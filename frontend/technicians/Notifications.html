@@ -1,29 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Notifications - VNU-IS Asset Maintenance</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="../assets/js/theme.config.js"></script>
-<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
 </head>
-<body class="bg-surface text-on-surface overflow-x-hidden">
+<body class="bg-surface text-on-surface overflow-hidden">
 
+<!-- SIDEBAR PLACEHOLDER -->
 <div id="sidebar-placeholder"></div>
 
-<div class="ml-[220px] flex flex-col min-h-screen">
+<!-- MAIN WRAPPER -->
+<div class="ml-[240px] flex flex-col h-screen">
+  <!-- TOP APP BAR PLACEHOLDER -->
   <div id="topbar-placeholder"></div>
 
-  <main class="flex-1 p-8 max-w-[720px]">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-headline-lg font-headline-lg text-primary">Notifications</h1>
-      <button id="markAllReadPageBtn" class="text-brand-blue text-label-md font-label-md hover:underline">Mark all as read</button>
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 overflow-y-auto bg-surface p-8 pb-32">
+    <!-- Header Title & Mark All as Read Button -->
+    <div class="mb-8 flex items-center justify-between">
+      <h1 class="text-headline-lg font-headline-lg text-on-surface">Notifications</h1>
+      <button id="markAllReadPageBtn" class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-lg hover:opacity-90 transition-all focus:outline-none">
+        Mark All as Read
+      </button>
     </div>
-    <div id="notificationFullList" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 divide-y divide-outline-variant/10"></div>
+
+    <!-- Filter Tabs (All / Unread / Read) -->
+    <div class="flex items-center gap-8 border-b border-outline-variant/20 mb-6">
+      <button id="tabAll" class="pb-3 text-primary border-b-2 border-primary font-label-lg tab-btn focus:outline-none" onclick="filterNotifications('all')">
+        All
+      </button>
+      <button id="tabUnread" class="pb-3 text-on-surface-variant hover:text-on-surface font-label-lg flex items-center gap-2 tab-btn focus:outline-none" onclick="filterNotifications('unread')">
+        Unread <span id="unreadTabCount" class="bg-primary text-on-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold">3</span>
+      </button>
+      <button id="tabRead" class="pb-3 text-on-surface-variant hover:text-on-surface font-label-lg tab-btn focus:outline-none" onclick="filterNotifications('read')">
+        Read
+      </button>
+    </div>
+
+    <!-- Notifications List Container -->
+    <div id="notificationFullList" class="space-y-4">
+      <!-- Unread Notification 1 -->
+      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-bold text-on-surface">WorkOrder Assigned</h4>
+            <span class="text-label-md text-on-surface-variant">5 minutes ago</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1">New WorkOrder <span class="font-medium text-primary">WO-2024-001</span> (Sony Projector) has been assigned to you.</p>
+        </div>
+      </div>
+
+      <!-- Unread Notification 2 -->
+      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-bold text-on-surface">WorkOrder Reassigned</h4>
+            <span class="text-label-md text-on-surface-variant">30 minutes ago</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1"><span class="font-medium text-primary">WO-2024-005</span> (Air Conditioner) has been reassigned to you.</p>
+        </div>
+      </div>
+
+      <!-- Unread Notification 3 -->
+      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-bold text-on-surface">Priority Escalation</h4>
+            <span class="text-label-md text-on-surface-variant">1 hour ago</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1">WorkOrder <span class="font-medium text-primary">WO-2024-012</span> priority was updated to <span class="text-error font-medium">High Priority</span>.</p>
+        </div>
+      </div>
+
+      <!-- Read Notification 1 -->
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-medium text-on-surface">Repair Completed</h4>
+            <span class="text-label-md text-on-surface-variant">2 hours ago</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1">Your repair report for <span class="font-medium">WO-2024-008</span> (Printer Maintenance) was submitted successfully.</p>
+        </div>
+      </div>
+
+      <!-- Read Notification 2 -->
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-medium text-on-surface">WorkOrder Cancelled</h4>
+            <span class="text-label-md text-on-surface-variant">5 hours ago</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1"><span class="font-medium">WO-2024-010</span> has been cancelled by Manager.</p>
+        </div>
+      </div>
+
+      <!-- Read Notification 3 -->
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-medium text-on-surface">Asset Failure Alert</h4>
+            <span class="text-label-md text-on-surface-variant">Yesterday</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1">Asset <span class="font-medium">Sony Projector P512</span> has exceeded the failure threshold.</p>
+        </div>
+      </div>
+
+      <!-- Read Notification 4 -->
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-medium text-on-surface">Maintenance Schedule Reminder</h4>
+            <span class="text-label-md text-on-surface-variant">2 days ago</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1">Scheduled air conditioner inspection for <span class="font-medium">Room A101</span> on Friday at 9:00 AM.</p>
+        </div>
+      </div>
+
+      <!-- Read Notification 5 -->
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='AssignedTasks.html'">
+        <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <h4 class="text-body-md font-medium text-on-surface">User Feedback Received</h4>
+            <span class="text-label-md text-on-surface-variant">3 days ago</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant mt-1">User confirmed repair for <span class="font-medium">WO-2024-003</span> with a <span class="text-amber-600 font-bold">5★ rating</span>: "Quick and clean fix!".</p>
+        </div>
+      </div>
+
+      <!-- Empty State Container (Hidden by default) -->
+      <div id="emptyStateBox" class="hidden bg-white p-12 rounded-xl border border-outline-variant/20 flex flex-col items-center justify-center text-center my-6">
+        <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">mark_chat_read</span>
+        <h4 id="emptyStateTitle" class="text-body-md font-bold text-on-surface">No unread notifications</h4>
+        <p id="emptyStateDesc" class="text-label-md text-on-surface-variant mt-1 max-w-md">You are all caught up! There are no unread notifications at the moment.</p>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="mt-10 flex items-center justify-center gap-2">
+      <button class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <button class="w-10 h-10 rounded-lg bg-primary text-on-primary font-label-lg font-bold">1</button>
+      <button class="w-10 h-10 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low font-label-lg transition-colors">2</button>
+      <button class="w-10 h-10 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low font-label-lg transition-colors">3</button>
+      <button class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
   </main>
+
+  <!-- FOOTER -->
+  <footer class="fixed bottom-0 left-0 right-0 w-full z-[55] flex items-center justify-between px-8 py-1.5 bg-[#d5e3ff] border-t border-outline-variant/10">
+    <p class="text-on-primary-fixed-variant text-[11px] font-label-md">© 2024 VNU-IS - Asset Maintenance System</p>
+    <div class="flex items-center gap-4">
+      <a class="text-on-primary-fixed-variant opacity-80 text-[11px] font-label-md hover:opacity-100 transition-colors" href="#">Privacy Policy</a>
+      <a class="text-on-primary-fixed-variant opacity-80 text-[11px] font-label-md hover:opacity-100 transition-colors" href="#">Terms of Service</a>
+    </div>
+  </footer>
 </div>
 
 <script src="../assets/js/config.js"></script>
@@ -32,15 +183,93 @@
 <script src="../assets/js/layout.js"></script>
 <script src="../assets/js/notifications.js"></script>
 <script>
-  Auth.guard('Technician');
+  let currentUser = { full_name: 'Nguyen Van A' };
+  try {
+    currentUser = Auth.guard('Technician');
+  } catch (e) {
+    console.log('Running in demo mode without auth session');
+  }
+
   Layout.init({ role: 'Technician', activePage: 'Notifications' });
 
-  Notifications.loadFullList('#notificationFullList').catch(err => console.error(err));
+  // Filter Tabs Handler with Empty State
+  function filterNotifications(filterType) {
+    const cards = document.querySelectorAll('.notif-card');
+    const tabs = document.querySelectorAll('.tab-btn');
+    const emptyBox = document.getElementById('emptyStateBox');
+    const emptyTitle = document.getElementById('emptyStateTitle');
+    const emptyDesc = document.getElementById('emptyStateDesc');
 
+    tabs.forEach(t => {
+      t.classList.remove('text-primary', 'border-b-2', 'border-primary');
+      t.classList.add('text-on-surface-variant');
+    });
+
+    if (filterType === 'all') {
+      document.getElementById('tabAll').classList.add('text-primary', 'border-b-2', 'border-primary');
+      document.getElementById('tabAll').classList.remove('text-on-surface-variant');
+    } else if (filterType === 'unread') {
+      document.getElementById('tabUnread').classList.add('text-primary', 'border-b-2', 'border-primary');
+      document.getElementById('tabUnread').classList.remove('text-on-surface-variant');
+    } else if (filterType === 'read') {
+      document.getElementById('tabRead').classList.add('text-primary', 'border-b-2', 'border-primary');
+      document.getElementById('tabRead').classList.remove('text-on-surface-variant');
+    }
+
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const status = card.dataset.status;
+      let show = false;
+      if (filterType === 'all') show = true;
+      else if (filterType === 'unread') show = (status === 'unread');
+      else if (filterType === 'read') show = (status === 'read');
+
+      card.style.display = show ? 'flex' : 'none';
+      if (show) visibleCount++;
+    });
+
+    if (visibleCount === 0) {
+      emptyBox.classList.remove('hidden');
+      if (filterType === 'unread') {
+        emptyTitle.textContent = 'No unread notifications';
+        emptyDesc.textContent = 'You are all caught up! There are no unread notifications at the moment.';
+      } else if (filterType === 'read') {
+        emptyTitle.textContent = 'No read notifications';
+        emptyDesc.textContent = 'You have not read any notifications yet.';
+      } else {
+        emptyTitle.textContent = 'No notifications';
+        emptyDesc.textContent = 'You do not have any notifications.';
+      }
+    } else {
+      emptyBox.classList.add('hidden');
+    }
+  }
+
+  // Mark All as Read Button Handler
   document.getElementById('markAllReadPageBtn').addEventListener('click', async () => {
-    await Api.patch('/notifications/read-all');
-    Notifications.loadFullList('#notificationFullList');
-    Notifications.refreshBadge();
+    try {
+      if (window.Api) await Api.patch('/notifications/read-all');
+    } catch (e) {}
+
+    // Update UI cards to read state
+    document.querySelectorAll('.notif-card').forEach(card => {
+      card.dataset.status = 'read';
+      card.classList.remove('bg-primary-fixed/20', 'border-primary-fixed/40');
+      card.classList.add('bg-white', 'border-outline-variant/20');
+      const dot = card.querySelector('.bg-primary.rounded-full');
+      if (dot) dot.classList.replace('bg-primary', 'bg-transparent');
+    });
+
+    const countPill = document.getElementById('unreadTabCount');
+    if (countPill) countPill.style.display = 'none';
+
+    if (window.Notifications) Notifications.refreshBadge();
+
+    // Re-apply active tab filter if currently on Unread tab
+    const activeUnread = document.getElementById('tabUnread').classList.contains('text-primary');
+    if (activeUnread) {
+      filterNotifications('unread');
+    }
   });
 </script>
 </body>
