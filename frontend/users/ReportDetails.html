@@ -97,7 +97,8 @@
         'Completed': 'bg-green-100 text-green-800',
         'Resolved': 'bg-green-100 text-green-800',
         'Rejected': 'bg-red-100 text-red-800',
-        'Cancelled': 'bg-gray-100 text-gray-800'
+        'Cancelled': 'bg-gray-100 text-gray-800',
+        'Assigned': 'bg-blue-100 text-blue-800'
       };
       return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
     }
@@ -110,6 +111,22 @@
           year: 'numeric', 
           month: 'short', 
           day: 'numeric' 
+        });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '-';
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
         });
       } catch {
         return dateStr;
@@ -134,9 +151,9 @@
 
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
-      const equipment = getFieldValue(report, ['equipment_name', 'asset_name', 'equipment', 'asset']);
-      const room = getFieldValue(report, ['room_name', 'room', 'classroom']);
-      const history = report.statusHistory || report.history || [];
+      const equipment = getFieldValue(report, ['asset_name', 'equipment_name']);
+      const room = getFieldValue(report, ['room_name']);
+      const history = report.statusHistory || [];
 
       let html = '';
 
@@ -156,12 +173,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- LEFT COLUMN (2/3) -->
           <div class="lg:col-span-2 space-y-6">
-            <!-- Report Info -->
             <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                 <div>
                   <p class="text-label-md text-on-surface-variant">Equipment</p>
-                  <p class="text-body-md font-medium text-on-surface">${equipment}</p>
+                  <p class="text-body-md font-medium text-on-surface">${equipment || 'N/A'}</p>
                 </div>
                 <div>
                   <p class="text-label-md text-on-surface-variant">Room</p>
@@ -179,7 +195,6 @@
                 ` : ''}
               </div>
 
-              <!-- Description -->
               <div>
                 <p class="text-label-md text-on-surface-variant mb-2">Fault Description</p>
                 <div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/10">
@@ -187,12 +202,11 @@
                 </div>
               </div>
 
-              <!-- Evidence -->
-              ${report.evidence_url ? `
+              ${report.image_path ? `
               <div>
                 <p class="text-label-md text-on-surface-variant mb-2">Uploaded Evidence</p>
                 <div class="flex gap-4">
-                  <a href="${report.evidence_url}" target="_blank" class="w-32 h-32 bg-surface-container rounded-lg border border-outline-variant/10 flex flex-col items-center justify-center text-outline-variant group cursor-pointer hover:border-brand-blue/30 transition-all">
+                  <a href="${report.image_path}" target="_blank" class="w-32 h-32 bg-surface-container rounded-lg border border-outline-variant/10 flex flex-col items-center justify-center text-outline-variant group cursor-pointer hover:border-brand-blue/30 transition-all">
                     <span class="material-symbols-outlined text-[32px]">photo_camera</span>
                     <span class="text-[10px] font-label-md mt-1">View Evidence</span>
                   </a>
@@ -205,6 +219,7 @@
           <!-- RIGHT COLUMN (1/3) -->
           <div class="space-y-6">
             ${workOrder ? renderWorkOrder(workOrder) : ''}
+            ${renderTimeline(workOrder)}
             ${renderHistory(history)}
           </div>
         </div>
@@ -213,7 +228,7 @@
       // ===== CONFIRMATION SECTION =====
       if (confirmation) {
         html += renderConfirmationDone(confirmation);
-      } else if (workOrder && ['Completed', 'Resolved'].includes(workOrder.status)) {
+      } else if (workOrder && ['Completed', 'Closed'].includes(workOrder.task_status || workOrder.status)) {
         html += renderConfirmationForm(workOrder.order_id);
       }
 
@@ -222,6 +237,8 @@
 
     // ===== WORK ORDER =====
     function renderWorkOrder(workOrder) {
+      const status = workOrder.task_status || workOrder.status;
+      
       return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
           <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2">Work Order Info</h3>
@@ -236,7 +253,7 @@
             </div>
             <div class="flex justify-between items-center p-2 rounded hover:bg-surface-container-low">
               <p class="text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Status</p>
-              ${statusBadge(workOrder.status)}
+              ${statusBadge(status)}
             </div>
             ${workOrder.fix_description ? `
             <div class="p-2 rounded border-t border-outline-variant/5">
@@ -251,16 +268,26 @@
             </div>
             ` : ''}
           </div>
-          <!-- Timeline -->
-          <div class="pt-2 border-t border-outline-variant/10">
+        </div>
+      `;
+    }
+
+    // ===== TIMELINE =====
+    function renderTimeline(workOrder) {
+      if (!workOrder) return '';
+      
+      return `
+        <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
+          <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2">Timeline</h3>
+          <div class="space-y-3">
             <div class="flex justify-between items-center p-2 rounded bg-surface-container-lowest">
               <p class="text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Assigned Date</p>
-              <p class="text-body-sm">${formatDate(workOrder.assigned_at)}</p>
+              <p class="text-body-sm font-medium text-on-surface">${formatDate(workOrder.assigned_at)}</p>
             </div>
-            ${workOrder.completed_at ? `
+            ${workOrder.resolved_at ? `
             <div class="flex justify-between items-center p-2 rounded hover:bg-surface-container-low">
               <p class="text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Resolved Date</p>
-              <p class="text-body-sm">${formatDate(workOrder.completed_at)}</p>
+              <p class="text-body-sm font-medium text-on-surface">${formatDate(workOrder.resolved_at)}</p>
             </div>
             ` : ''}
           </div>
@@ -268,33 +295,49 @@
       `;
     }
 
-    // ===== HISTORY =====
+    // ===== REPAIR HISTORY =====
     function renderHistory(history) {
-      if (!history || history.length === 0) return '';
+      if (!history || history.length === 0) {
+        return `
+          <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
+            <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2 mb-4">Repair History</h3>
+            <p class="text-body-sm text-on-surface-variant text-center py-4">No repair history available</p>
+          </div>
+        `;
+      }
+      
+      // Lấy 3 item gần nhất hoặc tất cả
+      const displayHistory = history.slice(0, 5);
+      
       return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
           <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2 mb-4">Repair History</h3>
           <div class="relative space-y-6 pl-6 before:content-[''] before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant/20">
-            ${history.map((h, index) => {
+            ${displayHistory.map((h, index) => {
               const isLatest = index === 0;
               const colors = {
                 'Completed': 'bg-green-500',
+                'Closed': 'bg-green-500',
                 'Resolved': 'bg-green-500',
                 'In Progress': 'bg-brand-blue',
                 'Processing': 'bg-brand-blue',
+                'Received': 'bg-brand-blue',
+                'Assigned': 'bg-blue-400',
                 'Pending': 'bg-yellow-500',
                 'Pending Approval': 'bg-yellow-500',
                 'Rejected': 'bg-red-500',
                 'Cancelled': 'bg-gray-500'
               };
-              const color = colors[h.new_status || h.status] || 'bg-outline-variant';
-              const status = h.new_status || h.status;
-              const note = h.note || h.change_note || '';
+              const statusText = h.new_status || h.status;
+              const color = colors[statusText] || 'bg-outline-variant';
+              const note = h.note || '';
+              const date = h.changed_at || h.created_at;
+              
               return `
                 <div class="relative">
                   <div class="absolute -left-[23px] top-1.5 w-4 h-4 rounded-full ${color} border-4 border-white shadow-sm z-10"></div>
-                  <p class="text-[12px] font-bold text-on-surface">${formatDate(h.changed_at || h.created_at)}</p>
-                  <p class="text-label-md ${isLatest ? 'text-brand-blue' : 'text-on-surface-variant'} font-medium">Status: ${status}</p>
+                  <p class="text-[12px] font-bold text-on-surface">${formatDate(date)}</p>
+                  <p class="text-label-md ${isLatest ? 'text-brand-blue font-bold' : 'text-on-surface-variant'}">Status: ${statusText}</p>
                   ${note ? `<p class="text-label-md text-on-surface-variant mt-1 leading-relaxed">Note: ${escapeHtml(note)}</p>` : ''}
                 </div>
               `;
@@ -394,34 +437,52 @@
     // ===== LOAD REPORT =====
     async function loadReport() {
       try {
+        // 1. Gọi API lấy report
         const report = await Api.get(`/fault-reports/${reportId}`);
         console.log('Report data:', report);
 
         let workOrder = null;
         let confirmation = null;
 
+        // 2. Nếu report có order_id, thử lấy work order
         if (report.order_id) {
           try {
             workOrder = await Api.get(`/work-orders/${report.order_id}`);
             console.log('Work order:', workOrder);
           } catch (e) {
-            console.warn('Error loading work order:', e);
+            console.warn('Cannot load work order (permission denied or not found):', e.status);
+            
+            // Tạo workOrder từ dữ liệu có trong report
+            workOrder = {
+              order_id: report.order_id,
+              technician_name: report.technician_name || 'N/A',
+              task_status: report.task_status || 'Assigned',
+              assigned_at: report.assigned_at || report.reported_at,
+              resolved_at: report.resolved_at || null,
+              fix_description: report.fix_description || null,
+              parts_used: report.parts_used || null
+            };
           }
         }
 
+        // 3. Nếu có work order, thử lấy confirmation
         if (report.order_id) {
           try {
             confirmation = await Api.get(`/confirmations/${report.order_id}`);
             console.log('Confirmation:', confirmation);
           } catch (e) {
-            if (e.status !== 404) {
+            if (e.status === 404) {
+              console.log('No confirmation found for this work order');
+            } else {
               console.warn('Error loading confirmation:', e);
             }
           }
         }
 
+        // 4. Render
         content.innerHTML = renderReport(report, workOrder, confirmation);
 
+        // 5. Setup confirmation form
         const confirmForm = document.getElementById('confirmForm');
         if (confirmForm) {
           setConfirmation(true);
@@ -449,7 +510,14 @@
         }
 
       } catch (err) {
-        content.innerHTML = `<p class="text-error text-center py-8">${err.message || 'Failed to load report'}</p>`;
+        content.innerHTML = `
+          <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <p class="text-error text-center">${err.message || 'Failed to load report'}</p>
+            <button onclick="loadReport()" class="mt-4 px-4 py-2 bg-brand-blue text-white rounded-lg mx-auto block">
+              Retry
+            </button>
+          </div>
+        `;
         console.error('Load report error:', err);
       }
     }
