@@ -23,22 +23,8 @@
     <form id="addRoomForm" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
       <div>
         <label class="text-label-md font-label-md text-on-surface-variant">Room Name *</label>
-        <input id="roomName" type="text" required placeholder="e.g. P101"
+        <input id="roomName" type="text" required placeholder="e.g. R601"
                class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
-      </div>
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant">Building</label>
-        <input id="building" type="text" placeholder="e.g. Building A"
-               class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
-      </div>
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant">Floor</label>
-        <select id="floorNumber" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
-          <option value="1">1</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-        </select>
       </div>
       <p id="formError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
       <button type="submit" class="bg-brand-blue text-white text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:opacity-90">Save Classroom</button>
@@ -62,8 +48,6 @@
     try {
       await Api.post('/classrooms', {
         roomName: document.getElementById('roomName').value.trim(),
-        building: document.getElementById('building').value.trim() || undefined,
-        floorNumber: Number(document.getElementById('floorNumber').value),
       });
       location.href = 'ClassroomsManagement.html';
     } catch (err) {

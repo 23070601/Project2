@@ -21,7 +21,7 @@
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-headline-lg font-headline-lg text-primary">Classrooms Management</h1>
-        <p class="text-on-surface-variant text-body-md mt-1">Rooms: P101–P114 across floors 1, 4, 5, 6.</p>
+        <p class="text-on-surface-variant text-body-md mt-1">Classroom directory across floors 1, 3, 4, 5, 6.</p>
       </div>
       <a href="AddClassroom.html" class="bg-brand-blue text-white text-label-lg font-label-lg px-4 py-2 rounded-lg hover:opacity-90">+ Add Classroom</a>
     </div>
@@ -30,11 +30,9 @@
       <table class="w-full text-body-sm">
         <thead class="bg-surface-container-low text-on-surface-variant text-label-md text-left">
           <tr>
-            <th class="px-4 py-3">Room</th>
-            <th class="px-4 py-3">Building</th>
-            <th class="px-4 py-3">Floor</th>
-            <th class="px-4 py-3">Assets</th>
-            <th class="px-4 py-3">QR Code</th>
+            <th class="px-4 py-3">Room Name</th>
+            <th class="px-4 py-3">Total Assets</th>
+            <th class="px-4 py-3">QR Code Status</th>
           </tr>
         </thead>
         <tbody id="roomsTableBody"></tbody>
@@ -57,11 +55,9 @@
     document.getElementById('roomsTableBody').innerHTML = rooms.map(r => `
       <tr class="border-t border-outline-variant/10 hover:bg-surface-container-low cursor-pointer"
           onclick="location.href='ClassroomsDetail.html?id=${r.room_id}'">
-        <td class="px-4 py-3 font-medium">${r.room_name}</td>
-        <td class="px-4 py-3">${r.building || '-'}</td>
-        <td class="px-4 py-3">${r.floor_number ?? '-'}</td>
-        <td class="px-4 py-3">${r.asset_count}</td>
-        <td class="px-4 py-3">${r.qr_code ? '<span class="text-green-700 text-[11px] font-bold">Generated</span>' : '<span class="text-on-surface-variant text-[11px]">Not yet</span>'}</td>
+        <td class="px-4 py-3 font-medium text-primary">${r.room_name}</td>
+        <td class="px-4 py-3 font-semibold">${r.asset_count} asset(s)</td>
+        <td class="px-4 py-3">${r.qr_code ? '<span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded font-medium">Generated</span>' : '<span class="bg-gray-100 text-gray-700 text-xs px-2.5 py-0.5 rounded font-medium">Not generated</span>'}</td>
       </tr>
     `).join('');
   }

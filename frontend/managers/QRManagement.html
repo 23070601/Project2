@@ -29,7 +29,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
       <table class="w-full text-body-sm">
         <thead class="bg-surface-container-low text-on-surface-variant text-label-md text-left">
-          <tr><th class="px-4 py-3">Room</th><th class="px-4 py-3">Building</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
+          <tr><th class="px-4 py-3">Room Name</th><th class="px-4 py-3">QR Status</th><th class="px-4 py-3 text-right">Action</th></tr>
         </thead>
         <tbody id="roomsTableBody"></tbody>
       </table>
@@ -62,9 +62,8 @@
     const rooms = await Api.get('/qrcodes');
     document.getElementById('roomsTableBody').innerHTML = rooms.map(r => `
       <tr class="border-t border-outline-variant/10">
-        <td class="px-4 py-3 font-medium">${r.roomName}</td>
-        <td class="px-4 py-3">${r.building || '-'}</td>
-        <td class="px-4 py-3">${r.hasQrCode ? '<span class="text-green-700 text-[11px] font-bold">Generated</span>' : '<span class="text-on-surface-variant text-[11px]">Not yet</span>'}</td>
+        <td class="px-4 py-3 font-medium text-primary">${r.roomName}</td>
+        <td class="px-4 py-3">${r.hasQrCode ? '<span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded font-medium">Generated</span>' : '<span class="bg-gray-100 text-gray-700 text-xs px-2.5 py-0.5 rounded font-medium">Not generated</span>'}</td>
         <td class="px-4 py-3 text-right">
           ${r.hasQrCode
             ? `<button class="view-qr-btn text-brand-blue text-label-md font-label-md hover:underline" data-room-id="${r.roomId}">View</button>`

@@ -3,7 +3,7 @@ const { pool } = require('../../config/db');
 const BASE_SELECT = `
   SELECT fr.*,
          u.full_name AS reporter_name,
-         c.room_name, c.building,
+         c.room_name,
          a.asset_name, a.asset_type,
          wo.order_id, wo.task_status, wo.technician_id, t.full_name AS technician_name
   FROM FaultReports fr
@@ -51,7 +51,6 @@ async function updateStatus(reportId, status) {
 }
 
 async function getStatusHistory(reportId) {
-  // Lịch sử trạng thái nằm ở WorkOrderStatusHistory, join qua WorkOrders.report_id
   const [rows] = await pool.execute(
     `SELECT h.* FROM WorkOrderStatusHistory h
      JOIN WorkOrders wo ON wo.order_id = h.order_id

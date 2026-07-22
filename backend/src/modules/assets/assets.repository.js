@@ -11,7 +11,7 @@ async function findAll({ roomId, assetType, status, search } = {}) {
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const [rows] = await pool.query(
-    `SELECT a.*, c.room_name, c.building
+    `SELECT a.*, c.room_name
      FROM Assets a
      JOIN Classrooms c ON c.room_id = a.room_id
      ${where}
@@ -23,12 +23,29 @@ async function findAll({ roomId, assetType, status, search } = {}) {
 
 async function findById(assetId) {
   const [rows] = await pool.execute(
-    `SELECT a.*, c.room_name, c.building
+    `SELECT a.*, c.room_name
      FROM Assets a JOIN Classrooms c ON c.room_id = a.room_id
      WHERE a.asset_id = ?`,
     [assetId]
   );
-  return rows[0] || null;
+  const asset = rows[0] || null;
+  if (asset) {
+    try {
+      const [historyRows] = await pool.execute(
+        `SELECT wo.*, tech.full_name AS technician_name
+         FROM WorkOrders wo
+         JOIN FaultReports fr ON fr.report_id = wo.report_id
+         JOIN Users tech ON tech.user_id = wo.technician_id
+         WHERE fr.asset_id = ?
+         ORDER BY wo.assigned_at DESC`,
+        [assetId]
+      );
+      asset.repairHistory = historyRows;
+    } catch (e) {
+      console.log('Error fetching asset repair history', e);
+    }
+  }
+  return asset;
 }
 
 async function create({ assetName, assetType, roomId, status = 'Operational' }) {

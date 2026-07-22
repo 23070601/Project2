@@ -73,6 +73,22 @@ const Layout = (() => {
     });
   }
 
+  function wireUserProfileDropdown() {
+    const btn = document.getElementById('userProfileBtn');
+    const dropdown = document.getElementById('userProfileDropdown');
+    if (!btn || !dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+  }
+
   async function init({ role, activePage }) {
     await loadPartial(SIDEBAR_FILE[role], '#sidebar-placeholder');
     await loadPartial('../partials/topbar.html', '#topbar-placeholder');
@@ -84,8 +100,10 @@ const Layout = (() => {
 
     wireLogout();
     wireNotificationBell();
+    wireUserProfileDropdown();
 
     if (window.Notifications) {
+      Notifications.loadDropdown();
       Notifications.startPolling();
     }
   }
