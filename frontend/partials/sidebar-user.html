@@ -1,37 +1,63 @@
-<aside class="fixed left-0 top-0 h-full w-[220px] bg-white border-r border-outline-variant/30 flex flex-col py-6 px-4 z-50">
+<aside class="fixed left-0 top-0 h-full w-[220px] bg-[#004d91] flex flex-col py-6 px-4 z-50">
   <div class="mb-10 px-2 flex items-center gap-3">
-    <div class="w-10 h-10 flex items-center justify-center shrink-0 bg-brand-blue rounded-lg text-white font-bold">VN</div>
+    <!-- Logo giống trang login -->
+    <div class="w-10 h-10 flex items-center justify-center shrink-0 bg-white rounded-lg">
+      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUnGM1xiEvCtdsC6RnQAGiFWtPnnpPFo4wuq4nW1EIWLN_reOYHXrUpj173ZKOhtRm6bJsPQAUIznQ6QKmloPdVS836AsqwsfFTzTkVmq6yYdAQK_mF2SKCfDTAhhfllcxQpPTUfEJTmqdbEFCAUe3cc0Y2VOx4z8Ci1Imznfq-7RaK0eNV4DB87xsS9X-uBquKPq0rxs0x9QdQEAE6_T-ZeTbFZXLGwAIWAB-boHpQNcNGrNDtqHDaRgPek7gp2CMLZH8qXAi-uXT" alt="VNU-IS Logo" class="w-8 h-8 object-contain">
+    </div>
     <div class="flex flex-col">
-      <h2 class="text-on-surface font-headline-sm text-headline-sm leading-tight">VNU-IS</h2>
-      <p class="text-on-surface-variant text-label-md font-label-md">Asset Maintenance</p>
+      <h2 class="text-white font-headline-sm text-headline-sm leading-tight">VNU-IS</h2>
+      <p class="text-white/60 text-label-md font-label-md">Asset Maintenance</p>
     </div>
   </div>
   <nav class="flex-1 space-y-1" data-nav-role="User">
-    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all" href="Dashboard.html" data-page="Dashboard">
+    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white/70 hover:bg-white/10 hover:text-white" href="Dashboard.html" data-page="Dashboard">
       <span class="material-symbols-outlined">dashboard</span>
       <span class="text-label-lg font-label-lg">Dashboard</span>
     </a>
-    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all" href="CreateReport.html" data-page="CreateReport">
+    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white/70 hover:bg-white/10 hover:text-white" href="CreateReport.html" data-page="CreateReport">
       <span class="material-symbols-outlined">add_box</span>
       <span class="text-label-lg font-label-lg">Report an Issue</span>
     </a>
-    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all" href="ListReports.html" data-page="ListReports">
+    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white/70 hover:bg-white/10 hover:text-white" href="ListReports.html" data-page="ListReports">
       <span class="material-symbols-outlined">list_alt</span>
       <span class="text-label-lg font-label-lg">My Reports</span>
     </a>
-    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all" href="Notification.html" data-page="Notification">
-      <span class="material-symbols-outlined">notifications</span>
-      <span class="text-label-lg font-label-lg">Notifications</span>
-    </a>
   </nav>
-  <div class="mt-auto pt-6 border-t border-outline-variant/20 space-y-1">
-    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all" href="MyProfile.html" data-page="MyProfile">
+  <div class="mt-auto pt-6 border-t border-white/20 space-y-1">
+    <a class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white/70 hover:bg-white/10 hover:text-white" href="MyProfile.html" data-page="MyProfile">
       <span class="material-symbols-outlined">person</span>
       <span class="text-label-lg font-label-lg">My Profile</span>
     </a>
-    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-error hover:bg-error/10 transition-all">
+    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-300 hover:bg-red-500/20 hover:text-red-100 transition-all">
       <span class="material-symbols-outlined">logout</span>
       <span class="text-label-lg font-label-lg">Log Out</span>
     </button>
   </div>
 </aside>
+
+<script>
+  // Highlight active page - Khi nhấn vào trang, chữ chuyển thành màu xanh trên nền trắng
+  document.addEventListener('DOMContentLoaded', function() {
+    const currentPage = window.location.pathname.split('/').pop() || 'Dashboard.html';
+    document.querySelectorAll('.nav-link').forEach(link => {
+      const page = link.getAttribute('data-page');
+      if (page && currentPage.includes(page)) {
+        // Active state: nền trắng, chữ xanh
+        link.classList.add('bg-white', 'text-[#004d91]');
+        link.classList.remove('text-white/70', 'hover:bg-white/10', 'hover:text-white');
+      }
+    });
+  });
+
+  // Logout functionality
+  document.getElementById('logoutBtn')?.addEventListener('click', function() {
+    if (window.Auth && typeof window.Auth.logout === 'function') {
+      window.Auth.logout();
+    } else {
+      // Fallback logout
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      window.location.href = 'Login.html';
+    }
+  });
+</script>

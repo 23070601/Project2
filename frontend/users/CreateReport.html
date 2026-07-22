@@ -1,69 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Report an Issue - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="../assets/js/theme.config.js"></script>
-<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .bg-brand-blue {
+    background-color: #004482;
+  }
+  .text-brand-blue {
+    color: #004482;
+  }
+</style>
 </head>
-<body class="bg-surface text-on-surface overflow-x-hidden">
+<body class="bg-background text-on-background min-h-screen">
 
+<!-- Sidebar placeholder -->
 <div id="sidebar-placeholder"></div>
 
 <div class="ml-[220px] flex flex-col min-h-screen">
+  <!-- Topbar placeholder -->
   <div id="topbar-placeholder"></div>
 
-  <main class="flex-1 p-8 max-w-[720px]">
-    <h1 class="text-headline-lg font-headline-lg text-primary mb-1">Report an Issue</h1>
-    <p class="text-on-surface-variant text-body-md mb-6">Describe the problem so we can prioritize and assign a technician quickly.</p>
+  <!-- Main Content Area -->
+  <main class="flex-1 mt-[60px] mb-[40px] p-8 bg-content-bg min-h-[calc(100vh-100px)]">
+    <div class="max-w-4xl mx-auto">
+      <header class="mb-6">
+        <h1 class="text-headline-md font-headline-md font-bold text-on-surface mb-2">Create New Report</h1>
+        <p class="text-body-sm text-on-surface-variant">Please provide the details below to submit a new facility or infrastructure repair request.</p>
+      </header>
 
-    <form id="reportForm" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-5">
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant" for="roomSelect">Classroom *</label>
-        <select id="roomSelect" required
-                class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-brand-blue outline-none">
-          <option value="">Select a classroom...</option>
-        </select>
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-8">
+        <form id="reportForm" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-label-lg font-semibold text-on-surface" for="roomSelect">Classroom <span class="text-error">*</span></label>
+              <div class="relative">
+                <select id="roomSelect" required class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
+                  <option value="">Select Classroom</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-label-lg font-semibold text-on-surface" for="assetSelect">Equipment (optional)</label>
+              <div class="relative">
+                <select id="assetSelect" class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
+                  <option value="">General / not asset-specific</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-label-lg font-semibold text-on-surface" for="urgencySelect">How urgent is this?</label>
+            <select id="urgencySelect" class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
+              <option value="Low">Low - can wait</option>
+              <option value="Medium" selected>Medium - affects the class</option>
+              <option value="High">High - class cannot continue</option>
+              <option value="Critical">Critical - immediate attention needed</option>
+            </select>
+            <div class="flex items-center gap-2 text-[10px] text-primary font-medium bg-primary-fixed px-2 py-1 rounded w-fit">
+              <span class="material-symbols-outlined text-[14px]">info</span>
+              <span>The system will combine this with the asset's importance to calculate the final priority (DSS).</span>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-label-lg font-semibold text-on-surface" for="description">Fault Description <span class="text-error">*</span></label>
+            <textarea id="description" required class="w-full p-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary resize-none" placeholder="Provide a detailed description of the issue..." rows="4"></textarea>
+          </div>
+
+          <!-- Upload Evidence -->
+          <div class="space-y-2">
+            <label class="text-label-lg font-semibold text-on-surface">Upload Evidence (Optional)</label>
+            <div class="border-2 border-dashed border-outline-variant/50 rounded-xl p-6 flex flex-col items-center justify-center bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer group" id="uploadZone">
+              <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined">cloud_upload</span>
+              </div>
+              <p class="text-label-lg font-semibold text-on-surface">Click to upload or drag and drop</p>
+              <p class="text-body-sm text-on-surface-variant">PNG, JPG or PDF (max. 5MB)</p>
+              <input class="hidden" type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf">
+            </div>
+            <div id="fileInfo" class="hidden text-body-sm text-on-surface-variant mt-2"></div>
+          </div>
+
+          <!-- Error & Success Messages -->
+          <p id="formError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
+          <p id="formSuccess" class="hidden text-green-700 text-body-sm bg-green-50 rounded-lg px-3 py-2"></p>
+
+          <div class="pt-4 flex justify-end gap-4">
+            <button class="px-6 py-2.5 rounded-lg text-label-lg font-semibold text-secondary border border-outline-variant hover:bg-surface-container transition-colors" type="reset">Cancel</button>
+            <button id="submitBtn" class="px-6 py-2.5 rounded-lg text-label-lg font-semibold text-on-primary bg-primary hover:opacity-90 transition-all shadow-md active:scale-95" type="submit">Submit Report</button>
+          </div>
+        </form>
       </div>
-
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant" for="assetSelect">Asset (optional)</label>
-        <select id="assetSelect"
-                class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-brand-blue outline-none">
-          <option value="">General / not asset-specific</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant" for="urgencySelect">How urgent is this?</label>
-        <select id="urgencySelect"
-                class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-brand-blue outline-none">
-          <option value="Low">Low - can wait</option>
-          <option value="Medium" selected>Medium - affects the class</option>
-          <option value="High">High - class cannot continue</option>
-        </select>
-        <p class="text-[11px] text-on-surface-variant mt-1">The system will combine this with the asset's importance to calculate the final priority (DSS1).</p>
-      </div>
-
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant" for="description">Description *</label>
-        <textarea id="description" required rows="4"
-                  class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-brand-blue outline-none"
-                  placeholder="e.g. Projector shows no signal, screen stays black."></textarea>
-      </div>
-
-      <p id="formError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
-      <p id="formSuccess" class="hidden text-green-700 text-body-sm bg-green-50 rounded-lg px-3 py-2"></p>
-
-      <button id="submitBtn" type="submit"
-              class="bg-brand-blue text-white font-label-lg font-label-lg px-6 py-2.5 rounded-lg hover:opacity-90 disabled:opacity-50">
-        Submit Report
-      </button>
-    </form>
+    </div>
   </main>
 </div>
 
@@ -72,65 +113,285 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/layout.js"></script>
 <script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/ui-helpers.js"></script>
 <script>
-  Auth.guard('User');
-  Layout.init({ role: 'User', activePage: 'CreateReport' });
-
-  const roomSelect = document.getElementById('roomSelect');
-  const assetSelect = document.getElementById('assetSelect');
-
-  async function loadRooms() {
-    const rooms = await Api.get('/classrooms');
-    roomSelect.innerHTML = '<option value="">Select a classroom...</option>' +
-      rooms.map(r => `<option value="${r.room_id}">${r.room_name} (${r.building || ''} - Floor ${r.floor_number ?? '-'})</option>`).join('');
-
-    // Prefill từ QR code: CreateReport.html?room_id=1&room_name=P101
-    const params = new URLSearchParams(location.search);
-    const prefillRoomId = params.get('room_id');
-    if (prefillRoomId) {
-      roomSelect.value = prefillRoomId;
-      loadAssetsForRoom(prefillRoomId);
+  (function() {
+    // 1. Get user from Auth
+    var user = Auth.getCurrentUser();
+    if (!user) {
+      window.location.href = 'Login.html';
+      return;
     }
-  }
 
-  async function loadAssetsForRoom(roomId) {
-    assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
-    if (!roomId) return;
-    const assets = await Api.get('/assets', { roomId });
-    assetSelect.innerHTML += assets.map(a => `<option value="${a.asset_id}">${a.asset_name} (${a.asset_type})</option>`).join('');
-  }
+    // 2. Initialize Layout
+    Layout.init({ 
+      role: user.role || 'User', 
+      activePage: 'CreateReport' 
+    });
 
-  roomSelect.addEventListener('change', () => loadAssetsForRoom(roomSelect.value));
+    // 3. Upload file handling
+    var uploadZone = document.getElementById('uploadZone');
+    var fileInput = document.getElementById('fileInput');
+    var fileInfo = document.getElementById('fileInfo');
+    var selectedFile = null;
 
-  document.getElementById('reportForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errorBox = document.getElementById('formError');
-    const successBox = document.getElementById('formSuccess');
-    const submitBtn = document.getElementById('submitBtn');
-    errorBox.classList.add('hidden');
-    successBox.classList.add('hidden');
-    submitBtn.disabled = true;
-
-    try {
-      const report = await Api.post('/fault-reports', {
-        roomId: Number(roomSelect.value),
-        assetId: assetSelect.value ? Number(assetSelect.value) : undefined,
-        description: document.getElementById('description').value.trim(),
-        urgencyHint: document.getElementById('urgencySelect').value,
+    if (uploadZone) {
+      uploadZone.addEventListener('click', function() {
+        fileInput.click();
       });
-      successBox.textContent = `Report #${report.report_id} submitted successfully with priority: ${report.priority}.`;
-      successBox.classList.remove('hidden');
-      document.getElementById('reportForm').reset();
-      setTimeout(() => location.href = `ReportDetails.html?id=${report.report_id}`, 1200);
-    } catch (err) {
-      errorBox.textContent = err.message;
-      errorBox.classList.remove('hidden');
-    } finally {
-      submitBtn.disabled = false;
-    }
-  });
 
-  loadRooms().catch(err => console.error('Failed to load rooms', err));
+      uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadZone.classList.add('border-primary');
+      });
+
+      uploadZone.addEventListener('dragleave', function() {
+        uploadZone.classList.remove('border-primary');
+      });
+
+      uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('border-primary');
+        if (e.dataTransfer.files.length) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length) {
+          handleFile(e.target.files[0]);
+        }
+      });
+    }
+
+    function handleFile(file) {
+      var validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please upload PNG, JPG, or PDF files only.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB.');
+        return;
+      }
+      selectedFile = file;
+      fileInfo.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      fileInfo.classList.remove('hidden');
+    }
+
+    // 4. Load rooms and assets
+    var roomSelect = document.getElementById('roomSelect');
+    var assetSelect = document.getElementById('assetSelect');
+    
+    // Dữ liệu mẫu cho assets từ database
+    var allAssetsData = [
+      { asset_id: 1, asset_name: 'Sony Projector VPL', asset_type: 'Projector', room_id: 1, status: 'Operational' },
+      { asset_id: 2, asset_name: 'Dell Classroom PC', asset_type: 'Computer', room_id: 1, status: 'Operational' },
+      { asset_id: 3, asset_name: 'Daikin Air Conditioner', asset_type: 'Air Conditioner', room_id: 2, status: 'Operational' },
+      { asset_id: 4, asset_name: 'Interactive Smart TV 65in', asset_type: 'Interactive TV', room_id: 3, status: 'Operational' },
+      { asset_id: 5, asset_name: 'Sony Projector VPL', asset_type: 'Projector', room_id: 1, status: 'Operational' },
+      { asset_id: 6, asset_name: 'Dell Classroom PC', asset_type: 'Computer', room_id: 1, status: 'Operational' },
+      { asset_id: 7, asset_name: 'Daikin Air Conditioner', asset_type: 'Air Conditioner', room_id: 2, status: 'Operational' },
+      { asset_id: 8, asset_name: 'Interactive Smart TV 65in', asset_type: 'Interactive TV', room_id: 3, status: 'Operational' }
+    ];
+
+    // Hàm hiển thị assets
+    function renderAssets(assets) {
+      assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
+      if (!assets || assets.length === 0) {
+        // Nếu không có assets, thêm option báo trống
+        var emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'No equipment available';
+        emptyOption.disabled = true;
+        assetSelect.appendChild(emptyOption);
+        return;
+      }
+      
+      assets.forEach(function(a) {
+        var option = document.createElement('option');
+        option.value = a.asset_id;
+        var displayText = a.asset_name + ' (' + a.asset_type + ')';
+        if (a.status) {
+          displayText += ' - ' + a.status;
+        }
+        option.textContent = displayText;
+        assetSelect.appendChild(option);
+      });
+    }
+
+    // Hàm lấy assets từ API hoặc fallback
+    async function fetchAssets(roomId) {
+      try {
+        // Thử gọi API
+        var response = await Api.get('/assets', { roomId: roomId });
+        console.log('Assets from API:', response);
+        
+        if (response && response.length > 0) {
+          // Lưu vào localStorage để dùng sau
+          localStorage.setItem('cached_assets', JSON.stringify(response));
+          renderAssets(response);
+          return;
+        }
+      } catch (err) {
+        console.warn('API error, using fallback data:', err);
+      }
+      
+      // Fallback: lọc từ dữ liệu mẫu
+      var filtered = allAssetsData.filter(function(a) {
+        return a.room_id === Number(roomId);
+      });
+      
+      if (filtered.length > 0) {
+        renderAssets(filtered);
+      } else {
+        // Nếu không có assets trong phòng, hiển thị tất cả
+        renderAssets(allAssetsData);
+      }
+    }
+
+    // Load rooms
+    async function loadRooms() {
+      try {
+        var rooms = await Api.get('/classrooms');
+        console.log('Rooms from API:', rooms);
+        
+        roomSelect.innerHTML = '<option value="">Select Classroom</option>';
+        if (rooms && rooms.length > 0) {
+          rooms.forEach(function(r) {
+            var option = document.createElement('option');
+            option.value = r.room_id;
+            option.textContent = r.room_name + ' (' + (r.building || '') + ' - Floor ' + (r.floor_number || '-') + ')';
+            roomSelect.appendChild(option);
+          });
+          
+          // Tự động load assets cho room đầu tiên nếu có
+          if (rooms.length > 0) {
+            var firstRoomId = rooms[0].room_id;
+            fetchAssets(firstRoomId);
+          }
+        } else {
+          // Fallback rooms
+          var fallbackRooms = [
+            { room_id: 1, room_name: 'Room 101', building: 'A', floor_number: 1 },
+            { room_id: 2, room_name: 'Room 102', building: 'A', floor_number: 1 },
+            { room_id: 3, room_name: 'Room 201', building: 'B', floor_number: 2 }
+          ];
+          fallbackRooms.forEach(function(r) {
+            var option = document.createElement('option');
+            option.value = r.room_id;
+            option.textContent = r.room_name + ' (' + (r.building || '') + ' - Floor ' + (r.floor_number || '-') + ')';
+            roomSelect.appendChild(option);
+          });
+          // Load assets cho room đầu tiên
+          fetchAssets(1);
+        }
+        
+        // Prefill từ QR code
+        var params = new URLSearchParams(location.search);
+        var prefillRoomId = params.get('room_id');
+        if (prefillRoomId) {
+          roomSelect.value = prefillRoomId;
+          fetchAssets(prefillRoomId);
+        }
+      } catch (err) {
+        console.error('Failed to load rooms:', err);
+        // Thêm rooms mặc định
+        roomSelect.innerHTML = '<option value="">Select Classroom</option>';
+        var defaultRooms = [
+          { room_id: 1, room_name: 'Room 101', building: 'A', floor_number: 1 },
+          { room_id: 2, room_name: 'Room 102', building: 'A', floor_number: 1 }
+        ];
+        defaultRooms.forEach(function(r) {
+          var option = document.createElement('option');
+          option.value = r.room_id;
+          option.textContent = r.room_name + ' (' + (r.building || '') + ' - Floor ' + (r.floor_number || '-') + ')';
+          roomSelect.appendChild(option);
+        });
+        fetchAssets(1);
+      }
+    }
+
+    // Khi chọn room, load assets
+    if (roomSelect) {
+      roomSelect.addEventListener('change', function() {
+        var roomId = roomSelect.value;
+        if (roomId) {
+          fetchAssets(roomId);
+        } else {
+          assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
+        }
+      });
+    }
+
+    // 5. Submit form
+    var reportForm = document.getElementById('reportForm');
+    if (reportForm) {
+      reportForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var errorBox = document.getElementById('formError');
+        var successBox = document.getElementById('formSuccess');
+        var submitBtn = document.getElementById('submitBtn');
+        errorBox.classList.add('hidden');
+        successBox.classList.add('hidden');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        try {
+          var reportData = {
+            roomId: Number(roomSelect.value),
+            assetId: assetSelect.value ? Number(assetSelect.value) : undefined,
+            description: document.getElementById('description').value.trim(),
+            urgencyHint: document.getElementById('urgencySelect').value,
+          };
+
+          var report;
+          if (selectedFile) {
+            var formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('reportData', JSON.stringify(reportData));
+            var response = await fetch('/api/v1/fault-reports/upload', {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+              }
+            });
+            var result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Upload failed');
+            report = result;
+          } else {
+            report = await Api.post('/fault-reports', reportData);
+          }
+
+          successBox.textContent = 'Report #' + report.report_id + ' submitted successfully with priority: ' + report.priority + '.';
+          successBox.classList.remove('hidden');
+          reportForm.reset();
+          fileInfo.classList.add('hidden');
+          selectedFile = null;
+          // Reset lại asset select
+          assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
+          setTimeout(function() {
+            location.href = 'ReportDetails.html?id=' + report.report_id;
+          }, 1500);
+        } catch (err) {
+          errorBox.textContent = err.message || 'Failed to submit report. Please try again.';
+          errorBox.classList.remove('hidden');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Report';
+        }
+      });
+    }
+
+    // 6. Load rooms on page load
+    loadRooms().catch(function(err) {
+      console.error('Failed to load rooms', err);
+    });
+
+  })();
 </script>
 </body>
 </html>

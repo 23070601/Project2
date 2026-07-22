@@ -109,6 +109,16 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
+  // Helper function để lấy giá trị từ object với nhiều tên field khác nhau
+  function getFieldValue(obj, fieldNames, defaultValue = 'N/A') {
+    for (const field of fieldNames) {
+      if (obj[field] !== undefined && obj[field] !== null && obj[field] !== '') {
+        return obj[field];
+      }
+    }
+    return defaultValue;
+  }
+
   // Helper functions for badges
   const priorityBadge = (priority) => {
     const colors = {
@@ -196,6 +206,10 @@
       let reports = [];
       try {
         reports = await Api.get('/fault-reports', { mine: 'true' });
+        
+        // Log để debug - xem cấu trúc dữ liệu từ API
+        console.log('API Response - first report:', reports[0]);
+        
       } catch (apiError) {
         console.warn('API error, using mock data:', apiError);
         // Fallback mock data for demo
@@ -228,24 +242,46 @@
         return;
       }
 
-      tbody.innerHTML = recent.map((r, index) => `
-        <tr class="bg-white hover:bg-[#D6EBFF] transition-colors border-b border-outline-variant/10 cursor-pointer"
-            onclick="location.href='ReportDetails.html?id=${r.report_id}'">
-          <td class="py-4 px-6 text-body-md">${index + 1}</td>
-          <td class="py-4 px-6 font-bold text-brand-blue">${r.report_id}</td>
-          <td class="py-4 px-6 text-body-md">${r.equipment_name || r.equipment || 'N/A'}</td>
-          <td class="py-4 px-6 text-body-md">${r.room_name || 'N/A'}</td>
-          <td class="py-4 px-6">${priorityBadge(r.priority)}</td>
-          <td class="py-4 px-6 text-body-md">${formatDate(r.reported_at)}</td>
-          <td class="py-4 px-6">${statusBadge(r.status)}</td>
-          <td class="py-4 px-6 text-center">
-            <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all" 
-                    onclick="event.stopPropagation(); location.href='ReportDetails.html?id=${r.report_id}'">
-              <span class="material-symbols-outlined">visibility</span>
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = recent.map((r, index) => {
+        // Lấy equipment name với nhiều tên field khác nhau
+        const equipment = getFieldValue(r, [
+          'equipment_name', 
+          'equipment', 
+          'asset_name', 
+          'asset', 
+          'item_name',
+          'title',
+          'name'
+        ], 'N/A');
+
+        // Lấy room name với nhiều tên field khác nhau
+        const room = getFieldValue(r, [
+          'room_name', 
+          'room', 
+          'classroom', 
+          'location',
+          'classroom_name'
+        ], 'N/A');
+
+        return `
+          <tr class="bg-white hover:bg-[#D6EBFF] transition-colors border-b border-outline-variant/10 cursor-pointer"
+              onclick="location.href='ReportDetails.html?id=${r.report_id}'">
+            <td class="py-4 px-6 text-body-md">${index + 1}</td>
+            <td class="py-4 px-6 font-bold text-brand-blue">${r.report_id}</td>
+            <td class="py-4 px-6 text-body-md">${equipment}</td>
+            <td class="py-4 px-6 text-body-md">${room}</td>
+            <td class="py-4 px-6">${priorityBadge(r.priority)}</td>
+            <td class="py-4 px-6 text-body-md">${formatDate(r.reported_at)}</td>
+            <td class="py-4 px-6">${statusBadge(r.status)}</td>
+            <td class="py-4 px-6 text-center">
+              <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all" 
+                      onclick="event.stopPropagation(); location.href='ReportDetails.html?id=${r.report_id}'">
+                <span class="material-symbols-outlined">visibility</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
 
     } catch (error) {
       console.error('Failed to load dashboard:', error);
