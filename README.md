@@ -81,3 +81,10 @@ frontend/
 - **DSS3 (Replacement):** hoàn toàn xử lý bằng trigger trong file `.sql` (`trg_assets_before_update_dss3`); backend chỉ đọc view `v_dss3_replacement_alerts`.
 - Một số modal trong bản mockup gốc (RejectModal, EditUserModal, ViewQRModal) đã được **gộp trực tiếp vào trang cha** thay vì tách file riêng, để luồng thao tác liền mạch hơn (không mất chức năng).
 - `Managers/EditAssetClass.html` (trống trong bản gốc) đã được dựng lại đầy đủ.
+
+
+User: lecturer.a@vnuis.edu.vn / User123!
+User: student.b@vnuis.edu.vn / User123!
+Technician: tech.c@vnuis.edu.vn / Tech123!
+Technician: tech.d@vnuis.edu.vn / Tech123!
+Manager: manager.e@vnuis.edu.vn / Manager123!

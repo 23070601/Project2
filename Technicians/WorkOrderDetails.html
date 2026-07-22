@@ -1,0 +1,523 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        try {
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "surface-container-high": "#e7e8ef",
+                            "secondary-container": "#dce0e6",
+                            "on-secondary": "#ffffff",
+                            "on-error-container": "#93000a",
+                            "surface-container-highest": "#e1e2e9",
+                            "on-tertiary": "#ffffff",
+                            "on-secondary-fixed-variant": "#42474c",
+                            "surface-container-lowest": "#ffffff",
+                            "inverse-on-surface": "#eff0f8",
+                            "secondary-fixed-dim": "#c2c7cd",
+                            "error-container": "#ffdad6",
+                            "on-primary-fixed": "#001b3b",
+                            "surface-bright": "#f9f9ff",
+                            "surface-dim": "#d8dae1",
+                            "tertiary": "#574000",
+                            "secondary": "#5a5f64",
+                            "error": "#ba1a1a",
+                            "on-primary-fixed-variant": "#004788",
+                            "surface-variant": "#e1e2e9",
+                            "tertiary-container": "#745600",
+                            "primary-fixed-dim": "#a7c8ff",
+                            "background": "#f9f9ff",
+                            "on-primary-container": "#bdd5ff",
+                            "surface-container": "#ecedf5",
+                            "on-error": "#ffffff",
+                            "surface-container-low": "#f2f3fb",
+                            "primary": "#004482",
+                            "outline": "#727783",
+                            "on-secondary-fixed": "#171c20",
+                            "primary-container": "#005bac",
+                            "on-background": "#191c21",
+                            "tertiary-fixed": "#ffdf9e",
+                            "on-tertiary-fixed": "#261a00",
+                            "on-secondary-container": "#5e6368",
+                            "tertiary-fixed-dim": "#fabd00",
+                            "on-primary": "#ffffff",
+                            "inverse-surface": "#2e3036",
+                            "inverse-primary": "#a7c8ff",
+                            "outline-variant": "#c2c6d3",
+                            "surface-tint": "#0b5eaf",
+                            "surface": "#f9f9ff",
+                            "on-surface-variant": "#424751",
+                            "primary-fixed": "#d5e3ff",
+                            "on-tertiary-fixed-variant": "#5b4300",
+                            "secondary-fixed": "#dfe3e9",
+                            "on-tertiary-container": "#ffcc55",
+                            "on-surface": "#191c21"
+                        },
+                        "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                        },
+                        "spacing": {
+                            "unit": "4px",
+                            "margin-desktop": "32px",
+                            "container-max": "1280px",
+                            "gutter": "24px",
+                            "margin-mobile": "16px"
+                        },
+                        "fontFamily": {
+                            "label-lg": ["Inter"],
+                            "body-sm": ["Inter"],
+                            "body-lg": ["Inter"],
+                            "label-md": ["Inter"],
+                            "headline-md": ["Poppins"],
+                            "headline-sm": ["Poppins"],
+                            "headline-lg": ["Poppins"],
+                            "display-lg": ["Poppins"],
+                            "body-md": ["Inter"]
+                        },
+                        "fontSize": {
+                            "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                            "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                            "display-lg": ["48px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                        }
+                    },
+                },
+            }
+        } catch (_e) {}
+    </script>
+</head>
+<body class="text-on-surface bg-surface overflow-x-hidden">
+
+<!-- SIDEBAR -->
+<aside class="fixed left-0 top-0 h-full w-[240px] bg-white border-r border-outline-variant/30 flex flex-col py-6 px-4 z-50 transition-all duration-300">
+    <div class="mb-10 px-2 flex items-center gap-3">
+        <div class="w-10 h-10 flex items-center justify-center shrink-0">
+            <img alt="Official VNU-IS institutional logo" class="w-10 h-10 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKN87w4BDnDKQ6nIcSw563ZwMVJ-PG-5o9ySXsn9_XuFX0Rd9eklSZVPm3KXmTPMz014H-MyqVCnrB9-1l-jV8AlmjgxDso3iOSdA7dKOAnnhnYhQBz4kyeZCvjlSXUAmDWi4Qt2NZ37iWD046ONO_6rRPHIkruIix7ek6hwel1-MhLDobYHh5zQ75KjS5dyhciGPKO9pMIHo_tC_W5lbwYdia9NheFyxldFqlQcQ4OPmYbZXLH3gXOhvD4bdHs6_jtmDNxEcrLv9OGMA">
+        </div>
+        <div class="flex flex-col">
+            <h2 class="text-on-surface font-headline-sm text-headline-sm leading-tight">VNU-IS</h2>
+            <p class="text-on-surface-variant text-label-md font-label-md">Asset Maintenance</p>
+        </div>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-label-lg font-label-lg">Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 bg-primary-fixed text-primary font-bold rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">task_alt</span>
+            <span class="text-label-lg font-label-lg whitespace-nowrap">Assigned Tasks</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">search</span>
+            <span class="text-label-lg font-label-lg">Asset Lookup</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- MAIN WRAPPER -->
+<div class="ml-[240px] flex flex-col min-h-screen">
+    <!-- TOP APP BAR -->
+    <header class="h-16 w-full bg-surface-container-lowest flex items-center justify-between px-8 z-40 shadow-sm border-b border-outline-variant/10">
+        <div class="flex items-center bg-surface-container-low px-4 py-1 rounded-full w-full border border-outline-variant/30 max-w-[400px]">
+            <span class="material-symbols-outlined text-outline">search</span>
+            <input class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder:text-outline-variant" placeholder="Search data, metrics, assets..." type="text">
+        </div>
+        <div class="flex items-center gap-6">
+            <button class="relative text-on-surface-variant hover:bg-secondary-container p-2 rounded-full transition-colors">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+            </button>
+            <div class="relative group">
+                <button class="flex items-center gap-3 pl-3 pr-2 py-1 rounded-full bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
+                    <div class="text-right flex flex-col">
+                        <span class="text-label-lg font-bold text-on-surface leading-tight text-right">Nguyen Van A</span>
+                        <span class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider text-right">Technician</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+                        <img alt="Technician profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSJOig5dVXEuQjGvYE8TI7ffTHJjJk7lt-nreWwgL0iHs6LfUZADSek0-LcXzTqIkJezvzT41yaptmFCCz2ENP79Bq8rqZred-R9NDOC_Iq2NwJr9hnPGU4vKWVP_Y4N0Qb1JTpCPJFBqQutYc2ynD8tkM1qsfgBc4-Nm3gso323S9Ab7qPyOnnXbnr8PorlcdRJUFS20N6RaAGISFw8-XhVcHdClhuwc8AT7FPTEzT2DBsknQeEv1TyMxubTsepC2XGyH3Z4YvgI_">
+                    </div>
+                    <span class="material-symbols-outlined text-on-surface-variant">keyboard_arrow_down</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-margin-desktop space-y-6 max-w-container-max mx-auto w-full pb-32">
+        <!-- Page Title -->
+        <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-1">
+                <button class="flex items-center gap-1 text-primary font-label-lg hover:underline transition-all">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    Back to Tasks
+                </button>
+                <h3 class="text-headline-md font-headline-md mt-2">Task Detail — <span class="text-primary">WO-2024-001</span></h3>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Column -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- WorkOrder Info Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                    <div class="bg-primary px-6 py-3">
+                        <h4 class="text-white font-bold text-label-lg">WorkOrder Information</h4>
+                    </div>
+                    <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Order ID</p>
+                            <p class="text-body-md font-bold text-on-surface">WO-2024-001</p>
+                        </div>
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Equipment</p>
+                            <p class="text-body-md font-bold text-on-surface">Sony Projector VPL-FHZ65</p>
+                        </div>
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Room</p>
+                            <p class="text-body-md font-bold text-on-surface">P512</p>
+                        </div>
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Priority</p>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-error-container text-on-error-container">
+                                High
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Status</p>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">
+                                In Progress
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Assigned Date</p>
+                            <p class="text-body-md font-medium text-on-surface">20 Oct 2024</p>
+                        </div>
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Reported By</p>
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">JD</div>
+                                <p class="text-body-md font-medium text-on-surface">John Doe</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Reported Date</p>
+                            <p class="text-body-md font-medium text-on-surface">18 Oct 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fault Description Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                    <div class="bg-primary px-6 py-3">
+                        <h4 class="text-white font-bold text-label-lg">Fault Description</h4>
+                    </div>
+                    <div class="p-6 flex flex-col md:flex-row gap-6">
+                        <div class="flex-1">
+                            <blockquote class="border-l-4 border-primary pl-4 py-2 italic text-on-surface-variant text-body-md leading-relaxed">
+                                "Máy chiếu bị mờ hình, màu sắc không chuẩn, có tiếng kêu lạ khi bật."
+                            </blockquote>
+                            <p class="text-body-sm text-outline mt-4">Reported issue from the lecturer in Room P512. Urgent maintenance required as it affects the semester exams.</p>
+                        </div>
+                        <div class="w-full md:w-48 h-32 rounded-lg border border-outline-variant bg-surface-container-low overflow-hidden relative cursor-pointer group">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcK5xVWoTXkgaMuPLBgoa1TVEXXY6dAiADd2nnN42J2ZMwpbreEwpO984IV0C7zWiuGD8oLsvhv5EuTYgsbKB0gp3eTprture61nyQ9Bf5pLNJeOz6QLHL3VX8GxkxPlpWKULq2BTcyZT-0xf7gnO-ZKh0TwA0NOmxKQ6SOktZOJHNxjlROpksG-57uS7pBKEYdAOI9F_iA9nMvjHJ8B5QBdtOA0ufLn7YihMK0MqU3rUT6I2lNNviHjpcgSGciSwtEKRkXNmgDfFr">
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-white">zoom_in</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asset Repair History Card (New) -->
+                <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                    <div class="bg-primary px-6 py-3">
+                        <h4 class="text-white font-bold text-label-lg">Asset Repair History</h4>
+                    </div>
+                    <div class="p-0">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-surface-container-low border-b border-outline-variant/20">
+                                    <tr>
+                                        <th class="px-6 py-3 text-label-md font-bold text-outline uppercase tracking-wider text-center">Date</th>
+                                        <th class="px-6 py-3 text-label-md font-bold text-outline uppercase tracking-wider text-center">Fix / Action</th>
+                                        <th class="px-6 py-3 text-label-md font-bold text-outline uppercase tracking-wider text-center">Technician</th>
+                                        <th class="px-6 py-3 text-label-md font-bold text-outline uppercase tracking-wider text-right text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-outline-variant/10">
+                                    <tr class="hover:bg-surface-container-lowest transition-colors">
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex flex-col">
+                                                <span class="text-body-sm font-bold">10 Oct 2024</span>
+                                                <span class="text-[10px] text-green-600 font-bold uppercase tracking-widest">Completed</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex flex-col">
+                                                <span class="text-body-sm text-on-surface">Replaced projector lamp</span>
+                                                <span class="text-label-md text-outline">Parts: Sony Lamp VPL-X01</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex items-center gap-2 justify-center">
+                                                <div class="w-6 h-6 rounded-full bg-primary-fixed text-primary text-[10px] flex items-center justify-center font-bold">NV</div>
+                                                <span class="text-body-sm">Nguyen Van A</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-right text-center">
+                                            <button class="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors flex items-center justify-center mx-auto" title="View WorkOrder"><span class="material-symbols-outlined">visibility</span></button>
+                                        </td>
+                                    </tr>
+                                    <!-- More rows as needed -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WorkOrder Status History Card (New Timeline) -->
+                <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                    <div class="bg-primary px-6 py-3">
+                        <h4 class="text-white font-bold text-label-lg">WorkOrder Status History</h4>
+                    </div>
+                    <div class="p-6">
+                        <div class="relative space-y-6 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-outline-variant/30">
+                            <!-- Progress Item -->
+                            <div class="relative flex items-center group">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-primary text-white shadow shrink-0 z-10">
+                                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                </div>
+                                <div class="ml-4 flex-1 bg-surface-container-low p-3 rounded-lg border border-outline-variant/20">
+                                    <div class="flex justify-between items-start">
+                                        <h5 class="text-body-sm font-bold text-on-surface">In Progress</h5>
+                                        <span class="text-[10px] text-outline font-medium">20 Oct 2024, 11:00 AM</span>
+                                    </div>
+                                    <p class="text-label-md text-on-surface-variant">Technician started the repair process.</p>
+                                </div>
+                            </div>
+                            <!-- Received Item -->
+                            <div class="relative flex items-center group">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-outline text-white shadow shrink-0 z-10">
+                                    <span class="material-symbols-outlined text-[18px]">task_alt</span>
+                                </div>
+                                <div class="ml-4 flex-1 p-3 rounded-lg border border-outline-variant/10">
+                                    <div class="flex justify-between items-start">
+                                        <h5 class="text-body-sm font-bold text-outline">Received</h5>
+                                        <span class="text-[10px] text-outline font-medium">20 Oct 2024, 10:30 AM</span>
+                                    </div>
+                                    <p class="text-label-md text-outline">Work order accepted by Nguyen Van A.</p>
+                                </div>
+                            </div>
+                            <!-- Assigned Item -->
+                            <div class="relative flex items-center group">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-outline text-white shadow shrink-0 z-10">
+                                    <span class="material-symbols-outlined text-[18px]">assignment_ind</span>
+                                </div>
+                                <div class="ml-4 flex-1 p-3 rounded-lg border border-outline-variant/10">
+                                    <div class="flex justify-between items-start">
+                                        <h5 class="text-body-sm font-bold text-outline">Assigned</h5>
+                                        <span class="text-[10px] text-outline font-medium">20 Oct 2024, 10:00 AM</span>
+                                    </div>
+                                    <p class="text-label-md text-outline">System assigned task to Technician Portal.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Asset Info Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                    <div class="bg-primary px-6 py-3">
+                        <h4 class="text-white font-bold text-label-lg">Asset Information</h4>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-lg border border-outline-variant/30">
+                            <div class="w-12 h-12 bg-white rounded-md flex items-center justify-center shadow-inner">
+                                <span class="material-symbols-outlined text-primary text-3xl">videocam</span>
+                            </div>
+                            <div>
+                                <p class="text-label-lg font-bold text-on-surface">Sony Projector VPL-FHZ65</p>
+                                <p class="text-label-md text-outline">SN: SN-928374-X</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            <div class="flex justify-between py-2 border-b border-outline-variant/10 border-dashed">
+                                <span class="text-body-sm text-outline">Type</span>
+                                <span class="text-body-sm font-bold text-on-surface">Visual Equipment</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-outline-variant/10 border-dashed">
+                                <span class="text-body-sm text-outline">Room</span>
+                                <span class="text-body-sm font-bold text-on-surface">512</span>
+                            </div>
+                            <div class="flex justify-between py-2">
+                                <span class="text-body-sm text-outline">Failure Count</span>
+                                <span class="text-body-sm font-bold text-error">4 (In last 6 months)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DSS3 Alert Card -->
+                <div class="bg-tertiary-container text-on-tertiary-container rounded-xl shadow-lg p-6 border-2 border-tertiary relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 opacity-10 scale-150 rotate-12 transition-transform group-hover:scale-175">
+                        <span class="material-symbols-outlined text-[120px]">warning</span>
+                    </div>
+                    <div class="flex items-start gap-4 relative z-10">
+                        <div class="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-on-tertiary">priority_high</span>
+                        </div>
+                        <div class="space-y-2">
+                            <h5 class="font-headline-sm text-headline-sm leading-tight">DSS3 Insight Alert</h5>
+                            <p class="text-body-md font-medium leading-snug">⚠️ This asset has failed 4 times. <strong class="underline">Replacement recommended</strong> over further repair.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Repair Evidence Card (New) -->
+                <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                    <div class="bg-primary px-6 py-3">
+                        <h4 class="text-white font-bold text-label-lg">Repair Evidence</h4>
+                    </div>
+                    <div class="p-6"><div class="flex gap-3">
+    <div class="flex-1 h-[120px] rounded-lg overflow-hidden border border-outline-variant/30 relative group">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcK5xVWoTXkgaMuPLBgoa1TVEXXY6dAiADd2nnN42J2ZMwpbreEwpO984IV0C7zWiuGD8oLsvhv5EuTYgsbKB0gp3eTprture61nyQ9Bf5pLNJeOz6QLHL3VX8GxkxPlpWKULq2BTcyZT-0xf7gnO-ZKh0TwA0NOmxKQ6SOktZOJHNxjlROpksG-57uS7pBKEYdAOI9F_iA9nMvjHJ8B5QBdtOA0ufLn7YihMK0MqU3rUT6I2lNNviHjpcgSGciSwtEKRkXNmgDfFr" class="w-full h-full object-cover">
+        <div class="absolute bottom-0 left-0 right-0 p-1.5 bg-black/40 backdrop-blur-sm">
+            <p class="text-white text-[8px] font-bold uppercase tracking-wider">Sample: Before Repair</p>
+        </div>
+    </div>
+    <div class="flex-1 h-[120px] rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer" onclick="toggleModal('uploadPhotoModal')">
+        <span class="material-symbols-outlined text-primary text-2xl">add_a_photo</span>
+        <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Evidence</p>
+    </div>
+</div></div>
+                </div>
+
+                <!-- Update WorkOrder Status Card (New) -->
+                <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                    <div class="bg-primary px-6 py-3">
+                        <h4 class="text-white font-bold text-label-lg">Update WorkOrder Status</h4>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-label-md font-bold text-outline uppercase tracking-wider">Current Status</label>
+                            <div class="relative">
+                                <select class="w-full h-12 pl-4 pr-10 rounded-lg border border-outline-variant focus:ring-primary focus:border-primary text-body-md bg-surface-container-low appearance-none">
+                                    <option value="received">Received</option>
+                                    <option value="in-progress" selected="">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending-parts">Pending Parts</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-primary hover:bg-primary-container text-white py-3 rounded-lg font-label-lg transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2" onclick="toggleModal('repairReportModal')">
+                            <span class="material-symbols-outlined">save</span>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER (Full width, overlaps sidebar by 240px) -->
+    <footer class="fixed bottom-0 left-0 right-0 h-16 bg-[#d5e3ff] border-t border-outline-variant/20 z-[55] flex items-center justify-between px-8 ml-[240px]">
+        <p class="text-on-primary-fixed-variant text-label-md font-label-md">© 2024 VNU-IS - Asset Maintenance System</p>
+        <div class="flex items-center gap-8">
+            <a class="text-on-primary-fixed-variant opacity-80 text-label-md font-label-md hover:opacity-100 transition-colors" href="#">Privacy Policy</a>
+            <a class="text-on-primary-fixed-variant opacity-80 text-label-md font-label-md hover:opacity-100 transition-colors" href="#">Terms of Service</a>
+        </div>
+    </footer>
+</div>
+
+<!-- MODALS -->
+
+<!-- 1. Upload Repair Photo Modal -->
+<div class="fixed inset-0 z-[100] hidden" id="uploadPhotoModal">
+    <div class="absolute inset-0 bg-on-surface/50 backdrop-blur-sm" onclick="toggleModal('uploadPhotoModal')"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+        <div class="bg-primary px-6 py-4 flex justify-between items-center">
+            <h3 class="text-white font-headline-sm text-headline-sm">Upload Evidence</h3>
+            <button class="text-white/80 hover:text-white" onclick="toggleModal('uploadPhotoModal')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-8 space-y-6">
+            <div class="border-2 border-dashed border-outline-variant/50 rounded-xl p-10 flex flex-col items-center justify-center gap-4 bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer">
+                <span class="material-symbols-outlined text-[48px] text-primary/40">cloud_upload</span>
+                <div class="text-center">
+                    <p class="text-body-md font-bold text-on-surface">Click to upload or drag &amp; drop</p>
+                    <p class="text-label-md text-outline">PNG, JPG or JPEG (Max. 5MB)</p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="text-label-lg font-bold text-on-surface">Photo Category</label>
+                <select class="w-full rounded-lg border-outline-variant focus:ring-primary focus:border-primary text-body-md">
+                    <option>Before Repair</option>
+                    <option>During Repair</option>
+                    <option>After Repair</option>
+                </select>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-container transition-all" onclick="toggleModal('uploadPhotoModal')">Upload Photo</button>
+                <button class="px-6 py-3 border border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all" onclick="toggleModal('uploadPhotoModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Submit Repair Report Modal -->
+<div class="fixed inset-0 z-[100] hidden" id="repairReportModal">
+    <div class="absolute inset-0 bg-on-surface/50 backdrop-blur-sm" onclick="toggleModal('repairReportModal')"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+        <div class="bg-primary px-6 py-4 flex justify-between items-center">
+            <h3 class="text-white font-headline-sm text-headline-sm">Submit Repair Report</h3>
+            <button class="text-white/80 hover:text-white" onclick="toggleModal('repairReportModal')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-8 space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-label-lg font-bold text-on-surface">WorkOrder</label>
+                    <input type="text" value="WO-2024-001" disabled="" class="w-full bg-surface-container-low border-outline-variant rounded-lg text-outline">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-label-lg font-bold text-on-surface">New Status</label>
+                    <input type="text" value="Completed" disabled="" class="w-full bg-surface-container-low border-outline-variant rounded-lg font-bold text-green-700">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="text-label-lg font-bold text-on-surface">Root Cause <span class="text-error">*</span></label>
+                <textarea class="w-full rounded-lg border-outline-variant focus:ring-primary focus:border-primary text-body-md" rows="3" placeholder="Explain what caused the issue..."></textarea>
+            </div>
+            <div class="space-y-2">
+                <label class="text-label-lg font-bold text-on-surface">Solution Actions <span class="text-error">*</span></label>
+                <textarea class="w-full rounded-lg border-outline-variant focus:ring-primary focus:border-primary text-body-md" rows="3" placeholder="Describe how you fixed it..."></textarea>
+            </div>
+            <div class="space-y-2">
+                <label class="text-label-lg font-bold text-on-surface">Parts Used</label>
+                <input type="text" class="w-full rounded-lg border-outline-variant focus:ring-primary focus:border-primary text-body-md" placeholder="e.g. Sony Lamp VPL-X01, Screws...">
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-container shadow-lg shadow-primary/20 transition-all" onclick="toggleModal('repairReportModal')">Submit Report
+
+</button></div></div></div></div></body></html>

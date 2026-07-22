@@ -1,0 +1,324 @@
+<!DOCTYPE html><html class="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Poppins:wght@600;700&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        try {
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "primary-fixed": "#d5e3ff",
+                            "surface-container": "#ecedf5",
+                            "error": "#ba1a1a",
+                            "surface-container-low": "#f2f3fb",
+                            "on-tertiary-container": "#ffcc55",
+                            "on-secondary": "#ffffff",
+                            "inverse-on-surface": "#eff0f8",
+                            "surface-container-highest": "#e1e2e9",
+                            "secondary-fixed-dim": "#c2c7cd",
+                            "secondary-fixed": "#dfe3e9",
+                            "on-primary": "#ffffff",
+                            "on-background": "#191c21",
+                            "on-primary-container": "#bdd5ff",
+                            "on-secondary-fixed": "#171c20",
+                            "on-tertiary": "#ffffff",
+                            "secondary-container": "#dce0e6",
+                            "tertiary-fixed": "#ffdf9e",
+                            "secondary": "#5a5f64",
+                            "tertiary-container": "#745600",
+                            "on-surface": "#191c21",
+                            "on-tertiary-fixed": "#261a00",
+                            "surface-container-high": "#e7e8ef",
+                            "on-primary-fixed": "#001b3b",
+                            "on-tertiary-fixed-variant": "#5b4300",
+                            "surface": "#f9f9ff",
+                            "tertiary-fixed-dim": "#fabd00",
+                            "on-secondary-container": "#5e6368",
+                            "on-error": "#ffffff",
+                            "inverse-surface": "#2e3036",
+                            "outline-variant": "#c2c6d3",
+                            "surface-bright": "#f9f9ff",
+                            "inverse-primary": "#a7c8ff",
+                            "surface-variant": "#e1e2e9",
+                            "surface-tint": "#0b5eaf",
+                            "surface-container-lowest": "#ffffff",
+                            "outline": "#727783",
+                            "on-error-container": "#93000a",
+                            "on-surface-variant": "#424751",
+                            "tertiary": "#574000",
+                            "on-secondary-fixed-variant": "#42474c",
+                            "background": "#f9f9ff",
+                            "primary-fixed-dim": "#a7c8ff",
+                            "error-container": "#ffdad6",
+                            "surface-dim": "#d8dae1",
+                            "primary-container": "#005bac",
+                            "primary": "#005BAC",
+                            "on-primary-fixed-variant": "#004788",
+                            "content-bg": "#F8FAFC",
+                            "brand-blue": "#005BAC",
+                            "dark-footer": "#003366",
+                            "footer-text": "#94A3B8"
+                        },
+                        "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                        },
+                        "spacing": {
+                            "container-max": "1280px",
+                            "unit": "4px",
+                            "margin-desktop": "32px",
+                            "margin-mobile": "16px",
+                            "gutter": "24px"
+                        },
+                        "fontFamily": {
+                            "body-lg": ["Inter"],
+                            "label-lg": ["Inter"],
+                            "headline-lg": ["Poppins"],
+                            "headline-md": ["Poppins"],
+                            "body-sm": ["Inter"],
+                            "headline-sm": ["Poppins"],
+                            "label-md": ["Inter"],
+                            "body-md": ["Inter"],
+                            "display-lg": ["Poppins"]
+                        },
+                        "fontSize": {
+                            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                            "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                            "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                            "display-lg": ["48px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                        }
+                    },
+                },
+            }
+        } catch (_e) {}
+    }catch(_e){}</script></head><body class="bg-content-bg text-on-surface font-body-md overflow-x-hidden min-h-screen flex flex-col">
+    <!-- Fixed Header (60px) -->
+    <header class="h-[60px] bg-surface-container-lowest shadow-sm z-50 flex items-center px-margin-desktop justify-between fixed top-0 left-0 ml-[220px] w-[calc(100%-220px)]">
+        <div class="flex items-center gap-8">
+            <div class="relative w-[350px]">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+                <input class="w-full bg-surface-container-low border-none rounded-full py-1.5 pl-10 pr-4 text-body-sm focus:ring-1 focus:ring-brand-blue outline-none transition-all" placeholder="Search classrooms, equipment..." type="text">
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Notification Bell Component with Relative Positioning -->
+            <div class="relative">
+                <button class="relative p-2 rounded-full hover:bg-secondary-container transition-colors">
+                    <span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface-container-lowest"></span>
+                </button>
+                
+                <!-- DROPDOWN WRAPPER -->
+                <div class="absolute right-0 top-[110%] w-[360px] bg-white border border-outline-variant/30 rounded-xl shadow-lg py-3 z-[100] text-left font-body-sm overflow-hidden">
+                    <!-- HEADER -->
+                    <div class="px-4 pb-2 border-b border-outline-variant/10 flex justify-between items-center">
+                        <span class="text-label-lg font-bold text-on-surface">Notifications</span>
+                        <button class="text-[11px] text-brand-blue font-medium hover:underline">Mark all as read</button>
+                    </div>
+                    
+                    <!-- LIST -->
+                    <div class="max-h-[300px] overflow-y-auto">
+                        <!-- Row 1 -->
+                        <a class="flex gap-3 px-4 py-3 hover:bg-surface-container-low transition-colors border-b border-outline-variant/5" href="#">
+                            <div class="mt-1 w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-brand-blue text-[18px]">schedule</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-body-sm text-on-surface leading-tight">Report <span class="font-bold text-brand-blue">REP-0021</span> status updated to <span class="font-medium text-yellow-700">Pending</span></p>
+                                <p class="text-[10px] text-on-surface-variant mt-1">1 hour ago</p>
+                            </div>
+                            <div class="mt-2 w-2 h-2 bg-brand-blue rounded-full"></div>
+                        </a>
+                        
+                        <!-- Row 2 -->
+                        <a class="flex gap-3 px-4 py-3 hover:bg-surface-container-low transition-colors border-b border-outline-variant/5" href="#">
+                            <div class="mt-1 w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-[#FFC107] text-[18px]">build</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-body-sm text-on-surface leading-tight">Equipment <span class="font-medium">'Digital Projector'</span> maintenance assigned</p>
+                                <p class="text-[10px] text-on-surface-variant mt-1">2 hours ago</p>
+                            </div>
+                        </a>
+                        
+                        <!-- Row 3 -->
+                        <a class="flex gap-3 px-4 py-3 hover:bg-surface-container-low transition-colors border-b border-outline-variant/10" href="#">
+                            <div class="mt-1 w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-green-600 text-[18px]">check_circle</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-body-sm text-on-surface leading-tight">Report <span class="font-bold text-brand-blue">REP-0015</span> has been successfully resolved</p>
+                                <p class="text-[10px] text-on-surface-variant mt-1">Yesterday</p>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- FOOTER -->
+                    <div class="border-t border-outline-variant/10 mt-1 pt-2">
+                        <a class="text-brand-blue font-label-lg hover:underline block text-center" href="#">View All Notifications</a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="flex items-center gap-3 px-4 py-1.5 border-outline-variant/20 rounded-full hover:bg-secondary-container transition-all">
+                <div class="text-right">
+                    <p class="text-label-lg font-label-lg text-on-surface">John Doe</p>
+                    <span class="px-2 py-0.5 bg-primary-fixed text-primary text-[10px] font-label-md rounded-full">User</span>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden border border-primary-fixed">
+                    <img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt5smcp-aDG-yX-zz-omeqn07euCUUxB2PW-W6NC9YpjU0Kh-Zc-QmtKhVBXSWYCQocj7gO4IWhBGD6bos1WD0X9pmqZ2poNCchp41j9UJb8xLTjoegqqk0Z784FydKlAggeXKhL0VsXe51EmHGCJXFPJLTscbcmjhqRVMgmTkH-sbFt2Tg0tNSzSMDO8ptWUzZ6IwO1bA4qHtYLWWfYdzgA1bqqlGGEMtjw_SWql62n06RxCzgPgdRx6p_J42OHp3Gbn8gKcJy2_S">
+                </div>
+                <span class="material-symbols-outlined text-on-surface-variant text-[20px]">keyboard_arrow_down</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 mt-[60px] mb-[40px]">
+        <!-- Sidebar (220px) -->
+        <aside class="w-[220px] fixed left-0 h-full bg-[#004d91] flex flex-col py-6 px-4 z-40 top-0">
+            <div class="mb-8 px-4">
+                <div class="flex items-center gap-3">
+                    <img alt="VNU-IS Logo" class="h-12 w-auto object-contain bg-transparent" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbQpw8DTbZJ7mp3fvDyxoEKt913ALLWwwwcClSxsvFwClbIKG2KpUphNrFVXzouOaT0BOsaRfn3SH0qZdCfCs70cIhZx7mehOC4qk-1tQdv5e3XkBFDuBfvLQIqVFspSRxm6zbDEH75BpJiNfemLCMchOOF4j53ugRtDKorTOulNWPJy5BKt0LAJENi43ey7MzVyA3HNGzwrDUO6qyN5ccdrWimPujP-r2xpDZPhhXDd118glwJQi5F-n_Lwe-_4mwb7dKcgaUKVeB">
+                    <div class="flex flex-col leading-none">
+                        <h1 class="text-[20px] font-bold font-headline-lg text-white leading-tight">VNU-IS</h1>
+                        <p class="text-white/60 text-[8px] uppercase tracking-widest whitespace-nowrap">Asset Maintenance</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 space-y-1">
+                <a class="flex items-center gap-3 py-2.5 px-4 bg-primary-fixed text-brand-blue rounded-lg font-bold transition-all" href="#">
+                    <span class="material-symbols-outlined filled-icon" data-icon="dashboard">dashboard</span>
+                    <span class="text-label-lg font-label-lg">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 py-2.5 px-4 text-on-primary opacity-80 hover:bg-on-primary-fixed-variant hover:text-white transition-all rounded-lg" href="#">
+                    <span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+                    <span class="text-label-lg font-label-lg">Reports</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow ml-[220px] p-8 bg-content-bg min-h-full">
+            <!-- STUDENT PROFILE BLOCK -->
+            <div class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
+                <h2 class="text-brand-blue font-bold text-headline-lg">Welcome back, John Doe</h2>
+                <p class="text-on-surface-variant text-body-md mb-3">Faculty of Applied IT • Student Dashboard</p>
+                <div class="flex gap-3">
+                    <div class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                        <span class="">Full-time Student</span>
+                    </div>
+                    <div class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        <span class="">Semester 2, 2023-2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI CARDS GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-8">
+                <!-- Card 1 -->
+                <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 border-l-4 border-l-[#005BAC] flex flex-col gap-2 hover:shadow-md transition-all">
+                    <span class="material-symbols-outlined text-brand-blue">pending_actions</span>
+                    <h3 class="text-headline-lg font-bold">03</h3>
+                    <p class="text-body-sm text-on-surface-variant">Awaiting review</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 border-l-4 border-l-[#FFC107] flex flex-col gap-2 hover:shadow-md transition-all">
+                    <span class="material-symbols-outlined text-[#FFC107]">build</span>
+                    <h3 class="text-headline-lg font-bold">02</h3>
+                    <p class="text-body-sm text-on-surface-variant">In progress</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 border-l-4 border-l-[#42A5F5] flex flex-col gap-2 hover:shadow-md transition-all">
+                    <span class="material-symbols-outlined text-[#42A5F5]">check_circle</span>
+                    <h3 class="text-headline-lg font-bold">15</h3>
+                    <p class="text-body-sm text-on-surface-variant">Successfully fixed</p>
+                </div>
+            </div>
+
+            <!-- Recent Reports Table -->
+            <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/20 mb-8">
+                <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
+                    <h3 class="text-headline-sm font-headline-sm text-on-surface">Recent Issue Reports</h3>
+                    <button class="text-brand-blue font-label-lg hover:underline transition-all">View All Reports</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-brand-blue text-white">
+                            <tr>
+                                <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">#</th>
+                                <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Report ID</th>
+                                <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Equipment</th>
+                                <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Room</th>
+                                <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Date</th>
+                                <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Status</th>
+                                <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-on-surface-variant">
+                            <tr class="bg-white hover:bg-[#D6EBFF] transition-colors border-b border-outline-variant/10">
+                                <td class="py-4 px-6 text-body-md">1</td>
+                                <td class="py-4 px-6 font-bold text-brand-blue">REP-0021</td>
+                                <td class="py-4 px-6 text-body-md">Air Conditioner Unit</td>
+                                <td class="py-4 px-6 text-body-md">Room 404</td>
+                                <td class="py-4 px-6 text-body-md">Jun 24, 2026</td>
+                                <td class="py-4 px-6">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                                </td>
+                                <td class="py-4 px-6 text-center">
+                                    <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all">
+                                        <span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="bg-[#EAF5FF] hover:bg-[#D6EBFF] transition-colors border-b border-outline-variant/10">
+                                <td class="py-4 px-6 text-body-md">2</td>
+                                <td class="py-4 px-6 font-bold text-brand-blue">REP-0019</td>
+                                <td class="py-4 px-6 text-body-md">Digital Projector</td>
+                                <td class="py-4 px-6 text-body-md">Room 602</td>
+                                <td class="py-4 px-6 text-body-md">May 23, 2026</td>
+                                <td class="py-4 px-6">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Processing</span>
+                                </td>
+                                <td class="py-4 px-6 text-center">
+                                    <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all">
+                                        <span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="bg-white hover:bg-[#D6EBFF] transition-colors border-b border-outline-variant/10">
+                                <td class="py-4 px-6 text-body-md">3</td>
+                                <td class="py-4 px-6 font-bold text-brand-blue">REP-0015</td>
+                                <td class="py-4 px-6 text-body-md">Network Switch</td>
+                                <td class="py-4 px-6 text-body-md">Room 505</td>
+                                <td class="py-4 px-6 text-body-md">Apr 22, 2026</td>
+                                <td class="py-4 px-6">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Completed</span>
+                                </td>
+                                <td class="py-4 px-6 text-center">
+                                    <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all">
+                                        <span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Full-width Footer (40px) -->
+    <footer class="fixed bottom-0 left-0 right-0 h-[40px] w-full bg-dark-footer flex items-center justify-between px-margin-desktop z-50">
+        <div class="flex-1">
+            <p class="text-white text-[12px] font-label-md">© 2026 VNU-IS - Asset Maintenance System</p>
+        </div>
+        <div class="flex items-center gap-6">
+            <a class="text-footer-text hover:text-white transition-colors text-[12px] font-label-md" href="#">Privacy Policy</a>
+            <a class="text-footer-text hover:text-white transition-colors text-[12px] font-label-md" href="#"></a></div></footer></body></html>

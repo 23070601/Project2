@@ -1,4 +1,3 @@
-const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -24,9 +23,6 @@ app.use(express.json({ limit: '5mb' }));
 app.use(morgan(env.nodeEnv === 'development' ? 'dev' : 'combined'));
 
 app.get('/health', (req, res) => res.json({ success: true, data: { status: 'ok' } }));
-app.get('/favicon.ico', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/favicon.ico'));
-});
 
 // Toàn bộ API prefix bằng /api/v1 để tách bạch version cho sau này
 const API_PREFIX = '/api/v1';

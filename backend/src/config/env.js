@@ -11,7 +11,7 @@ function required(name, fallback) {
 module.exports = {
   port: Number(process.env.PORT || 4000),
   nodeEnv: process.env.NODE_ENV || 'development',
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5500',
+  corsOrigin: process.env.CORS_ORIGIN || '*',
 
   db: {
     host: required('DB_HOST', 'localhost'),
