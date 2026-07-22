@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>My Profile - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .bg-brand-blue {
+    background-color: #005BAC;
+  }
+  .text-brand-blue {
+    color: #005BAC;
+  }
+</style>
+</head>
+<body class="bg-content-bg text-on-surface font-body-md overflow-x-hidden min-h-screen flex flex-col">
+
+<!-- Sidebar placeholder -->
+<div id="sidebar-placeholder"></div>
+
+<!-- Main wrapper với margin-left cho sidebar -->
+<div class="ml-[220px] flex flex-col min-h-screen">
+  <!-- Topbar placeholder -->
+  <div id="topbar-placeholder"></div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 mt-[60px] mb-[40px] p-8 bg-content-bg min-h-[calc(100vh-100px)]">
+    <div class="max-w-4xl mx-auto">
+      <!-- MY PROFILE COMPONENT -->
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-8">
+        <header class="mb-8">
+          <h2 class="text-headline-md text-on-surface font-headline-md mb-2">My Profile</h2>
+          <p class="text-body-sm text-on-surface-variant">Manage your personal profile information and security settings.</p>
+        </header>
+
+        <!-- Profile Info -->
+        <div class="flex items-center gap-6 mb-8 pb-8 border-b border-outline-variant/20">
+          <div class="w-20 h-20 rounded-full bg-primary-fixed flex items-center justify-center text-headline-lg font-headline-lg text-brand-blue" id="avatarBig">?</div>
+          <div>
+            <p id="profileName" class="text-headline-sm font-headline-sm text-on-surface">-</p>
+            <p id="profileRole" class="text-on-surface-variant text-body-sm">-</p>
+            <p id="profileEmail" class="text-on-surface-variant text-body-sm">-</p>
+          </div>
+        </div>
+
+        <!-- PERSONAL INFO FORM -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Full Name -->
+          <div class="flex flex-col gap-2">
+            <label class="text-label-md font-semibold text-on-surface-variant">Full Name</label>
+            <input id="fullNameInput" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-2.5 px-4 text-body-md text-on-surface-variant cursor-not-allowed" disabled readonly type="text" value="-">
+          </div>
+          <!-- Email Address -->
+          <div class="flex flex-col gap-2">
+            <label class="text-label-md font-semibold text-on-surface-variant">Email Address</label>
+            <input id="emailInput" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-2.5 px-4 text-body-md text-on-surface-variant cursor-not-allowed" disabled readonly type="email" value="-">
+          </div>
+          <!-- Phone Number -->
+          <div class="flex flex-col gap-2 md:col-span-2">
+            <label class="text-label-md font-semibold text-on-surface-variant">Phone Number</label>
+            <div class="flex gap-3">
+              <input id="phoneInput" class="flex-1 bg-white border border-outline-variant/30 rounded-lg py-2.5 px-4 text-body-md text-on-surface focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all" type="text" value="-">
+              <button id="savePhoneBtn" class="bg-brand-blue text-white hover:bg-primary-container px-6 py-2.5 rounded-lg text-label-lg font-bold shadow-sm transition-all whitespace-nowrap">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECURITY SECTION -->
+        <div class="border-t border-outline-variant/20 my-8"></div>
+        <div class="flex flex-col gap-4">
+          <h3 class="text-label-lg font-semibold text-on-surface">Security</h3>
+          <a href="ChangePassword.html" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-error/30 text-error hover:bg-red-50 rounded-lg text-label-lg font-bold transition-all w-fit">
+            <span class="material-symbols-outlined text-[20px]">lock_reset</span>
+            <span>Change Password</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/ui-helpers.js"></script>
+<script>
+  (function() {
+    // 1. Get user from Auth
+    const user = Auth.getCurrentUser();
+    if (!user) {
+      window.location.href = 'Login.html';
+      return;
+    }
+
+    // 2. Initialize Layout
+    Layout.init({ 
+      role: user.role || 'User', 
+      activePage: 'MyProfile' 
+    });
+
+    // 3. Load profile
+    async function loadProfile() {
+      try {
+        // Try to get from API
+        const me = await Api.get('/auth/me');
+        console.log('Profile from API:', me);
+        // Merge with user data to keep phone if API doesn't have it
+        if (user.phone && !me.phone) {
+          me.phone = user.phone;
+        }
+        updateProfileUI(me);
+        // Update user in Auth
+        if (me) {
+          const currentUser = Auth.getCurrentUser();
+          if (currentUser) {
+            Object.assign(currentUser, me);
+            localStorage.setItem('auth_user', JSON.stringify(currentUser));
+          }
+        }
+      } catch (err) {
+        console.warn('API error, using user data:', err);
+        // Use data from Auth
+        updateProfileUI(user);
+      }
+    }
+
+    // 4. Update UI
+    function updateProfileUI(data) {
+      const fullName = data.full_name || data.name || 'User';
+      const role = data.role || 'User';
+      const email = data.email || '-';
+      const phone = data.phone || user?.phone || '-';
+      const createdAt = data.created_at || data.createdAt || null;
+
+      document.getElementById('profileName').textContent = fullName;
+      document.getElementById('profileRole').textContent = role;
+      document.getElementById('profileEmail').textContent = email;
+      document.getElementById('fullNameInput').value = fullName;
+      document.getElementById('emailInput').value = email;
+      document.getElementById('phoneInput').value = phone;
+      
+      // Avatar
+      const initial = fullName.charAt(0).toUpperCase();
+      document.getElementById('avatarBig').textContent = initial;
+      
+      // Created at
+      if (createdAt) {
+        const createdDate = document.getElementById('profileCreatedAt');
+        if (createdDate) {
+          createdDate.textContent = formatDate(createdAt);
+        }
+      }
+    }
+
+    // 5. Format date
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    // 6. Save phone number - Gọi API đúng endpoint
+    document.getElementById('savePhoneBtn').addEventListener('click', async function() {
+      const phoneInput = document.getElementById('phoneInput');
+      const phone = phoneInput.value.trim();
+      
+      if (!phone) {
+        alert('Please enter a phone number');
+        return;
+      }
+
+      const btn = this;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        // Gọi API để cập nhật profile
+        const response = await Api.patch('/auth/me/profile', { phone: phone });
+        console.log('Profile updated successfully:', response);
+        
+        // Cập nhật user trong localStorage
+        const currentUser = Auth.getCurrentUser();
+        if (currentUser) {
+          currentUser.phone = phone;
+          // Cập nhật thêm các field khác nếu có
+          if (response.full_name) currentUser.full_name = response.full_name;
+          if (response.email) currentUser.email = response.email;
+          if (response.role) currentUser.role = response.role;
+          localStorage.setItem('auth_user', JSON.stringify(currentUser));
+        }
+
+        // Cập nhật UI
+        document.getElementById('phoneInput').value = phone;
+        
+        // Hiển thị thành công
+        btn.textContent = '✓ Saved';
+        btn.classList.remove('bg-brand-blue');
+        btn.classList.add('bg-green-600');
+        
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove('bg-green-600');
+          btn.classList.add('bg-brand-blue');
+          btn.disabled = false;
+        }, 2000);
+
+      } catch (err) {
+        console.error('Failed to update phone:', err);
+        
+        // Fallback: lưu local nếu API lỗi
+        try {
+          const currentUser = Auth.getCurrentUser();
+          if (currentUser) {
+            currentUser.phone = phone;
+            localStorage.setItem('auth_user', JSON.stringify(currentUser));
+          }
+          
+          btn.textContent = '✓ Saved (Local)';
+          btn.classList.remove('bg-brand-blue');
+          btn.classList.add('bg-yellow-600');
+          
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('bg-yellow-600');
+            btn.classList.add('bg-brand-blue');
+            btn.disabled = false;
+          }, 2000);
+        } catch (fallbackErr) {
+          alert('Failed to save phone number. Please try again.');
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
+      }
+    });
+
+    // 7. Load profile
+    loadProfile().catch(err => console.error('Failed to load profile', err));
+
+  })();
+</script>
+</body>
+</html>

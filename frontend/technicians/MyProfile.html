@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>My Profile - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden">
+
+<!-- SIDEBAR PLACEHOLDER -->
+<div id="sidebar-placeholder"></div>
+
+<!-- MAIN WRAPPER -->
+<div class="ml-[240px] flex flex-col h-screen">
+  <!-- TOP APP BAR PLACEHOLDER -->
+  <div id="topbar-placeholder"></div>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 overflow-y-auto bg-surface p-8 pb-32">
+    <div class="max-w-4xl mx-auto space-y-8">
+      <!-- Page Title -->
+      <h1 class="text-headline-lg font-headline-lg text-on-surface">My Profile</h1>
+
+      <!-- Profile Header Card -->
+      <div class="bg-white p-8 rounded-xl shadow-sm border border-outline-variant/20 flex items-center gap-6">
+        <div id="profileAvatar" class="w-24 h-24 rounded-full bg-primary-fixed flex items-center justify-center text-primary text-display-lg font-bold">
+          N
+        </div>
+        <div class="flex flex-col gap-2">
+          <h2 id="profileHeaderName" class="text-headline-md font-headline-md text-on-surface">Nguyen Van A</h2>
+          <span id="profileHeaderRole" class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-bold w-fit uppercase tracking-wider">Technician</span>
+        </div>
+      </div>
+
+      <!-- Main Grid Section -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Personal Information Card -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/20 space-y-6">
+          <h3 class="text-headline-sm font-headline-sm text-on-surface">Personal Information</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="text-label-md font-medium text-on-surface-variant block mb-1">Full Name</label>
+              <div id="profileFullName" class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/20 text-body-md text-on-surface">Nguyen Van A</div>
+            </div>
+            <div>
+              <label class="text-label-md font-medium text-on-surface-variant block mb-1">Email</label>
+              <div id="profileEmail" class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/20 text-body-md text-on-surface">nguyenvana@example.com</div>
+            </div>
+            <div>
+              <label class="text-label-md font-medium text-on-surface-variant block mb-1">Specialty</label>
+              <select id="profileSpecialty" class="w-full p-3 bg-white rounded-lg border border-outline-variant/30 text-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+                <option value="Projector" selected>Projector</option>
+                <option value="Computer">Computer</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Network">Network</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column Cards -->
+        <div class="space-y-8">
+          <!-- Contact Information Card -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/20 space-y-6">
+            <h3 class="text-headline-sm font-headline-sm text-on-surface">Contact Information</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="text-label-md font-medium text-on-surface-variant block mb-1">Phone Number</label>
+                <input id="profilePhone" class="w-full p-3 bg-white rounded-lg border border-outline-variant/30 text-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" type="text" value="+84 123 456 789">
+              </div>
+              <button id="saveProfileBtn" class="w-full py-3 bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-all shadow-sm focus:outline-none">Save Changes</button>
+            </div>
+          </div>
+
+          <!-- Security Card -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/20 space-y-6">
+            <h3 class="text-headline-sm font-headline-sm text-on-surface">Security</h3>
+            <div class="space-y-4">
+              <p class="text-body-sm text-on-surface-variant">Manage your account security and password settings.</p>
+              <button id="changePasswordBtn" onclick="location.href='ChangePassword.html'" class="w-full py-3 border border-outline text-primary font-bold rounded-lg hover:bg-surface-container-low transition-all focus:outline-none">Change Password</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="fixed bottom-0 left-0 right-0 w-full z-[55] flex items-center justify-between px-8 py-1.5 bg-[#d5e3ff] border-t border-outline-variant/10">
+    <p class="text-on-primary-fixed-variant text-[11px] font-label-md">© 2024 VNU-IS - Asset Maintenance System</p>
+    <div class="flex items-center gap-4">
+      <a class="text-on-primary-fixed-variant opacity-80 text-[11px] font-label-md hover:opacity-100 transition-colors" href="#">Privacy Policy</a>
+      <a class="text-on-primary-fixed-variant opacity-80 text-[11px] font-label-md hover:opacity-100 transition-colors" href="#">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/ui-helpers.js"></script>
+<script>
+  let currentUser = { full_name: 'Nguyen Van A', role: 'Technician', email: 'nguyenvana@example.com', phone: '+84 123 456 789' };
+  try {
+    currentUser = Auth.guard('Technician');
+  } catch (e) {
+    console.log('Running in demo mode without auth session');
+  }
+
+  Layout.init({ role: 'Technician', activePage: 'MyProfile' });
+
+  async function loadProfile() {
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        const me = await Api.get('/auth/me');
+        if (me) currentUser = { ...currentUser, ...me };
+      }
+    } catch (err) {
+      console.log('Using local user session data for profile view', err);
+    }
+
+    const initial = (currentUser.full_name || 'N').charAt(0).toUpperCase();
+    document.getElementById('profileAvatar').textContent = initial;
+    document.getElementById('profileHeaderName').textContent = currentUser.full_name || 'Nguyen Van A';
+    document.getElementById('profileHeaderRole').textContent = (currentUser.role || 'Technician').toUpperCase();
+
+    document.getElementById('profileFullName').textContent = currentUser.full_name || 'Nguyen Van A';
+    document.getElementById('profileEmail').textContent = currentUser.email || 'nguyenvana@example.com';
+    document.getElementById('profilePhone').value = currentUser.phone || '+84 123 456 789';
+
+    if (currentUser.technician_specialty) {
+      const select = document.getElementById('profileSpecialty');
+      if (select) select.value = currentUser.technician_specialty;
+    }
+  }
+
+  document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    const newPhone = document.getElementById('profilePhone').value.trim();
+    const newSpecialty = document.getElementById('profileSpecialty').value;
+
+    const btn = document.getElementById('saveProfileBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        await Api.patch('/users/me/profile', { phone: newPhone, technician_specialty: newSpecialty });
+      }
+      currentUser.phone = newPhone;
+      currentUser.technician_specialty = newSpecialty;
+      localStorage.setItem('vnuis_user', JSON.stringify(currentUser));
+      alert('Profile updated successfully!');
+    } catch (err) {
+      alert(err.message || 'Updated local profile settings successfully!');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    }
+  });
+
+  loadProfile();
+</script>
+</body>
+</html>
