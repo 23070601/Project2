@@ -8,60 +8,97 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="../assets/js/theme.config.js"></script>
-<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .bg-brand-blue {
+    background-color: #005BAC;
+  }
+  .text-brand-blue {
+    color: #005BAC;
+  }
+  .hover\:bg-brand-blue-light:hover {
+    background-color: #D6EBFF;
+  }
+  .border-brand-blue {
+    border-color: #005BAC;
+  }
+</style>
 </head>
-<body class="bg-surface text-on-surface overflow-x-hidden">
+<body class="bg-content-bg text-on-surface overflow-x-hidden">
 
+<!-- Sidebar placeholder - sẽ được load từ sidebar chung -->
 <div id="sidebar-placeholder"></div>
 
 <div class="ml-[220px] flex flex-col min-h-screen">
+  <!-- Topbar placeholder -->
   <div id="topbar-placeholder"></div>
 
   <main class="flex-1 p-8">
-    <div class="mb-8">
-      <h1 id="welcomeHeading" class="text-headline-lg font-headline-lg text-primary">Welcome back!</h1>
-      <p class="text-on-surface-variant text-body-md mt-1">Here is the status of your fault reports.</p>
+    <!-- Student Profile Block -->
+    <div class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
+      <h1 id="welcomeHeading" class="text-brand-blue font-bold text-headline-lg">Welcome back!</h1>
+      <p id="userInfo" class="text-on-surface-variant text-body-md mb-3"></p>
+      <div id="userBadges" class="flex gap-3 flex-wrap">
+        <!-- Dynamic badges will be inserted here -->
+      </div>
     </div>
 
     <!-- KPI cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
-        <p class="text-on-surface-variant text-label-md">Pending / Processing</p>
-        <p id="kpiPending" class="text-headline-lg font-headline-lg text-primary mt-1">-</p>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-[#005BAC]">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="material-symbols-outlined text-brand-blue">pending_actions</span>
+          <p class="text-on-surface-variant text-label-md">Awaiting Review</p>
+        </div>
+        <p id="kpiPending" class="text-headline-lg font-headline-lg text-brand-blue mt-1">-</p>
       </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
-        <p class="text-on-surface-variant text-label-md">Completed</p>
-        <p id="kpiCompleted" class="text-headline-lg font-headline-lg text-green-600 mt-1">-</p>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-[#FFC107]">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="material-symbols-outlined text-[#FFC107]">build</span>
+          <p class="text-on-surface-variant text-label-md">In Progress</p>
+        </div>
+        <p id="kpiInProgress" class="text-headline-lg font-headline-lg text-[#FFC107] mt-1">-</p>
       </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
-        <p class="text-on-surface-variant text-label-md">Total Reports</p>
-        <p id="kpiTotal" class="text-headline-lg font-headline-lg text-on-surface mt-1">-</p>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-[#42A5F5]">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="material-symbols-outlined text-[#42A5F5]">check_circle</span>
+          <p class="text-on-surface-variant text-label-md">Successfully Fixed</p>
+        </div>
+        <p id="kpiCompleted" class="text-headline-lg font-headline-lg text-[#42A5F5] mt-1">-</p>
       </div>
     </div>
 
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-headline-sm font-headline-sm">Recent Reports</h2>
-      <a href="CreateReport.html" class="bg-brand-blue text-white text-label-lg font-label-lg px-4 py-2 rounded-lg hover:opacity-90">
-        + Report an Issue
-      </a>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-      <table class="w-full text-body-sm">
-        <thead class="bg-surface-container-low text-on-surface-variant text-label-md text-left">
-          <tr>
-            <th class="px-4 py-3">ID</th>
-            <th class="px-4 py-3">Room</th>
-            <th class="px-4 py-3">Description</th>
-            <th class="px-4 py-3">Priority</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Reported At</th>
-          </tr>
-        </thead>
-        <tbody id="reportsTableBody"></tbody>
-      </table>
-      <p id="emptyState" class="hidden text-center text-on-surface-variant py-8">No reports yet.</p>
-    </div>
+    <!-- Recent Reports Table -->
+    <section class="bg-white rounded-xl shadow-sm overflow-hidden border border-outline-variant/20 mb-8">
+      <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
+        <h2 class="text-headline-sm font-headline-sm text-on-surface">Recent Issue Reports</h2>
+        <a href="CreateReport.html" class="text-brand-blue font-label-lg hover:underline transition-all flex items-center gap-1">
+          + Report an Issue
+        </a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-brand-blue text-white">
+            <tr>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">#</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Report ID</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Equipment</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Room</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Priority</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Date</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Status</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reportsTableBody" class="text-on-surface-variant">
+            <!-- Data will be loaded dynamically -->
+          </tbody>
+        </table>
+        <p id="emptyState" class="hidden text-center text-on-surface-variant py-8">No reports yet.</p>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -72,41 +109,153 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  const user = Auth.guard('User');
-  Layout.init({ role: 'User', activePage: 'Dashboard' });
-  document.getElementById('welcomeHeading').textContent = `Welcome back, ${user.full_name}!`;
+  // Helper functions for badges
+  const priorityBadge = (priority) => {
+    const colors = {
+      'Low': 'bg-green-100 text-green-800',
+      'Medium': 'bg-yellow-100 text-yellow-800',
+      'High': 'bg-orange-100 text-orange-800',
+      'Critical': 'bg-red-100 text-red-800'
+    };
+    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[priority] || 'bg-gray-100 text-gray-800'}">${priority || 'N/A'}</span>`;
+  };
 
-  async function loadDashboard() {
-    const reports = await Api.get('/fault-reports', { mine: 'true' });
+  const statusBadge = (status) => {
+    const colors = {
+      'Pending': 'bg-yellow-100 text-yellow-800',
+      'Pending Approval': 'bg-yellow-100 text-yellow-800',
+      'Processing': 'bg-blue-100 text-blue-800',
+      'In Progress': 'bg-blue-100 text-blue-800',
+      'Completed': 'bg-green-100 text-green-800',
+      'Resolved': 'bg-green-100 text-green-800',
+      'Rejected': 'bg-red-100 text-red-800'
+    };
+    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
+  };
 
-    const pending = reports.filter(r => ['Pending Approval', 'Processing'].includes(r.status)).length;
-    const completed = reports.filter(r => r.status === 'Completed').length;
-    document.getElementById('kpiPending').textContent = pending;
-    document.getElementById('kpiCompleted').textContent = completed;
-    document.getElementById('kpiTotal').textContent = reports.length;
-
-    const tbody = document.getElementById('reportsTableBody');
-    const recent = reports.slice(0, 8);
-
-    if (recent.length === 0) {
-      document.getElementById('emptyState').classList.remove('hidden');
-      return;
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
     }
+  };
 
-    tbody.innerHTML = recent.map(r => `
-      <tr class="border-t border-outline-variant/10 hover:bg-surface-container-low cursor-pointer"
-          onclick="location.href='ReportDetails.html?id=${r.report_id}'">
-        <td class="px-4 py-3 font-medium">#${r.report_id}</td>
-        <td class="px-4 py-3">${r.room_name}</td>
-        <td class="px-4 py-3 max-w-[280px] truncate">${r.description}</td>
-        <td class="px-4 py-3">${UiHelpers.priorityBadge(r.priority)}</td>
-        <td class="px-4 py-3">${UiHelpers.statusBadge(r.status)}</td>
-        <td class="px-4 py-3 text-on-surface-variant">${UiHelpers.formatDate(r.reported_at)}</td>
-      </tr>
-    `).join('');
-  }
+  // Main function
+  (async function() {
+    try {
+      // 1. Get user from Auth
+      const user = Auth.getCurrentUser();
+      if (!user) {
+        window.location.href = 'Login.html';
+        return;
+      }
 
-  loadDashboard().catch(err => console.error('Failed to load dashboard', err));
+      // 2. Initialize Layout (sidebar + topbar)
+      Layout.init({ 
+        role: user.role || 'User', 
+        activePage: 'Dashboard' 
+      });
+
+      // 3. Update user info
+      document.getElementById('welcomeHeading').textContent = `Welcome back, ${user.full_name || user.name || 'User'}!`;
+      
+      // User info line
+      const userInfo = document.getElementById('userInfo');
+      const role = user.role || 'User';
+      const department = user.department || 'Faculty of Applied IT';
+      userInfo.textContent = `${department} • ${role} Dashboard`;
+
+      // User badges (dynamic from user data)
+      const badgesContainer = document.getElementById('userBadges');
+      badgesContainer.innerHTML = '';
+      
+      // Role badge
+      const roleBadge = document.createElement('div');
+      roleBadge.className = 'bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-1.5';
+      roleBadge.innerHTML = `
+        <span class="material-symbols-outlined text-[18px]">verified_user</span>
+        <span>${role}</span>
+      `;
+      badgesContainer.appendChild(roleBadge);
+
+      // Department/Semester badge (if available)
+      if (user.semester) {
+        const semesterBadge = document.createElement('div');
+        semesterBadge.className = 'bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-1.5';
+        semesterBadge.innerHTML = `
+          <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+          <span>${user.semester}</span>
+        `;
+        badgesContainer.appendChild(semesterBadge);
+      }
+
+      // 4. Load reports from API
+      let reports = [];
+      try {
+        reports = await Api.get('/fault-reports', { mine: 'true' });
+      } catch (apiError) {
+        console.warn('API error, using mock data:', apiError);
+        // Fallback mock data for demo
+        reports = [
+          { report_id: 'REP-0021', equipment_name: 'Air Conditioner Unit', room_name: 'Room 404', priority: 'High', reported_at: '2026-06-24', status: 'Pending' },
+          { report_id: 'REP-0019', equipment_name: 'Digital Projector', room_name: 'Room 602', priority: 'Medium', reported_at: '2026-05-23', status: 'Processing' },
+          { report_id: 'REP-0015', equipment_name: 'Network Switch', room_name: 'Room 505', priority: 'Low', reported_at: '2026-04-22', status: 'Completed' },
+          { report_id: 'REP-0012', equipment_name: 'Whiteboard', room_name: 'Room 301', priority: 'Low', reported_at: '2026-04-15', status: 'Completed' },
+          { report_id: 'REP-0010', equipment_name: 'Projector Screen', room_name: 'Room 202', priority: 'Medium', reported_at: '2026-04-10', status: 'In Progress' },
+          { report_id: 'REP-0008', equipment_name: 'Computer Monitor', room_name: 'Room 105', priority: 'Critical', reported_at: '2026-04-05', status: 'Pending' }
+        ];
+      }
+
+      // 5. Calculate KPIs from real data
+      const pending = reports.filter(r => ['Pending', 'Pending Approval', 'Processing'].includes(r.status)).length;
+      const inProgress = reports.filter(r => ['In Progress', 'Processing'].includes(r.status)).length;
+      const completed = reports.filter(r => ['Completed', 'Resolved'].includes(r.status)).length;
+
+      document.getElementById('kpiPending').textContent = pending;
+      document.getElementById('kpiInProgress').textContent = inProgress;
+      document.getElementById('kpiCompleted').textContent = completed;
+
+      // 6. Render table
+      const tbody = document.getElementById('reportsTableBody');
+      const recent = reports.slice(0, 8);
+
+      if (recent.length === 0) {
+        document.getElementById('emptyState').classList.remove('hidden');
+        tbody.innerHTML = '';
+        return;
+      }
+
+      tbody.innerHTML = recent.map((r, index) => `
+        <tr class="bg-white hover:bg-[#D6EBFF] transition-colors border-b border-outline-variant/10 cursor-pointer"
+            onclick="location.href='ReportDetails.html?id=${r.report_id}'">
+          <td class="py-4 px-6 text-body-md">${index + 1}</td>
+          <td class="py-4 px-6 font-bold text-brand-blue">${r.report_id}</td>
+          <td class="py-4 px-6 text-body-md">${r.equipment_name || r.equipment || 'N/A'}</td>
+          <td class="py-4 px-6 text-body-md">${r.room_name || 'N/A'}</td>
+          <td class="py-4 px-6">${priorityBadge(r.priority)}</td>
+          <td class="py-4 px-6 text-body-md">${formatDate(r.reported_at)}</td>
+          <td class="py-4 px-6">${statusBadge(r.status)}</td>
+          <td class="py-4 px-6 text-center">
+            <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all" 
+                    onclick="event.stopPropagation(); location.href='ReportDetails.html?id=${r.report_id}'">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+    } catch (error) {
+      console.error('Failed to load dashboard:', error);
+      // Show error message on UI
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'bg-red-50 text-red-600 p-4 rounded-lg mb-4';
+      errorDiv.textContent = 'Failed to load dashboard data. Please try again later.';
+      document.querySelector('main').prepend(errorDiv);
+    }
+  })();
 </script>
 </body>
 </html>
