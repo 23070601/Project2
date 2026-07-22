@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Asset - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden">
+
+<div id="sidebar-placeholder"></div>
+
+<div class="ml-[240px] flex flex-col min-h-screen">
+  <div id="topbar-placeholder"></div>
+
+  <main class="flex-1 p-8 max-w-[480px]">
+    <h1 class="text-headline-lg font-headline-lg text-primary mb-6">Edit Asset</h1>
+
+    <form id="editAssetForm" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
+      <div>
+        <label class="text-label-md font-label-md text-on-surface-variant">Asset Name *</label>
+        <input id="assetName" type="text" required class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
+      </div>
+      <div>
+        <label class="text-label-md font-label-md text-on-surface-variant">Asset Type *</label>
+        <select id="assetType" required class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
+          <option value="Projector">Projector</option>
+          <option value="Interactive TV">Interactive TV</option>
+          <option value="Air Conditioner">Air Conditioner</option>
+          <option value="Computer">Computer</option>
+          <option value="Speaker">Speaker</option>
+          <option value="Microphone">Microphone</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-label-md font-label-md text-on-surface-variant">Classroom *</label>
+        <select id="roomSelect" required class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm"></select>
+      </div>
+      <div>
+        <label class="text-label-md font-label-md text-on-surface-variant">Status</label>
+        <select id="status" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
+          <option value="Operational">Operational</option>
+          <option value="Under Repair">Under Repair</option>
+          <option value="Recommended for Replacement">Recommended for Replacement</option>
+          <option value="Retired">Retired</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-4 text-body-sm text-on-surface-variant pt-2 border-t border-outline-variant/10">
+        <div>Failure count: <strong id="failureCount" class="text-on-surface">-</strong></div>
+        <div>Last fault: <strong id="lastFaultAt" class="text-on-surface">-</strong></div>
+      </div>
+      <p id="formError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
+      <p id="formSuccess" class="hidden text-green-700 text-body-sm bg-green-50 rounded-lg px-3 py-2"></p>
+      <div class="flex gap-3">
+        <button type="submit" class="bg-brand-blue text-white text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:opacity-90">Save Changes</button>
+        <button type="button" id="deleteBtn" class="border border-error text-error text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:bg-error/5">Delete Asset</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/ui-helpers.js"></script>
+<script>
+  Auth.guard('Manager');
+  Layout.init({ role: 'Manager', activePage: 'ClassroomsManagement' });
+
+  const assetId = new URLSearchParams(location.search).get('id');
+  const roomSelect = document.getElementById('roomSelect');
+  let currentAsset = null;
+
+  async function load() {
+    const [asset, rooms] = await Promise.all([
+      Api.get(`/assets/${assetId}`),
+      Api.get('/classrooms'),
+    ]);
+    currentAsset = asset;
+
+    roomSelect.innerHTML = rooms.map(r => `<option value="${r.room_id}">${r.room_name}</option>`).join('');
+    roomSelect.value = asset.room_id;
+
+    document.getElementById('assetName').value = asset.asset_name;
+    document.getElementById('assetType').value = asset.asset_type;
+    document.getElementById('status').value = asset.status;
+    document.getElementById('failureCount').textContent = asset.failure_count;
+    document.getElementById('lastFaultAt').textContent = UiHelpers.formatDate(asset.last_fault_at);
+  }
+
+  document.getElementById('editAssetForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById('formError');
+    const successBox = document.getElementById('formSuccess');
+    errorBox.classList.add('hidden');
+    successBox.classList.add('hidden');
+    try {
+      await Api.patch(`/assets/${assetId}`, {
+        assetName: document.getElementById('assetName').value.trim(),
+        assetType: document.getElementById('assetType').value,
+        roomId: Number(roomSelect.value),
+        status: document.getElementById('status').value,
+      });
+      successBox.textContent = 'Asset updated successfully.';
+      successBox.classList.remove('hidden');
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if (!confirm('Delete this asset? This cannot be undone.')) return;
+    try {
+      await Api.delete(`/assets/${assetId}`);
+      location.href = `ClassroomsDetail.html?id=${currentAsset.room_id}`;
+    } catch (err) {
+      document.getElementById('formError').textContent = err.message;
+      document.getElementById('formError').classList.remove('hidden');
+    }
+  });
+
+  load().catch(err => console.error(err));
+</script>
+</body>
+</html>

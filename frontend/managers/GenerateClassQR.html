@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate QR Code - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden">
+
+<div id="sidebar-placeholder"></div>
+
+<div class="ml-[240px] flex flex-col min-h-screen">
+  <div id="topbar-placeholder"></div>
+
+  <main class="flex-1 p-8 max-w-[480px]">
+    <h1 class="text-headline-lg font-headline-lg text-primary mb-1">Generate QR Code</h1>
+    <p class="text-on-surface-variant text-body-md mb-6">Generates a new QR that links directly to the "Report an Issue" form for this room.</p>
+
+    <div class="mb-4">
+      <label class="text-label-md font-label-md text-on-surface-variant">Classroom</label>
+      <select id="roomSelect" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm"></select>
+    </div>
+
+    <button id="generateBtn" class="bg-brand-blue text-white text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:opacity-90">Generate QR Code</button>
+    <p id="genError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2 mt-3"></p>
+
+    <div id="qrResult" class="hidden mt-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 text-center">
+      <img id="qrImage" class="mx-auto w-[240px] h-[240px]" alt="QR Code">
+      <p id="qrRoomName" class="text-label-lg font-label-lg mt-3"></p>
+      <a id="qrDownloadLink" download class="inline-block mt-3 text-brand-blue text-label-md font-label-md hover:underline">Download PNG</a>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script>
+  Auth.guard('Manager');
+  Layout.init({ role: 'Manager', activePage: 'QRManagement' });
+
+  const roomSelect = document.getElementById('roomSelect');
+
+  async function loadRooms() {
+    const rooms = await Api.get('/classrooms');
+    roomSelect.innerHTML = rooms.map(r => `<option value="${r.room_id}">${r.room_name}</option>`).join('');
+
+    const prefillRoomId = new URLSearchParams(location.search).get('room_id');
+    if (prefillRoomId) roomSelect.value = prefillRoomId;
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const errorBox = document.getElementById('genError');
+    errorBox.classList.add('hidden');
+    try {
+      const result = await Api.post(`/qrcodes/${roomSelect.value}/generate`);
+      document.getElementById('qrImage').src = result.qrImageDataUrl;
+      document.getElementById('qrDownloadLink').href = result.qrImageDataUrl;
+      document.getElementById('qrDownloadLink').download = `QR-${result.roomName}.png`;
+      document.getElementById('qrRoomName').textContent = result.roomName;
+      document.getElementById('qrResult').classList.remove('hidden');
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    }
+  });
+
+  loadRooms().catch(err => console.error(err));
+</script>
+</body>
+</html>

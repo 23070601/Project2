@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden">
+
+<div id="sidebar-placeholder"></div>
+
+<div class="ml-[220px] flex flex-col min-h-screen">
+  <div id="topbar-placeholder"></div>
+
+  <main class="flex-1 p-8">
+    <div class="mb-8">
+      <h1 id="welcomeHeading" class="text-headline-lg font-headline-lg text-primary">Welcome back!</h1>
+      <p class="text-on-surface-variant text-body-md mt-1">Here is the status of your fault reports.</p>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
+        <p class="text-on-surface-variant text-label-md">Pending / Processing</p>
+        <p id="kpiPending" class="text-headline-lg font-headline-lg text-primary mt-1">-</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
+        <p class="text-on-surface-variant text-label-md">Completed</p>
+        <p id="kpiCompleted" class="text-headline-lg font-headline-lg text-green-600 mt-1">-</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
+        <p class="text-on-surface-variant text-label-md">Total Reports</p>
+        <p id="kpiTotal" class="text-headline-lg font-headline-lg text-on-surface mt-1">-</p>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-headline-sm font-headline-sm">Recent Reports</h2>
+      <a href="CreateReport.html" class="bg-brand-blue text-white text-label-lg font-label-lg px-4 py-2 rounded-lg hover:opacity-90">
+        + Report an Issue
+      </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+      <table class="w-full text-body-sm">
+        <thead class="bg-surface-container-low text-on-surface-variant text-label-md text-left">
+          <tr>
+            <th class="px-4 py-3">ID</th>
+            <th class="px-4 py-3">Room</th>
+            <th class="px-4 py-3">Description</th>
+            <th class="px-4 py-3">Priority</th>
+            <th class="px-4 py-3">Status</th>
+            <th class="px-4 py-3">Reported At</th>
+          </tr>
+        </thead>
+        <tbody id="reportsTableBody"></tbody>
+      </table>
+      <p id="emptyState" class="hidden text-center text-on-surface-variant py-8">No reports yet.</p>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/ui-helpers.js"></script>
+<script>
+  const user = Auth.guard('User');
+  Layout.init({ role: 'User', activePage: 'Dashboard' });
+  document.getElementById('welcomeHeading').textContent = `Welcome back, ${user.full_name}!`;
+
+  async function loadDashboard() {
+    const reports = await Api.get('/fault-reports', { mine: 'true' });
+
+    const pending = reports.filter(r => ['Pending Approval', 'Processing'].includes(r.status)).length;
+    const completed = reports.filter(r => r.status === 'Completed').length;
+    document.getElementById('kpiPending').textContent = pending;
+    document.getElementById('kpiCompleted').textContent = completed;
+    document.getElementById('kpiTotal').textContent = reports.length;
+
+    const tbody = document.getElementById('reportsTableBody');
+    const recent = reports.slice(0, 8);
+
+    if (recent.length === 0) {
+      document.getElementById('emptyState').classList.remove('hidden');
+      return;
+    }
+
+    tbody.innerHTML = recent.map(r => `
+      <tr class="border-t border-outline-variant/10 hover:bg-surface-container-low cursor-pointer"
+          onclick="location.href='ReportDetails.html?id=${r.report_id}'">
+        <td class="px-4 py-3 font-medium">#${r.report_id}</td>
+        <td class="px-4 py-3">${r.room_name}</td>
+        <td class="px-4 py-3 max-w-[280px] truncate">${r.description}</td>
+        <td class="px-4 py-3">${UiHelpers.priorityBadge(r.priority)}</td>
+        <td class="px-4 py-3">${UiHelpers.statusBadge(r.status)}</td>
+        <td class="px-4 py-3 text-on-surface-variant">${UiHelpers.formatDate(r.reported_at)}</td>
+      </tr>
+    `).join('');
+  }
+
+  loadDashboard().catch(err => console.error('Failed to load dashboard', err));
+</script>
+</body>
+</html>

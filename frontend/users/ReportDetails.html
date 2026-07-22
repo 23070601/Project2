@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Details - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden">
+
+<div id="sidebar-placeholder"></div>
+
+<div class="ml-[220px] flex flex-col min-h-screen">
+  <div id="topbar-placeholder"></div>
+
+  <main class="flex-1 p-8 max-w-[820px]">
+    <a href="ListReports.html" class="text-brand-blue text-label-md font-label-md flex items-center gap-1 mb-4 hover:underline">
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to My Reports
+    </a>
+
+    <div id="content" class="space-y-6"></div>
+  </main>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/ui-helpers.js"></script>
+<script>
+  Auth.guard('User');
+  Layout.init({ role: 'User', activePage: 'ListReports' });
+
+  const reportId = new URLSearchParams(location.search).get('id');
+  const content = document.getElementById('content');
+
+  function renderHeader(r) {
+    return `
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
+        <div class="flex items-start justify-between">
+          <div>
+            <h1 class="text-headline-md font-headline-md text-primary">Report #${r.report_id}</h1>
+            <p class="text-on-surface-variant text-body-sm mt-1">${r.room_name}${r.asset_name ? ' · ' + r.asset_name : ''}</p>
+          </div>
+          <div class="flex gap-2">${UiHelpers.priorityBadge(r.priority)}${UiHelpers.statusBadge(r.status)}</div>
+        </div>
+        <p class="text-body-md mt-4 whitespace-pre-line">${UiHelpers.escapeHtml(r.description)}</p>
+        <p class="text-on-surface-variant text-body-sm mt-4">Reported at ${UiHelpers.formatDate(r.reported_at)}</p>
+        ${r.technician_name ? `<p class="text-body-sm mt-1">Assigned technician: <strong>${r.technician_name}</strong> · Task status: ${UiHelpers.statusBadge(r.task_status)}</p>` : ''}
+      </div>`;
+  }
+
+  function renderHistory(history) {
+    if (!history || history.length === 0) return '';
+    return `
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
+        <h2 class="text-headline-sm font-headline-sm mb-4">Status History</h2>
+        <ol class="space-y-3">
+          ${history.map(h => `
+            <li class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-brand-blue text-[18px] mt-0.5">check_circle</span>
+              <div>
+                <p class="text-body-sm"><strong>${h.old_status || 'Created'}</strong> → <strong>${h.new_status}</strong></p>
+                <p class="text-[11px] text-on-surface-variant">${UiHelpers.formatDate(h.changed_at)}${h.note ? ' · ' + UiHelpers.escapeHtml(h.note) : ''}</p>
+              </div>
+            </li>`).join('')}
+        </ol>
+      </div>`;
+  }
+
+  function renderConfirmationForm(order) {
+    return `
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
+        <h2 class="text-headline-sm font-headline-sm mb-2">Confirm the repair</h2>
+        <p class="text-on-surface-variant text-body-sm mb-4">The technician marked this as completed. Please confirm whether the issue was fully resolved.</p>
+        <form id="confirmForm" class="space-y-4">
+          <div class="flex gap-3">
+            <label class="flex items-center gap-2 text-body-sm">
+              <input type="radio" name="isConfirmed" value="true" checked> Yes, it's fixed
+            </label>
+            <label class="flex items-center gap-2 text-body-sm">
+              <input type="radio" name="isConfirmed" value="false"> No, still not working
+            </label>
+          </div>
+          <div>
+            <label class="text-label-md font-label-md text-on-surface-variant">Rating (1-5, optional)</label>
+            <input type="number" min="1" max="5" id="ratingInput" class="mt-1 w-24 rounded-lg border border-outline-variant/50 px-3 py-2 text-body-sm">
+          </div>
+          <div>
+            <label class="text-label-md font-label-md text-on-surface-variant">Feedback (optional)</label>
+            <textarea id="feedbackInput" rows="2" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-3 py-2 text-body-sm"></textarea>
+          </div>
+          <p id="confirmError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
+          <button type="submit" class="bg-brand-blue text-white text-label-lg font-label-lg px-5 py-2 rounded-lg hover:opacity-90">Submit Confirmation</button>
+        </form>
+      </div>`;
+  }
+
+  function renderConfirmationDone(confirmation) {
+    return `
+      <div class="bg-green-50 rounded-xl border border-green-200 p-6">
+        <p class="text-green-800 text-body-md font-medium">
+          ${confirmation.is_confirmed ? '✅ You confirmed this repair was successful.' : '⚠️ You reported this issue is still not resolved.'}
+        </p>
+        ${confirmation.feedback ? `<p class="text-body-sm text-green-700 mt-2">"${UiHelpers.escapeHtml(confirmation.feedback)}"</p>` : ''}
+      </div>`;
+  }
+
+  async function load() {
+    const report = await Api.get(`/fault-reports/${reportId}`);
+    let html = renderHeader(report) + renderHistory(report.statusHistory);
+
+    if (report.order_id && ['Completed', 'Closed'].includes(report.task_status)) {
+      try {
+        const confirmation = await Api.get(`/confirmations/${report.order_id}`);
+        html += renderConfirmationDone(confirmation);
+      } catch (e) {
+        if (e.status === 404) {
+          html += renderConfirmationForm(report);
+        }
+      }
+    }
+
+    content.innerHTML = html;
+
+    const confirmForm = document.getElementById('confirmForm');
+    if (confirmForm) {
+      confirmForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorBox = document.getElementById('confirmError');
+        errorBox.classList.add('hidden');
+        try {
+          const isConfirmed = confirmForm.isConfirmed.value === 'true';
+          const rating = document.getElementById('ratingInput').value;
+          const feedback = document.getElementById('feedbackInput').value.trim();
+          await Api.post(`/confirmations/${report.order_id}`, {
+            isConfirmed,
+            rating: rating ? Number(rating) : undefined,
+            feedback: feedback || undefined,
+          });
+          load();
+        } catch (err) {
+          errorBox.textContent = err.message;
+          errorBox.classList.remove('hidden');
+        }
+      });
+    }
+  }
+
+  load().catch(err => {
+    content.innerHTML = `<p class="text-error">${err.message}</p>`;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="bg-content-bg text-on-surface font-body-md min-h-screen flex items-center justify-center px-4">
+
+  <div class="w-full max-w-[420px] bg-white rounded-xl shadow-lg p-8">
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-14 h-14 flex items-center justify-center bg-brand-blue rounded-xl text-white font-bold text-headline-sm mb-3">VN</div>
+      <h1 class="text-headline-md font-headline-md text-primary">VNU-IS</h1>
+      <p class="text-on-surface-variant text-body-sm">Classroom Asset Maintenance DSS</p>
+    </div>
+
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="text-label-md font-label-md text-on-surface-variant" for="email">Email</label>
+        <input id="email" type="email" required autocomplete="username"
+               class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none"
+               placeholder="you@vnuis.edu.vn">
+      </div>
+      <div>
+        <label class="text-label-md font-label-md text-on-surface-variant" for="password">Password</label>
+        <input id="password" type="password" required autocomplete="current-password"
+               class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none"
+               placeholder="••••••••">
+      </div>
+
+      <p id="loginError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
+
+      <button id="loginSubmit" type="submit"
+              class="w-full bg-brand-blue text-white font-label-lg font-label-lg rounded-lg py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50">
+        Log In
+      </button>
+    </form>
+  </div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  // Nếu đã đăng nhập sẵn thì đưa thẳng vào dashboard đúng vai trò
+  const existingUser = Auth.getCurrentUser();
+  if (Auth.isAuthenticated() && existingUser) {
+    location.href = Auth.homePageForRole(existingUser.role);
+  }
+
+  const form = document.getElementById('loginForm');
+  const errorBox = document.getElementById('loginError');
+  const submitBtn = document.getElementById('loginSubmit');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging in...';
+
+    try {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const user = await Auth.login(email, password);
+      location.href = Auth.homePageForRole(user.role);
+    } catch (err) {
+      errorBox.textContent = err.message || 'Login failed. Please check your email and password.';
+      errorBox.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Log In';
+    }
+  });
+</script>
+</body>
+</html>
