@@ -73,4 +73,57 @@ async function getMe(userId) {
   return toSafeUser(rows[0]);
 }
 
-module.exports = { login, changePassword, getMe, toSafeUser };
+// THÊM SERVICE MỚI: Cập nhật profile
+async function updateProfile(userId, data) {
+  // Lấy thông tin user hiện tại
+  const [rows] = await pool.execute('SELECT * FROM Users WHERE user_id = ?', [userId]);
+  if (!rows[0]) throw new ApiError(404, 'User not found');
+  
+  // Xây dựng câu lệnh UPDATE động
+  const updates = [];
+  const values = [];
+  
+  if (data.phone !== undefined && data.phone !== null) {
+    updates.push('phone = ?');
+    values.push(data.phone);
+  }
+  
+  if (data.full_name !== undefined && data.full_name !== null) {
+    updates.push('full_name = ?');
+    values.push(data.full_name);
+  }
+  
+  if (data.department !== undefined && data.department !== null) {
+    updates.push('department = ?');
+    values.push(data.department);
+  }
+  
+  if (updates.length === 0) {
+    throw new ApiError(400, 'No fields to update');
+  }
+  
+  values.push(userId);
+  const query = `UPDATE Users SET ${updates.join(', ')} WHERE user_id = ?`;
+  
+  await pool.execute(query, values);
+  
+  // Ghi audit log
+  await auditLogRepository.log({
+    userId,
+    actionType: 'UPDATE',
+    entityTable: 'Users',
+    entityId: userId,
+    description: `User updated their profile: ${updates.join(', ')}`,
+  });
+  
+  // Lấy thông tin user đã cập nhật
+  return await getMe(userId);
+}
+
+module.exports = { 
+  login, 
+  changePassword, 
+  getMe, 
+  toSafeUser,
+  updateProfile  // Export hàm mới
+};

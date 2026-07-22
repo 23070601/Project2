@@ -27,4 +27,23 @@ async function changePassword(req, res) {
   noContent(res);
 }
 
-module.exports = { login, me, changePassword };
+// THÊM CONTROLLER MỚI: Cập nhật profile
+async function updateProfile(req, res) {
+  const userId = req.user.userId;
+  const { phone, full_name, department } = req.body;
+  
+  // Kiểm tra có field nào để update không
+  if (!phone && !full_name && !department) {
+    throw new ApiError(400, 'No fields to update');
+  }
+  
+  const updatedUser = await authService.updateProfile(userId, {
+    phone,
+    full_name,
+    department
+  });
+  
+  ok(res, updatedUser);
+}
+
+module.exports = { login, me, changePassword, updateProfile };

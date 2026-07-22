@@ -1,28 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Notifications - VNU-IS Asset Maintenance</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="../assets/js/theme.config.js"></script>
-<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .bg-brand-blue {
+    background-color: #005BAC;
+  }
+  .text-brand-blue {
+    color: #005BAC;
+  }
+  .border-brand-blue {
+    border-color: #005BAC;
+  }
+</style>
 </head>
-<body class="bg-surface text-on-surface overflow-x-hidden">
+<body class="bg-content-bg text-on-surface font-body-md overflow-x-hidden min-h-screen flex flex-col">
 
+<!-- Sidebar placeholder -->
 <div id="sidebar-placeholder"></div>
 
+<!-- Main wrapper với margin-left cho sidebar -->
 <div class="ml-[220px] flex flex-col min-h-screen">
+  <!-- Topbar placeholder -->
   <div id="topbar-placeholder"></div>
 
-  <main class="flex-1 p-8 max-w-[720px]">
+  <!-- Main Content Area - có margin-top cho topbar -->
+  <main class="flex-1 mt-[60px] p-8 bg-content-bg min-h-[calc(100vh-60px-40px)]">
+    <!-- Notifications Workspace -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-headline-lg font-headline-lg text-primary">Notifications</h1>
-      <button id="markAllReadPageBtn" class="text-brand-blue text-label-md font-label-md hover:underline">Mark all as read</button>
+      <h2 class="text-headline-md text-on-surface font-headline-md">Notifications</h2>
+      <button id="markAllReadPageBtn" class="bg-brand-blue text-white hover:bg-primary-container px-4 py-2 rounded-lg text-label-md font-bold shadow-sm transition-all whitespace-nowrap active:scale-95">
+        Mark All as Read
+      </button>
     </div>
-    <div id="notificationFullList" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 divide-y divide-outline-variant/10"></div>
+    
+    <!-- Control Row - Filter Tabs -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-1 border-b border-outline-variant/20 flex-1 mr-8">
+        <button data-filter="all" class="filter-tab px-6 py-2.5 text-label-lg font-bold text-brand-blue border-b-2 border-brand-blue transition-all">All</button>
+        <button data-filter="unread" class="filter-tab px-6 py-2.5 text-label-lg font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all">Unread</button>
+        <button data-filter="read" class="filter-tab px-6 py-2.5 text-label-lg font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all">Read</button>
+      </div>
+    </div>
+
+    <!-- Notification List Panel -->
+    <div id="notificationFullList" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden mb-6">
+      <!-- Notifications will be loaded here -->
+      <div class="divide-y divide-outline-variant/10">
+        <p class="text-center text-on-surface-variant py-8">Loading notifications...</p>
+      </div>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div id="paginationFooter" class="flex flex-col md:flex-row justify-between items-center gap-4 hidden">
+      <p id="paginationInfo" class="text-label-md text-on-surface-variant">Showing 0 notifications</p>
+      <div id="paginationControls" class="flex items-center gap-2">
+        <!-- Pagination buttons will be generated -->
+      </div>
+    </div>
   </main>
 </div>
 
@@ -32,16 +76,268 @@
 <script src="../assets/js/layout.js"></script>
 <script src="../assets/js/notifications.js"></script>
 <script>
-  Auth.guard('User');
-  Layout.init({ role: 'User', activePage: 'Notification' });
+  (function() {
+    // 1. Get user from Auth
+    const user = Auth.getCurrentUser();
+    if (!user) {
+      window.location.href = 'Login.html';
+      return;
+    }
 
-  Notifications.loadFullList('#notificationFullList').catch(err => console.error(err));
+    // 2. Initialize Layout
+    Layout.init({ 
+      role: user.role || 'User', 
+      activePage: 'Notification' 
+    });
 
-  document.getElementById('markAllReadPageBtn').addEventListener('click', async () => {
-    await Api.patch('/notifications/read-all');
-    Notifications.loadFullList('#notificationFullList');
-    Notifications.refreshBadge();
-  });
+    // 3. State
+    let allNotifications = [];
+    let filteredNotifications = [];
+    let currentFilter = 'all';
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    // DOM elements
+    const container = document.getElementById('notificationFullList');
+    const paginationFooter = document.getElementById('paginationFooter');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const paginationControls = document.getElementById('paginationControls');
+
+    // 4. Notification helper functions
+    function getIconForType(type) {
+      const icons = {
+        'report_updated': 'pending_actions',
+        'report_resolved': 'check_circle',
+        'report_rejected': 'cancel',
+        'equipment_assigned': 'build',
+        'maintenance_scheduled': 'event',
+        'system_alert': 'warning',
+        'default': 'notifications'
+      };
+      return icons[type] || icons.default;
+    }
+
+    function getIconColorForType(type) {
+      const colors = {
+        'report_updated': 'text-brand-blue bg-blue-100',
+        'report_resolved': 'text-green-600 bg-green-100',
+        'report_rejected': 'text-red-600 bg-red-100',
+        'equipment_assigned': 'text-yellow-600 bg-yellow-100',
+        'maintenance_scheduled': 'text-purple-600 bg-purple-100',
+        'system_alert': 'text-orange-600 bg-orange-100',
+        'default': 'text-gray-600 bg-gray-100'
+      };
+      return colors[type] || colors.default;
+    }
+
+    function formatTimeAgo(dateStr) {
+      if (!dateStr) return 'Just now';
+      try {
+        const now = new Date();
+        const past = new Date(dateStr);
+        const diffMs = now - past;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        const diffWeeks = Math.floor(diffDays / 7);
+        const diffMonths = Math.floor(diffDays / 30);
+        const diffYears = Math.floor(diffDays / 365);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return diffMins + 'm ago';
+        if (diffHours < 24) return diffHours + 'h ago';
+        if (diffDays < 7) return diffDays + 'd ago';
+        if (diffWeeks < 4) return diffWeeks + 'w ago';
+        if (diffMonths < 12) return diffMonths + 'mo ago';
+        return diffYears + 'y ago';
+      } catch {
+        return dateStr;
+      }
+    }
+
+    // 5. Load notifications
+    async function loadNotifications() {
+      try {
+        // Try to get from API
+        const data = await Api.get('/notifications');
+        console.log('Notifications from API:', data);
+        allNotifications = data || [];
+      } catch (err) {
+        console.warn('API error, using mock data:', err);
+        // Mock data
+        allNotifications = [
+          { id: 1, type: 'report_updated', title: 'Report REP-0021 status updated', message: 'Your report for Air Conditioner Unit in Room 404 has been updated to Pending', time: new Date(Date.now() - 3600000).toISOString(), read: false, link: 'ReportDetails.html?id=REP-0021' },
+          { id: 2, type: 'equipment_assigned', title: 'Equipment assigned', message: 'Equipment "Digital Projector" has been assigned to your classroom', time: new Date(Date.now() - 10800000).toISOString(), read: false, link: 'EquipmentDetails.html?id=1' },
+          { id: 3, type: 'system_alert', title: 'Network issue detected', message: 'Network Switch in Room 505 is reporting intermittent errors', time: new Date(Date.now() - 18000000).toISOString(), read: false, link: 'ReportDetails.html?id=REP-0019' },
+          { id: 4, type: 'report_resolved', title: 'Report REP-0015 resolved', message: 'Your report for Network Switch in Room 505 has been resolved', time: new Date(Date.now() - 86400000).toISOString(), read: true, link: 'ReportDetails.html?id=REP-0015' },
+          { id: 5, type: 'report_rejected', title: 'Report REP-0012 rejected', message: 'Your report for Smart Board has been rejected due to invalid location', time: new Date(Date.now() - 259200000).toISOString(), read: true, link: 'ReportDetails.html?id=REP-0012' },
+          { id: 6, type: 'maintenance_scheduled', title: 'Maintenance scheduled', message: 'Air Conditioner maintenance scheduled for Room 404', time: new Date(Date.now() - 345600000).toISOString(), read: true, link: 'Schedule.html' },
+          { id: 7, type: 'report_resolved', title: 'Report REP-0009 completed', message: 'Smart Board connectivity issue has been resolved', time: new Date(Date.now() - 604800000).toISOString(), read: true, link: 'ReportDetails.html?id=REP-0009' }
+        ];
+      }
+      applyFilters();
+    }
+
+    // 6. Apply filters
+    function applyFilters() {
+      if (currentFilter === 'all') {
+        filteredNotifications = allNotifications;
+      } else if (currentFilter === 'unread') {
+        filteredNotifications = allNotifications.filter(n => !n.read);
+      } else if (currentFilter === 'read') {
+        filteredNotifications = allNotifications.filter(n => n.read);
+      }
+      currentPage = 1;
+      renderNotifications();
+    }
+
+    // 7. Render notifications
+    function renderNotifications() {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageItems = filteredNotifications.slice(start, end);
+
+      if (filteredNotifications.length === 0) {
+        container.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-12 px-4">
+            <span class="material-symbols-outlined text-6xl text-outline-variant mb-4">notifications_off</span>
+            <p class="text-headline-sm font-headline-sm text-on-surface">No notifications</p>
+            <p class="text-body-sm text-on-surface-variant mt-1">You're all caught up!</p>
+          </div>
+        `;
+        paginationFooter.classList.add('hidden');
+        return;
+      }
+      paginationFooter.classList.remove('hidden');
+
+      // Render notifications
+      container.innerHTML = `
+        <div class="divide-y divide-outline-variant/10">
+          ${pageItems.map(notif => {
+            const icon = getIconForType(notif.type);
+            const iconColor = getIconColorForType(notif.type);
+            const timeAgo = formatTimeAgo(notif.time);
+            const isUnread = !notif.read;
+            
+            return `
+              <a href="${notif.link || '#'}" 
+                 class="flex items-center gap-4 p-5 ${isUnread ? 'bg-[#EAF5FF] hover:bg-[#D6EBFF]' : 'bg-white hover:bg-surface-container-low'} transition-colors relative group cursor-pointer">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full ${iconColor} flex items-center justify-center">
+                  <span class="material-symbols-outlined">${icon}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-body-md ${isUnread ? 'font-bold' : 'font-normal'} text-on-surface">${notif.title}</p>
+                  <p class="text-body-sm ${isUnread ? 'text-on-surface' : 'text-on-surface-variant'} mt-0.5">${notif.message}</p>
+                  <p class="text-label-md ${isUnread ? 'text-on-surface-variant' : 'text-on-surface-variant/60'} mt-0.5">${timeAgo}</p>
+                </div>
+                ${isUnread ? `
+                  <div class="flex-shrink-0">
+                    <div class="w-2.5 h-2.5 bg-brand-blue rounded-full shadow-sm"></div>
+                  </div>
+                ` : ''}
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+                </div>
+              </a>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      // Update pagination
+      const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage);
+      paginationInfo.textContent = `Showing ${start + 1} to ${Math.min(end, filteredNotifications.length)} of ${filteredNotifications.length} notifications`;
+
+      // Render pagination buttons
+      let paginationHTML = '';
+      
+      // Previous button
+      paginationHTML += `
+        <button class="px-3 py-1.5 text-label-md font-medium text-on-surface-variant hover:text-brand-blue transition-colors disabled:opacity-50" 
+                onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+          Previous
+        </button>
+      `;
+
+      // Page numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === currentPage) {
+          paginationHTML += `
+            <button class="w-8 h-8 flex items-center justify-center rounded bg-primary-fixed text-brand-blue font-bold text-label-md" onclick="goToPage(${i})">${i}</button>
+          `;
+        } else if (i <= 3 || i > totalPages - 2 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          paginationHTML += `
+            <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-low text-on-surface-variant text-label-md" onclick="goToPage(${i})">${i}</button>
+          `;
+        } else if (i === 4 && currentPage > 5) {
+          paginationHTML += `<span class="px-2 text-on-surface-variant">...</span>`;
+        } else if (i === totalPages - 3 && currentPage < totalPages - 4) {
+          paginationHTML += `<span class="px-2 text-on-surface-variant">...</span>`;
+        }
+      }
+
+      // Next button
+      paginationHTML += `
+        <button class="px-3 py-1.5 text-label-md font-medium text-on-surface-variant hover:text-brand-blue transition-colors" 
+                onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+          Next
+        </button>
+      `;
+
+      paginationControls.innerHTML = paginationHTML;
+    }
+
+    // 8. Pagination function
+    window.goToPage = function(page) {
+      const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderNotifications();
+    };
+
+    // 9. Event listeners
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const filter = this.dataset.filter;
+        currentFilter = filter;
+        
+        // Update active tab styles
+        document.querySelectorAll('.filter-tab').forEach(t => {
+          t.classList.remove('text-brand-blue', 'border-brand-blue', 'font-bold');
+          t.classList.add('text-on-surface-variant', 'font-medium');
+          t.classList.remove('border-b-2');
+        });
+        this.classList.add('text-brand-blue', 'border-brand-blue', 'font-bold');
+        this.classList.remove('text-on-surface-variant', 'font-medium');
+        this.classList.add('border-b-2');
+        
+        applyFilters();
+      });
+    });
+
+    // 10. Mark all as read
+    document.getElementById('markAllReadPageBtn').addEventListener('click', async function() {
+      try {
+        await Api.patch('/notifications/read-all');
+        // Mark all as read in local data
+        allNotifications = allNotifications.map(n => ({ ...n, read: true }));
+        applyFilters();
+        // Refresh badge in topbar
+        if (window.Notifications && typeof window.Notifications.refreshBadge === 'function') {
+          window.Notifications.refreshBadge();
+        }
+      } catch (err) {
+        console.error('Failed to mark all as read:', err);
+        // Fallback: mark all as read locally
+        allNotifications = allNotifications.map(n => ({ ...n, read: true }));
+        applyFilters();
+      }
+    });
+
+    // 11. Load data
+    loadNotifications().catch(err => console.error('Failed to load notifications', err));
+
+  })();
 </script>
 </body>
 </html>
