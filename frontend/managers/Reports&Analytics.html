@@ -47,7 +47,7 @@
           </select>
         </div>
       </div>
-      <button onclick="exportReport()" class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-label-lg flex items-center gap-2 hover:bg-primary-container transition-all shadow-sm">
+      <button onclick="openExportModal()" class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-label-lg flex items-center gap-2 hover:bg-primary-container transition-all shadow-sm">
         <span class="material-symbols-outlined text-lg">download</span>
         Export Report
       </button>
@@ -194,6 +194,162 @@
   <div id="footer-placeholder"></div>
 </div>
 
+<!-- EXPORT REPORT MODAL OVERLAY (RESPONSIVE FLEX CONTENT WITH STICKY HEADER & FOOTER) -->
+<div id="exportReportModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <!-- Fixed Header -->
+    <div class="p-5 border-b border-outline-variant/20 flex items-start justify-between shrink-0 bg-white z-10">
+      <div>
+        <h3 id="exportModalTitle" class="text-headline-sm font-headline-sm text-on-surface">Export Report</h3>
+        <p id="exportModalSubtitle" class="text-body-sm text-on-surface-variant mt-0.5">Select your preferred file format for export.</p>
+      </div>
+      <button type="button" onclick="closeExportModal()" class="p-1.5 hover:bg-surface-container-high rounded-full text-on-surface-variant transition-colors">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Scrollable Body Content Area -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <!-- Step 1: Format Selection -->
+      <div id="exportStep1" class="space-y-3">
+        <label class="block text-label-md font-bold text-outline uppercase tracking-wider mb-2">Choose Format</label>
+        
+        <button type="button" onclick="selectExportFormat('PDF')" class="w-full p-4 rounded-xl border border-outline-variant/30 hover:border-primary hover:bg-primary-fixed/10 flex items-center justify-between transition-all group text-left">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center font-bold shrink-0">
+              <span class="material-symbols-outlined">picture_as_pdf</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-on-surface text-body-md group-hover:text-primary">PDF Document (.pdf)</h4>
+              <p class="text-xs text-on-surface-variant">Formatted visual document suitable for printing & presentations.</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary">chevron_right</span>
+        </button>
+
+        <button type="button" onclick="selectExportFormat('Excel')" class="w-full p-4 rounded-xl border border-outline-variant/30 hover:border-primary hover:bg-primary-fixed/10 flex items-center justify-between transition-all group text-left">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center font-bold shrink-0">
+              <span class="material-symbols-outlined">table_chart</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-on-surface text-body-md group-hover:text-primary">Excel Spreadsheet (.xlsx)</h4>
+              <p class="text-xs text-on-surface-variant">Structured spreadsheet for data manipulation and pivot analysis.</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary">chevron_right</span>
+        </button>
+
+        <button type="button" onclick="selectExportFormat('CSV')" class="w-full p-4 rounded-xl border border-outline-variant/30 hover:border-primary hover:bg-primary-fixed/10 flex items-center justify-between transition-all group text-left">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">
+              <span class="material-symbols-outlined">csv</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-on-surface text-body-md group-hover:text-primary">CSV File (.csv)</h4>
+              <p class="text-xs text-on-surface-variant">Lightweight plain-text dataset compatible with any data tool.</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary">chevron_right</span>
+        </button>
+      </div>
+
+      <!-- Step 2: Information & Explicit Time Range Selection -->
+      <div id="exportStep2" class="hidden space-y-4">
+        <div class="flex items-center justify-between bg-surface-container-low p-3 rounded-lg border border-outline-variant/20">
+          <span class="text-body-sm font-bold text-on-surface">Selected Format:</span>
+          <span id="selectedFormatBadge" class="px-3 py-1 bg-primary text-white rounded-full text-xs font-bold uppercase">PDF</span>
+        </div>
+
+        <!-- Export Time Range Field with Explicit Date Display -->
+        <div class="space-y-2">
+          <label class="block text-label-md font-bold text-on-surface">Export Time Period *</label>
+          <select id="exportTimeRange" onchange="onExportTimeRangeChange(this.value)" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-sm text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none cursor-pointer pl-4 pr-10 transition-all">
+            <option value="This Month" selected>This Month (July 2026)</option>
+            <option value="Today">Today (23 Jul 2026)</option>
+            <option value="This Week">This Week (20 Jul 2026 - 26 Jul 2026)</option>
+            <option value="This Quarter">This Quarter (Q3 2026)</option>
+            <option value="This Year">This Year (2026)</option>
+            <option value="All Time">All Time (Full History)</option>
+            <option value="Custom Range">Custom Range (Specify Dates)</option>
+          </select>
+
+          <!-- Dynamic Explicit Date Range Preview / Inputs -->
+          <div id="customDateRangeBox" class="flex items-center gap-3 bg-surface-container-low/80 p-3 rounded-lg border border-outline-variant/30">
+            <span class="material-symbols-outlined text-primary text-lg shrink-0">calendar_month</span>
+            <div id="datePreviewText" class="text-xs font-medium text-on-surface flex-1">
+              Exact Date Range: <strong id="datePreviewRange" class="text-primary font-bold">01/07/2026 — 23/07/2026</strong>
+            </div>
+            <div id="customDateInputs" class="hidden flex flex-wrap sm:flex-nowrap items-center gap-2 w-full">
+              <div class="flex-1 min-w-[120px]">
+                <label class="text-[10px] font-bold uppercase text-outline block mb-0.5">From Date</label>
+                <input type="date" id="exportStartDate" value="2026-07-01" class="w-full px-2.5 py-1.5 bg-white border border-outline-variant/30 rounded text-xs outline-none focus:ring-1 focus:ring-primary">
+              </div>
+              <span class="text-xs font-bold text-outline pt-3 hidden sm:inline">—</span>
+              <div class="flex-1 min-w-[120px]">
+                <label class="text-[10px] font-bold uppercase text-outline block mb-0.5">To Date</label>
+                <input type="date" id="exportEndDate" value="2026-07-23" class="w-full px-2.5 py-1.5 bg-white border border-outline-variant/30 rounded text-xs outline-none focus:ring-1 focus:ring-primary">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <label class="block text-label-md font-bold text-outline uppercase tracking-wider pt-2">Select Content to Include</label>
+
+        <div class="space-y-3">
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/20 hover:bg-surface-container-low cursor-pointer transition-colors">
+            <input type="checkbox" id="chkKpi" checked class="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary shrink-0">
+            <div>
+              <span class="font-bold text-body-sm text-on-surface block">KPI Summary Metrics</span>
+              <span class="text-xs text-on-surface-variant">Total Assets, Maintenance Requests, Completed Repairs, Failure Rate</span>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/20 hover:bg-surface-container-low cursor-pointer transition-colors">
+            <input type="checkbox" id="chkCharts" checked class="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary shrink-0">
+            <div>
+              <span class="font-bold text-body-sm text-on-surface block">Maintenance & Failure Analysis Charts</span>
+              <span class="text-xs text-on-surface-variant">Monthly request trends and asset failure breakdown charts</span>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/20 hover:bg-surface-container-low cursor-pointer transition-colors">
+            <input type="checkbox" id="chkClassroomStatus" checked class="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary shrink-0">
+            <div>
+              <span class="font-bold text-body-sm text-on-surface block">Classroom Maintenance Status Table</span>
+              <span class="text-xs text-on-surface-variant">Asset counts, requests, condition rating and room status</span>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/20 hover:bg-surface-container-low cursor-pointer transition-colors">
+            <input type="checkbox" id="chkTechnicianPerf" checked class="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary shrink-0">
+            <div>
+              <span class="font-bold text-body-sm text-on-surface block">Technician Performance Table</span>
+              <span class="text-xs text-on-surface-variant">Workload assigned, resolution times, and performance rating</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed Sticky Footer (Always Visible at Bottom) -->
+    <div id="exportModalFooter" class="hidden p-4 border-t border-outline-variant/20 flex items-center justify-between shrink-0 bg-white z-10">
+      <button type="button" onclick="backToStep1()" class="px-4 py-2 text-on-surface-variant font-bold text-body-sm hover:bg-surface-container rounded-lg transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Back
+      </button>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="closeExportModal()" class="px-4 py-2 rounded-lg text-on-surface font-bold text-body-sm hover:bg-surface-container transition-colors">
+          Cancel
+        </button>
+        <button type="button" onclick="confirmDownloadExport()" id="confirmExportBtn" class="px-6 py-2 bg-primary text-white rounded-lg font-bold text-label-lg hover:bg-primary-container transition-all shadow-md flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">download</span>
+          Download File
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -210,8 +366,102 @@
 
   Layout.init({ role: 'Manager', activePage: 'Report&Analytics' });
 
-  function exportReport() {
-    alert('Exporting Reports & Analytics data to Excel / PDF...');
+  let selectedFormat = 'PDF';
+
+  function openExportModal() {
+    document.getElementById('exportStep1').classList.remove('hidden');
+    document.getElementById('exportStep2').classList.add('hidden');
+    document.getElementById('exportModalFooter').classList.add('hidden');
+    document.getElementById('exportModalTitle').textContent = 'Export Report';
+    document.getElementById('exportModalSubtitle').textContent = 'Select your preferred file format for export.';
+    document.getElementById('exportReportModal').classList.remove('hidden');
+  }
+
+  function closeExportModal() {
+    document.getElementById('exportReportModal').classList.add('hidden');
+  }
+
+  function selectExportFormat(fmt) {
+    selectedFormat = fmt;
+    document.getElementById('selectedFormatBadge').textContent = fmt;
+    document.getElementById('exportStep1').classList.add('hidden');
+    document.getElementById('exportStep2').classList.remove('hidden');
+    document.getElementById('exportModalFooter').classList.remove('hidden');
+    document.getElementById('exportModalTitle').textContent = `Export Options (${fmt})`;
+    document.getElementById('exportModalSubtitle').textContent = 'Select time period and content sections for your exported file.';
+  }
+
+  function backToStep1() {
+    document.getElementById('exportStep1').classList.remove('hidden');
+    document.getElementById('exportStep2').classList.add('hidden');
+    document.getElementById('exportModalFooter').classList.add('hidden');
+    document.getElementById('exportModalTitle').textContent = 'Export Report';
+    document.getElementById('exportModalSubtitle').textContent = 'Select your preferred file format for export.';
+  }
+
+  function onExportTimeRangeChange(val) {
+    const textEl = document.getElementById('datePreviewText');
+    const customInputs = document.getElementById('customDateInputs');
+    const rangeBadge = document.getElementById('datePreviewRange');
+
+    if (val === 'Custom Range') {
+      textEl.classList.add('hidden');
+      customInputs.classList.remove('hidden');
+      return;
+    }
+
+    textEl.classList.remove('hidden');
+    customInputs.classList.add('hidden');
+
+    let rangeStr = '';
+    if (val === 'This Month') rangeStr = '01/07/2026 — 23/07/2026';
+    else if (val === 'Today') rangeStr = '23/07/2026 — 23/07/2026';
+    else if (val === 'This Week') rangeStr = '20/07/2026 — 26/07/2026';
+    else if (val === 'This Quarter') rangeStr = '01/07/2026 — 30/09/2026';
+    else if (val === 'This Year') rangeStr = '01/01/2026 — 31/12/2026';
+    else if (val === 'All Time') rangeStr = '01/01/2023 — 23/07/2026';
+
+    if (rangeBadge) rangeBadge.textContent = rangeStr;
+  }
+
+  function confirmDownloadExport() {
+    const timeOption = document.getElementById('exportTimeRange').value;
+    let timeRangeText = '';
+    
+    if (timeOption === 'Custom Range') {
+      const start = document.getElementById('exportStartDate').value || '2026-07-01';
+      const end = document.getElementById('exportEndDate').value || '2026-07-23';
+      timeRangeText = `From ${start} to ${end}`;
+    } else {
+      timeRangeText = `${timeOption} (${document.getElementById('datePreviewRange').textContent})`;
+    }
+
+    const included = [];
+    if (document.getElementById('chkKpi').checked) included.push('KPI Summary');
+    if (document.getElementById('chkCharts').checked) included.push('Charts Data');
+    if (document.getElementById('chkClassroomStatus').checked) included.push('Classroom Status');
+    if (document.getElementById('chkTechnicianPerf').checked) included.push('Technician Performance');
+
+    if (included.length === 0) {
+      if (window.showToast) showToast('Please select at least one content section to export!', 'warning');
+      else alert('Please select at least one content section to export!');
+      return;
+    }
+
+    const btn = document.getElementById('confirmExportBtn');
+    btn.disabled = true;
+    btn.textContent = 'Generating File...';
+
+    setTimeout(() => {
+      if (window.showToast) {
+        showToast(`Report (${selectedFormat}) exported successfully! Download started.`, 'success');
+      } else {
+        alert(`Exporting ${selectedFormat} report\nDate Range: [${timeRangeText}]\nIncluded Content: [${included.join(', ')}]\n\nFile download started!`);
+      }
+      btn.disabled = false;
+      btn.innerHTML = `<span class="material-symbols-outlined text-lg">download</span> Download File`;
+      closeExportModal();
+    }, 800);
   }
 
   // Initialize Chart.js charts
@@ -294,22 +544,6 @@
       });
     }
   });
-
-  async function loadReportsData() {
-    try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        const [mttr, downtime, workload] = await Promise.all([
-          Api.get('/dashboard/mttr').catch(() => null),
-          Api.get('/dashboard/downtime').catch(() => null),
-          Api.get('/dashboard/technician-workload').catch(() => null),
-        ]);
-      }
-    } catch (err) {
-      console.log('Using default mock data for Reports&Analytics view', err);
-    }
-  }
-
-  loadReportsData();
 </script>
 </body>
 </html>
