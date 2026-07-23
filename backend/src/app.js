@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path'); // THÊM DÒNG NÀY
 const cors = require('cors');
 const morgan = require('morgan');
 const env = require('./config/env');
@@ -21,6 +22,9 @@ const app = express();
 app.use(cors({ origin: env.corsOrigin }));
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan(env.nodeEnv === 'development' ? 'dev' : 'combined'));
+
+// THÊM DÒNG NÀY ĐỂ SERVE FILE UPLOADS
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/health', (req, res) => res.json({ success: true, data: { status: 'ok' } }));
 

@@ -327,64 +327,85 @@
     }
 
     // 5. Submit form
-    var reportForm = document.getElementById('reportForm');
-    if (reportForm) {
-      reportForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        var errorBox = document.getElementById('formError');
-        var successBox = document.getElementById('formSuccess');
-        var submitBtn = document.getElementById('submitBtn');
-        errorBox.classList.add('hidden');
-        successBox.classList.add('hidden');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
+var reportForm = document.getElementById('reportForm');
+if (reportForm) {
+  reportForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var errorBox = document.getElementById('formError');
+    var successBox = document.getElementById('formSuccess');
+    var submitBtn = document.getElementById('submitBtn');
+    errorBox.classList.add('hidden');
+    successBox.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
 
-        try {
-          var reportData = {
-            roomId: Number(roomSelect.value),
-            assetId: assetSelect.value ? Number(assetSelect.value) : undefined,
-            description: document.getElementById('description').value.trim(),
-            urgencyHint: document.getElementById('urgencySelect').value,
-          };
+    try {
+      // Kiểm tra dữ liệu bắt buộc
+      if (!roomSelect.value) {
+        throw new Error('Please select a classroom');
+      }
+      if (!document.getElementById('description').value.trim()) {
+        throw new Error('Please enter a description');
+      }
 
-          var report;
-          if (selectedFile) {
-            var formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('reportData', JSON.stringify(reportData));
-            var response = await fetch('/api/v1/fault-reports/upload', {
-              method: 'POST',
-              body: formData,
-              headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
-              }
-            });
-            var result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'Upload failed');
-            report = result;
-          } else {
-            report = await Api.post('/fault-reports', reportData);
-          }
+      // Tạo FormData
+      var formData = new FormData();
+      formData.append('roomId', roomSelect.value);
+      if (assetSelect.value) {
+        formData.append('assetId', assetSelect.value);
+      }
+      formData.append('description', document.getElementById('description').value.trim());
+      formData.append('urgencyHint', document.getElementById('urgencySelect').value);
+      
+      // Thêm file nếu có
+      if (selectedFile) {
+        formData.append('evidence', selectedFile);
+        console.log('Uploading file:', selectedFile.name);
+      }
 
-          successBox.textContent = 'Report #' + report.report_id + ' submitted successfully with priority: ' + report.priority + '.';
-          successBox.classList.remove('hidden');
-          reportForm.reset();
-          fileInfo.classList.add('hidden');
-          selectedFile = null;
-          // Reset lại asset select
-          assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
-          setTimeout(function() {
-            location.href = 'ReportDetails.html?id=' + report.report_id;
-          }, 1500);
-        } catch (err) {
-          errorBox.textContent = err.message || 'Failed to submit report. Please try again.';
-          errorBox.classList.remove('hidden');
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Submit Report';
-        }
+      // Gửi request - ĐÚNG ENDPOINT
+      var token = localStorage.getItem('auth_token');
+      console.log('Sending to: /api/v1/fault-reports');
+      
+      var response = await fetch('/api/v1/fault-reports', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        body: formData
       });
+
+      console.log('Response status:', response.status);
+      
+      var result = await response.json();
+      console.log('Response data:', result);
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit report');
+      }
+
+      var report = result.data || result;
+      successBox.textContent = 'Report #' + report.report_id + ' submitted successfully with priority: ' + report.priority + '.';
+      successBox.classList.remove('hidden');
+      reportForm.reset();
+      fileInfo.classList.add('hidden');
+      selectedFile = null;
+      assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
+      
+      setTimeout(function() {
+        location.href = 'ReportDetails.html?id=' + report.report_id;
+      }, 1500);
+      
+    } catch (err) {
+      console.error('Submit error:', err);
+      errorBox.textContent = err.message || 'Failed to submit report. Please try again.';
+      errorBox.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Report';
     }
+  });
+}
 
     // 6. Load rooms on page load
     loadRooms().catch(function(err) {

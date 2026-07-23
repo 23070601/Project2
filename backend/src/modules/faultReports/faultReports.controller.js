@@ -12,7 +12,6 @@ async function list(req, res) {
   const { status, priority, roomId, mine } = req.query;
 
   const filters = { status, priority, roomId: roomId ? Number(roomId) : undefined };
-  // User chỉ được xem báo cáo của chính mình; Manager/Technician xem tất cả (theo query filter)
   if (req.user.role === ROLES.USER || mine === 'true') {
     filters.reporterId = req.user.userId;
   }
@@ -34,10 +33,17 @@ async function getById(req, res) {
   ok(res, { ...report, statusHistory: history });
 }
 
-// Dùng cho Users/CreateReport.html - DSS1 tự động tính priority
+// SỬA HÀM CREATE - XỬ LÝ FILE UPLOAD
 async function create(req, res) {
   requireFields(req.body, ['roomId', 'description']);
-  const { roomId, assetId, description, imagePath, urgencyHint } = req.body;
+  const { roomId, assetId, description, urgencyHint } = req.body;
+
+  // Lấy imagePath từ file upload nếu có
+  let imagePath = null;
+  if (req.file) {
+    imagePath = '/uploads/' + req.file.filename;
+    console.log('File uploaded:', imagePath);
+  }
 
   const room = await classroomsRepository.findById(roomId);
   if (!room) throw new ApiError(404, `Classroom #${roomId} not found`);
@@ -60,19 +66,16 @@ async function create(req, res) {
   const report = await faultReportsRepository.create({
     reporterId: req.user.userId,
     assetId: assetId ?? null,
-    roomId,
-    description,
-    imagePath: imagePath ?? null,
-    priority,
+    roomId: roomId,
+    description: description,
+    imagePath: imagePath, // Đã có imagePath từ file upload
+    priority: priority,
   });
-
-  // Trigger DB (trg_faultreports_after_insert) đã tự ghi AuditLog + cập nhật Assets,
-  // nên không cần ghi AuditLog thủ công ở đây.
 
   created(res, { ...report, dss1Score: score });
 }
 
-// Manager duyệt/từ chối báo cáo (PendingRequest.html -> PendingRequestDetail.html / RejectReport.html)
+// Manager duyệt/từ chối báo cáo
 async function updateStatus(req, res) {
   const reportId = toPositiveInt(req.params.id, 'id');
   requireFields(req.body, ['status']);
