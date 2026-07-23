@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 570" width="100%" height="100%">
+  <defs>
+    <!-- Gold Gradient for Book Stripes -->
+    <linearGradient id="vnuGoldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D4AF37"/>
+      <stop offset="50%" stop-color="#F3E5AB"/>
+      <stop offset="100%" stop-color="#AA7C11"/>
+    </linearGradient>
+    
+    <!-- Clip shield boundary -->
+    <clipPath id="shieldInnerClip">
+      <path d="M 250 555 C 130 460 15 360 15 15 H 485 C 485 360 370 460 250 555 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer Shield Navy Border -->
+  <path d="M 250 560 C 125 465 10 365 10 10 H 490 C 490 365 375 465 250 560 Z" fill="#ffffff" stroke="#0C2340" stroke-width="12" stroke-linejoin="round"/>
+
+  <!-- Content inside Shield -->
+  <g clip-path="url(#shieldInnerClip)">
+    <!-- Left Navy Column -->
+    <rect x="0" y="0" width="155" height="570" fill="#0C2340"/>
+
+    <!-- Text "V N U • I S" in Left Navy Column rotated -90deg -->
+    <g transform="translate(82, 260) rotate(-90)">
+      <text x="0" y="0" fill="#ffffff" font-family="'Inter', 'Arial', sans-serif" font-weight="700" font-size="30" letter-spacing="4" text-anchor="middle">V N U • I S</text>
+    </g>
+
+    <!-- Bottom Vertical Grey Lines -->
+    <g stroke="#9CA3AF" stroke-width="7" stroke-linecap="round" opacity="0.75">
+      <line x1="180" y1="360" x2="180" y2="480"/>
+      <line x1="205" y1="360" x2="205" y2="505"/>
+      <line x1="230" y1="360" x2="230" y2="525"/>
+      <line x1="250" y1="360" x2="250" y2="538"/>
+      <line x1="270" y1="360" x2="270" y2="525"/>
+      <line x1="295" y1="360" x2="295" y2="505"/>
+      <line x1="320" y1="360" x2="320" y2="480"/>
+      <line x1="345" y1="360" x2="345" y2="455"/>
+      <line x1="370" y1="360" x2="370" y2="425"/>
+      <line x1="395" y1="360" x2="395" y2="395"/>
+      <line x1="420" y1="360" x2="420" y2="360"/>
+    </g>
+
+    <!-- Double Gold Curved Book Band -->
+    <path d="M 0 310 Q 80 340 155 310 Q 260 340 485 310" fill="none" stroke="url(#vnuGoldGrad)" stroke-width="12"/>
+    <path d="M 0 340 Q 80 370 155 340 Q 260 370 485 340" fill="none" stroke="url(#vnuGoldGrad)" stroke-width="12"/>
+
+    <!-- Navy "iS" Lettermark -->
+    <!-- Dot of 'i' (Leaf/Flame shape) -->
+    <path d="M 185 80 C 185 140 260 170 260 170 C 260 170 260 100 185 80 Z" fill="#0C2340"/>
+
+    <!-- Stem of 'i' and Main 'S' -->
+    <path d="M 170 180 H 260 V 310 C 260 370 310 405 365 405 C 420 405 455 365 455 310 C 455 200 320 230 320 140 C 320 75 440 70 445 160 H 380 C 380 115 360 110 355 110 C 340 110 335 125 335 140 C 335 235 470 210 470 310 C 470 415 400 445 365 445 C 265 445 210 370 210 310 V 215 H 170 V 180 Z" fill="#0C2340"/>
+  </g>
+</svg>

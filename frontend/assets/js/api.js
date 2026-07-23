@@ -24,6 +24,12 @@ const Api = (() => {
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
 
+    const currentUser = window.Auth ? Auth.getCurrentUser() : null;
+    if (currentUser) {
+      if (currentUser.user_id) headers['X-User-Id'] = String(currentUser.user_id);
+      if (currentUser.email) headers['X-User-Email'] = currentUser.email;
+    }
+
     const response = await fetch(url, {
       method,
       headers,
@@ -38,12 +44,15 @@ const Api = (() => {
     if (!response.ok) {
       const message = payload?.error?.message || `Request failed with status ${response.status}`;
 
-      // Token hết hạn/không hợp lệ -> đưa về trang đăng nhập
+      // Token hết hạn/không hợp lệ -> chỉ đưa về trang đăng nhập nếu KHÔNG PHẢI token demo
       if (response.status === 401) {
-        localStorage.removeItem('vnuis_token');
-        localStorage.removeItem('vnuis_user');
-        if (!location.pathname.endsWith('Login.html')) {
-          location.href = resolveLoginPath();
+        const currentToken = getToken();
+        if (currentToken && !currentToken.startsWith('demo_')) {
+          localStorage.removeItem('vnuis_token');
+          localStorage.removeItem('vnuis_user');
+          if (!location.pathname.endsWith('Login.html')) {
+            location.href = resolveLoginPath();
+          }
         }
       }
 

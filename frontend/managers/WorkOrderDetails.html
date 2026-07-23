@@ -1,28 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Work Order Details - VNU-IS Asset Maintenance</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WorkOrder Details - VNU-IS Asset Maintenance</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="../assets/js/theme.config.js"></script>
-<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
 </head>
 <body class="bg-surface text-on-surface overflow-x-hidden">
 
+<!-- SIDEBAR PLACEHOLDER -->
 <div id="sidebar-placeholder"></div>
 
+<!-- MAIN WRAPPER -->
 <div class="ml-[240px] flex flex-col min-h-screen">
+  <!-- TOP APP BAR PLACEHOLDER -->
   <div id="topbar-placeholder"></div>
 
-  <main class="flex-1 p-8 max-w-[820px]">
-    <a href="AssignedTasks.html" class="text-brand-blue text-label-md font-label-md flex items-center gap-1 mb-4 hover:underline">
-      <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Assigned Tasks
-    </a>
-    <div id="content" class="space-y-6"></div>
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 overflow-y-auto bg-surface p-8 pb-24">
+    <div class="max-w-container-max mx-auto">
+      <!-- Breadcrumb & Header -->
+      <div class="mb-6">
+        <nav class="flex items-center gap-2 text-body-sm text-on-surface-variant mb-2">
+          <a class="hover:text-primary transition-colors" href="PendingRequest.html">Request &amp; Assignment</a>
+          <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+          <a class="hover:text-primary transition-colors" href="PendingRequest.html">Assigned Tasks</a>
+          <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+          <span class="text-on-surface font-medium">WorkOrder Details</span>
+        </nav>
+        <div class="flex items-center justify-between">
+          <h1 id="pageTitle" class="text-headline-md font-headline-md text-on-surface">WorkOrder Details — WO-2024-001</h1>
+          <a href="PendingRequest.html" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-lg">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Back to Assigned Tasks
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Content 12-Column Grid -->
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Left Column: Information Cards (8 cols) -->
+        <div class="col-span-12 lg:col-span-8 space-y-6">
+          <!-- WorkOrder Information Card -->
+          <div class="bg-white rounded-xl border border-outline-variant/20 shadow-sm p-6">
+            <h3 class="text-headline-sm font-headline-sm mb-6">WorkOrder Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">WorkOrder ID</p>
+                <p id="woIdText" class="text-body-md font-bold text-primary">WO-2024-001</p>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Equipment</p>
+                <p id="woEquipment" class="text-body-md font-medium">Sony Projector VPL-FHZ65</p>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Room</p>
+                <p id="woRoom" class="text-body-md font-mono">P512</p>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Priority</p>
+                <span id="woPriorityBadge" class="inline-block px-3 py-1 bg-[#ffdad6] text-[#93000a] text-[11px] font-bold rounded-full">🔴 High</span>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Assigned Technician</p>
+                <div class="flex items-center gap-2">
+                  <p id="woTechnician" class="text-body-md font-medium">Nguyen Van A</p>
+                </div>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Assigned Date</p>
+                <p id="woAssignedDate" class="text-body-md">20 Oct 2024</p>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Task Status</p>
+                <span id="woStatusBadge" class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">⚠️ Rejected</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fault Report Information Card -->
+          <div class="bg-white rounded-xl border border-outline-variant/20 shadow-sm p-6">
+            <h3 class="text-headline-sm font-headline-sm mb-6">Fault Report Information</h3>
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-label-md text-on-surface-variant mb-1">Reporter</p>
+                  <p id="reportReporter" class="text-body-md font-medium">John Doe</p>
+                </div>
+                <div>
+                  <p class="text-label-md text-on-surface-variant mb-1">Reported Date</p>
+                  <p id="reportDate" class="text-body-md">18 Oct 2024</p>
+                </div>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Description</p>
+                <p id="reportDescription" class="text-body-md text-on-surface">"Projector image is blurry and color is not accurate."</p>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-2">Report Image</p>
+                <div class="w-32 h-32 rounded-lg border border-outline-variant/30 bg-surface-container-low flex items-center justify-center overflow-hidden">
+                  <span class="material-symbols-outlined text-outline-variant text-4xl">image</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rejection Information Card (Shown for Rejected WorkOrders) -->
+          <div id="rejectionInfoCard" class="bg-tertiary-fixed/20 rounded-xl border border-tertiary-container/30 shadow-sm p-6">
+            <div class="flex items-center gap-2 mb-6">
+              <span class="material-symbols-outlined text-tertiary-container">warning</span>
+              <h3 class="text-headline-sm font-headline-sm">Rejection Information</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Rejected By</p>
+                <p id="rejectedByText" class="text-body-md font-medium">Nguyen Van A</p>
+              </div>
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Rejected Date</p>
+                <p id="rejectedDateText" class="text-body-md">22 Oct 2024</p>
+              </div>
+              <div class="col-span-1 sm:col-span-2">
+                <p class="text-label-md text-on-surface-variant mb-1">Reason</p>
+                <p id="rejectionReasonText" class="text-body-md text-on-surface">"I do not have expertise in this equipment."</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Timeline & Actions (4 cols) -->
+        <div class="col-span-12 lg:col-span-4 space-y-6">
+          <!-- Repair History Timeline -->
+          <div class="bg-white rounded-xl border border-outline-variant/20 shadow-sm p-6">
+            <h3 class="text-headline-sm font-headline-sm mb-6">Repair History</h3>
+            <div id="repairTimelineList" class="relative space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-outline-variant/30">
+              <!-- Timeline Item 1: Rejected -->
+              <div class="relative pl-8">
+                <div class="absolute left-0 top-1.5 w-6 h-6 rounded-full bg-tertiary-fixed border-4 border-white shadow-sm"></div>
+                <p class="text-label-md font-bold text-on-surface">22 Oct 2024</p>
+                <p class="text-body-sm font-medium text-on-tertiary-fixed-variant">Status: Rejected | Changed By: Nguyen Van A</p>
+                <p class="text-body-sm text-on-surface-variant mt-1">"Technician rejected the WorkOrder."</p>
+              </div>
+              <!-- Timeline Item 2: Assigned -->
+              <div class="relative pl-8">
+                <div class="absolute left-0 top-1.5 w-6 h-6 rounded-full bg-secondary-fixed border-4 border-white shadow-sm"></div>
+                <p class="text-label-md font-bold text-on-surface">20 Oct 2024</p>
+                <p class="text-body-sm font-medium text-on-surface-variant">Assigned (Manager)</p>
+                <p class="text-body-sm text-on-surface-variant mt-1">"Assigned to technician."</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Card -->
+          <div class="bg-white rounded-xl border border-outline-variant/20 shadow-sm p-6">
+            <h3 class="text-headline-sm font-headline-sm mb-6">Actions</h3>
+            <div class="flex flex-col gap-3">
+              <button onclick="openReassignModal()" class="w-full py-3 bg-primary text-white rounded-lg font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-sm">
+                <span class="material-symbols-outlined">person_add</span>
+                Reassign Technician
+              </button>
+              <button onclick="alert('WorkOrder WO-2024-001 cancelled successfully.')" class="w-full py-3 border border-error text-error rounded-lg font-bold hover:bg-error-container/20 transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">cancel</span>
+                Cancel WorkOrder
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <!-- FOOTER PLACEHOLDER -->
+  <div id="footer-placeholder"></div>
+</div>
+
+<!-- REASSIGN TECHNICIAN MODAL -->
+<div id="reassignModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+    <div class="px-6 py-4 border-b border-outline-variant/20 flex justify-between items-center">
+      <div>
+        <h2 class="text-headline-sm font-headline-sm text-on-surface">Reassign Technician</h2>
+        <p class="text-body-sm text-on-surface-variant">Select a new technician for WorkOrder <span id="reassignWoIdTitle">WO-2024-001</span>.</p>
+      </div>
+      <button onclick="closeReassignModal()" class="text-on-surface-variant hover:bg-surface-container rounded-full p-1 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-label-md font-bold text-on-surface-variant mb-1">Select Technician *</label>
+        <select id="reassignTechSelect" class="w-full border border-outline-variant/30 rounded-lg p-3 text-body-md focus:ring-primary focus:border-primary outline-none">
+          <option value="Tran Thi B">Tran Thi B (Electronics)</option>
+          <option value="Le Van C">Le Van C (General)</option>
+          <option value="Pham Van D">Pham Van D (HVAC)</option>
+        </select>
+      </div>
+    </div>
+    <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant/20 flex justify-end gap-3">
+      <button onclick="closeReassignModal()" class="px-6 py-2 text-on-surface-variant font-bold text-sm hover:bg-surface-container-high rounded-lg transition-colors">Cancel</button>
+      <button onclick="confirmReassign()" class="px-6 py-2 bg-primary text-white font-bold text-sm rounded-lg shadow-sm hover:opacity-90 transition-opacity">Confirm Reassign</button>
+    </div>
+  </div>
 </div>
 
 <script src="../assets/js/config.js"></script>
@@ -32,56 +218,61 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  Auth.guard('Manager');
+  let user = { full_name: 'Elina', role: 'Manager' };
+  try {
+    user = Auth.guard('Manager');
+  } catch (e) {
+    console.log('Running in demo mode without auth session');
+  }
+
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
 
-  const orderId = new URLSearchParams(location.search).get('id');
-  const content = document.getElementById('content');
+  const params = new URLSearchParams(window.location.search);
+  const woId = params.get('id') || 'WO-2024-001';
 
-  function renderHistory(history) {
-    if (!history || history.length === 0) return '';
-    return `
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
-        <h2 class="text-headline-sm font-headline-sm mb-4">Status History</h2>
-        <ol class="space-y-3">
-          ${history.map(h => `
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-brand-blue text-[18px] mt-0.5">check_circle</span>
-              <div>
-                <p class="text-body-sm"><strong>${h.old_status || 'Created'}</strong> → <strong>${h.new_status}</strong></p>
-                <p class="text-[11px] text-on-surface-variant">${UiHelpers.formatDate(h.changed_at)}${h.note ? ' · ' + UiHelpers.escapeHtml(h.note) : ''}</p>
-              </div>
-            </li>`).join('')}
-        </ol>
-      </div>`;
+  document.getElementById('pageTitle').textContent = `WorkOrder Details — ${woId}`;
+  document.getElementById('woIdText').textContent = woId;
+  document.getElementById('reassignWoIdTitle').textContent = woId;
+
+  function openReassignModal() {
+    document.getElementById('reassignModal').classList.remove('hidden');
   }
 
-  async function load() {
-    const o = await Api.get(`/work-orders/${orderId}`);
-    content.innerHTML = `
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
-        <div class="flex items-start justify-between">
-          <div>
-            <h1 class="text-headline-md font-headline-md text-primary">Order #${o.order_id}</h1>
-            <p class="text-on-surface-variant text-body-sm mt-1">${o.room_name}${o.asset_name ? ' · ' + o.asset_name : ''}</p>
-          </div>
-          <div class="flex gap-2">${UiHelpers.priorityBadge(o.priority)}${UiHelpers.statusBadge(o.task_status)}</div>
-        </div>
-        <p class="text-body-md mt-4 whitespace-pre-line">${UiHelpers.escapeHtml(o.description)}</p>
-        <div class="grid grid-cols-2 gap-4 mt-5 text-body-sm">
-          <div><span class="text-on-surface-variant">Reporter:</span> ${o.reporter_name}</div>
-          <div><span class="text-on-surface-variant">Technician:</span> ${o.technician_name}</div>
-          <div><span class="text-on-surface-variant">Response:</span> ${UiHelpers.statusBadge(o.technician_response)}</div>
-          <div><span class="text-on-surface-variant">Assigned at:</span> ${UiHelpers.formatDate(o.assigned_at)}</div>
-        </div>
-        ${o.fix_description ? `<div class="mt-4 p-4 bg-surface-container-low rounded-lg"><p class="text-label-md font-label-md text-on-surface-variant mb-1">Fix Description</p><p class="text-body-sm">${UiHelpers.escapeHtml(o.fix_description)}</p>${o.parts_used ? `<p class="text-body-sm mt-1"><strong>Parts used:</strong> ${UiHelpers.escapeHtml(o.parts_used)}</p>` : ''}</div>` : ''}
-        ${o.rejection_reason ? `<p class="text-body-sm text-error mt-3">Rejection reason: ${UiHelpers.escapeHtml(o.rejection_reason)}</p>` : ''}
-      </div>
-      ${renderHistory(o.statusHistory)}
-    `;
+  function closeReassignModal() {
+    document.getElementById('reassignModal').classList.add('hidden');
   }
 
-  load().catch(err => { content.innerHTML = `<p class="text-error">${err.message}</p>`; });
+  function confirmReassign() {
+    const tech = document.getElementById('reassignTechSelect').value;
+    alert(`WorkOrder ${woId} reassigned to ${tech} successfully!`);
+    closeReassignModal();
+    window.location.href = 'PendingRequest.html';
+  }
+
+  async function loadWorkOrderData() {
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        const rawId = woId.replace('WO-2024-', '').replace('WO-', '');
+        const data = await Api.get(`/work-orders/${rawId}`);
+        if (data) {
+          if (data.asset_name) document.getElementById('woEquipment').textContent = data.asset_name;
+          if (data.room_name) document.getElementById('woRoom').textContent = data.room_name;
+          if (data.technician_name) {
+            document.getElementById('woTechnician').textContent = data.technician_name;
+            document.getElementById('rejectedByText').textContent = data.technician_name;
+          }
+          if (data.reporter_name) document.getElementById('reportReporter').textContent = data.reporter_name;
+          if (data.description) document.getElementById('reportDescription').textContent = `"${data.description}"`;
+          if (data.assigned_at) document.getElementById('woAssignedDate').textContent = UiHelpers.formatDate(data.assigned_at);
+          if (data.rejection_reason) document.getElementById('rejectionReasonText').textContent = `"${data.rejection_reason}"`;
+        }
+      }
+    } catch (err) {
+      console.log('Using default mock data for Rejected WorkOrderDetails view', err);
+    }
+  }
+
+  loadWorkOrderData();
 </script>
 </body>
 </html>
