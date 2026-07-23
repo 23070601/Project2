@@ -267,15 +267,8 @@
     }
   });
 
-  // ===== LOGIC LOGIN - GIỮ NGUYÊN TỪ CODE GỐC =====
+  // ===== LOGIC LOGIN =====
   (function() {
-    // Kiểm tra đã đăng nhập chưa
-    const existingUser = Auth.getCurrentUser();
-    if (Auth.isAuthenticated() && existingUser) {
-      location.href = Auth.homePageForRole(existingUser.role);
-      return;
-    }
-
     const form = document.getElementById('loginForm');
     const errorBox = document.getElementById('loginError');
     const submitBtn = document.getElementById('loginSubmit');
