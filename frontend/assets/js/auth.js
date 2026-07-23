@@ -15,10 +15,12 @@ const Auth = (() => {
 
   async function login(email, password, selectedRole) {
     let user = null;
+    let realToken = null;
     try {
       const result = await Api.post('/auth/login', { email, password });
       if (result && result.token) {
         user = result.user;
+        realToken = result.token;
       }
     } catch (err) {
       console.warn('Backend login API unavailable/error, fallback to frontend demo auth:', err.message);
@@ -68,7 +70,7 @@ const Auth = (() => {
       }
     }
 
-    localStorage.setItem(TOKEN_KEY, 'demo_jwt_token_' + Date.now());
+    localStorage.setItem(TOKEN_KEY, realToken || ('demo_jwt_token_' + Date.now()));
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     return user;
   }
