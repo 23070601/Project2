@@ -454,10 +454,12 @@
           console.log('QR Code generated in demo mode');
         }
       }
-      alert(`QR Code for "${roomName}" generated successfully!`);
+      if (window.showToast) showToast(`QR Code for "${roomName}" generated successfully!`, 'success');
+      else alert(`QR Code for "${roomName}" generated successfully!`);
       closeGenerateQrModal();
     } catch (err) {
-      alert(`QR Code for "${roomName}" generated successfully!`);
+      if (window.showToast) showToast(`QR Code for "${roomName}" generated successfully!`, 'success');
+      else alert(`QR Code for "${roomName}" generated successfully!`);
       closeGenerateQrModal();
     } finally {
       btn.disabled = false;
