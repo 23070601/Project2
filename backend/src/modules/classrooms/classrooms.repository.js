@@ -1,18 +1,19 @@
 const { pool } = require('../../config/db');
 
-async function findAll({ building, floorNumber, search } = {}) {
+async function findAll({ search } = {}) {
   const clauses = [];
   const params = [];
 
-  if (building) { clauses.push('building = ?'); params.push(building); }
-  if (floorNumber !== undefined) { clauses.push('floor_number = ?'); params.push(floorNumber); }
-  if (search) { clauses.push('room_name LIKE ?'); params.push(`%${search}%`); }
+  if (search) {
+    clauses.push('room_name LIKE ?');
+    params.push(`%${search}%`);
+  }
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const [rows] = await pool.query(
     `SELECT c.*,
             (SELECT COUNT(*) FROM Assets a WHERE a.room_id = c.room_id) AS asset_count
-     FROM Classrooms c ${where} ORDER BY c.building, c.floor_number, c.room_name`,
+     FROM Classrooms c ${where} ORDER BY c.room_name`,
     params
   );
   return rows;
@@ -28,20 +29,19 @@ async function findByName(roomName) {
   return rows[0] || null;
 }
 
-async function create({ roomName, building = null, floorNumber = null, qrCode = null }) {
+async function create({ roomName, qrCode = null }) {
   const [result] = await pool.execute(
-    'INSERT INTO Classrooms (room_name, qr_code, building, floor_number) VALUES (?, ?, ?, ?)',
-    [roomName, qrCode, building, floorNumber]
+    'INSERT INTO Classrooms (room_name, qr_code) VALUES (?, ?)',
+    [roomName, qrCode]
   );
   return findById(result.insertId);
 }
 
-async function update(roomId, { roomName, building, floorNumber }) {
+async function update(roomId, { roomName, qrCode }) {
   const fields = [];
   const params = [];
   if (roomName !== undefined) { fields.push('room_name = ?'); params.push(roomName); }
-  if (building !== undefined) { fields.push('building = ?'); params.push(building); }
-  if (floorNumber !== undefined) { fields.push('floor_number = ?'); params.push(floorNumber); }
+  if (qrCode !== undefined) { fields.push('qr_code = ?'); params.push(qrCode); }
 
   if (fields.length === 0) return findById(roomId);
   params.push(roomId);

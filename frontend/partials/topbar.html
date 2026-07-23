@@ -1,35 +1,75 @@
 <header class="h-16 w-full bg-surface-container-lowest flex items-center justify-between px-8 z-40 shadow-sm border-b border-outline-variant/10">
   <div class="flex items-center bg-surface-container-low px-4 py-1 rounded-full w-full border border-outline-variant/30 max-w-[400px]">
     <span class="material-symbols-outlined text-outline">search</span>
-    <input id="topbarSearch" class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder:text-outline-variant" placeholder="Search classrooms, equipment..." type="text">
+    <input id="topbarSearch" class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder:text-outline-variant outline-none" placeholder="Search data, metrics, assets..." type="text">
   </div>
   <div class="flex items-center gap-6">
     <div class="relative">
-      <button id="notificationBell" class="relative text-on-surface-variant hover:bg-secondary-container p-2 rounded-full transition-colors">
+      <button id="notificationBell" class="relative text-on-surface-variant hover:bg-secondary-container p-2 rounded-full transition-colors focus:outline-none">
         <span class="material-symbols-outlined">notifications</span>
-        <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+        <span id="notificationBadge" class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
       </button>
-      <div id="notificationDropdown" class="hidden absolute right-0 top-[110%] w-[380px] bg-white border border-outline-variant/30 rounded-xl shadow-lg py-3 z-[100] text-left font-body-sm overflow-hidden">
-        <div class="px-4 pb-2 border-b border-outline-variant/10 flex justify-between items-center">
-          <span class="text-label-lg font-bold text-on-surface">Notifications</span>
-          <button id="markAllReadBtn" class="text-[11px] text-brand-blue font-medium hover:underline">Mark all as read</button>
+      <div id="notificationDropdown" class="hidden absolute right-0 top-[115%] w-80 bg-white rounded-xl shadow-lg border border-outline-variant/20 z-50 overflow-hidden text-left">
+        <div class="p-4 border-b border-outline-variant/10 flex items-center justify-between">
+          <h3 class="text-label-lg font-bold text-on-surface">Notifications</h3>
+          <span id="notificationUnreadCount" class="bg-primary text-white text-[10px] px-2 py-0.5 rounded-full font-bold">3</span>
         </div>
-        <div id="notificationList" class="max-h-[300px] overflow-y-auto">
-          <!-- Notifications will be loaded here -->
+        <div id="notificationList" class="max-h-96 overflow-y-auto">
+          <!-- Item 1: New WorkOrder assigned -->
+          <div class="p-4 bg-primary-fixed/20 border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:bg-primary-fixed/30 transition-colors" onclick="location.href='AssignedTasks.html'">
+            <div class="w-2 h-2 mt-2 rounded-full bg-primary shrink-0"></div>
+            <div class="flex flex-col gap-1">
+              <p class="text-body-sm font-bold text-on-surface">New WorkOrder assigned</p>
+              <p class="text-label-md text-on-surface-variant">WO-2024-001 has been assigned to you.</p>
+              <p class="text-[10px] text-outline mt-1">5 minutes ago</p>
+            </div>
+          </div>
+          <!-- Item 2: WorkOrder priority updated -->
+          <div class="p-4 bg-white border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:bg-surface-container-low transition-colors" onclick="location.href='AssignedTasks.html'">
+            <div class="w-2 h-2 mt-2 rounded-full bg-amber-600 shrink-0"></div>
+            <div class="flex flex-col gap-1">
+              <p class="text-body-sm font-medium text-on-surface">WorkOrder priority updated</p>
+              <p class="text-label-md text-on-surface-variant">WO-2024-005 priority changed to High.</p>
+              <p class="text-[10px] text-outline mt-1">30 minutes ago</p>
+            </div>
+          </div>
+          <!-- Item 3: Repair report submitted -->
+          <div class="p-4 bg-white border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:bg-surface-container-low transition-colors" onclick="location.href='AssignedTasks.html'">
+            <div class="w-2 h-2 mt-2 rounded-full bg-green-600 shrink-0"></div>
+            <div class="flex flex-col gap-1">
+              <p class="text-body-sm font-medium text-on-surface">Repair report submitted</p>
+              <p class="text-label-md text-on-surface-variant">WO-2024-008 repair report was submitted.</p>
+              <p class="text-[10px] text-outline mt-1">2 hours ago</p>
+            </div>
+          </div>
         </div>
-        <div class="border-t border-outline-variant/10 mt-1 pt-2">
-          <a href="Notification.html" class="text-brand-blue font-label-lg hover:underline block text-center">View All Notifications</a>
+        <div class="p-3 text-center border-t border-outline-variant/10">
+          <a href="Notifications.html" class="text-primary text-label-md font-bold hover:underline">View All Notifications</a>
         </div>
       </div>
     </div>
     <div class="relative">
-      <button class="flex items-center gap-3 pl-3 pr-2 py-1 rounded-full bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
+      <button id="userProfileBtn" class="flex items-center gap-3 pl-3 pr-2 py-1 rounded-full bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high transition-colors focus:outline-none">
         <div class="text-right flex flex-col">
-          <span id="topbarUserName" class="text-label-lg font-bold text-on-surface leading-tight">-</span>
-          <span id="topbarUserRole" class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">-</span>
+          <span id="topbarUserName" class="text-label-lg font-bold text-on-surface leading-tight">Nguyen Van A</span>
+          <span id="topbarUserRole" class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">Technician</span>
         </div>
-        <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-primary" id="topbarUserAvatar">?</div>
+        <div id="topbarUserAvatar" class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30 bg-primary-fixed flex items-center justify-center font-bold text-primary text-xs">
+          A
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant text-sm">keyboard_arrow_down</span>
       </button>
+      <div id="userProfileDropdown" class="hidden absolute right-0 top-[115%] w-48 bg-white border border-outline-variant/30 rounded-xl shadow-lg py-2 z-[100] text-left">
+        <a href="MyProfile.html" class="flex items-center gap-3 px-4 py-2 text-on-surface hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-on-surface-variant text-[20px]">person</span>
+          <span class="text-label-lg font-medium">My Profile</span>
+        </a>
+        <div class="border-t border-outline-variant/10 my-1"></div>
+        <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-2 text-error hover:bg-error/10 transition-colors text-left">
+          <span class="material-symbols-outlined text-[20px]">logout</span>
+          <span class="text-label-lg font-medium">Log Out</span>
+        </button>
+      </div>
     </div>
   </div>
 </header>
@@ -46,47 +86,34 @@
     let notifications = [];
     let isDropdownOpen = false;
 
-    // Sample notifications data
+    // Sample notifications data matching Stitch mockup
     const sampleNotifications = [
       {
         id: 1,
-        title: 'Report REP-0021 status updated',
-        message: 'Your report for Air Conditioner Unit in Room 404 has been updated to Pending',
-        time: '2 hours ago',
+        title: 'New WorkOrder assigned',
+        message: 'WO-2024-001 has been assigned to you.',
+        time: '5 minutes ago',
         read: false,
-        link: 'ReportDetails.html?id=REP-0021',
-        icon: 'schedule',
-        iconColor: 'text-brand-blue'
+        link: 'AssignedTasks.html',
+        dotColor: 'bg-primary'
       },
       {
         id: 2,
-        title: 'New equipment assigned',
-        message: 'Equipment "Digital Projector" has been assigned to your classroom',
-        time: '5 hours ago',
+        title: 'WorkOrder priority updated',
+        message: 'WO-2024-005 priority changed to High.',
+        time: '30 minutes ago',
         read: false,
-        link: 'EquipmentDetails.html?id=1',
-        icon: 'build',
-        iconColor: 'text-yellow-600'
+        link: 'AssignedTasks.html',
+        dotColor: 'bg-amber-600'
       },
       {
         id: 3,
-        title: 'Report REP-0015 resolved',
-        message: 'Your report for Network Switch in Room 505 has been successfully resolved',
-        time: 'Yesterday',
+        title: 'Repair report submitted',
+        message: 'WO-2024-008 repair report was submitted.',
+        time: '2 hours ago',
         read: true,
-        link: 'ReportDetails.html?id=REP-0015',
-        icon: 'check_circle',
-        iconColor: 'text-green-600'
-      },
-      {
-        id: 4,
-        title: 'Maintenance scheduled',
-        message: 'Scheduled maintenance for Room 404 on Friday at 2:00 PM',
-        time: '2 days ago',
-        read: true,
-        link: 'Schedule.html',
-        icon: 'event',
-        iconColor: 'text-purple-600'
+        link: 'AssignedTasks.html',
+        dotColor: 'bg-green-600'
       }
     ];
 
@@ -104,74 +131,75 @@
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
-      if (!notificationDropdown.contains(e.target) && e.target !== notificationBell) {
+      if (!notificationDropdown.contains(e.target) && !notificationBell.contains(e.target)) {
         notificationDropdown.classList.add('hidden');
         isDropdownOpen = false;
       }
     });
 
-    // Load notifications
-    function loadNotifications() {
-      // Try to get from API
+    // Load notifications from Database API
+    async function loadNotifications() {
       try {
-        // You can replace this with actual API call
-        // const data = await Api.get('/notifications');
-        // notifications = data;
-        
-        // Using sample data for demo
-        notifications = sampleNotifications;
-        renderNotifications();
-        updateBadge();
+        if (window.Api && window.Auth && Auth.isAuthenticated()) {
+          const data = await Api.get('/notifications');
+          if (data && Array.isArray(data)) {
+            notifications = data.map(n => ({
+              id: n.notification_id,
+              title: n.message,
+              message: n.message,
+              time: window.Notifications ? Notifications.timeAgo(n.created_at) : 'Recently',
+              read: Boolean(n.is_read),
+              link: n.order_id ? `WorkOrderDetails.html?id=${n.order_id}` : 'AssignedTasks.html',
+              dotColor: n.is_read ? 'bg-amber-600' : 'bg-primary'
+            }));
+            renderNotifications();
+            updateBadge();
+            return;
+          }
+        }
       } catch (error) {
-        console.error('Failed to load notifications:', error);
-        notifications = sampleNotifications;
-        renderNotifications();
-        updateBadge();
+        console.log('API notifications fetch fallback to demo items', error);
       }
+      notifications = sampleNotifications;
+      renderNotifications();
+      updateBadge();
     }
 
-    // Render notifications
+    // Render notifications (top 3 most recent) matching Stitch design
     function renderNotifications() {
-      if (notifications.length === 0) {
+      const top3 = notifications.slice(0, 3);
+      if (top3.length === 0) {
         notificationList.innerHTML = `
-          <div class="flex flex-col items-center justify-center py-8 px-4">
-            <span class="material-symbols-outlined text-4xl text-outline-variant mb-2">notifications_off</span>
-            <p class="text-on-surface-variant text-body-sm">No notifications yet</p>
+          <div class="p-6 text-center text-on-surface-variant text-body-sm">
+            No notifications yet
           </div>
         `;
         return;
       }
 
-      notificationList.innerHTML = notifications.map(notif => `
-        <a href="${notif.link}" class="flex gap-3 px-4 py-3 hover:bg-surface-container-low transition-colors border-b border-outline-variant/5 ${notif.read ? '' : 'bg-blue-50/30'} group">
-          <div class="mt-1 w-8 h-8 rounded-full bg-${notif.iconColor === 'text-brand-blue' ? 'blue' : notif.iconColor === 'text-yellow-600' ? 'yellow' : notif.iconColor === 'text-green-600' ? 'green' : 'purple'}-50 flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined ${notif.iconColor} text-[18px]">${notif.icon}</span>
+      notificationList.innerHTML = top3.map(notif => `
+        <div class="p-4 ${notif.read ? 'bg-white' : 'bg-primary-fixed/20'} border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:${notif.read ? 'bg-surface-container-low' : 'bg-primary-fixed/30'} transition-colors"
+             onclick="location.href='${notif.link || 'AssignedTasks.html'}'">
+          <div class="w-2 h-2 mt-2 rounded-full ${notif.dotColor || (notif.read ? 'bg-amber-600' : 'bg-primary')} shrink-0"></div>
+          <div class="flex flex-col gap-1">
+            <p class="text-body-sm ${notif.read ? 'font-medium' : 'font-bold'} text-on-surface">${notif.title}</p>
+            <p class="text-label-md text-on-surface-variant">${notif.message}</p>
+            <p class="text-[10px] text-outline mt-1">${notif.time}</p>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-body-sm text-on-surface leading-tight">${notif.title}</p>
-            <p class="text-xs text-on-surface-variant mt-0.5 line-clamp-2">${notif.message}</p>
-            <p class="text-[10px] text-on-surface-variant mt-1">${notif.time}</p>
-          </div>
-          ${!notif.read ? `<div class="mt-2 w-2 h-2 bg-brand-blue rounded-full flex-shrink-0"></div>` : ''}
-          <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
-            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
-          </div>
-        </a>
+        </div>
       `).join('');
     }
 
-    // Update notification badge
+    // Update notification badge (red dot on bell) and count pill in dropdown header
     function updateBadge() {
       const unreadCount = notifications.filter(n => !n.read).length;
-      if (unreadCount > 0) {
-        notificationBadge.classList.remove('hidden');
-        notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-        // Add count badge
-        notificationBadge.className = 'absolute -top-1 -right-1 w-5 h-5 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center';
-        notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-      } else {
-        notificationBadge.classList.add('hidden');
-        notificationBadge.className = 'hidden absolute top-1 right-1 w-2 h-2 bg-error rounded-full';
+      if (notificationBadge) {
+        notificationBadge.classList.toggle('hidden', unreadCount === 0);
+      }
+      const countPill = document.getElementById('notificationUnreadCount');
+      if (countPill) {
+        countPill.textContent = unreadCount;
+        countPill.classList.toggle('hidden', unreadCount === 0);
       }
     }
 
@@ -204,7 +232,23 @@
       }
     });
 
-    // Load notifications on page load
+    // User profile dropdown toggle
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userProfileDropdown = document.getElementById('userProfileDropdown');
+    if (userProfileBtn && userProfileDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userProfileDropdown.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function(e) {
+        if (!userProfileDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) {
+          userProfileDropdown.classList.add('hidden');
+        }
+      });
+    }
+
+    // Initial load for notifications & badge status
+    loadNotifications();
     document.addEventListener('DOMContentLoaded', function() {
       loadNotifications();
     });

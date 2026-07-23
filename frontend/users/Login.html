@@ -267,15 +267,8 @@
     }
   });
 
-  // ===== LOGIC LOGIN - GIỮ NGUYÊN TỪ CODE GỐC =====
+  // ===== LOGIC LOGIN =====
   (function() {
-    // Kiểm tra đã đăng nhập chưa
-    const existingUser = Auth.getCurrentUser();
-    if (Auth.isAuthenticated() && existingUser) {
-      location.href = Auth.homePageForRole(existingUser.role);
-      return;
-    }
-
     const form = document.getElementById('loginForm');
     const errorBox = document.getElementById('loginError');
     const submitBtn = document.getElementById('loginSubmit');
@@ -290,7 +283,8 @@
         try {
           const email = document.getElementById('email').value.trim();
           const password = document.getElementById('password').value;
-          const user = await Auth.login(email, password);
+          const selectedRole = document.body.dataset.selectedRole || 'user';
+          const user = await Auth.login(email, password, selectedRole);
           location.href = Auth.homePageForRole(user.role);
         } catch (err) {
           errorBox.textContent = err.message || 'Login failed. Please check your email and password.';

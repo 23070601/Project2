@@ -32,7 +32,30 @@ async function findAll({ technicianId, managerId, taskStatus, technicianResponse
 
 async function findById(orderId) {
   const [rows] = await pool.execute(`${BASE_SELECT} WHERE wo.order_id = ?`, [orderId]);
-  return rows[0] || null;
+  const order = rows[0] || null;
+  if (order && order.asset_id) {
+    try {
+      const [historyRows] = await pool.execute(
+        `SELECT wo.*, tech.full_name AS technician_name
+         FROM WorkOrders wo
+         JOIN Users tech ON tech.user_id = wo.technician_id
+         JOIN FaultReports fr ON fr.report_id = wo.report_id
+         WHERE fr.asset_id = ? AND wo.order_id != ?
+         ORDER BY wo.assigned_at DESC LIMIT 5`,
+        [order.asset_id, orderId]
+      );
+      order.repairHistory = historyRows;
+
+      const [failureRows] = await pool.execute(
+        `SELECT COUNT(*) AS count FROM FaultReports WHERE asset_id = ?`,
+        [order.asset_id]
+      );
+      order.failure_count = failureRows[0]?.count || 1;
+    } catch (e) {
+      console.log('Error fetching asset history details', e);
+    }
+  }
+  return order;
 }
 
 async function findByReportId(reportId) {

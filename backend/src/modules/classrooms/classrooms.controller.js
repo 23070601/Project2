@@ -4,12 +4,8 @@ const { ok, created, noContent, ApiError } = require('../../shared/utils/respons
 const { requireFields, toPositiveInt } = require('../../shared/utils/validators');
 
 async function list(req, res) {
-  const { building, floorNumber, search } = req.query;
-  const rooms = await classroomsRepository.findAll({
-    building,
-    floorNumber: floorNumber !== undefined ? Number(floorNumber) : undefined,
-    search,
-  });
+  const { search } = req.query;
+  const rooms = await classroomsRepository.findAll({ search });
   ok(res, rooms);
 }
 
@@ -22,12 +18,12 @@ async function getById(req, res) {
 
 async function create(req, res) {
   requireFields(req.body, ['roomName']);
-  const { roomName, building, floorNumber } = req.body;
+  const { roomName } = req.body;
 
   const existing = await classroomsRepository.findByName(roomName);
   if (existing) throw new ApiError(409, `Room "${roomName}" already exists`);
 
-  const room = await classroomsRepository.create({ roomName, building, floorNumber });
+  const room = await classroomsRepository.create({ roomName });
 
   await auditLogRepository.log({
     userId: req.user.userId,

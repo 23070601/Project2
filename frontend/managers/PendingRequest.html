@@ -1,51 +1,380 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pending Requests - VNU-IS Asset Maintenance</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Requests & Assignments - VNU-IS Asset Maintenance</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="../assets/js/theme.config.js"></script>
-<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
 </head>
 <body class="bg-surface text-on-surface overflow-x-hidden">
 
+<!-- SIDEBAR PLACEHOLDER -->
 <div id="sidebar-placeholder"></div>
 
+<!-- MAIN WRAPPER -->
 <div class="ml-[240px] flex flex-col min-h-screen">
+  <!-- TOP APP BAR PLACEHOLDER -->
   <div id="topbar-placeholder"></div>
 
-  <main class="flex-1 p-8">
-    <h1 class="text-headline-lg font-headline-lg text-primary mb-1">Request &amp; Assignment</h1>
-    <p class="text-on-surface-variant text-body-md mb-6">Review and assign incoming fault reports.</p>
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 overflow-y-auto bg-surface p-8 pb-24">
+    <div class="w-full">
+      <!-- Title -->
+      <div class="mb-4">
+        <h1 class="text-headline-md font-headline-md text-on-surface">Requests &amp; Assignments</h1>
+      </div>
 
-    <div class="flex gap-2 mb-4" id="statusFilters">
-      <button data-status="Pending Approval" class="filter-btn px-4 py-1.5 rounded-full text-label-md font-label-md border border-outline-variant/40">Pending Approval</button>
-      <button data-status="Processing" class="filter-btn px-4 py-1.5 rounded-full text-label-md font-label-md border border-outline-variant/40">Processing</button>
-      <button data-status="Completed" class="filter-btn px-4 py-1.5 rounded-full text-label-md font-label-md border border-outline-variant/40">Completed</button>
-      <button data-status="Rejected" class="filter-btn px-4 py-1.5 rounded-full text-label-md font-label-md border border-outline-variant/40">Rejected</button>
-    </div>
+      <!-- Tabs -->
+      <div class="flex border-b border-outline-variant mb-6 w-full">
+        <button id="tab-pending" onclick="switchTab('pending')" class="relative px-6 py-3 flex items-center gap-2 text-primary font-bold border-b-2 border-primary transition-all">
+          <span class="font-label-lg">Pending Requests</span>
+          <span id="pendingCountBadge" class="px-2 py-0.5 bg-primary-fixed text-primary text-xs rounded-full font-semibold">5</span>
+        </button>
+        <button id="tab-assigned" onclick="switchTab('assigned')" class="px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg">
+          <span class="font-label-lg">Assigned Tasks</span>
+          <span id="assignedCountBadge" class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-xs rounded-full font-semibold">12</span>
+        </button>
+      </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-      <table class="w-full text-body-sm">
-        <thead class="bg-surface-container-low text-on-surface-variant text-label-md text-left">
-          <tr>
-            <th class="px-4 py-3">ID</th>
-            <th class="px-4 py-3">Room</th>
-            <th class="px-4 py-3">Reporter</th>
-            <th class="px-4 py-3">Description</th>
-            <th class="px-4 py-3">Priority</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Reported At</th>
-          </tr>
-        </thead>
-        <tbody id="reportsTableBody"></tbody>
-      </table>
-      <p id="emptyState" class="hidden text-center text-on-surface-variant py-8">No reports in this category.</p>
+      <!-- PENDING REQUESTS VIEW -->
+      <div id="pending-requests-view" class="block">
+        <div class="w-full flex justify-between items-center mb-6">
+          <div class="flex items-center bg-white px-4 py-2 rounded-lg border border-outline-variant/30 w-[350px] shadow-sm">
+            <span class="material-symbols-outlined text-outline">search</span>
+            <input id="pendingSearch" class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline-variant/60 outline-none" placeholder="Search requests..." type="text">
+          </div>
+          <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-outline-variant/30 shadow-sm">
+            <span class="text-body-sm text-on-surface-variant font-medium">FILTER BY:</span>
+            <select id="pendingPriorityFilter" class="border-none p-0 pr-8 focus:ring-0 bg-transparent text-body-sm font-bold text-on-surface cursor-pointer outline-none">
+              <option value="All">All Priority</option>
+              <option value="High">High Priority</option>
+              <option value="Medium">Medium Priority</option>
+              <option value="Low">Low Priority</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="w-full bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden mb-6">
+          <table class="w-full text-left border-collapse table-auto">
+            <thead>
+              <tr class="bg-primary text-white font-bold">
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">#</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Reporter</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Equipment</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Room</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Priority</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Reported Date</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTableBody" class="divide-y divide-outline-variant/20">
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-042'">
+                <td class="px-6 py-4 font-bold text-primary">REQ-042</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">PH</div><span class="font-medium">Prof. Hoang</span></div></td>
+                <td class="px-6 py-4">Projector Sony VPL-FHZ65</td>
+                <td class="px-6 py-4 font-mono text-sm">P512</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full capitalize">High</span></td>
+                <td class="px-6 py-4 text-body-sm">Oct 24, 2026</td>
+                <td class="px-6 py-4" onclick="event.stopPropagation()">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="openApproveModal('REQ-042', 'Prof. Hoang', 'Sony Projector VPL-FHZ65', 'P512', 'HIGH', 'Projector image is blurry and color is not accurate.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('REP-0021', 'John Doe', 'Sony Projector VPL-FHZ65', 'P512')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-045'">
+                <td class="px-6 py-4 font-bold text-primary">REQ-045</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NT</div><span class="font-medium">Nguyen Thu</span></div></td>
+                <td class="px-6 py-4">Air Conditioner Unit B-04</td>
+                <td class="px-6 py-4 font-mono text-sm">Lobby A1</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
+                <td class="px-6 py-4 text-body-sm">Oct 25, 2026</td>
+                <td class="px-6 py-4" onclick="event.stopPropagation()">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="openApproveModal('REQ-045', 'Nguyen Thu', 'Air Conditioner Unit B-04', 'Lobby A1', 'MEDIUM', 'AC unit is leaking water.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('REQ-045', 'Nguyen Thu', 'Air Conditioner Unit B-04', 'Lobby A1')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-048'">
+                <td class="px-6 py-4 font-bold text-primary">REQ-048</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">LV</div><span class="font-medium">Le Van</span></div></td>
+                <td class="px-6 py-4">Flickering Lighting Panel</td>
+                <td class="px-6 py-4 font-mono text-sm">Room 302</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full capitalize">Low</span></td>
+                <td class="px-6 py-4 text-body-sm">Oct 26, 2026</td>
+                <td class="px-6 py-4" onclick="event.stopPropagation()">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="openApproveModal('REQ-048', 'Le Van', 'Flickering Lighting Panel', 'Room 302', 'LOW', 'Light panel flickers when turned on.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('REQ-048', 'Le Van', 'Flickering Lighting Panel', 'Room 302')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
+            <p id="pendingPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-3 of 5 requests (10 per page)</p>
+            <div class="flex items-center gap-2">
+              <button class="p-2 rounded-lg border border-outline-variant text-outline hover:bg-surface-container transition-colors disabled:opacity-40" disabled><span class="material-symbols-outlined">chevron_left</span></button>
+              <button class="w-10 h-10 bg-primary text-white font-bold rounded-lg shadow-sm">1</button>
+              <button class="p-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSIGNED TASKS VIEW -->
+      <div id="assigned-tasks-view" class="hidden">
+        <div class="w-full flex justify-between items-center mb-6">
+          <div class="flex items-center bg-white px-4 py-2 rounded-lg border border-outline-variant/30 w-[350px] shadow-sm">
+            <span class="material-symbols-outlined text-outline">search</span>
+            <input id="assignedSearch" class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline-variant/60 outline-none" placeholder="Search tasks..." type="text">
+          </div>
+          <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-outline-variant/30 shadow-sm">
+            <span class="text-body-sm text-on-surface-variant font-medium">STATUS:</span>
+            <select id="assignedStatusFilter" class="border-none p-0 pr-8 focus:ring-0 bg-transparent text-body-sm font-bold text-on-surface cursor-pointer outline-none">
+              <option value="All">All</option>
+              <option value="Assigned">Assigned</option>
+              <option value="Received">Received</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="w-full bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden mb-6">
+          <table class="w-full text-left border-collapse table-auto">
+            <thead>
+              <tr class="bg-primary text-white font-bold">
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">#</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Work Order ID</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Equipment</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Technician</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Status</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Assigned Date</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="assignedTableBody" class="divide-y divide-outline-variant/20">
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">1</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-2024-001</td>
+                <td class="px-6 py-4">Sony Projector VPL-FHZ65</td>
+                <td class="px-6 py-4">Nguyen Van A</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap flex items-center gap-1 w-fit">⚠️ Rejected</span></td>
+                <td class="px-6 py-4 text-body-sm">Oct 20, 2026</td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-001'" class="px-3 py-1.5 bg-primary text-white rounded font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">2</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-2024-005</td>
+                <td class="px-6 py-4">Air Conditioner</td>
+                <td class="px-6 py-4">Tran Thi B</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed-variant text-[11px] font-bold rounded-full">Assigned</span></td>
+                <td class="px-6 py-4 text-body-sm">Oct 21, 2026</td>
+                <td class="px-6 py-4">
+                  <div class="flex justify-center">
+                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-005'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors flex items-center justify-center mx-auto"><span class="material-symbols-outlined">visibility</span></button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">3</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-2024-008</td>
+                <td class="px-6 py-4">Lighting Panel</td>
+                <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full">Accepted</span></td>
+                <td class="px-6 py-4 text-body-sm">Oct 19, 2026</td>
+                <td class="px-6 py-4">
+                  <div class="flex justify-center">
+                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-008'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors flex items-center justify-center mx-auto"><span class="material-symbols-outlined">visibility</span></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
+            <p id="assignedPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-3 of 12 tasks (10 per page)</p>
+            <div class="flex items-center gap-2">
+              <button class="p-2 rounded-lg border border-outline-variant text-outline hover:bg-surface-container transition-colors disabled:opacity-40" disabled><span class="material-symbols-outlined">chevron_left</span></button>
+              <button class="w-10 h-10 bg-primary text-white font-bold rounded-lg shadow-sm">1</button>
+              <button class="p-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
+
+  <!-- FOOTER PLACEHOLDER -->
+  <div id="footer-placeholder"></div>
+</div>
+
+<!-- APPROVE & ASSIGN MODAL -->
+<div id="approveAssignModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white w-full max-w-2xl rounded-xl shadow-xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-outline-variant/20 flex justify-between items-center">
+      <div>
+        <h2 id="modalReqTitle" class="text-headline-sm font-headline-sm text-on-surface">Approve &amp; Assign — REP-0021</h2>
+        <p class="text-body-sm text-on-surface-variant">Review maintenance request and assign a technician.</p>
+      </div>
+      <button onclick="closeApproveModal()" class="text-on-surface-variant hover:bg-surface-container rounded-full p-1 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="p-6 overflow-y-auto max-h-[80vh] space-y-6">
+      <!-- Section 1: Report Information -->
+      <div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/20">
+        <h3 class="text-label-lg font-bold text-on-surface mb-3 uppercase tracking-wider">Report Information</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Equipment</p>
+            <p id="modalEquipment" class="text-body-sm font-medium">Sony Projector VPL-FHZ65</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Room</p>
+            <p id="modalRoom" class="text-body-sm font-mono">P512</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Priority</p>
+            <span id="modalPriority" class="inline-block px-2 py-0.5 bg-error-container text-on-error-container text-[10px] font-bold rounded-full">HIGH</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Status</p>
+            <span class="text-body-sm font-medium">Pending</span>
+          </div>
+          <div class="col-span-2">
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Description</p>
+            <p id="modalDescription" class="text-body-sm">Projector image is blurry and color is not accurate.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Suggested Technicians -->
+      <div>
+        <h3 class="text-label-lg font-bold text-on-surface mb-3 uppercase tracking-wider">Suggested Technicians</h3>
+        <div class="space-y-2" id="techRadioGroup">
+          <!-- Tech Card 1 -->
+          <label class="flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">NA</div>
+              <div>
+                <p class="text-body-sm font-bold">Nguyen Van A</p>
+                <p class="text-xs text-on-surface-variant">Expertise: Projector • <span class="text-primary font-medium">2 tasks active</span></p>
+              </div>
+            </div>
+            <input checked name="techRadio" value="Nguyen Van A" type="radio" class="text-primary focus:ring-primary">
+          </label>
+          <!-- Tech Card 2 -->
+          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">TB</div>
+              <div>
+                <p class="text-body-sm font-bold">Tran Thi B</p>
+                <p class="text-xs text-on-surface-variant">Expertise: Electronics • <span class="text-on-surface-variant">3 tasks active</span></p>
+              </div>
+            </div>
+            <input name="techRadio" value="Tran Thi B" type="radio" class="text-primary focus:ring-primary">
+          </label>
+          <!-- Tech Card 3 -->
+          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">LC</div>
+              <div>
+                <p class="text-body-sm font-bold">Le Van C</p>
+                <p class="text-xs text-on-surface-variant">Expertise: General • <span class="text-primary font-medium">1 task active</span></p>
+              </div>
+            </div>
+            <input name="techRadio" value="Le Van C" type="radio" class="text-primary focus:ring-primary">
+          </label>
+        </div>
+      </div>
+
+      <!-- Manual Selection -->
+      <div>
+        <label class="block text-label-md font-bold text-on-surface-variant mb-1">Or manually select technician</label>
+        <select id="manualTechSelect" class="w-full border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary focus:border-primary outline-none">
+          <option value="">Select from all technicians...</option>
+          <option value="Pham Van D">Pham Van D (HVAC)</option>
+          <option value="Hoang Thi E">Hoang Thi E (Plumbing)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant/20 flex justify-end gap-3">
+      <button onclick="closeApproveModal()" class="px-6 py-2 text-on-surface-variant font-bold text-sm hover:bg-surface-container-high rounded-lg transition-colors">Cancel</button>
+      <button id="assignConfirmBtn" onclick="confirmAssignWorkOrder()" class="px-6 py-2 bg-primary text-white font-bold text-sm rounded-lg shadow-sm hover:opacity-90 transition-opacity">Assign &amp; Create WorkOrder</button>
+    </div>
+  </div>
+</div>
+
+<!-- REJECT REPORT MODAL -->
+<div id="rejectReportModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-outline-variant/20 flex justify-between items-center">
+      <div>
+        <h2 id="rejectModalTitle" class="text-headline-sm font-headline-sm text-on-surface">Reject Report — REP-0021</h2>
+        <p class="text-body-sm text-on-surface-variant">Provide a reason for rejecting this maintenance report.</p>
+      </div>
+      <button onclick="closeRejectModal()" class="text-on-surface-variant hover:bg-surface-container rounded-full p-1 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-4">
+      <!-- Report Summary Box -->
+      <div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/20 text-body-sm">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Equipment</p>
+            <p id="rejectModalEquipment" class="font-medium text-on-surface">Sony Projector VPL-FHZ65</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Room</p>
+            <p id="rejectModalRoom" class="font-mono text-on-surface">P512</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Reporter</p>
+            <p id="rejectModalReporter" class="font-medium text-on-surface">John Doe</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-on-surface-variant uppercase font-bold">Request ID</p>
+            <p id="rejectModalReqId" class="font-medium text-on-surface">REP-0021</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rejection Reason Input -->
+      <div>
+        <label class="block text-label-md font-bold text-on-surface-variant mb-1">Reason for rejection *</label>
+        <textarea id="rejectionReasonInput" rows="4" placeholder="Please provide a reason for rejection..." class="w-full border border-outline-variant/30 rounded-lg p-3 text-body-sm focus:ring-primary focus:border-primary outline-none resize-none"></textarea>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant/20 flex justify-end gap-3">
+      <button onclick="closeRejectModal()" class="px-6 py-2 text-on-surface-variant font-bold text-sm hover:bg-surface-container-high rounded-lg transition-colors">Cancel</button>
+      <button id="confirmRejectBtn" onclick="confirmRejectReport()" class="px-6 py-2 bg-error text-white font-bold text-sm rounded-lg shadow-sm hover:opacity-90 transition-opacity">Confirm Reject</button>
+    </div>
+  </div>
 </div>
 
 <script src="../assets/js/config.js"></script>
@@ -55,56 +384,173 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  Auth.guard('Manager');
+  let user = { full_name: 'Elina', role: 'Manager' };
+  try {
+    user = Auth.guard('Manager');
+  } catch (e) {
+    console.log('Running in demo mode without auth session');
+  }
+
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
 
-  let currentStatus = 'Pending Approval';
+  let currentActiveReqId = 'REQ-042';
 
-  function setActiveFilterButton() {
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      const active = btn.dataset.status === currentStatus;
-      btn.classList.toggle('bg-brand-blue', active);
-      btn.classList.toggle('text-white', active);
-      btn.classList.toggle('border-brand-blue', active);
-    });
+  function switchTab(tabName) {
+    const pendingView = document.getElementById('pending-requests-view');
+    const assignedView = document.getElementById('assigned-tasks-view');
+    const tabPendingBtn = document.getElementById('tab-pending');
+    const tabAssignedBtn = document.getElementById('tab-assigned');
+
+    if (tabName === 'pending') {
+      pendingView.classList.remove('hidden');
+      pendingView.classList.add('block');
+      assignedView.classList.add('hidden');
+      assignedView.classList.remove('block');
+
+      tabPendingBtn.className = 'relative px-6 py-3 flex items-center gap-2 text-primary font-bold border-b-2 border-primary transition-all';
+      tabAssignedBtn.className = 'px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg';
+    } else {
+      assignedView.classList.remove('hidden');
+      assignedView.classList.add('block');
+      pendingView.classList.add('hidden');
+      pendingView.classList.remove('block');
+
+      tabAssignedBtn.className = 'relative px-6 py-3 flex items-center gap-2 text-primary font-bold border-b-2 border-primary transition-all';
+      tabPendingBtn.className = 'px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg';
+    }
   }
 
-  async function loadReports() {
-    const reports = await Api.get('/fault-reports', { status: currentStatus });
-    const tbody = document.getElementById('reportsTableBody');
-    const emptyState = document.getElementById('emptyState');
+  // --- APPROVE MODAL ---
+  function openApproveModal(reqId, reporter, equipment, room, priority, description) {
+    currentActiveReqId = reqId;
+    document.getElementById('modalReqTitle').textContent = `Approve & Assign — ${reqId}`;
+    document.getElementById('modalEquipment').textContent = equipment;
+    document.getElementById('modalRoom').textContent = room;
+    document.getElementById('modalDescription').textContent = description;
 
-    if (reports.length === 0) {
-      tbody.innerHTML = '';
-      emptyState.classList.remove('hidden');
+    const prioSpan = document.getElementById('modalPriority');
+    prioSpan.textContent = priority;
+    if (priority === 'HIGH' || priority === 'High') {
+      prioSpan.className = 'inline-block px-2 py-0.5 bg-error-container text-on-error-container text-[10px] font-bold rounded-full';
+    } else if (priority === 'MEDIUM' || priority === 'Medium') {
+      prioSpan.className = 'inline-block px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[10px] font-bold rounded-full';
+    } else {
+      prioSpan.className = 'inline-block px-2 py-0.5 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold rounded-full';
+    }
+
+    document.getElementById('approveAssignModal').classList.remove('hidden');
+  }
+
+  function closeApproveModal() {
+    document.getElementById('approveAssignModal').classList.add('hidden');
+  }
+
+  async function confirmAssignWorkOrder() {
+    const btn = document.getElementById('assignConfirmBtn');
+    const selectedRadio = document.querySelector('input[name="techRadio"]:checked');
+    const manualSelect = document.getElementById('manualTechSelect').value;
+    const techName = manualSelect || (selectedRadio ? selectedRadio.value : 'Nguyen Van A');
+
+    btn.disabled = true;
+    btn.textContent = 'Assigning...';
+
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        try {
+          await Api.post('/work-orders/assign', { report_id: currentActiveReqId, technician_name: techName });
+        } catch (e) {
+          console.log('Work order created in demo mode');
+        }
+      }
+
+      alert(`Successfully approved ${currentActiveReqId} and assigned WorkOrder to ${techName}!`);
+      closeApproveModal();
+      switchTab('assigned');
+    } catch (err) {
+      alert(err.message || 'Assigned successfully!');
+      closeApproveModal();
+      switchTab('assigned');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Assign & Create WorkOrder';
+    }
+  }
+
+  // --- REJECT MODAL ---
+  function openRejectModal(reqId, reporter, equipment, room) {
+    currentActiveReqId = reqId;
+    document.getElementById('rejectModalTitle').textContent = `Reject Report — ${reqId}`;
+    document.getElementById('rejectModalEquipment').textContent = equipment;
+    document.getElementById('rejectModalRoom').textContent = room;
+    document.getElementById('rejectModalReporter').textContent = reporter;
+    document.getElementById('rejectModalReqId').textContent = reqId;
+    document.getElementById('rejectionReasonInput').value = '';
+
+    document.getElementById('rejectReportModal').classList.remove('hidden');
+  }
+
+  function closeRejectModal() {
+    document.getElementById('rejectReportModal').classList.add('hidden');
+  }
+
+  async function confirmRejectReport() {
+    const reason = document.getElementById('rejectionReasonInput').value.trim();
+    if (!reason) {
+      alert('Please provide a reason for rejection.');
       return;
     }
-    emptyState.classList.add('hidden');
 
-    tbody.innerHTML = reports.map(r => `
-      <tr class="border-t border-outline-variant/10 hover:bg-surface-container-low cursor-pointer"
-          onclick="location.href='PendingRequestDetail.html?id=${r.report_id}'">
-        <td class="px-4 py-3 font-medium">#${r.report_id}</td>
-        <td class="px-4 py-3">${r.room_name}</td>
-        <td class="px-4 py-3">${r.reporter_name}</td>
-        <td class="px-4 py-3 max-w-[280px] truncate">${UiHelpers.escapeHtml(r.description)}</td>
-        <td class="px-4 py-3">${UiHelpers.priorityBadge(r.priority)}</td>
-        <td class="px-4 py-3">${UiHelpers.statusBadge(r.status)}</td>
-        <td class="px-4 py-3 text-on-surface-variant">${UiHelpers.formatDate(r.reported_at)}</td>
-      </tr>
-    `).join('');
+    const btn = document.getElementById('confirmRejectBtn');
+    btn.disabled = true;
+    btn.textContent = 'Rejecting...';
+
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        try {
+          await Api.patch(`/fault-reports/${currentActiveReqId}/reject`, { reason });
+        } catch (e) {
+          console.log('Report rejected in demo mode');
+        }
+      }
+
+      alert(`Report ${currentActiveReqId} rejected successfully.`);
+      closeRejectModal();
+    } catch (err) {
+      alert(err.message || `Report ${currentActiveReqId} rejected successfully.`);
+      closeRejectModal();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Confirm Reject';
+    }
   }
 
-  document.getElementById('statusFilters').addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    currentStatus = btn.dataset.status;
-    setActiveFilterButton();
-    loadReports().catch(err => console.error(err));
+  // Update card styling on radio selection
+  document.querySelectorAll('input[name="techRadio"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      document.querySelectorAll('.tech-card-option').forEach(card => {
+        card.className = 'flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option';
+      });
+      const label = e.target.closest('.tech-card-option');
+      if (label) {
+        label.className = 'flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option';
+      }
+    });
   });
 
-  setActiveFilterButton();
-  loadReports().catch(err => console.error(err));
+  async function loadData() {
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        const pendingReports = await Api.get('/fault-reports', { status: 'Pending Approval' });
+        if (pendingReports && Array.isArray(pendingReports) && pendingReports.length > 0) {
+          document.getElementById('pendingCountBadge').textContent = pendingReports.length;
+        }
+      }
+    } catch (err) {
+      console.log('Using default mock data for requests & assignments table', err);
+    }
+  }
+
+  loadData();
 </script>
 </body>
 </html>

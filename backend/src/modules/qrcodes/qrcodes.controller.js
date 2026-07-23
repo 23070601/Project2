@@ -4,11 +4,8 @@ const auditLogRepository = require('../auditLog/auditLog.repository');
 const { ok, ApiError } = require('../../shared/utils/responseWrapper');
 const { toPositiveInt } = require('../../shared/utils/validators');
 
-// URL đích khi quét QR: mở thẳng trang CreateReport.html với room_id điền sẵn.
-// FRONTEND_BASE_URL nên trỏ tới domain thật khi deploy.
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://127.0.0.1:5500/frontend/users';
 
-// Managers/GenerateClassQR.html - sinh QR mới cho 1 phòng
 async function generate(req, res) {
   const roomId = toPositiveInt(req.params.roomId, 'roomId');
   const room = await classroomsRepository.findById(roomId);
@@ -32,7 +29,6 @@ async function generate(req, res) {
   ok(res, { roomId, roomName: room.room_name, qrCode, targetUrl, qrImageDataUrl });
 }
 
-// Managers/ViewQRModal.html - render lại QR hiện có (không đổi mã) để xem/tải
 async function view(req, res) {
   const roomId = toPositiveInt(req.params.roomId, 'roomId');
   const room = await classroomsRepository.findById(roomId);
@@ -45,14 +41,11 @@ async function view(req, res) {
   ok(res, { roomId, roomName: room.room_name, qrCode: room.qr_code, targetUrl, qrImageDataUrl });
 }
 
-// Managers/QRManagement.html - danh sách toàn bộ phòng kèm trạng thái QR
 async function list(req, res) {
   const rooms = await classroomsRepository.findAll();
   ok(res, rooms.map((r) => ({
     roomId: r.room_id,
     roomName: r.room_name,
-    building: r.building,
-    floorNumber: r.floor_number,
     hasQrCode: Boolean(r.qr_code),
     qrCode: r.qr_code,
   })));

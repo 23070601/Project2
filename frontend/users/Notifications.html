@@ -40,7 +40,7 @@
         All
       </button>
       <button id="tabUnread" class="pb-3 text-on-surface-variant hover:text-on-surface font-label-lg flex items-center gap-2 tab-btn focus:outline-none" onclick="filterNotifications('unread')">
-        Unread <span id="unreadTabCount" class="bg-primary text-on-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold">3</span>
+        Unread <span id="unreadTabCount" class="bg-primary text-on-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold">2</span>
       </button>
       <button id="tabRead" class="pb-3 text-on-surface-variant hover:text-on-surface font-label-lg tab-btn focus:outline-none" onclick="filterNotifications('read')">
         Read
@@ -50,74 +50,50 @@
     <!-- Notifications List Container -->
     <div id="notificationFullList" class="space-y-4">
       <!-- Unread Notification 1 -->
-      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='PendingRequest.html'">
+      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='ReportDetails.html'">
         <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
-            <h4 class="text-body-md font-bold text-on-surface">New Fault Report Submitted</h4>
-            <span class="text-label-md text-on-surface-variant">5 minutes ago</span>
+            <h4 class="text-body-md font-bold text-on-surface">Report Status Updated</h4>
+            <span class="text-label-md text-on-surface-variant">10 minutes ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">New report <span class="font-medium text-primary">#REP-2024-001</span> (Sony Projector - Room A101) requires manager review & assignment.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">Your report <span class="font-medium text-primary">#REP-0021</span> (Air Conditioner Unit in Room 404) has been assigned to Technician.</p>
         </div>
       </div>
 
       <!-- Unread Notification 2 -->
-      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='PendingRequest.html'">
+      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='ListReports.html'">
         <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
-            <h4 class="text-body-md font-bold text-on-surface">High Priority Request Escalated</h4>
-            <span class="text-label-md text-on-surface-variant">30 minutes ago</span>
-          </div>
-          <p class="text-body-sm text-on-surface-variant mt-1"><span class="font-medium text-primary">#REP-2024-005</span> (Air Conditioner - Room B204) marked as <span class="text-error font-medium">High Priority</span>.</p>
-        </div>
-      </div>
-
-      <!-- Unread Notification 3 -->
-      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='Report&Analytics.html'">
-        <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
-        <div class="flex-1">
-          <div class="flex justify-between items-start">
-            <h4 class="text-body-md font-bold text-on-surface">Decision Support Replacement Alert</h4>
+            <h4 class="text-body-md font-bold text-on-surface">Maintenance In Progress</h4>
             <span class="text-label-md text-on-surface-variant">1 hour ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">Asset <span class="font-medium text-primary">AST-104 (Projector Sony)</span> has exceeded failure threshold. Replacement recommended.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">Technician has started working on <span class="font-medium text-primary">Projector Connectivity Issue</span> in Room 202.</p>
         </div>
       </div>
 
       <!-- Read Notification 1 -->
-      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='PendingRequest.html'">
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='ListReports.html'">
         <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
-            <h4 class="text-body-md font-medium text-on-surface">Repair Report Submitted by Technician</h4>
-            <span class="text-label-md text-on-surface-variant">2 hours ago</span>
+            <h4 class="text-body-md font-medium text-on-surface">Report Resolved</h4>
+            <span class="text-label-md text-on-surface-variant">Yesterday</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">Technician Le Van C submitted completed repair report for <span class="font-medium">#WO-2024-008</span>.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">Your report <span class="font-medium">#REP-0015</span> (Smart Board Touchscreen) has been marked as Completed.</p>
         </div>
       </div>
 
       <!-- Read Notification 2 -->
-      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='ClassroomsManagement.html'">
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='ListReports.html'">
         <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
-            <h4 class="text-body-md font-medium text-on-surface">New Classroom Added</h4>
-            <span class="text-label-md text-on-surface-variant">Yesterday</span>
+            <h4 class="text-body-md font-medium text-on-surface">Report Created Confirmation</h4>
+            <span class="text-label-md text-on-surface-variant">3 days ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">Classroom <span class="font-medium">Room C303</span> was registered successfully into system inventory.</p>
-        </div>
-      </div>
-
-      <!-- Read Notification 3 -->
-      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='UsersManagement.html'">
-        <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
-        <div class="flex-1">
-          <div class="flex justify-between items-start">
-            <h4 class="text-body-md font-medium text-on-surface">User Profile Created</h4>
-            <span class="text-label-md text-on-surface-variant">2 days ago</span>
-          </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">New technician account created for <span class="font-medium">Pham Van D</span>.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">Your issue report for <span class="font-medium">Speaker System Room A101</span> was submitted successfully.</p>
         </div>
       </div>
 
@@ -136,7 +112,6 @@
       </button>
       <button class="w-10 h-10 rounded-lg bg-primary text-on-primary font-label-lg font-bold">1</button>
       <button class="w-10 h-10 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low font-label-lg transition-colors">2</button>
-      <button class="w-10 h-10 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low font-label-lg transition-colors">3</button>
       <button class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low transition-colors">
         <span class="material-symbols-outlined">chevron_right</span>
       </button>
@@ -153,14 +128,14 @@
 <script src="../assets/js/layout.js"></script>
 <script src="../assets/js/notifications.js"></script>
 <script>
-  let currentUser = { full_name: 'Elina', role: 'Manager' };
+  let currentUser = { full_name: 'Student User', role: 'User' };
   try {
-    currentUser = Auth.guard('Manager');
+    currentUser = Auth.guard('User');
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }
 
-  Layout.init({ role: 'Manager', activePage: 'Notifications' });
+  Layout.init({ role: 'User', activePage: 'Notification' });
 
   // Filter Tabs Handler with Empty State
   function filterNotifications(filterType) {
