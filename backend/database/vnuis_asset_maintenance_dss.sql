@@ -193,14 +193,14 @@ CREATE TABLE Notifications (
 
 -- 1. USERS (Default password: 123456)
 INSERT INTO Users (user_id, full_name, email, password_hash, role, phone, technician_specialty, is_active) VALUES
-(1,  'Nguyen Van A',   'lecturer.a@vnuis.edu.vn', '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'User',       '0912345678', NULL, TRUE),
-(2,  'Tran Thi B',     'student.b@vnuis.edu.vn',  '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'User',       '0923456789', NULL, TRUE),
-(3,  'Le Van C',       'tech.c@vnuis.edu.vn',     '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'Technician', '0934567890', 'Electrical', TRUE),
-(4,  'Pham Thi D',     'tech.d@vnuis.edu.vn',     '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'Technician', '0945678901', 'Networking', TRUE),
-(5,  'Hoang Van E',    'manager.e@vnuis.edu.vn',  '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'Manager',    '0956789012', NULL, TRUE),
-(6,  'Vu Van F',       'tech.f@vnuis.edu.vn',     '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'Technician', '0967890123', 'General', TRUE),
-(7,  'Doan Van G',     'lecturer.g@vnuis.edu.vn', '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'User',       '0978901234', NULL, TRUE),
-(8,  'Bui Thi H',      'student.h@vnuis.edu.vn',  '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW', 'User',       '0989012345', NULL, TRUE);
+(1,  'Nguyen Van A',   'lecturer.a@vnuis.edu.vn', '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0912345678', NULL, TRUE),
+(2,  'Tran Thi B',     'student.b@vnuis.edu.vn',  '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0923456789', NULL, TRUE),
+(3,  'Le Van C',       'tech.c@vnuis.edu.vn',     '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Technician', '0934567890', 'Electrical', TRUE),
+(4,  'Pham Thi D',     'tech.d@vnuis.edu.vn',     '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Technician', '0945678901', 'Networking', TRUE),
+(5,  'Hoang Van E',    'manager.e@vnuis.edu.vn',  '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Manager',    '0956789012', NULL, TRUE),
+(6,  'Vu Van F',       'tech.f@vnuis.edu.vn',     '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Technician', '0967890123', 'General', TRUE),
+(7,  'Doan Van G',     'lecturer.g@vnuis.edu.vn', '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0978901234', NULL, TRUE),
+(8,  'Bui Thi H',      'student.h@vnuis.edu.vn',  '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0989012345', NULL, TRUE);
 
 -- 2. CLASSROOMS (26 CLASSROOMS - FLOORS 1, 3, 4, 5, 6 - NO FLOOR 2)
 INSERT INTO Classrooms (room_id, room_name, qr_code) VALUES
