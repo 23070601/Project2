@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-container-lowest": "#ffffff",
+          "tertiary": "#574000",
+          "inverse-on-surface": "#eff0f8",
+          "on-error": "#ffffff",
+          "primary-fixed": "#d5e3ff",
+          "on-tertiary-fixed": "#261a00",
+          "on-secondary-fixed-variant": "#42474c",
+          "on-primary": "#ffffff",
+          "on-surface": "#191c21",
+          "secondary": "#5a5f64",
+          "secondary-fixed": "#dfe3e9",
+          "surface-tint": "#0b5eaf",
+          "surface-container": "#ecedf5",
+          "secondary-fixed-dim": "#c2c7cd",
+          "surface-bright": "#f9f9ff",
+          "outline-variant": "#c2c6d3",
+          "tertiary-fixed": "#ffdf9e",
+          "on-surface-variant": "#424751",
+          "secondary-container": "#dce0e6",
+          "on-secondary-fixed": "#171c20",
+          "on-primary-fixed-variant": "#004788",
+          "surface-dim": "#d8dae1",
+          "primary": "#004482",
+          "tertiary-container": "#745600",
+          "surface-variant": "#e1e2e9",
+          "outline": "#727783",
+          "error": "#ba1a1a",
+          "on-tertiary-fixed-variant": "#5b4300",
+          "surface": "#f9f9ff",
+          "inverse-primary": "#a7c8ff",
+          "inverse-surface": "#2e3036",
+          "on-secondary": "#ffffff",
+          "on-primary-container": "#bdd5ff",
+          "primary-fixed-dim": "#a7c8ff",
+          "surface-container-high": "#e7e8ef",
+          "error-container": "#ffdad6",
+          "surface-container-low": "#f2f3fb",
+          "on-tertiary": "#ffffff",
+          "on-primary-fixed": "#001b3b",
+          "tertiary-fixed-dim": "#fabd00",
+          "on-tertiary-container": "#ffcc55",
+          "surface-container-highest": "#e1e2e9",
+          "on-background": "#191c21",
+          "on-error-container": "#93000a",
+          "on-secondary-container": "#5e6368",
+          "background": "#f9f9ff",
+          "primary-container": "#005bac"
+        },
+        borderRadius: {
+          DEFAULT: "0.25rem",
+          lg: "0.5rem",
+          xl: "0.75rem",
+          full: "9999px"
+        },
+        spacing: {
+          "margin-mobile": "16px",
+          "margin-desktop": "32px",
+          "unit": "4px",
+          "gutter": "24px",
+          "container-max": "1280px"
+        },
+        fontFamily: {
+          "label-lg": ["Inter"],
+          "headline-md": ["Poppins"],
+          "headline-sm": ["Poppins"],
+          "label-md": ["Inter"],
+          "body-sm": ["Inter"],
+          "display-lg": ["Poppins"],
+          "headline-lg": ["Poppins"],
+          "body-lg": ["Inter"],
+          "body-md": ["Inter"]
+        },
+        fontSize: {
+          "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+          "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+          "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+          "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+          "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+          "display-lg": ["48px", { "lineHeight": "1.2", "fontWeight": "700" }],
+          "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+          "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+          "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .animate-in {
+    animation: fadeSlide 0.6s ease-out both;
+  }
+  @keyframes fadeSlide {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-x-hidden">
+
+<!-- Hero Section / Background Container -->
+<main class="flex-grow relative flex items-center justify-center py-12 px-margin-mobile md:px-margin-desktop">
+  
+  <!-- Background Campus Image & Gradient -->
+  <div class="absolute inset-0 z-0">
+    <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBO5NXULCP9B6YDiwlQ3LyarNpNVC1c-8jiklv22y6CbC7ZmE1SB1XRArT9t0l_u5FWngLuA2B_crzd4Rb_PB7GMd_ViqgeTE7dZL5KngkVYcu2D7fxKtni2mEWDM3N9bNn-eSeg_2zh4YJii3NWlL4kHNEPZE0QULJekOvdQ-bQM_Oygc6T-JZuFGQHVbO6ooYiGiFSe0eUqfUIPhpzD9sU6Zl0smuImJu_0KAolU_wE8aMO6k9kewnWTxg9A58DXIa2jCohTf60rp');"></div>
+    <div class="absolute inset-0 campus-bg-overlay bg-surface-dim/40"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="relative z-10 w-full max-w-md animate-in">
+    <div class="shadow-2xl rounded-xl overflow-hidden flex flex-col items-center p-8 md:p-10 bg-white border border-outline-variant/30 shadow-md">
+      
+      <!-- Brand Logo -->
+      <div class="mb-6 h-20 w-auto flex items-center justify-center">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUnGM1xiEvCtdsC6RnQAGiFWtPnnpPFo4wuq4nW1EIWLN_reOYHXrUpj173ZKOhtRm6bJsPQAUIznQ6QKmloPdVS836AsqwsfFTzTkVmq6yYdAQK_mF2SKCfDTAhhfllcxQpPTUfEJTmqdbEFCAUe3cc0Y2VOx4z8Ci1Imznfq-7RaK0eNV4DB87xsS9X-uBquKPq0rxs0x9QdQEAE6_T-ZeTbFZXLGwAIWAB-boHpQNcNGrNDtqHDaRgPek7gp2CMLZH8qXAi-uXT" alt="VNU-IS Logo" class="h-full object-contain">
+      </div>
+
+      <h1 class="font-headline-md text-headline-md text-primary mb-8 tracking-tight">WELCOME BACK</h1>
+      <p class="text-body-sm text-on-surface-variant text-center -mt-6 mb-8 italic">Please select your role to login</p>
+
+      <!-- Role Selector Tabs -->
+      <div class="w-full grid grid-cols-3 gap-2 p-1 bg-surface-container rounded-lg mb-8">
+        <button id="tab-user" onclick="switchTab('user')" class="flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all duration-300 bg-primary-container text-white shadow-sm font-label-md text-label-md">
+          <span class="material-symbols-outlined text-[20px] mb-1">person</span>
+          User
+        </button>
+        <button id="tab-technician" onclick="switchTab('technician')" class="flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all duration-300 text-on-surface-variant hover:bg-surface-container-highest font-label-md text-label-md">
+          <span class="material-symbols-outlined text-[20px] mb-1">engineering</span>
+          Technician
+        </button>
+        <button id="tab-manager" onclick="switchTab('manager')" class="flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all duration-300 text-on-surface-variant hover:bg-surface-container-highest font-label-md text-label-md">
+          <span class="material-symbols-outlined text-[20px] mb-1">admin_panel_settings</span>
+          Manager
+        </button>
+      </div>
+
+      <!-- Login Form - GIỮ NGUYÊN ID VÀ CHỨC NĂNG -->
+      <form id="loginForm" class="w-full space-y-5">
+        <div>
+          <label for="email" class="block font-label-lg text-label-lg text-on-surface-variant mb-1.5 ml-1">Email Address</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">mail</span>
+            <input type="email" id="email" placeholder="example@vnu.edu.vn" required autocomplete="username"
+                   class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-primary transition-all">
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1.5 ml-1">
+            <label for="password" class="block font-label-lg text-label-lg text-on-surface-variant">Password</label>
+            <a href="#" class="text-label-md font-label-md text-primary hover:underline">Forgot?</a>
+          </div>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password"
+                   class="w-full pl-10 pr-12 py-3 bg-white border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-primary transition-all">
+            <button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center ml-1">
+          <input type="checkbox" id="remember" class="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary">
+          <label for="remember" class="ml-2 font-label-md text-label-md text-on-surface-variant cursor-pointer">Keep me logged in</label>
+        </div>
+
+        <!-- Error Message - GIỮ NGUYÊN ID -->
+        <p id="loginError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
+
+        <!-- Login Button - GIỮ NGUYÊN ID -->
+        <button id="loginSubmit" type="submit" class="w-full bg-primary-container text-white text-body-lg font-bold py-4 rounded-lg shadow-md hover:bg-on-primary-fixed-variant hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 hover:shadow-lg mt-4 flex items-center justify-center gap-2">
+          Login
+        </button>
+      </form>
+
+      <!-- Help Desk Link -->
+      <div class="mt-8 text-center">
+        <p class="font-body-sm text-body-sm text-on-surface-variant">
+          Need help? <a href="#" class="text-primary font-label-lg hover:underline">Contact Support</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Load scripts -->
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+
+<script>
+  // ===== Tab switching (chỉ UI) =====
+  function switchTab(role) {
+    const tabs = ['user', 'technician', 'manager'];
+    tabs.forEach(t => {
+      const btn = document.getElementById(`tab-${t}`);
+      if (t === role) {
+        btn.classList.add('bg-primary-container', 'text-white', 'shadow-sm');
+        btn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-highest');
+      } else {
+        btn.classList.remove('bg-primary-container', 'text-white', 'shadow-sm');
+        btn.classList.add('text-on-surface-variant', 'hover:bg-surface-container-highest');
+      }
+    });
+    
+    // Animation nhẹ cho form
+    const form = document.querySelector('form');
+    if (form) {
+      form.style.opacity = '0.5';
+      form.style.transform = 'translateY(4px)';
+      setTimeout(() => {
+        form.style.opacity = '1';
+        form.style.transform = 'translateY(0)';
+      }, 100);
+    }
+    // Lưu role đã chọn
+    document.body.dataset.selectedRole = role;
+  }
+
+  // ===== Khởi tạo trang =====
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set User tab active mặc định
+    const userTab = document.getElementById('tab-user');
+    if (userTab) {
+      ['user', 'technician', 'manager'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === 'user') {
+          btn.classList.add('bg-primary-container', 'text-white', 'shadow-sm');
+          btn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-highest');
+        } else {
+          btn.classList.remove('bg-primary-container', 'text-white', 'shadow-sm');
+          btn.classList.add('text-on-surface-variant', 'hover:bg-surface-container-highest');
+        }
+      });
+      document.body.dataset.selectedRole = 'user';
+    }
+
+    // Toggle password visibility
+    const toggleBtn = document.getElementById('togglePassword');
+    const pwField = document.getElementById('password');
+    if (toggleBtn && pwField) {
+      toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const type = pwField.getAttribute('type') === 'password' ? 'text' : 'password';
+        pwField.setAttribute('type', type);
+        this.querySelector('span').textContent = type === 'password' ? 'visibility' : 'visibility_off';
+      });
+    }
+  });
+
+  // ===== LOGIC LOGIN - GIỮ NGUYÊN TỪ CODE GỐC =====
+  (function() {
+    // Kiểm tra đã đăng nhập chưa
+    const existingUser = Auth.getCurrentUser();
+    if (Auth.isAuthenticated() && existingUser) {
+      location.href = Auth.homePageForRole(existingUser.role);
+      return;
+    }
+
+    const form = document.getElementById('loginForm');
+    const errorBox = document.getElementById('loginError');
+    const submitBtn = document.getElementById('loginSubmit');
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorBox.classList.add('hidden');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
+
+        try {
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          const user = await Auth.login(email, password);
+          location.href = Auth.homePageForRole(user.role);
+        } catch (err) {
+          errorBox.textContent = err.message || 'Login failed. Please check your email and password.';
+          errorBox.classList.remove('hidden');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Login';
+        }
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

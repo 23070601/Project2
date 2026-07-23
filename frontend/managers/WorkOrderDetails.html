@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Order Details - VNU-IS Asset Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../assets/js/theme.config.js"></script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden">
+
+<div id="sidebar-placeholder"></div>
+
+<div class="ml-[240px] flex flex-col min-h-screen">
+  <div id="topbar-placeholder"></div>
+
+  <main class="flex-1 p-8 max-w-[820px]">
+    <a href="AssignedTasks.html" class="text-brand-blue text-label-md font-label-md flex items-center gap-1 mb-4 hover:underline">
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Assigned Tasks
+    </a>
+    <div id="content" class="space-y-6"></div>
+  </main>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/ui-helpers.js"></script>
+<script>
+  Auth.guard('Manager');
+  Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
+
+  const orderId = new URLSearchParams(location.search).get('id');
+  const content = document.getElementById('content');
+
+  function renderHistory(history) {
+    if (!history || history.length === 0) return '';
+    return `
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
+        <h2 class="text-headline-sm font-headline-sm mb-4">Status History</h2>
+        <ol class="space-y-3">
+          ${history.map(h => `
+            <li class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-brand-blue text-[18px] mt-0.5">check_circle</span>
+              <div>
+                <p class="text-body-sm"><strong>${h.old_status || 'Created'}</strong> → <strong>${h.new_status}</strong></p>
+                <p class="text-[11px] text-on-surface-variant">${UiHelpers.formatDate(h.changed_at)}${h.note ? ' · ' + UiHelpers.escapeHtml(h.note) : ''}</p>
+              </div>
+            </li>`).join('')}
+        </ol>
+      </div>`;
+  }
+
+  async function load() {
+    const o = await Api.get(`/work-orders/${orderId}`);
+    content.innerHTML = `
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
+        <div class="flex items-start justify-between">
+          <div>
+            <h1 class="text-headline-md font-headline-md text-primary">Order #${o.order_id}</h1>
+            <p class="text-on-surface-variant text-body-sm mt-1">${o.room_name}${o.asset_name ? ' · ' + o.asset_name : ''}</p>
+          </div>
+          <div class="flex gap-2">${UiHelpers.priorityBadge(o.priority)}${UiHelpers.statusBadge(o.task_status)}</div>
+        </div>
+        <p class="text-body-md mt-4 whitespace-pre-line">${UiHelpers.escapeHtml(o.description)}</p>
+        <div class="grid grid-cols-2 gap-4 mt-5 text-body-sm">
+          <div><span class="text-on-surface-variant">Reporter:</span> ${o.reporter_name}</div>
+          <div><span class="text-on-surface-variant">Technician:</span> ${o.technician_name}</div>
+          <div><span class="text-on-surface-variant">Response:</span> ${UiHelpers.statusBadge(o.technician_response)}</div>
+          <div><span class="text-on-surface-variant">Assigned at:</span> ${UiHelpers.formatDate(o.assigned_at)}</div>
+        </div>
+        ${o.fix_description ? `<div class="mt-4 p-4 bg-surface-container-low rounded-lg"><p class="text-label-md font-label-md text-on-surface-variant mb-1">Fix Description</p><p class="text-body-sm">${UiHelpers.escapeHtml(o.fix_description)}</p>${o.parts_used ? `<p class="text-body-sm mt-1"><strong>Parts used:</strong> ${UiHelpers.escapeHtml(o.parts_used)}</p>` : ''}</div>` : ''}
+        ${o.rejection_reason ? `<p class="text-body-sm text-error mt-3">Rejection reason: ${UiHelpers.escapeHtml(o.rejection_reason)}</p>` : ''}
+      </div>
+      ${renderHistory(o.statusHistory)}
+    `;
+  }
+
+  load().catch(err => { content.innerHTML = `<p class="text-error">${err.message}</p>`; });
+</script>
+</body>
+</html>
