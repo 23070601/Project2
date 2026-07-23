@@ -1,19 +1,6 @@
 /**
- * layout.js - nạp partial sidebar/topbar dùng chung vào mọi trang, để tránh
- * lặp lại ~150 dòng HTML header/sidebar ở từng file như bản mockup gốc.
- *
- * Cách dùng trong mỗi trang:
- *   <div id="sidebar-placeholder"></div>
- *   <div id="topbar-placeholder"></div>
- *   ...
- *   <script src="../assets/js/config.js"></script>
- *   <script src="../assets/js/api.js"></script>
- *   <script src="../assets/js/auth.js"></script>
- *   <script src="../assets/js/layout.js"></script>
- *   <script>
- *     const user = Auth.guard('User');              // hoặc ['Manager','Technician']
- *     Layout.init({ role: 'User', activePage: 'Dashboard' });
- *   </script>
+ * layout.js - nạp partial sidebar/topbar/footer dùng chung vào mọi trang, để đảm bảo
+ * cấu trúc layout (sidebar, header, footer) nhất quán theo chuẩn Role Technician.
  */
 const Layout = (() => {
   const SIDEBAR_FILE = {
@@ -25,7 +12,7 @@ const Layout = (() => {
   async function loadPartial(url, targetSelector) {
     const target = document.querySelector(targetSelector);
     if (!target) return;
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-cache' });
     target.innerHTML = await res.text();
   }
 
@@ -50,8 +37,10 @@ const Layout = (() => {
   }
 
   function wireLogout() {
-    const btn = document.getElementById('logoutBtn');
-    if (btn) btn.addEventListener('click', () => Auth.logout());
+    const btns = document.querySelectorAll('#logoutBtn');
+    btns.forEach((btn) => {
+      btn.addEventListener('click', () => Auth.logout());
+    });
   }
 
   function wireNotificationBell() {
@@ -92,6 +81,14 @@ const Layout = (() => {
   async function init({ role, activePage }) {
     await loadPartial(SIDEBAR_FILE[role], '#sidebar-placeholder');
     await loadPartial('../partials/topbar.html', '#topbar-placeholder');
+
+    let footerTarget = document.querySelector('#footer-placeholder');
+    if (!footerTarget) {
+      footerTarget = document.createElement('div');
+      footerTarget.id = 'footer-placeholder';
+      document.body.appendChild(footerTarget);
+    }
+    await loadPartial('../partials/footer.html', '#footer-placeholder');
 
     highlightActiveNav(activePage);
 

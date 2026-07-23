@@ -13,51 +13,64 @@ const Auth = (() => {
     Manager: '../managers/ManagerDashboard.html',
   };
 
-  async function login(email, password) {
+  async function login(email, password, selectedRole) {
+    let user = null;
     try {
       const result = await Api.post('/auth/login', { email, password });
       if (result && result.token) {
-        localStorage.setItem(TOKEN_KEY, result.token);
-        localStorage.setItem(USER_KEY, JSON.stringify(result.user));
-        return result.user;
+        user = result.user;
       }
     } catch (err) {
       console.warn('Backend login API unavailable/error, fallback to frontend demo auth:', err.message);
     }
 
-    // Fallback cho Demo Mode / Offline Live Server:
-    const cleanEmail = email.toLowerCase();
-    const savedPwKey = `vnuis_password_${cleanEmail}`;
-    const savedPw = localStorage.getItem(savedPwKey);
+    if (!user) {
+      // Fallback cho Demo Mode / Offline Live Server:
+      const cleanEmail = email.toLowerCase();
+      const savedPwKey = `vnuis_password_${cleanEmail}`;
+      const savedPw = localStorage.getItem(savedPwKey);
+      const expectedPassword = savedPw ? savedPw : '123456';
 
-    // Nếu người dùng đã từng đổi mật khẩu -> BẮT BUỘC dùng mật khẩu mới (savedPw), mật khẩu cũ sẽ BỊ TỪ CHỐI
-    // Nếu chưa đổi mật khẩu -> Dùng mật khẩu mặc định ban đầu là '123456'
-    const expectedPassword = savedPw ? savedPw : '123456';
+      if (password === expectedPassword) {
+        const selRoleNorm = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1).toLowerCase()) : null;
 
-    if (password === expectedPassword) {
-      let role = 'User';
-      let name = 'Nguyen Van A';
-      if (cleanEmail.includes('tech') || cleanEmail.includes('c@vnuis')) {
-        role = 'Technician';
-        name = 'Le Van C';
-      } else if (cleanEmail.includes('manager') || cleanEmail.includes('e@vnuis')) {
-        role = 'Manager';
-        name = 'Hoang Van E';
+        let role = 'User';
+        let name = 'Nguyen Van A';
+
+        if (cleanEmail.includes('tech') || cleanEmail.includes('c@vnuis')) {
+          role = 'Technician';
+          name = 'Le Van C';
+        } else if (cleanEmail.includes('manager') || cleanEmail.includes('e@vnuis')) {
+          role = 'Manager';
+          name = 'Hoang Van E';
+        } else if (selRoleNorm) {
+          role = selRoleNorm;
+          name = role === 'Technician' ? 'Le Van C' : (role === 'Manager' ? 'Hoang Van E' : 'Nguyen Van A');
+        }
+
+        user = {
+          user_id: role === 'Manager' ? 2 : (role === 'Technician' ? 3 : 1),
+          full_name: name,
+          email: email,
+          role: role
+        };
+      } else {
+        throw new Error('Invalid email or password. Please check your credentials.');
       }
-
-      const demoUser = {
-        user_id: 1,
-        full_name: name,
-        email: email,
-        role: role
-      };
-
-      localStorage.setItem(TOKEN_KEY, 'demo_jwt_token_' + Date.now());
-      localStorage.setItem(USER_KEY, JSON.stringify(demoUser));
-      return demoUser;
     }
 
-    throw new Error('Invalid email or password. Please check your credentials.');
+    // Check if account role matches the selected role tab
+    if (selectedRole) {
+      const normSelected = selectedRole.toLowerCase();
+      const normUserRole = (user.role || '').toLowerCase();
+      if (normSelected !== normUserRole) {
+        throw new Error('Invalid email or password. Please check your credentials.');
+      }
+    }
+
+    localStorage.setItem(TOKEN_KEY, 'demo_jwt_token_' + Date.now());
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    return user;
   }
 
   function logout() {
@@ -80,19 +93,22 @@ const Auth = (() => {
   }
 
   function guard(allowedRoles) {
-    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
     let user = getCurrentUser();
 
     if (!user) {
-      user = {
-        user_id: 3,
-        full_name: 'Le Van C',
-        email: 'tech.c@vnuis.edu.vn',
-        role: 'Technician'
-      };
-      localStorage.setItem(USER_KEY, JSON.stringify(user));
-      localStorage.setItem(TOKEN_KEY, 'demo_jwt_token_default');
+      location.href = '../users/Login.html';
+      return null;
     }
+
+    if (allowedRoles) {
+      const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+      if (roles.length > 0 && !roles.includes(user.role)) {
+        alert(`Access Denied: Your account role (${user.role}) is not authorized to access this page. Redirecting to your dashboard...`);
+        location.href = homePageForRole(user.role);
+        return null;
+      }
+    }
+
     return user;
   }
 
