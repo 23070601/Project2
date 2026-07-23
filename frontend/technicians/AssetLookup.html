@@ -306,13 +306,14 @@
 
   // Fallback MySQL Assets
   let allAssets = [
-    { asset_id: 1, asset_name: 'Sony Projector VPL-FHZ65', asset_type: 'Projector', room_name: 'P512', status: 'Operational', failure_count: 4, install_date: 'Jan 15, 2023' },
-    { asset_id: 2, asset_name: 'Epson EB-X06', asset_type: 'Projector', room_name: 'P301', status: 'Operational', failure_count: 1, install_date: 'Mar 10, 2023' },
-    { asset_id: 3, asset_name: 'BenQ MX560', asset_type: 'Projector', room_name: 'P205', status: 'Operational', failure_count: 0, install_date: 'Jun 05, 2023' },
-    { asset_id: 4, asset_name: 'Samsung 75in Commercial TV', asset_type: 'TV', room_name: 'R101', status: 'Recommended for Replacement', failure_count: 3, install_date: 'Feb 20, 2022' },
-    { asset_id: 5, asset_name: 'LG Commercial Display 55in', asset_type: 'TV', room_name: 'R302', status: 'Operational', failure_count: 4, install_date: 'Nov 12, 2022' },
-    { asset_id: 6, asset_name: 'Shure Wireless Dual Microphone', asset_type: 'Microphone', room_name: 'R102', status: 'Operational', failure_count: 0, install_date: 'May 18, 2023' },
-    { asset_id: 7, asset_name: 'AKG Wireless Lavalier Mic', asset_type: 'Microphone', room_name: 'R512', status: 'Operational', failure_count: 5, install_date: 'Aug 22, 2022' }
+    { asset_id: 1, asset_name: 'Cisco Catalyst 24-Port Switch', asset_type: 'NetworkSwitch', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
+    { asset_id: 2, asset_name: 'Samsung 75in Commercial TV', asset_type: 'TV', room_name: 'R101', status: 'Recommended for Replacement', failure_count: 3, install_date: '2026-07-21' },
+    { asset_id: 3, asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Aircon', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
+    { asset_id: 4, asset_name: 'JBL Classroom Wall Speaker', asset_type: 'Speaker', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
+    { asset_id: 5, asset_name: 'Panasonic 4K Projector PT-VMZ51', asset_type: 'Projector', room_name: 'R102', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
+    { asset_id: 6, asset_name: 'Shure Wireless Dual Microphone', asset_type: 'Microphone', room_name: 'R102', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
+    { asset_id: 10, asset_name: 'Ultra HD HDMI Cable 10m', asset_type: 'Cable', room_name: 'R103', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
+    { asset_id: 27, asset_name: 'Epson Document Camera R305', asset_type: 'DocumentCamera', room_name: 'R305', status: 'Operational', failure_count: 0, install_date: '2026-07-22' }
   ];
 
   let currentCategoryTypeKey = null;
@@ -324,7 +325,9 @@
     'Aircon': { icon: 'ac_unit', label: 'Air Conditioner', subtitle: 'Manage HVAC and classroom AC units.' },
     'NetworkSwitch': { icon: 'router', label: 'Network Device', subtitle: 'Manage network switches, routers, and hubs.' },
     'Speaker': { icon: 'volume_up', label: 'Speaker System', subtitle: 'Manage classroom sound systems and wall speakers.' },
-    'Visualizer': { icon: 'camera_alt', label: 'Visualizer Camera', subtitle: 'Manage document cameras and visualizers.' }
+    'Visualizer': { icon: 'camera_alt', label: 'Visualizer Camera', subtitle: 'Manage document cameras and visualizers.' },
+    'Cable': { icon: 'cable', label: 'Cable & Accessories', subtitle: 'Manage HDMI and AV cables.' },
+    'DocumentCamera': { icon: 'photo_camera', label: 'Document Camera', subtitle: 'Manage visualizers and document cameras.' }
   };
 
   function renderLevel1Categories() {
