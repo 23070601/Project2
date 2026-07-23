@@ -61,21 +61,21 @@ cd backend
 Tạo một file có tên `.env` ngay trong thư mục `backend` (cùng cấp với `package.json`) với nội dung:
 ```env
 # --- Server ---
-PORT=4000
-NODE_ENV=development
-CORS_ORIGIN=*
+PORT=
+NODE_ENV=
+CORS_ORIGIN=
 
 # --- Database (MySQL XAMPP / Local) ---
-DB_HOST=localhost
-DB_PORT=3306
+DB_HOST=
+DB_PORT=
 DB_USER=root
 DB_PASSWORD=
-DB_NAME=vnuis_asset_maintenance_dss
+DB_NAME=
 
 # --- Auth ---
-JWT_SECRET=vnuis_secret_key_2024
-JWT_EXPIRES_IN=8h
-BCRYPT_SALT_ROUNDS=10
+JWT_SECRET=
+JWT_EXPIRES_IN=
+BCRYPT_SALT_ROUNDS=
 ```
 
 ### Bước 3.3: Cài đặt thư viện dependencies
