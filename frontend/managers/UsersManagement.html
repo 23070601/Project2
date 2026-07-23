@@ -488,11 +488,13 @@
           console.log('User created in demo mode');
         }
       }
-      alert(`User account "${name}" created successfully!`);
+      if (window.showToast) showToast(`User account "${name}" created successfully!`, 'success');
+      else alert(`User account "${name}" created successfully!`);
       closeAddUserModal();
       document.getElementById('addUserForm').reset();
     } catch (err) {
-      alert(err.message || `User account "${name}" created successfully!`);
+      if (window.showToast) showToast(err.message || `User account "${name}" created successfully!`, 'success');
+      else alert(err.message || `User account "${name}" created successfully!`);
       closeAddUserModal();
     } finally {
       btn.disabled = false;
@@ -535,10 +537,12 @@
           console.log('User updated in demo mode');
         }
       }
-      alert(`User account "${name}" updated successfully!`);
+      if (window.showToast) showToast(`User account "${name}" updated successfully!`, 'success');
+      else alert(`User account "${name}" updated successfully!`);
       closeEditUserModal();
     } catch (err) {
-      alert(err.message || `User account "${name}" updated successfully!`);
+      if (window.showToast) showToast(err.message || `User account "${name}" updated successfully!`, 'success');
+      else alert(err.message || `User account "${name}" updated successfully!`);
       closeEditUserModal();
     } finally {
       btn.disabled = false;
@@ -551,8 +555,10 @@
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
         await Api.put(`/users/${id}`, { is_active: isActive });
       }
+      if (window.showToast) showToast(`User ${id} status changed to ${isActive ? 'Active' : 'Inactive'}`, 'info');
       console.log(`User ${id} active status set to: ${isActive}`);
     } catch (err) {
+      if (window.showToast) showToast(`User ${id} status changed to ${isActive ? 'Active' : 'Inactive'}`, 'info');
       console.log('Status toggled in demo mode');
     }
   }
