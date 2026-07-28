@@ -46,30 +46,7 @@
 <!-- MAIN WRAPPER -->
 <div class="ml-[240px] flex flex-col h-screen">
   <!-- TOP APP BAR -->
-  <header class="h-16 w-full bg-surface-container-lowest flex items-center justify-between px-8 z-40 shadow-sm border-b border-outline-variant/10">
-    <div class="flex items-center bg-surface-container-low px-4 py-1 rounded-full w-full border border-outline-variant/30 max-w-[400px]">
-      <span class="material-symbols-outlined text-outline">search</span>
-      <input class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder:text-outline-variant" placeholder="Search data, metrics, assets..." type="text">
-    </div>
-    <div class="flex items-center gap-6">
-      <button class="relative text-on-surface-variant hover:bg-secondary-container p-2 rounded-full transition-colors">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-      </button>
-      <div class="relative group">
-        <button class="flex items-center gap-3 pl-3 pr-2 py-1 rounded-full bg-surface-container-low border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
-          <div class="text-right flex flex-col">
-            <span id="topUserFullName" class="text-label-lg font-bold text-on-surface leading-tight text-right">Le Van C</span>
-            <span class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider text-right">Technician</span>
-          </div>
-          <div class="w-8 h-8 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold text-sm border border-outline-variant/30">
-            <span id="topUserInitial">L</span>
-          </div>
-          <span class="material-symbols-outlined text-on-surface-variant">keyboard_arrow_down</span>
-        </button>
-      </div>
-    </div>
-  </header>
+  <div id="topbar-placeholder"></div>
 
   <!-- MAIN CONTENT AREA -->
   <main class="flex-1 overflow-y-auto bg-surface p-8 pb-32">
@@ -145,8 +122,10 @@
           </select>
           <select id="l2FilterStatus" onchange="filterLevel2Table()" class="bg-white border border-outline-variant/30 rounded-lg px-4 py-2 text-body-sm font-body-sm focus:ring-primary">
             <option value="">All Status</option>
-            <option value="Normal">Normal</option>
-            <option value="High Risk">High Risk</option>
+            <option value="Operational">Operational</option>
+            <option value="Under Repair">Under Repair</option>
+            <option value="Recommended for Replacement">Recommended for Replacement</option>
+            <option value="Retired">Retired</option>
           </select>
         </div>
       </div>
@@ -287,22 +266,10 @@
     const user = Auth.getCurrentUser();
     if (user) {
       currentUser = user;
-      document.getElementById('topUserFullName').textContent = user.full_name || 'Le Van C';
-      document.getElementById('topUserInitial').textContent = (user.full_name || 'L').charAt(0).toUpperCase();
     }
   } catch (e) {}
 
-  function formatAssignedDate(dateStr) {
-    if (!dateStr) return 'Oct 10, 2024';
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${monthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-    } catch (e) {
-      return dateStr;
-    }
-  }
+  Layout.init({ role: 'Technician', activePage: 'AssetLookup' });
 
   // Fallback MySQL Assets
   let allAssets = [
@@ -325,7 +292,6 @@
     'Aircon': { icon: 'ac_unit', label: 'Air Conditioner', subtitle: 'Manage HVAC and classroom AC units.' },
     'NetworkSwitch': { icon: 'router', label: 'Network Device', subtitle: 'Manage network switches, routers, and hubs.' },
     'Speaker': { icon: 'volume_up', label: 'Speaker System', subtitle: 'Manage classroom sound systems and wall speakers.' },
-    'Visualizer': { icon: 'camera_alt', label: 'Visualizer Camera', subtitle: 'Manage document cameras and visualizers.' },
     'Cable': { icon: 'cable', label: 'Cable & Accessories', subtitle: 'Manage HDMI and AV cables.' },
     'DocumentCamera': { icon: 'photo_camera', label: 'Document Camera', subtitle: 'Manage visualizers and document cameras.' }
   };
@@ -417,6 +383,20 @@
     document.getElementById('level1CategoryView').classList.remove('hidden');
   }
 
+  function getAssetStatusBadgeHtml(status) {
+    const s = status || 'Operational';
+    if (s === 'Recommended for Replacement') {
+      return `<span class="px-2.5 py-1 rounded-full bg-error-container/40 text-error text-[10px] font-bold uppercase flex items-center gap-1 w-fit mx-auto"><span class="material-symbols-outlined text-[12px]">warning</span> Replacement Rec.</span>`;
+    }
+    if (s === 'Under Repair') {
+      return `<span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold uppercase flex items-center gap-1 w-fit mx-auto"><span class="material-symbols-outlined text-[12px]">build</span> Under Repair</span>`;
+    }
+    if (s === 'Retired') {
+      return `<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase flex items-center gap-1 w-fit mx-auto"><span class="material-symbols-outlined text-[12px]">block</span> Retired</span>`;
+    }
+    return `<span class="px-2.5 py-1 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold uppercase flex items-center gap-1 w-fit mx-auto"><span class="material-symbols-outlined text-[12px]">check_circle</span> Operational</span>`;
+  }
+
   function renderLevel2TableRows(assetsList) {
     const tbody = document.getElementById('l2AssetsTableBody');
     if (assetsList.length === 0) {
@@ -425,7 +405,6 @@
     }
 
     tbody.innerHTML = assetsList.map((a, idx) => {
-      const isHighRisk = (a.failure_count || 0) >= 3;
       const formattedId = `AST-${String(a.asset_id).padStart(3, '0')}`;
 
       return `
@@ -437,24 +416,18 @@
           <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(a.room_name || 'Room')}</td>
           <td class="px-6 py-4 text-body-sm text-center">${a.failure_count || 0}</td>
           <td class="px-6 py-4 text-center">
-            ${isHighRisk ? `
-              <span class="px-3 py-1 rounded-full bg-error-container/40 text-error text-[10px] font-bold flex items-center gap-1 w-fit mx-auto">
-                <span class="material-symbols-outlined text-[12px]">warning</span> High Risk
-              </span>
-            ` : `
-              <span class="px-3 py-1 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold flex items-center gap-1 w-fit mx-auto">
-                <span class="material-symbols-outlined text-[12px]">check_circle</span> Normal
-              </span>
-            `}
+            ${getAssetStatusBadgeHtml(a.status)}
           </td>
           <td class="px-6 py-4 flex justify-center text-center">
-            <button onclick="openAssetDetailsModal(${a.asset_id})" class="text-primary font-bold text-label-lg hover:underline" title="View Asset Details">
+            <button data-asset-id="${a.asset_id}" class="asset-details-btn text-primary font-bold text-label-lg hover:underline" title="View Asset Details">
               <span class="material-symbols-outlined flex items-center justify-center">visibility</span>
             </button>
           </td>
         </tr>
       `;
     }).join('');
+
+    attachAssetDetailsHandlers();
   }
 
   function filterLevel2Table() {
@@ -470,12 +443,22 @@
     const filtered = categoryAssets.filter(a => {
       const matchQuery = !q || (a.asset_name || '').toLowerCase().includes(q) || String(a.asset_id).includes(q);
       const matchRoom = !room || a.room_name === room;
-      const isHighRisk = (a.failure_count || 0) >= 3;
-      const matchStatus = !status || (status === 'High Risk' && isHighRisk) || (status === 'Normal' && !isHighRisk);
+      const matchStatus = !status || a.status === status;
       return matchQuery && matchRoom && matchStatus;
     });
 
     renderLevel2TableRows(filtered);
+  }
+
+  function attachAssetDetailsHandlers() {
+    document.querySelectorAll('.asset-details-btn').forEach(button => {
+      button.addEventListener('click', (event) => {
+        const assetId = event.currentTarget.dataset.assetId;
+        if (assetId) {
+          openAssetDetailsModal(assetId);
+        }
+      });
+    });
   }
 
   // Asset Details Modal Logic

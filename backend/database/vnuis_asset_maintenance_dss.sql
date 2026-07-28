@@ -367,11 +367,11 @@ INSERT INTO FaultReports (report_id, reporter_id, asset_id, room_id, description
 
 -- 5. WORK ORDERS (8 UNIQUE REPORT_ID VALUES: 1, 3, 6, 8, 9, 11, 12, 15)
 INSERT INTO WorkOrders (order_id, report_id, manager_id, technician_id, assigned_at, technician_response, rejection_reason, task_status, fix_description, parts_used, resolved_at, closed_at) VALUES
-(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, 'Accepted', NULL,            'In Progress', 'Inspected optical engine and power supply unit.', 'Spare Lamp Module', NULL, NULL),
+(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, 'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
 (2,  3,  5, 4, NOW() - INTERVAL 5 DAY,  'Accepted', NULL,            'Closed',      'Replaced display panel driver and updated firmware.', 'Display Controller Board', NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
 (3,  6,  5, 6, NOW() - INTERVAL 10 HOUR, 'Rejected', 'overloaded',   'Assigned',    NULL, NULL, NULL, NULL),
 (4,  8,  5, 3, NOW() - INTERVAL 16 HOUR, 'Accepted', NULL,            'Received',    NULL, NULL, NULL, NULL),
-(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  'Accepted', NULL,            'In Progress', 'Replaced wireless receiver module and antenna.', 'Mic Receiver Antenna', NULL, NULL),
+(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
 (6,  11, 5, 6, NOW() - INTERVAL 6 DAY,  'Accepted', NULL,            'Closed',      'Fixed HDMI port connection and replaced TV remote battery.', 'HDMI Female Socket', NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
 (7,  12, 5, 3, NOW() - INTERVAL 7 DAY,  'Accepted', NULL,            'Closed',      'Replaced microphone shell casing and soldered broken audio lead.', 'Mic Housing Clip', NOW() - INTERVAL 6 DAY, NOW() - INTERVAL 6 DAY),
 (8,  15, 5, 4, NOW() - INTERVAL 1 HOUR,  'Pending',  NULL,            'Assigned',    NULL, NULL, NULL, NULL);

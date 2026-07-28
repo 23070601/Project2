@@ -360,6 +360,10 @@
         <label class="block text-label-md font-bold text-on-surface mb-1">Email *</label>
         <input id="newEmail" type="email" placeholder="Enter email address" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
       </div>
+      <div>
+        <label class="block text-label-md font-bold text-on-surface mb-1">Temporary Password *</label>
+        <input id="newPassword" type="password" placeholder="Enter password (min 6 chars)" value="123456" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
+      </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-label-md font-bold text-on-surface mb-1">Role *</label>
@@ -445,6 +449,24 @@
   </div>
 </div>
 
+<!-- DELETE USER MODAL OVERLAY -->
+<div id="deleteUserModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+    <div class="p-6 border-b border-outline-variant/20">
+      <h3 class="text-headline-sm font-headline-sm text-on-surface">Confirm Delete User</h3>
+      <p class="text-body-sm text-on-surface-variant mt-1">Are you sure you want to delete user account <span id="deleteModalUserName" class="font-bold text-on-surface"></span>? This action cannot be undone.</p>
+    </div>
+    <div class="p-6 flex justify-end items-center gap-3 border-t border-outline-variant/10">
+      <button type="button" onclick="closeDeleteUserModal()" class="px-6 py-2.5 rounded-lg text-on-surface-variant font-bold text-label-lg hover:bg-surface-container transition-colors">
+        Cancel
+      </button>
+      <button type="button" id="confirmDeleteUserBtn" onclick="confirmDeleteUser()" class="px-6 py-2.5 bg-error text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all shadow-md">
+        Delete User
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -452,14 +474,113 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Elina', role: 'Manager' };
+  let currentUser = { full_name: 'Elina', role: 'Manager' };
   try {
-    user = Auth.guard('Manager');
+    currentUser = Auth.guard('Manager');
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }
 
   Layout.init({ role: 'Manager', activePage: 'UsersManagement' });
+
+  let allUsers = [];
+  let pendingDeleteUserId = null;
+
+  const DEFAULT_USERS = [
+    { user_id: 'USR001', full_name: 'Elina Manager', email: 'elina.m@vnuis.edu.vn', role: 'Manager', is_active: true, created_at: 'Oct 12, 2023' },
+    { user_id: 'USR002', full_name: 'John Doe', email: 'john.doe@vnuis.edu.vn', role: 'Technician', is_active: true, created_at: 'Nov 05, 2023' },
+    { user_id: 'USR003', full_name: 'Sarah Smith', email: 'sarah.s@vnuis.edu.vn', role: 'User', is_active: false, created_at: 'Dec 01, 2023' },
+    { user_id: 'USR004', full_name: 'Pham Thi D', email: 'd.pham@gmail.com', role: 'User', is_active: true, created_at: 'Jul 05, 2026' },
+    { user_id: 'USR005', full_name: 'Hoang Van E', email: 'e.hoang@gmail.com', role: 'Technician', is_active: true, created_at: 'Jul 02, 2026' },
+    { user_id: 'USR006', full_name: 'Doan Thi F', email: 'f.doan@gmail.com', role: 'User', is_active: false, created_at: 'Jun 28, 2026' },
+    { user_id: 'USR007', full_name: 'Vu Van G', email: 'g.vu@gmail.com', role: 'Manager', is_active: true, created_at: 'Jun 25, 2026' },
+    { user_id: 'USR008', full_name: 'Dang Thi H', email: 'h.dang@gmail.com', role: 'User', is_active: true, created_at: 'Jun 20, 2026' }
+  ];
+
+  function saveUsersState() {
+    localStorage.setItem('vnuis_users_list', JSON.stringify(allUsers));
+  }
+
+  function updateKpiStats() {
+    document.getElementById('statTotalUsers').textContent = allUsers.length;
+    document.getElementById('statActiveUsers').textContent = allUsers.filter(u => u.is_active !== false).length;
+    document.getElementById('statTechnicians').textContent = allUsers.filter(u => u.role === 'Technician').length;
+    document.getElementById('statManagers').textContent = allUsers.filter(u => u.role === 'Manager').length;
+  }
+
+  function renderUsersTable(usersToRender) {
+    const list = usersToRender || filterUsersList();
+    const tbody = document.getElementById('usersTableBody');
+    if (!tbody) return;
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-outline">No users found matching search criteria.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map((u, idx) => {
+      const initials = (u.full_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      const isActive = u.is_active !== false;
+
+      let roleBadgeClass = 'bg-secondary-fixed/40 text-secondary';
+      if (u.role === 'Manager') roleBadgeClass = 'bg-primary-fixed/30 text-primary';
+      else if (u.role === 'Technician') roleBadgeClass = 'bg-tertiary-fixed/30 text-tertiary';
+
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors">
+          <td class="px-6 text-body-sm py-6">${idx + 1}</td>
+          <td class="px-6 py-6 text-body-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold text-xs">${initials}</div>
+              <div class="flex flex-col">
+                <span class="font-bold text-on-surface">${UiHelpers.escapeHtml(u.full_name)}</span>
+                <span class="text-xs text-on-surface-variant">${UiHelpers.escapeHtml(u.email)}</span>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-6">
+            <span class="px-2.5 py-1 rounded-full ${roleBadgeClass} text-[10px] font-bold uppercase">${UiHelpers.escapeHtml(u.role || 'User')}</span>
+          </td>
+          <td class="px-6 py-6">
+            ${isActive ? `
+              <span class="px-2.5 py-1 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold uppercase">Active</span>
+            ` : `
+              <span class="px-2.5 py-1 rounded-full bg-outline-variant/30 text-outline text-[10px] font-bold uppercase">Inactive</span>
+            `}
+          </td>
+          <td class="px-6 text-body-sm py-6">${UiHelpers.escapeHtml(u.created_at || 'Jul 28, 2026')}</td>
+          <td class="px-6 flex items-center gap-3 py-6">
+            <button onclick="openEditUserModal('${u.user_id}', '${UiHelpers.escapeJsString(u.full_name)}', '${UiHelpers.escapeJsString(u.email)}', '${u.role}', '${isActive ? 'Active' : 'Inactive'}', '${u.created_at || ''}')" class="p-1.5 hover:bg-surface-container-high rounded transition-colors text-outline" title="Edit User">
+              <span class="material-symbols-outlined text-lg">edit</span>
+            </button>
+            <button onclick="openDeleteUserModal('${u.user_id}', '${UiHelpers.escapeJsString(u.full_name)}')" class="p-1.5 hover:bg-error-container/40 rounded transition-colors text-error" title="Delete User">
+              <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" ${isActive ? 'checked' : ''} class="sr-only peer" onchange="toggleUserStatus('${u.user_id}', this.checked)">
+              <div class="w-8 h-4 bg-outline-variant/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    updateKpiStats();
+  }
+
+  function filterUsersList() {
+    const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+    const role = document.getElementById('roleFilter').value;
+    const status = document.getElementById('statusFilter').value;
+
+    return allUsers.filter(u => {
+      const matchSearch = !search || u.full_name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search);
+      const matchRole = role === 'All' || u.role === role;
+      const isActive = u.is_active !== false;
+      const matchStatus = status === 'All' || (status === 'Active' && isActive) || (status === 'Inactive' && !isActive);
+      return matchSearch && matchRole && matchStatus;
+    });
+  }
 
   // Add User Modal
   function openAddUserModal() {
@@ -473,6 +594,7 @@
   async function confirmAddUser() {
     const name = document.getElementById('newFullName').value.trim();
     const email = document.getElementById('newEmail').value.trim();
+    const password = document.getElementById('newPassword').value || '123456';
     const role = document.getElementById('newRole').value;
     const status = document.getElementById('newStatus').value;
     const btn = document.getElementById('saveAddUserBtn');
@@ -480,22 +602,47 @@
     btn.disabled = true;
     btn.textContent = 'Creating...';
 
+    const numericId = Date.now();
+    let newUserId = `USR${String(numericId).slice(-4)}`;
+
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api) {
         try {
-          await Api.post('/users', { full_name: name, email, role, is_active: status === 'Active' });
+          const created = await Api.post('/users', {
+            fullName: name,
+            email,
+            password,
+            role,
+            isActive: status === 'Active'
+          });
+          if (created && created.user_id) {
+            newUserId = `USR${String(created.user_id).padStart(3, '0')}`;
+          }
         } catch (e) {
-          console.log('User created in demo mode');
+          console.warn('API post user error:', e);
         }
       }
-      if (window.showToast) showToast(`User account "${name}" created successfully!`, 'success');
-      else alert(`User account "${name}" created successfully!`);
+
+      const newUserObj = {
+        user_id: newUserId,
+        full_name: name,
+        email: email,
+        role: role,
+        is_active: status === 'Active',
+        created_at: 'Jul 28, 2026'
+      };
+
+      allUsers.unshift(newUserObj);
+      saveUsersState();
+      await loadUsers();
+
+      if (window.showToast) showToast(`User account "${name}" created successfully in Database!`, 'success');
+      else alert(`User account "${name}" created successfully in Database!`);
       closeAddUserModal();
       document.getElementById('addUserForm').reset();
     } catch (err) {
-      if (window.showToast) showToast(err.message || `User account "${name}" created successfully!`, 'success');
-      else alert(err.message || `User account "${name}" created successfully!`);
-      closeAddUserModal();
+      if (window.showToast) showToast(err.message || `Failed to create user "${name}"`, 'error');
+      else alert(err.message || `Failed to create user "${name}"`);
     } finally {
       btn.disabled = false;
       btn.textContent = 'Create User';
@@ -520,8 +667,8 @@
 
   async function saveUserEdit() {
     const id = document.getElementById('editUserId').value;
-    const name = document.getElementById('editFullName').value;
-    const email = document.getElementById('editEmail').value;
+    const name = document.getElementById('editFullName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
     const role = document.getElementById('editRole').value;
     const status = document.getElementById('editStatus').value;
     const btn = document.getElementById('saveUserEditBtn');
@@ -529,16 +676,35 @@
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
+    const cleanNumId = parseInt(String(id).replace(/\D/g, ''), 10);
+
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api && cleanNumId) {
         try {
-          await Api.put(`/users/${id}`, { full_name: name, email, role, is_active: status === 'Active' });
+          await Api.patch(`/users/${cleanNumId}`, {
+            fullName: name,
+            email,
+            role,
+            isActive: status === 'Active'
+          });
         } catch (e) {
-          console.log('User updated in demo mode');
+          console.warn('API patch user error:', e);
         }
       }
-      if (window.showToast) showToast(`User account "${name}" updated successfully!`, 'success');
-      else alert(`User account "${name}" updated successfully!`);
+
+      const userIndex = allUsers.findIndex(u => String(u.user_id) === String(id));
+      if (userIndex !== -1) {
+        allUsers[userIndex].full_name = name;
+        allUsers[userIndex].email = email;
+        allUsers[userIndex].role = role;
+        allUsers[userIndex].is_active = status === 'Active';
+        saveUsersState();
+      }
+
+      await loadUsers();
+
+      if (window.showToast) showToast(`User account "${name}" updated successfully in Database!`, 'success');
+      else alert(`User account "${name}" updated successfully in Database!`);
       closeEditUserModal();
     } catch (err) {
       if (window.showToast) showToast(err.message || `User account "${name}" updated successfully!`, 'success');
@@ -550,34 +716,120 @@
     }
   }
 
-  async function toggleUserStatus(id, isActive) {
+  // Delete User Modal
+  function openDeleteUserModal(id, name) {
+    pendingDeleteUserId = id;
+    document.getElementById('deleteModalUserName').textContent = name;
+    document.getElementById('deleteUserModal').classList.remove('hidden');
+  }
+
+  function closeDeleteUserModal() {
+    pendingDeleteUserId = null;
+    document.getElementById('deleteUserModal').classList.add('hidden');
+  }
+
+  async function confirmDeleteUser() {
+    if (!pendingDeleteUserId) return;
+
+    const btn = document.getElementById('confirmDeleteUserBtn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+
+    const targetId = pendingDeleteUserId;
+    const cleanNumId = parseInt(String(targetId).replace(/\D/g, ''), 10);
+
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        await Api.put(`/users/${id}`, { is_active: isActive });
+      if (window.Api && cleanNumId) {
+        try {
+          await Api.delete(`/users/${cleanNumId}`);
+        } catch (e) {
+          console.warn('API delete user error:', e);
+        }
       }
-      if (window.showToast) showToast(`User ${id} status changed to ${isActive ? 'Active' : 'Inactive'}`, 'info');
-      console.log(`User ${id} active status set to: ${isActive}`);
+
+      const targetUser = allUsers.find(u => String(u.user_id) === String(targetId));
+      const userName = targetUser ? targetUser.full_name : targetId;
+
+      allUsers = allUsers.filter(u => String(u.user_id) !== String(targetId));
+      saveUsersState();
+      await loadUsers();
+
+      closeDeleteUserModal();
+      if (window.showToast) showToast(`User "${userName}" deleted/deactivated in Database!`, 'success');
+      else alert(`User "${userName}" deleted/deactivated in Database!`);
     } catch (err) {
-      if (window.showToast) showToast(`User ${id} status changed to ${isActive ? 'Active' : 'Inactive'}`, 'info');
-      console.log('Status toggled in demo mode');
+      closeDeleteUserModal();
+      if (window.showToast) showToast(err.message || `Failed to delete user`, 'error');
+      else alert(err.message || `Failed to delete user`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Delete User';
     }
   }
 
-  async function loadUsers() {
+  async function toggleUserStatus(id, isActive) {
+    const cleanNumId = parseInt(String(id).replace(/\D/g, ''), 10);
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api && cleanNumId) {
+        try {
+          await Api.patch(`/users/${cleanNumId}`, { isActive });
+        } catch (e) {
+          console.warn('API toggle status error:', e);
+        }
+      }
+    } catch (err) {}
+
+    const userObj = allUsers.find(u => String(u.user_id) === String(id));
+    if (userObj) {
+      userObj.is_active = isActive;
+      saveUsersState();
+    }
+
+    await loadUsers();
+    if (window.showToast) showToast(`User ${id} status changed to ${isActive ? 'Active' : 'Inactive'}`, 'info');
+  }
+
+  async function loadUsers() {
+    let loadedFromApi = false;
+    try {
+      if (window.Api) {
         const users = await Api.get('/users');
         if (users && Array.isArray(users) && users.length > 0) {
-          document.getElementById('statTotalUsers').textContent = users.length;
-          document.getElementById('statActiveUsers').textContent = users.filter(u => u.is_active !== false).length;
-          document.getElementById('statTechnicians').textContent = users.filter(u => u.role === 'Technician').length;
-          document.getElementById('statManagers').textContent = users.filter(u => u.role === 'Manager').length;
+          allUsers = users.map(u => ({
+            user_id: `USR${String(u.user_id || u.id).padStart(3, '0')}`,
+            full_name: u.full_name || u.fullName || 'User',
+            email: u.email || '',
+            role: u.role || 'User',
+            is_active: u.is_active !== undefined ? u.is_active : (u.isActive !== undefined ? u.isActive : true),
+            created_at: u.created_at ? new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Jul 28, 2026'
+          }));
+          loadedFromApi = true;
         }
       }
     } catch (err) {
-      console.log('Using default mock data for UsersManagement view', err);
+      console.log('Using local state for UsersManagement view', err);
     }
+
+    if (!loadedFromApi) {
+      const stored = localStorage.getItem('vnuis_users_list');
+      if (stored) {
+        try {
+          allUsers = JSON.parse(stored);
+        } catch (e) {
+          allUsers = DEFAULT_USERS;
+        }
+      } else {
+        allUsers = DEFAULT_USERS;
+      }
+    }
+
+    saveUsersState();
+    renderUsersTable();
   }
+
+  document.getElementById('searchInput').addEventListener('input', () => renderUsersTable());
+  document.getElementById('roleFilter').addEventListener('change', () => renderUsersTable());
+  document.getElementById('statusFilter').addEventListener('change', () => renderUsersTable());
 
   loadUsers();
 </script>

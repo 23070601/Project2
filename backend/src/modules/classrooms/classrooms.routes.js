@@ -16,6 +16,7 @@ router.get('/:id', asyncHandler(controller.getById));
 // Ghi: chỉ Manager (ClassroomsManagement.html, AddClassroom.html)
 router.post('/', requireRole(ROLES.MANAGER), asyncHandler(controller.create));
 router.patch('/:id', requireRole(ROLES.MANAGER), asyncHandler(controller.update));
+router.put('/:id', requireRole(ROLES.MANAGER), asyncHandler(controller.update));
 router.delete('/:id', requireRole(ROLES.MANAGER), asyncHandler(controller.remove));
 
 module.exports = router;

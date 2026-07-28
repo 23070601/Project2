@@ -40,7 +40,7 @@ async function findById(orderId) {
          FROM WorkOrders wo
          JOIN Users tech ON tech.user_id = wo.technician_id
          JOIN FaultReports fr ON fr.report_id = wo.report_id
-         WHERE fr.asset_id = ? AND wo.order_id != ?
+         WHERE fr.asset_id = ? AND wo.task_status IN ('Completed', 'Closed') AND wo.order_id != ?
          ORDER BY wo.assigned_at DESC LIMIT 5`,
         [order.asset_id, orderId]
       );

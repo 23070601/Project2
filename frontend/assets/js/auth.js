@@ -114,5 +114,11 @@ const Auth = (() => {
     return user;
   }
 
-  return { login, logout, getCurrentUser, isAuthenticated, homePageForRole, guard };
+  const auth = { login, logout, getCurrentUser, isAuthenticated, homePageForRole, guard };
+
+  if (typeof window !== 'undefined') {
+    window.Auth = auth;
+  }
+
+  return auth;
 })();

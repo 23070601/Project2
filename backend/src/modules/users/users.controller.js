@@ -62,12 +62,12 @@ async function create(req, res) {
 
 async function update(req, res) {
   const userId = toPositiveInt(req.params.id, 'id');
-  const { fullName, phone, technicianSpecialty, isActive } = req.body;
+  const { fullName, email, role, phone, technicianSpecialty, isActive } = req.body;
 
   const existing = await usersRepository.findById(userId);
   if (!existing) throw new ApiError(404, 'User not found');
 
-  const updated = await usersRepository.update(userId, { fullName, phone, technicianSpecialty, isActive });
+  const updated = await usersRepository.update(userId, { fullName, email, role, phone, technicianSpecialty, isActive });
 
   await auditLogRepository.log({
     userId: req.user.userId,

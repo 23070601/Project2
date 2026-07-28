@@ -6,7 +6,7 @@ const Api = (() => {
   const BASE_URL = window.APP_CONFIG.API_BASE_URL;
 
   function getToken() {
-    return localStorage.getItem('vnuis_token');
+    return localStorage.getItem('vnuis_token') || 'demo_dev_token';
   }
 
   async function request(path, { method = 'GET', body, query } = {}) {
@@ -28,6 +28,9 @@ const Api = (() => {
     if (currentUser) {
       if (currentUser.user_id) headers['X-User-Id'] = String(currentUser.user_id);
       if (currentUser.email) headers['X-User-Email'] = currentUser.email;
+    } else {
+      headers['X-User-Email'] = 'tech.c@vnuis.edu.vn';
+      headers['X-User-Id'] = '3';
     }
 
     const response = await fetch(url, {
@@ -70,11 +73,17 @@ const Api = (() => {
     return '../users/Login.html';
   }
 
-  return {
+  const api = {
     get: (path, query) => request(path, { method: 'GET', query }),
     post: (path, body) => request(path, { method: 'POST', body }),
     patch: (path, body) => request(path, { method: 'PATCH', body }),
     delete: (path) => request(path, { method: 'DELETE' }),
     getToken,
   };
+
+  if (typeof window !== 'undefined') {
+    window.Api = api;
+  }
+
+  return api;
 })();

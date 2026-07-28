@@ -16,11 +16,17 @@ const confirmationsRoutes = require('./modules/confirmations/confirmations.route
 const notificationsRoutes = require('./modules/notifications/notifications.routes');
 const qrcodesRoutes = require('./modules/qrcodes/qrcodes.routes');
 const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
+const { normalizeRequestBody } = require('./shared/utils/requestNormalizer');
 
 const app = express();
 
-app.use(cors({ origin: env.corsOrigin }));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Id', 'X-User-Email'],
+}));
 app.use(express.json({ limit: '5mb' }));
+app.use(normalizeRequestBody);
 app.use(morgan(env.nodeEnv === 'development' ? 'dev' : 'combined'));
 
 // THÊM DÒNG NÀY ĐỂ SERVE FILE UPLOADS

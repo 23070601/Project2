@@ -46,11 +46,13 @@ async function create({ fullName, email, passwordHash, role, phone = null, techn
   return findById(result.insertId);
 }
 
-async function update(userId, { fullName, phone, technicianSpecialty, isActive }) {
+async function update(userId, { fullName, email, role, phone, technicianSpecialty, isActive }) {
   const fields = [];
   const params = [];
 
   if (fullName !== undefined) { fields.push('full_name = ?'); params.push(fullName); }
+  if (email !== undefined) { fields.push('email = ?'); params.push(email); }
+  if (role !== undefined) { fields.push('role = ?'); params.push(role); }
   if (phone !== undefined) { fields.push('phone = ?'); params.push(phone); }
   if (technicianSpecialty !== undefined) { fields.push('technician_specialty = ?'); params.push(technicianSpecialty); }
   if (isActive !== undefined) { fields.push('is_active = ?'); params.push(isActive ? 1 : 0); }

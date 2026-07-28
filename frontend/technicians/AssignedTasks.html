@@ -177,6 +177,25 @@
   Layout.init({ role: 'Technician', activePage: 'AssignedTasks' });
 
   let activeRejectOrderId = null;
+  let currentTasks = [];
+
+  function getStoredWorkOrders() {
+    try {
+      const stored = localStorage.getItem('vnuis_work_orders');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return null;
+  }
+
+  function saveStoredWorkOrders(tasks) {
+    localStorage.setItem('vnuis_work_orders', JSON.stringify(tasks));
+  }
+
+  function getDisplayTaskStatus(task) {
+    if (!task) return '';
+    if (task.technician_response === 'Rejected') return 'Rejected';
+    return task.task_status || '';
+  }
 
   function filterTasksTable() {
     const search = document.getElementById('taskSearchInput').value.toLowerCase().trim();
@@ -211,29 +230,23 @@
   }
 
   async function acceptTaskRow(btnEl, orderId) {
+    const cleanId = String(orderId).replace(/^WO-/, '');
+    let apiSuccess = false;
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        await Api.patch(`/work-orders/${orderId}/response`, { technicianResponse: 'Accepted' });
+      if (window.Api) {
+        await Api.patch(`/work-orders/${cleanId}/response`, { technicianResponse: 'Accepted' });
+        apiSuccess = true;
       }
-    } catch (e) {}
-
-    const row = btnEl.closest('tr');
-    if (row) {
-      row.dataset.status = 'Received';
-      const statusCell = row.children[4];
-      if (statusCell) {
-        statusCell.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>`;
-      }
-      const actionsCell = row.children[5];
-      if (actionsCell) {
-        actionsCell.innerHTML = `
-          <button onclick="location.href='WorkOrderDetails.html?id=${orderId}'" class="text-primary hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="View Details">
-            <span class="material-symbols-outlined">visibility</span>
-          </button>
-        `;
-      }
+    } catch (e) {
+      console.error('Accept task API error:', e);
     }
-    alert(`Work order WO-${orderId} accepted successfully!`);
+
+    if (apiSuccess) {
+      await loadTasksFromApi();
+      alert(`Work order WO-${cleanId} accepted successfully!`);
+    } else {
+      alert(`Unable to accept work order WO-${cleanId}. Please try again.`);
+    }
   }
 
   function formatAssignedDate(dateStr) {
@@ -297,76 +310,100 @@
       return;
     }
 
+    const cleanId = String(activeRejectOrderId).replace(/^WO-/, '');
+
+    let apiSuccess = false;
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        await Api.patch(`/work-orders/${activeRejectOrderId}/response`, {
+      if (window.Api) {
+        await Api.patch(`/work-orders/${cleanId}/response`, {
           technicianResponse: 'Rejected',
           rejectionReason: reason,
         });
+        apiSuccess = true;
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error('Reject task API error:', err);
+    }
 
     closeRejectModal();
-    const row = document.querySelector(`.task-row[data-id="WO-${activeRejectOrderId}"]`);
-    if (row) {
-      row.remove();
+
+    if (apiSuccess) {
+      await loadTasksFromApi();
+      alert(`Work order WO-${cleanId} rejected.`);
+    } else {
+      alert(`Unable to reject work order WO-${cleanId}. Please try again.`);
     }
-    filterTasksTable();
-    alert(`Work order WO-${activeRejectOrderId} rejected.`);
   }
 
   const TASKS_BY_EMAIL = {
     'tech.c@vnuis.edu.vn': [
-      { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24' },
-      { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-21 07:52:24' },
-      { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-15 07:52:24' }
+      { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.' },
+      { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.' },
+      { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.' }
     ],
     'tech.d@vnuis.edu.vn': [
-      { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-20 07:52:24' },
-      { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24' },
-      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending', assigned_at: '2026-07-23 07:52:24' }
+      { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.' },
+      { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.' },
+      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending', assigned_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.' }
     ],
     'tech.f@vnuis.edu.vn': [
-      { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected', assigned_at: '2026-07-21 07:52:24' },
-      { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24' }
+      { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected', assigned_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.' },
+      { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.' }
     ]
   };
 
   async function loadTasksFromApi() {
     let tasks = [];
+    let loadedFromApi = false;
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (data && Array.isArray(data)) {
           tasks = data;
+          loadedFromApi = true;
         }
       }
     } catch (err) {
-      console.log('API fetch error', err);
+      console.warn('API fetch error, using local fallback:', err);
     }
 
-    if (!tasks || tasks.length === 0) {
-      const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
-      tasks = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+    if (loadedFromApi) {
+      saveStoredWorkOrders(tasks);
+    } else {
+      const stored = getStoredWorkOrders();
+      if (stored && Array.isArray(stored) && stored.length > 0) {
+        tasks = stored;
+      } else {
+        const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
+        tasks = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+      }
     }
+
+    currentTasks = tasks;
+
+    const activeDisplayTasks = currentTasks.filter(o => getDisplayTaskStatus(o) !== 'Rejected');
 
     const tbody = document.getElementById('taskTableBody');
-    tbody.innerHTML = tasks.map(o => `
-      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${o.task_status}" data-assigned-at="${o.assigned_at || ''}">
+    tbody.innerHTML = activeDisplayTasks.map(o => {
+      const displayStatus = getDisplayTaskStatus(o);
+      const isAssigned = o.technician_response === 'Pending' && displayStatus === 'Assigned';
+      return `
+      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${displayStatus}" data-assigned-at="${o.assigned_at || ''}">
         <td class="px-6 py-4 text-body-sm font-bold text-center">WO-${o.order_id}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.room_name || 'Room')}</td>
         <td class="px-6 py-4 text-center">${getPriorityBadgeHtml(o.priority)}</td>
-        <td class="px-6 py-4 text-center">${getStatusBadgeHtml(o.task_status)}</td>
+        <td class="px-6 py-4 text-center">${getStatusBadgeHtml(o)}</td>
         <td class="px-6 py-4 flex items-center gap-3 text-center justify-center">
-          ${o.technician_response === 'Pending' ? `
+          ${isAssigned ? `
             <button onclick="acceptTaskRow(this, '${o.order_id}')" class="text-green-600 hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="Accept"><span class="material-symbols-outlined">check_circle</span></button>
-            <button onclick="openRejectModal('${o.order_id}')" class="text-error hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="Reject"><span class="material-symbols-outlined">block</span></button>
+            <button onclick="openRejectModal('${o.order_id}')" class="text-error hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="Reject"><span class="material-symbols-outlined">cancel</span></button>
           ` : ''}
           <button onclick="location.href='WorkOrderDetails.html?id=${o.order_id}'" class="text-primary hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="View Details"><span class="material-symbols-outlined">visibility</span></button>
         </td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
 
     filterTasksTable();
   }
@@ -378,12 +415,18 @@
     return '<span class="px-2 py-0.5 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold">Low</span>';
   }
 
-  function getStatusBadgeHtml(s) {
-    s = (s || '').toLowerCase();
+  function getStatusBadgeHtml(taskOrStatus) {
+    const raw = typeof taskOrStatus === 'object' && taskOrStatus !== null
+      ? (taskOrStatus.technician_response === 'Rejected' ? 'Rejected' : (taskOrStatus.task_status || ''))
+      : (taskOrStatus || '');
+    const s = (raw || '').toLowerCase();
     if (s.includes('progress')) return '<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">In Progress</span>';
     if (s.includes('received')) return '<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>';
     if (s.includes('completed')) return '<span class="px-2 py-0.5 rounded-full bg-green-50 text-green-600 text-[10px] font-bold">Completed</span>';
-    return '<span class="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>';
+    if (s.includes('closed')) return '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Closed</span>';
+    if (s.includes('rejected')) return '<span class="px-2 py-0.5 rounded-full bg-error-container/40 text-error text-[10px] font-bold">Rejected</span>';
+    if (s.includes('assigned')) return '<span class="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>';
+    return `<span class="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">${UiHelpers.escapeHtml(raw)}</span>`;
   }
 
   loadTasksFromApi();

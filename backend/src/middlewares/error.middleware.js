@@ -8,10 +8,14 @@ function notFoundHandler(req, res, next) {
 // Handler lỗi tập trung - mọi controller chỉ cần throw ApiError hoặc next(err)
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
-  const status = err instanceof ApiError ? err.status : 500;
-  const message = status === 500 ? 'Internal server error' : err.message;
+  let status = err instanceof ApiError ? err.status : (err.status || err.statusCode || 500);
+  let message = err.message;
 
-  if (status === 500) {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    status = 400;
+    message = 'Invalid JSON body payload';
+  } else if (status === 500) {
+    message = 'Internal server error';
     console.error('[UNHANDLED ERROR]', err);
   }
 

@@ -181,14 +181,23 @@
     }
   }
 
-  function getStatusBadgeHtml(status) {
-    const s = (status || '').toLowerCase();
+  function getDisplayTaskStatus(task) {
+    if (!task) return '';
+    if (task.technician_response === 'Rejected') return 'Rejected';
+    return task.task_status || '';
+  }
+
+  function getStatusBadgeHtml(task) {
+    const raw = typeof task === 'object' && task !== null ? getDisplayTaskStatus(task) : (task || '');
+    const s = (raw || '').toLowerCase();
     if (s.includes('progress')) {
       return '<span class="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">In Progress</span>';
     } else if (s.includes('received')) {
       return '<span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>';
     } else if (s.includes('completed')) {
       return '<span class="px-3 py-1 rounded-full bg-green-50 text-green-600 text-[10px] font-bold">Completed</span>';
+    } else if (s.includes('rejected')) {
+      return '<span class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-[10px] font-bold">Rejected</span>';
     } else {
       return '<span class="px-3 py-1 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>';
     }
@@ -213,50 +222,70 @@
 
   async function loadDashboardData() {
     let orders = [];
+    let loadedFromApi = false;
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (data && Array.isArray(data)) {
           orders = data;
+          loadedFromApi = true;
         }
       }
     } catch (err) {
       console.log('API fetch error', err);
     }
 
-    if (!orders || orders.length === 0) {
-      const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
-      orders = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+    if (loadedFromApi) {
+      localStorage.setItem('vnuis_work_orders', JSON.stringify(orders));
+    } else if (!orders || orders.length === 0) {
+      const stored = localStorage.getItem('vnuis_work_orders');
+      if (stored) {
+        try {
+          orders = JSON.parse(stored);
+        } catch (e) {}
+      }
+      if (!orders || orders.length === 0) {
+        const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
+        orders = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+      }
     }
 
-    const inProgress = orders.filter(o => ['Received', 'In Progress'].includes(o.task_status)).length;
-    const completed = orders.filter(o => ['Completed', 'Closed'].includes(o.task_status)).length;
-    const overdue = orders.filter(o => o.task_status === 'Overdue' || (o.priority === 'High' && o.task_status !== 'Completed' && o.task_status !== 'Closed')).length;
-    
+    const activeOrders = orders.filter(o => getDisplayTaskStatus(o) !== 'Rejected');
+
+    const inProgress = activeOrders.filter(o => ['Received', 'In Progress'].includes(getDisplayTaskStatus(o))).length;
+    const completed = activeOrders.filter(o => ['Completed', 'Closed'].includes(getDisplayTaskStatus(o))).length;
+    const overdue = activeOrders.filter(o => getDisplayTaskStatus(o) === 'Overdue' || (o.priority === 'High' && !['Completed', 'Closed'].includes(getDisplayTaskStatus(o)))).length;
+
     document.getElementById('kpiInProgress').textContent = inProgress;
     document.getElementById('kpiCompleted').textContent = completed;
     document.getElementById('kpiOverdue').textContent = overdue;
-    document.getElementById('kpiTotal').textContent = orders.length;
+    document.getElementById('kpiTotal').textContent = activeOrders.length;
 
     const upcomingContainer = document.getElementById('upcomingTasksContainer');
-    upcomingContainer.innerHTML = orders.slice(0, 5).map(o => `
-      <div class="flex gap-6 group cursor-pointer" onclick="location.href='WorkOrderDetails.html?id=${o.order_id}'">
-        <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
-          <div class="flex justify-between items-start">
-            <div>
-              <h4 class="text-body-md font-bold text-on-surface">WO-${o.order_id} - ${UiHelpers.escapeHtml(o.asset_name || o.description || 'Maintenance Task')}</h4>
-              <div class="flex items-center gap-4 mt-1">
-                <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[16px]">location_on</span>${UiHelpers.escapeHtml(o.room_name || 'Classroom')}
-                </span>
-                ${getPriorityBadgeHtml(o.priority)}
+    if (upcomingContainer) {
+      if (activeOrders.length === 0) {
+        upcomingContainer.innerHTML = `<p class="text-on-surface-variant text-body-sm py-4 text-center">No assigned work orders found.</p>`;
+      } else {
+        upcomingContainer.innerHTML = activeOrders.slice(0, 5).map(o => `
+          <div class="flex gap-6 group cursor-pointer" onclick="location.href='WorkOrderDetails.html?id=${o.order_id}'">
+            <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h4 class="text-body-md font-bold text-on-surface">WO-${o.order_id} - ${UiHelpers.escapeHtml(o.asset_name || o.description || 'Maintenance Task')}</h4>
+                  <div class="flex items-center gap-4 mt-1">
+                    <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
+                      <span class="material-symbols-outlined text-[16px]">location_on</span>${UiHelpers.escapeHtml(o.room_name || 'Classroom')}
+                    </span>
+                    ${getPriorityBadgeHtml(o.priority)}
+                  </div>
+                </div>
+                ${getStatusBadgeHtml(o)}
               </div>
             </div>
-            ${getStatusBadgeHtml(o.task_status)}
           </div>
-        </div>
-      </div>
-    `).join('');
+        `).join('');
+      }
+    }
   }
 
   loadDashboardData();
