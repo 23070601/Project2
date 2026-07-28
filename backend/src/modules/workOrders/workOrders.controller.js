@@ -2,6 +2,7 @@ const workOrdersRepository = require('./workOrders.repository');
 const faultReportsRepository = require('../faultReports/faultReports.repository');
 const usersRepository = require('../users/users.repository');
 const auditLogRepository = require('../auditLog/auditLog.repository');
+const notificationsRepository = require('../notifications/notifications.repository');
 const { suggestTechnicians } = require('./assignment.service');
 const { ok, created, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, requireOneOf, toPositiveInt } = require('../../shared/utils/validators');
@@ -115,6 +116,23 @@ async function respond(req, res) {
     rejectionReason: req.body.rejectionReason ?? null,
   });
 
+  // Gửi Notification cho Manager khi Kỹ thuật viên Accept / Reject
+  if (order.manager_id) {
+    try {
+      const responseText = req.body.technicianResponse === TECHNICIAN_RESPONSE.ACCEPTED ? 'accepted' : 'rejected';
+      await notificationsRepository.createNotification({
+        userId: order.manager_id,
+        reportId: order.report_id,
+        orderId: order.order_id,
+        message: `Technician has ${responseText} Work Order #${orderId}.${
+          req.body.rejectionReason ? ` Reason: ${req.body.rejectionReason}` : ''
+        }`,
+      });
+    } catch (e) {
+      console.log('Failed to send manager notification on response:', e.message);
+    }
+  }
+
   ok(res, updated);
 }
 
@@ -148,6 +166,29 @@ async function updateStatus(req, res) {
   // UPDATE kích hoạt trigger DB: ghi lịch sử, notification, và tự set Asset -> Operational
   // + FaultReports -> Completed khi task_status đạt 'Completed'/'Closed'
   const updated = await workOrdersRepository.updateTaskStatus(orderId, req.body.taskStatus);
+
+  // Gửi Notification cho Reporter & Manager khi cập nhật trạng thái
+  try {
+    if (order.reporter_id) {
+      await notificationsRepository.createNotification({
+        userId: order.reporter_id,
+        reportId: order.report_id,
+        orderId: order.order_id,
+        message: `Work Order #${orderId} for report #${order.report_id} updated to status: ${req.body.taskStatus}.`,
+      });
+    }
+    if (order.manager_id && order.manager_id !== req.user.userId) {
+      await notificationsRepository.createNotification({
+        userId: order.manager_id,
+        reportId: order.report_id,
+        orderId: order.order_id,
+        message: `Work Order #${orderId} progress update: ${req.body.taskStatus}.`,
+      });
+    }
+  } catch (e) {
+    console.log('Failed to send status update notification:', e.message);
+  }
+
   ok(res, updated);
 }
 
