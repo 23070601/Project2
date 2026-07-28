@@ -371,50 +371,105 @@
       </div>
     </div>
   </div>
+</div>
+
 <!-- 3. View Repair History Record Modal -->
-<div class="fixed inset-0 z-[999] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs" id="historyDetailModal" onclick="if(event.target===this) toggleModal('historyDetailModal', false)">
-  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 relative z-10 animate-in zoom-in duration-200">
+<div class="fixed inset-0 z-[999] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-xs" id="historyDetailModal" onclick="if(event.target===this) toggleModal('historyDetailModal', false)">
+  <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 relative z-10 animate-in zoom-in duration-200">
+    <!-- Header -->
     <div class="bg-primary px-6 py-4 flex justify-between items-center text-white">
-      <h3 class="font-headline-sm text-headline-sm flex items-center gap-2 font-bold">
-        <span class="material-symbols-outlined">history</span>
-        <span>Repair History Detail</span>
-      </h3>
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-white">build_circle</span>
+        </div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm font-bold">Past Repair Audit Log</h3>
+          <p class="text-xs text-white/80">Detailed technical resolution & diagnostic report</p>
+        </div>
+      </div>
       <button class="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors" onclick="toggleModal('historyDetailModal', false)">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <div class="p-6 space-y-4 bg-white text-slate-800">
-      <div class="bg-slate-50 p-4 rounded-xl space-y-3 border border-slate-200">
-        <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-          <span class="text-label-md text-slate-500 font-medium">WorkOrder ID</span>
+
+    <div class="p-6 space-y-5 bg-white text-slate-800 max-h-[80vh] overflow-y-auto">
+      <!-- Top Meta Badge Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">WorkOrder ID</span>
           <span id="historyModalOrderId" class="text-body-md font-bold text-primary">WO-010</span>
         </div>
-        <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-          <span class="text-label-md text-slate-500 font-medium">Assigned Date</span>
-          <span id="historyModalDate" class="text-body-md font-medium text-slate-800">15 May 2026</span>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Fault Report</span>
+          <span id="historyModalReportId" class="text-body-md font-bold text-slate-700">#FR-010</span>
         </div>
-        <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-          <span class="text-label-md text-slate-500 font-medium">Technician</span>
-          <span id="historyModalTech" class="text-body-md font-medium text-slate-800">Pham Thi D</span>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Assigned Date</span>
+          <span id="historyModalDate" class="text-body-sm font-medium text-slate-800">15 May 2026</span>
         </div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Final Status</span>
+          <span id="historyModalStatus" class="inline-flex px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-bold uppercase mt-0.5">Closed</span>
+        </div>
+      </div>
+
+      <!-- Section 1: Initial Fault Report -->
+      <div class="space-y-2 border-l-4 border-amber-500 pl-4 py-1">
         <div class="flex justify-between items-center">
-          <span class="text-label-md text-slate-500 font-medium">Task Status</span>
-          <span id="historyModalStatus" class="px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-bold uppercase">Closed</span>
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Initial Fault Report & Symptom</h4>
+          <span class="text-xs text-slate-500 font-medium">Reporter: <strong id="historyModalReporter" class="text-slate-800">Nguyen Van A (Lecturer)</strong></span>
+        </div>
+        <p id="historyModalReportedIssue" class="text-body-md font-medium text-slate-700 italic bg-amber-50/50 p-3 rounded-lg border border-amber-100">
+          "Wireless microphone loses signal every 2 minutes during lecture."
+        </p>
+      </div>
+
+      <!-- Section 2: Technical Diagnosis & Root Cause -->
+      <div class="space-y-2 border-l-4 border-blue-500 pl-4 py-1">
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Technician Root Cause Analysis</h4>
+        <p id="historyModalRootCause" class="text-body-md text-slate-800 font-medium bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+          Internal battery spring contact oxidation causing intermittent power disconnection when moved, combined with antenna sleeve fatigue.
+        </p>
+      </div>
+
+      <!-- Section 3: Fix Actions & Parts Replacement -->
+      <div class="space-y-3 border-l-4 border-emerald-500 pl-4 py-1">
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Technical Solution & Spare Parts Used</h4>
+        <div class="space-y-1">
+          <span class="text-xs font-semibold text-slate-500">Action Taken:</span>
+          <p id="historyModalFixDesc" class="p-3 bg-slate-50 rounded-lg text-body-md text-slate-800 font-medium border border-slate-200">
+            Tightened internal battery terminal contacts and replaced antenna sleeve.
+          </p>
+        </div>
+        <div class="space-y-1">
+          <span class="text-xs font-semibold text-slate-500">Parts / Components Replaced:</span>
+          <p id="historyModalParts" class="p-3 bg-slate-50 rounded-lg text-body-md text-slate-800 font-medium border border-slate-200">
+            AKG Battery Terminal Spring (SKU: AKG-SP-202)
+          </p>
         </div>
       </div>
 
-      <div class="space-y-1">
-        <label class="text-label-md font-bold text-slate-500 uppercase tracking-wider">Fix Description / Action Taken</label>
-        <p id="historyModalFixDesc" class="p-3 bg-slate-50 rounded-lg text-body-md text-slate-800 font-medium border border-slate-200">Tightened internal battery terminal contacts and replaced antenna sleeve.</p>
-      </div>
-
-      <div class="space-y-1">
-        <label class="text-label-md font-bold text-slate-500 uppercase tracking-wider">Parts Used</label>
-        <p id="historyModalParts" class="p-3 bg-slate-50 rounded-lg text-body-md text-slate-800 font-medium border border-slate-200">AKG Battery Terminal Spring</p>
+      <!-- Section 4: Service Technician & Verification -->
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-body-md shrink-0" id="historyModalTechInitials">
+            PT
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 font-semibold">Service Technician (Kỹ thuật viên thực hiện)</p>
+            <p id="historyModalTech" class="text-body-md font-bold text-slate-800">Pham Thi D</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span id="historyModalVerification" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+            Verified Operational
+          </span>
+        </div>
       </div>
 
       <div class="pt-2 flex justify-end">
-        <button onclick="toggleModal('historyDetailModal', false)" class="px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-all">Close</button>
+        <button onclick="toggleModal('historyDetailModal', false)" class="px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-all">Close Details</button>
       </div>
     </div>
   </div>
@@ -460,6 +515,8 @@
     }
   }
 
+  window.toggleModal = toggleModal;
+
   function getStoredWorkOrders() {
     try {
       const stored = localStorage.getItem('vnuis_work_orders');
@@ -472,14 +529,20 @@
     localStorage.setItem('vnuis_work_orders', JSON.stringify(tasks));
   }
 
-  function formatAssignedDate(dateStr) {
+  function formatAssignedDate(dateStr, includeTime = false) {
     if (!dateStr) return '20 Oct 2024';
     try {
-      const d = new Date(dateStr);
+      const d = new Date(String(dateStr).includes('T') ? dateStr : String(dateStr).replace(' ', 'T'));
       if (isNaN(d.getTime())) return dateStr;
       const day = String(d.getDate()).padStart(2, '0');
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${day} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      const formattedDate = `${day} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      if (includeTime) {
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${formattedDate} ${hours}:${minutes}`;
+      }
+      return formattedDate;
     } catch (e) {
       return dateStr;
     }
@@ -615,10 +678,13 @@
     let item = (currentRepairHistory && currentRepairHistory.length > index) ? currentRepairHistory[index] : null;
 
     if (!item) {
-      const faultDesc = document.getElementById('detailFaultQuote')?.textContent?.replace(/^"|"$/g, '') || '';
       item = {
-        order_id: cleanId || 1,
-        assigned_at: new Date().toISOString(),
+        order_id: '10',
+        report_id: '17',
+        reporter_name: 'Nguyen Van A',
+        reported_issue: 'Loose battery contact springs causing audio dropout',
+        root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.',
+        assigned_at: '2026-05-15 09:00:00',
         technician_name: 'Pham Thi D',
         task_status: 'Closed',
         fix_description: 'Tightened internal battery terminal contacts and replaced antenna sleeve.',
@@ -626,21 +692,31 @@
       };
     }
 
-    const targetId = item.order_id || cleanId || 1;
+    const targetId = item.order_id || '10';
+    const reportId = item.report_id || '17';
+    const reporterName = item.reporter_name || 'Nguyen Van A';
+    const reportedIssue = item.reported_issue || item.description || 'Loose battery contact springs causing audio dropout';
+    const rootCause = item.root_cause || 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.';
     const dateStr = item.assigned_at ? formatAssignedDate(item.assigned_at) : '15 May 2026';
     const techName = item.technician_name || 'Pham Thi D';
+    const initials = techName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     const statusStr = item.task_status || 'Closed';
-    const fixDesc = item.fix_description || item.description || 'Tightened internal battery terminal contacts and replaced antenna sleeve.';
+    const fixDesc = item.fix_description || 'Tightened internal battery terminal contacts and replaced antenna sleeve.';
     const partsUsed = item.parts_used || 'AKG Battery Terminal Spring';
 
     document.getElementById('historyModalOrderId').textContent = `WO-${targetId}`;
+    document.getElementById('historyModalReportId').textContent = `#FR-${reportId}`;
+    document.getElementById('historyModalReporter').textContent = reporterName;
+    document.getElementById('historyModalReportedIssue').textContent = `"${reportedIssue}"`;
+    document.getElementById('historyModalRootCause').textContent = rootCause;
     document.getElementById('historyModalDate').textContent = dateStr;
     document.getElementById('historyModalTech').textContent = techName;
+    document.getElementById('historyModalTechInitials').textContent = initials;
     document.getElementById('historyModalStatus').textContent = statusStr;
     document.getElementById('historyModalFixDesc').textContent = fixDesc;
     document.getElementById('historyModalParts').textContent = partsUsed;
 
-    toggleModal('historyDetailModal', true);
+    window.toggleModal('historyDetailModal', true);
   }
 
   window.openHistoryDetailModalByIndex = openHistoryDetailModalByIndex;
@@ -679,7 +755,7 @@
       const partsUsedStr = r.parts_used || 'None';
 
       return `
-        <tr onclick="openHistoryDetailModalByIndex(${idx})" class="history-item-row hover:bg-surface-container-lowest transition-colors cursor-pointer">
+        <tr onclick="window.openHistoryDetailModalByIndex(${idx})" class="history-item-row hover:bg-surface-container-lowest transition-colors cursor-pointer">
           <td class="px-6 py-4 text-center">
             <div class="flex flex-col items-center">
               <span class="text-body-sm font-bold">${assignedDateFormatted}</span>
@@ -699,7 +775,7 @@
             </div>
           </td>
           <td class="px-6 py-4 text-center">
-            <button onclick="event.stopPropagation(); openHistoryDetailModalByIndex(${idx})" class="history-item-btn text-primary hover:bg-primary/10 p-2 rounded-full transition-colors flex items-center justify-center mx-auto" title="View Repair Details">
+            <button onclick="if(window.event && window.event.stopPropagation) window.event.stopPropagation(); window.openHistoryDetailModalByIndex(${idx}); return false;" class="history-item-btn text-primary hover:bg-primary/10 p-2 rounded-full transition-colors flex items-center justify-center mx-auto" title="View Repair Details">
               <span class="material-symbols-outlined">visibility</span>
             </button>
           </td>
@@ -740,7 +816,7 @@
           <div class="ml-4 flex-1 ${isLast ? 'bg-surface-container-low p-3 rounded-lg border border-outline-variant/20' : 'p-3 rounded-lg border border-outline-variant/10'}">
             <div class="flex justify-between items-start">
               <h5 class="text-body-sm font-bold ${isLast ? 'text-on-surface' : 'text-outline'}">${UiHelpers.escapeHtml(statusName)}</h5>
-              <span class="text-[10px] text-outline font-medium">${formatAssignedDate(h.changed_at)}</span>
+              <span class="text-[10px] text-outline font-medium">${formatAssignedDate(h.changed_at, true)}</span>
             </div>
             <p class="text-label-md ${isLast ? 'text-on-surface-variant' : 'text-outline'}">${UiHelpers.escapeHtml(h.notes || h.note || 'Status updated in system.')}</p>
           </div>

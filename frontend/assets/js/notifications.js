@@ -35,6 +35,19 @@ const Notifications = (() => {
     }
   ];
 
+  function timeAgo(isoString) {
+    if (!isoString) return 'recently';
+    const date = new Date(isoString.includes('T') ? isoString : isoString.replace(' ', 'T'));
+    const diffMs = Date.now() - date.getTime();
+    const minutes = Math.floor(diffMs / 60000);
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes} minutes ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days > 1 ? 's' : ''} ago`;
+  }
+
   function normalizeNotification(item) {
     if (!item) return {};
     return {
@@ -79,6 +92,28 @@ const Notifications = (() => {
     return 'ListReports.html';
   }
 
+  let lastChimeTime = 0;
+  function playUrgentAudioChime() {
+    if (Date.now() - lastChimeTime < 10000) return; // Limit chime interval
+    lastChimeTime = Date.now();
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch (e) {}
+  }
+
   async function refreshBadge(customItems) {
     let unreadCount = 0;
     const normalizedItems = (customItems || []).map(normalizeNotification);
@@ -103,12 +138,34 @@ const Notifications = (() => {
     const badge = document.getElementById('notificationBadge');
     if (badge) {
       badge.classList.toggle('hidden', unreadCount === 0);
+      if (unreadCount > 0) {
+        badge.classList.add('animate-pulse');
+        playUrgentAudioChime();
+      } else {
+        badge.classList.remove('animate-pulse');
+      }
     }
     const countPill = document.getElementById('notificationUnreadCount');
     if (countPill) {
       countPill.textContent = unreadCount;
       countPill.classList.toggle('hidden', unreadCount === 0);
     }
+  }
+
+  async function markAllAsRead(items, container, isDropdown = true) {
+    const currentItems = Array.isArray(items) ? items : SAMPLE_ITEMS;
+    currentItems.forEach(n => n.is_read = true);
+
+    try {
+      if (window.Api) {
+        await Api.patch('/notifications/read-all');
+      }
+    } catch (e) {}
+
+    if (container) {
+      renderList(currentItems, container, isDropdown);
+    }
+    refreshBadge(currentItems);
   }
 
   async function markNotificationAsRead(id, items, container, isDropdown = true) {

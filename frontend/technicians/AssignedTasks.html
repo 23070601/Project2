@@ -44,7 +44,7 @@
       </div>
 
       <!-- Priority Filter -->
-      <div class="w-full md:w-48">
+      <div class="w-full md:w-44">
         <label class="block text-label-md font-bold text-on-surface mb-2">Priority</label>
         <select id="priorityFilter" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary outline-none" onchange="filterTasksTable()">
           <option value="">All Priorities</option>
@@ -55,7 +55,7 @@
       </div>
 
       <!-- Status Filter -->
-      <div class="w-full md:w-48">
+      <div class="w-full md:w-36">
         <label class="block text-label-md font-bold text-on-surface mb-2">Status</label>
         <select id="statusFilter" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary outline-none" onchange="filterTasksTable()">
           <option value="">All Statuses</option>
@@ -67,13 +67,33 @@
       </div>
     </div>
 
+    <!-- Quick Floor & Room Pills Bar -->
+    <div id="quickRoomPillsContainer" class="flex flex-wrap items-center gap-2 mb-8 p-4 bg-white rounded-xl border border-outline-variant/20 shadow-xs">
+      <span class="text-xs font-bold text-slate-600 flex items-center gap-1 mr-2"><span class="material-symbols-outlined text-[16px] text-primary">stairs</span> Quick Floor Filter:</span>
+      <button onclick="selectQuickFloorPill('', this)" class="floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all">All Floors</button>
+      <!-- Floor pills rendered dynamically -->
+    </div>
+
     <!-- WorkOrders Table Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden">
-      <div class="p-6 border-b border-outline-variant/10">
+      <div class="p-6 border-b border-outline-variant/10 flex items-center justify-between">
         <h3 class="text-headline-sm font-headline-sm text-on-surface">My Assigned WorkOrders</h3>
+        
+        <!-- View Toggle Controls -->
+        <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/20">
+          <button id="viewToggleTableBtn" onclick="switchTaskViewMode('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-primary shadow-xs flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">table_rows</span>
+            <span class="hidden sm:inline">Table View</span>
+          </button>
+          <button id="viewToggleGridBtn" onclick="switchTaskViewMode('grid')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-primary flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">grid_view</span>
+            <span class="hidden sm:inline">Card View</span>
+          </button>
+        </div>
       </div>
 
-      <div class="overflow-x-auto">
+      <!-- Table View Container -->
+      <div id="tableViewContainer" class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead class="bg-surface-container-low border-b border-outline-variant/20">
             <tr class="text-label-md font-bold text-on-surface-variant uppercase tracking-wider text-center">
@@ -91,15 +111,18 @@
         </table>
       </div>
 
+      <!-- Card Grid View Container -->
+      <div id="gridViewContainer" class="hidden p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-slate-50/50">
+        <!-- Dynamic Cards rendered here -->
+      </div>
+
       <!-- Table Footer / Pagination -->
       <div class="p-6 border-t border-outline-variant/10 flex items-center justify-between">
-        <p id="tablePaginationInfo" class="text-label-md text-on-surface-variant">Showing 1 to 3 of 12 entries</p>
-        <div class="flex items-center gap-2">
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">Previous</button>
+        <p id="tablePaginationInfo" class="text-label-md text-on-surface-variant">Showing 1 entry</p>
+        <div id="tablePaginationControls" class="flex items-center gap-2">
+          <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>
           <button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">1</button>
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">2</button>
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">3</button>
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">Next</button>
+          <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>
         </div>
       </div>
     </div>
@@ -197,8 +220,62 @@
     return task.task_status || '';
   }
 
+  function getFloorFromRoom(roomName) {
+    if (!roomName) return 'Other';
+    const match = String(roomName).match(/(\d+)/);
+    if (!match) return 'Other';
+    const numStr = match[1];
+    if (numStr.length >= 3) {
+      return `Floor ${numStr.substring(0, numStr.length - 2)}`;
+    }
+    return `Floor ${numStr[0]}`;
+  }
+
+  let activeQuickFloorFilter = '';
+
+  function updatePaginationControls(visibleCount) {
+    const info = document.getElementById('tablePaginationInfo');
+    const controls = document.getElementById('tablePaginationControls');
+
+    if (visibleCount === 0) {
+      if (info) info.textContent = 'Showing 0 matching entries';
+      if (controls) controls.innerHTML = '';
+      return;
+    }
+
+    const pageSize = 10;
+    const totalPages = Math.ceil(visibleCount / pageSize);
+
+    if (info) {
+      info.textContent = `Showing 1 to ${visibleCount} of ${visibleCount} matching entry${visibleCount > 1 ? 's' : ''}`;
+    }
+
+    if (!controls) return;
+
+    if (totalPages <= 1) {
+      controls.innerHTML = `
+        <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>
+        <button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">1</button>
+        <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>
+      `;
+      return;
+    }
+
+    let buttonsHtml = `<button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>`;
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === 1) {
+        buttonsHtml += `<button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">${p}</button>`;
+      } else {
+        buttonsHtml += `<button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">${p}</button>`;
+      }
+    }
+    buttonsHtml += `<button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>`;
+    controls.innerHTML = buttonsHtml;
+  }
+
   function filterTasksTable() {
     const search = document.getElementById('taskSearchInput').value.toLowerCase().trim();
+    const floor = activeQuickFloorFilter.toLowerCase();
     const priority = document.getElementById('priorityFilter').value;
     const status = document.getElementById('statusFilter').value;
     const rows = document.querySelectorAll('#taskTableBody .task-row');
@@ -208,14 +285,16 @@
       const rowId = row.dataset.id.toLowerCase();
       const rowEquip = row.dataset.equipment.toLowerCase();
       const rowRoom = row.dataset.room.toLowerCase();
+      const rowFloor = getFloorFromRoom(row.dataset.room).toLowerCase();
       const rowPriority = row.dataset.priority;
       const rowStatus = row.dataset.status;
 
       const matchesSearch = !search || rowId.includes(search) || rowEquip.includes(search) || rowRoom.includes(search);
+      const matchesFloor = !floor || rowFloor === floor;
       const matchesPriority = !priority || rowPriority === priority;
       const matchesStatus = !status || rowStatus === status;
 
-      if (matchesSearch && matchesPriority && matchesStatus) {
+      if (matchesSearch && matchesFloor && matchesPriority && matchesStatus) {
         row.style.display = '';
         visibleCount++;
       } else {
@@ -223,10 +302,96 @@
       }
     });
 
-    const info = document.getElementById('tablePaginationInfo');
-    if (info) {
-      info.textContent = `Showing 1 to ${visibleCount} of ${rows.length} entries`;
+    updatePaginationControls(visibleCount);
+    if (currentViewMode === 'grid') {
+      renderTaskGridCards();
     }
+  }
+
+  let currentViewMode = 'table';
+
+  function switchTaskViewMode(mode) {
+    currentViewMode = mode;
+    const tableContainer = document.getElementById('tableViewContainer');
+    const gridContainer = document.getElementById('gridViewContainer');
+    const tableBtn = document.getElementById('viewToggleTableBtn');
+    const gridBtn = document.getElementById('viewToggleGridBtn');
+
+    if (mode === 'grid') {
+      tableContainer.classList.add('hidden');
+      gridContainer.classList.remove('hidden');
+      tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-primary flex items-center gap-1.5 transition-all';
+      gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-primary shadow-xs flex items-center gap-1.5 transition-all';
+      renderTaskGridCards();
+    } else {
+      gridContainer.classList.add('hidden');
+      tableContainer.classList.remove('hidden');
+      gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-primary flex items-center gap-1.5 transition-all';
+      tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-primary shadow-xs flex items-center gap-1.5 transition-all';
+    }
+  }
+
+  function renderTaskGridCards() {
+    const gridContainer = document.getElementById('gridViewContainer');
+    if (!gridContainer) return;
+
+    const visibleRows = document.querySelectorAll('#taskTableBody .task-row:not([style*="display: none"])');
+    if (visibleRows.length === 0) {
+      gridContainer.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 font-medium">No matching work orders found.</div>`;
+      return;
+    }
+
+    gridContainer.innerHTML = Array.from(visibleRows).map(row => {
+      const id = row.dataset.id;
+      const cleanId = String(id).replace(/^WO-/, '');
+      const equipment = row.dataset.equipment;
+      const room = row.dataset.room;
+      const priority = row.dataset.priority;
+      const status = row.dataset.status;
+
+      return `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between gap-4 hover:shadow-md transition-all">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center font-bold shrink-0">
+                <span class="material-symbols-outlined text-[20px]">build</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-body-md font-bold text-on-surface">${id}</span>
+                <span class="text-xs text-slate-400 font-medium">${UiHelpers.escapeHtml(equipment)}</span>
+              </div>
+            </div>
+            ${getPriorityBadgeHtml(priority)}
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-slate-100 text-slate-600">
+            <div><span class="font-bold text-slate-800">Room:</span> ${UiHelpers.escapeHtml(room || 'Room')}</div>
+            <div><span class="font-bold text-slate-800">Status:</span> ${getStatusBadgeHtml(status)}</div>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <button onclick="location.href='WorkOrderDetails.html?id=${cleanId}'" class="flex-1 py-2 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary-container transition-colors flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">visibility</span>
+              <span>View Details</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.switchTaskViewMode = switchTaskViewMode;
+
+  function selectQuickFloorPill(floorName, btnEl) {
+    document.querySelectorAll('.floor-pill-btn').forEach(btn => {
+      btn.className = 'floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
+    });
+    if (btnEl) {
+      btnEl.className = 'floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all';
+    }
+
+    activeQuickFloorFilter = floorName;
+    filterTasksTable();
   }
 
   async function acceptTaskRow(btnEl, orderId) {
@@ -405,6 +570,32 @@
     `;
     }).join('');
 
+    // Populate Floor & Room Select Dropdowns & Quick Floor Pills dynamically
+    const rooms = [...new Set(activeDisplayTasks.map(o => o.room_name).filter(Boolean))];
+    const floors = [...new Set(activeDisplayTasks.map(o => getFloorFromRoom(o.room_name)).filter(Boolean))].sort();
+
+    const floorSelect = document.getElementById('floorFilter');
+    if (floorSelect) {
+      floorSelect.innerHTML = '<option value="">All Floors</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
+    }
+
+    const roomSelect = document.getElementById('roomFilter');
+    if (roomSelect) {
+      roomSelect.innerHTML = '<option value="">All Rooms</option>' + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+    }
+
+    const pillsBox = document.getElementById('quickRoomPillsContainer');
+    if (pillsBox) {
+      pillsBox.innerHTML = `
+        <span class="text-xs font-bold text-slate-600 flex items-center gap-1 mr-2"><span class="material-symbols-outlined text-[16px] text-primary">stairs</span> Quick Floor Filter:</span>
+        <button onclick="selectQuickFloorPill('', this)" class="floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all">All Floors (${activeDisplayTasks.length})</button>
+        ${floors.map(f => {
+          const count = activeDisplayTasks.filter(o => getFloorFromRoom(o.room_name) === f).length;
+          return `<button onclick="selectQuickFloorPill('${f}', this)" class="floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">${f} (${count})</button>`;
+        }).join('')}
+      `;
+    }
+
     filterTasksTable();
   }
 
@@ -430,6 +621,31 @@
   }
 
   loadTasksFromApi();
+</script>
+
+<!-- Back to Top Floating Button -->
+<button id="backToTopBtn" onclick="scrollToTopMain()" class="hidden fixed bottom-8 right-8 z-[999] p-3.5 bg-primary text-white rounded-full shadow-2xl hover:bg-primary-container transition-all flex items-center justify-center border-2 border-white" title="Back to top">
+  <span class="material-symbols-outlined text-[24px]">arrow_upward</span>
+</button>
+<script>
+  function scrollToTopMain() {
+    const mainEl = document.querySelector('main');
+    if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.addEventListener('scroll', () => {
+        const btn = document.getElementById('backToTopBtn');
+        if (btn) {
+          if (mainEl.scrollTop > 80) btn.classList.remove('hidden');
+          else btn.classList.add('hidden');
+        }
+      });
+    }
+  });
 </script>
 </body>
 </html>

@@ -32,10 +32,10 @@ async function findById(assetId) {
   if (asset) {
     try {
       const [historyRows] = await pool.execute(
-        `SELECT wo.*, tech.full_name AS technician_name
+        `SELECT wo.*, tech.full_name AS technician_name, fr.description AS reported_issue
          FROM WorkOrders wo
          JOIN FaultReports fr ON fr.report_id = wo.report_id
-         JOIN Users tech ON tech.user_id = wo.technician_id
+         LEFT JOIN Users tech ON tech.user_id = wo.technician_id
          WHERE fr.asset_id = ?
          ORDER BY wo.assigned_at DESC`,
         [assetId]

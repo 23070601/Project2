@@ -36,10 +36,12 @@ async function findById(orderId) {
   if (order && order.asset_id) {
     try {
       const [historyRows] = await pool.execute(
-        `SELECT wo.*, tech.full_name AS technician_name
+        `SELECT wo.*, tech.full_name AS technician_name, mgr.full_name AS manager_name, fr.description AS reported_issue, fr.report_id, reporter.full_name AS reporter_name
          FROM WorkOrders wo
          JOIN Users tech ON tech.user_id = wo.technician_id
+         LEFT JOIN Users mgr ON mgr.user_id = wo.manager_id
          JOIN FaultReports fr ON fr.report_id = wo.report_id
+         LEFT JOIN Users reporter ON reporter.user_id = fr.reporter_id
          WHERE fr.asset_id = ? AND wo.task_status IN ('Completed', 'Closed') AND wo.order_id != ?
          ORDER BY wo.assigned_at DESC LIMIT 5`,
         [order.asset_id, orderId]
