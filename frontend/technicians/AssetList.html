@@ -49,20 +49,33 @@
   Layout.init({ role: 'Technician', activePage: 'AssetList' });
 
   async function loadAssets() {
-    const assets = await Api.get('/assets');
-    document.getElementById('assetsTableBody').innerHTML = assets.map(a => `
-      <tr class="border-t border-outline-variant/10 hover:bg-surface-container-low cursor-pointer"
-          onclick="location.href='AssetDetails.html?id=${a.asset_id}'">
-        <td class="px-4 py-3 font-medium">${a.asset_name}</td>
-        <td class="px-4 py-3">${a.asset_type}</td>
-        <td class="px-4 py-3">${a.room_name}</td>
-        <td class="px-4 py-3">${UiHelpers.statusBadge(a.status)}</td>
-        <td class="px-4 py-3">${a.failure_count}</td>
-      </tr>
-    `).join('');
+    const tbody = document.getElementById('assetsTableBody');
+    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-6 text-center text-on-surface-variant">Loading assets...</td></tr>';
+
+    try {
+      const assets = await Api.get('/assets');
+      if (!Array.isArray(assets) || !assets.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-6 text-center text-on-surface-variant">No assets found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = assets.map(a => `
+        <tr class="border-t border-outline-variant/10 hover:bg-surface-container-low cursor-pointer"
+            onclick="location.href='AssetDetails.html?id=${a.asset_id}'">
+          <td class="px-4 py-3 font-medium">${UiHelpers.escapeHtml(a.asset_name || 'Unnamed Asset')}</td>
+          <td class="px-4 py-3">${UiHelpers.escapeHtml(a.asset_type || 'Unknown')}</td>
+          <td class="px-4 py-3">${UiHelpers.escapeHtml(a.room_name || 'Unknown Room')}</td>
+          <td class="px-4 py-3">${UiHelpers.statusBadge(a.status)}</td>
+          <td class="px-4 py-3">${a.failure_count ?? 0}</td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-6 text-center text-error">Unable to load assets from the server.</td></tr>';
+    }
   }
 
-  loadAssets().catch(err => console.error(err));
+  loadAssets();
 </script>
 </body>
 </html>

@@ -73,7 +73,7 @@ async function suggestions(req, res) {
  */
 async function create(req, res) {
   requireFields(req.body, ['reportId', 'technicianId']);
-  const { reportId, technicianId } = req.body;
+  const { reportId, technicianId, deadlineAt } = req.body;
 
   // Validate fault report exists and is in pending approval status
   const report = await faultReportsRepository.findById(reportId);
@@ -97,6 +97,7 @@ async function create(req, res) {
     reportId,
     managerId: req.user.userId,
     technicianId,
+    deadlineAt: deadlineAt || null,
   });
 
   // Log audit trail
@@ -168,6 +169,18 @@ async function respond(req, res) {
  * Flow: Received -> In Progress -> Completed
  * Used in: WorkOrderDetails.html
  */
+async function updateDeadline(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  const { deadlineAt } = req.body;
+
+  if (deadlineAt === undefined || deadlineAt === null || deadlineAt === '') {
+    throw new ApiError(400, 'deadlineAt is required');
+  }
+
+  const updated = await workOrdersRepository.updateDeadline(orderId, deadlineAt);
+  ok(res, updated);
+}
+
 async function updateStatus(req, res) {
   const orderId = toPositiveInt(req.params.id, 'id');
   requireFields(req.body, ['taskStatus']);
@@ -224,4 +237,4 @@ async function updateStatus(req, res) {
   ok(res, updated);
 }
 
-module.exports = { list, getById, suggestions, create, respond, updateStatus };
+module.exports = { list, getById, suggestions, create, respond, updateDeadline, updateStatus };

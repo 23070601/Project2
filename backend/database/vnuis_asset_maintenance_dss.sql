@@ -91,6 +91,7 @@ CREATE TABLE WorkOrders (
     manager_id           INT             NOT NULL,
     technician_id        INT             NOT NULL,
     assigned_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deadline_at          DATETIME        NULL,
     technician_response  VARCHAR(20)     NOT NULL DEFAULT 'Pending',
     rejection_reason     VARCHAR(255)    NULL,
     task_status          VARCHAR(30)     NOT NULL DEFAULT 'Assigned',

@@ -194,51 +194,39 @@
     }
   }
 
-  const TASKS_BY_EMAIL = {
-    'tech.c@vnuis.edu.vn': [
-      { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', technician_response: 'Accepted' },
-      { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted' },
-      { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
-    ],
-    'tech.d@vnuis.edu.vn': [
-      { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted' },
-      { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted' },
-      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending' }
-    ],
-    'tech.f@vnuis.edu.vn': [
-      { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected' },
-      { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
-    ]
-  };
-
   async function loadDashboardData() {
+    const upcomingContainer = document.getElementById('upcomingTasksContainer');
+    if (upcomingContainer) {
+      upcomingContainer.innerHTML = '<div class="text-center text-on-surface-variant py-6">Loading assigned work orders...</div>';
+    }
+
     let orders = [];
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           orders = data;
         }
       }
     } catch (err) {
       console.log('API fetch error', err);
-    }
-
-    if (!orders || orders.length === 0) {
-      const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
-      orders = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+      orders = [];
     }
 
     const inProgress = orders.filter(o => ['Received', 'In Progress'].includes(o.task_status)).length;
     const completed = orders.filter(o => ['Completed', 'Closed'].includes(o.task_status)).length;
-    const overdue = orders.filter(o => o.task_status === 'Overdue' || (o.priority === 'High' && o.task_status !== 'Completed' && o.task_status !== 'Closed')).length;
+    const overdue = orders.filter(o => String(o.task_status || '').toLowerCase() === 'overdue').length;
     
     document.getElementById('kpiInProgress').textContent = inProgress;
     document.getElementById('kpiCompleted').textContent = completed;
     document.getElementById('kpiOverdue').textContent = overdue;
     document.getElementById('kpiTotal').textContent = orders.length;
 
-    const upcomingContainer = document.getElementById('upcomingTasksContainer');
+    if (!orders.length) {
+      upcomingContainer.innerHTML = '<div class="text-center text-on-surface-variant py-6">No assigned work orders found.</div>';
+      return;
+    }
+
     upcomingContainer.innerHTML = orders.slice(0, 5).map(o => `
       <div class="flex gap-6 group cursor-pointer" onclick="location.href='WorkOrderDetails.html?id=${o.order_id}'">
         <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
