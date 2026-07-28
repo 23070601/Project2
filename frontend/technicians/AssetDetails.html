@@ -44,13 +44,13 @@
       <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
         <div class="flex items-start justify-between">
           <div>
-            <h1 class="text-headline-md font-headline-md text-primary">${a.asset_name}</h1>
-            <p class="text-on-surface-variant text-body-sm mt-1">${a.asset_type} · ${a.room_name} (${a.building || '-'})</p>
+            <h1 class="text-headline-md font-headline-md text-primary">${UiHelpers.escapeHtml(a.asset_name || 'Unnamed Asset')}</h1>
+            <p class="text-on-surface-variant text-body-sm mt-1">${UiHelpers.escapeHtml(a.asset_type || 'Unknown')} · ${UiHelpers.escapeHtml(a.room_name || 'Unknown Room')} (${UiHelpers.escapeHtml(a.building || '-')})</p>
           </div>
           ${UiHelpers.statusBadge(a.status)}
         </div>
         <div class="grid grid-cols-2 gap-4 mt-5 text-body-sm">
-          <div><span class="text-on-surface-variant">Failure count:</span> <strong>${a.failure_count}</strong></div>
+          <div><span class="text-on-surface-variant">Failure count:</span> <strong>${a.failure_count ?? 0}</strong></div>
           <div><span class="text-on-surface-variant">Last fault at:</span> ${UiHelpers.formatDate(a.last_fault_at)}</div>
         </div>
 

@@ -214,26 +214,13 @@
     try {
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
         await Api.patch(`/work-orders/${orderId}/response`, { technicianResponse: 'Accepted' });
+        await loadTasksFromApi();
+        alert(`Work order WO-${orderId} accepted successfully!`);
       }
-    } catch (e) {}
-
-    const row = btnEl.closest('tr');
-    if (row) {
-      row.dataset.status = 'Received';
-      const statusCell = row.children[4];
-      if (statusCell) {
-        statusCell.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>`;
-      }
-      const actionsCell = row.children[5];
-      if (actionsCell) {
-        actionsCell.innerHTML = `
-          <button onclick="location.href='WorkOrderDetails.html?id=${orderId}'" class="text-primary hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="View Details">
-            <span class="material-symbols-outlined">visibility</span>
-          </button>
-        `;
-      }
+    } catch (e) {
+      console.error('Failed to accept task', e);
+      alert('Unable to accept this work order right now.');
     }
-    alert(`Work order WO-${orderId} accepted successfully!`);
   }
 
   function formatAssignedDate(dateStr) {
@@ -303,56 +290,42 @@
           technicianResponse: 'Rejected',
           rejectionReason: reason,
         });
+        closeRejectModal();
+        await loadTasksFromApi();
+        alert(`Work order WO-${activeRejectOrderId} rejected.`);
       }
-    } catch (err) {}
-
-    closeRejectModal();
-    const row = document.querySelector(`.task-row[data-id="WO-${activeRejectOrderId}"]`);
-    if (row) {
-      row.remove();
+    } catch (err) {
+      console.error('Failed to reject task', err);
+      alert('Unable to reject this work order right now.');
     }
-    filterTasksTable();
-    alert(`Work order WO-${activeRejectOrderId} rejected.`);
   }
 
-  const TASKS_BY_EMAIL = {
-    'tech.c@vnuis.edu.vn': [
-      { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24' },
-      { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-21 07:52:24' },
-      { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-15 07:52:24' }
-    ],
-    'tech.d@vnuis.edu.vn': [
-      { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-20 07:52:24' },
-      { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24' },
-      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending', assigned_at: '2026-07-23 07:52:24' }
-    ],
-    'tech.f@vnuis.edu.vn': [
-      { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected', assigned_at: '2026-07-21 07:52:24' },
-      { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24' }
-    ]
-  };
-
   async function loadTasksFromApi() {
+    const tbody = document.getElementById('taskTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant">Loading assigned work orders...</td></tr>';
+
     let tasks = [];
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           tasks = data;
         }
       }
     } catch (err) {
       console.log('API fetch error', err);
+      tasks = [];
     }
 
-    if (!tasks || tasks.length === 0) {
-      const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
-      tasks = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+    if (!tasks.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant">No assigned work orders found.</td></tr>';
+      return;
     }
 
-    const tbody = document.getElementById('taskTableBody');
     tbody.innerHTML = tasks.map(o => `
-      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${o.task_status}" data-assigned-at="${o.assigned_at || ''}">
+      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority || ''}" data-status="${o.task_status || ''}" data-assigned-at="${o.assigned_at || ''}">
         <td class="px-6 py-4 text-body-sm font-bold text-center">WO-${o.order_id}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.room_name || 'Room')}</td>
