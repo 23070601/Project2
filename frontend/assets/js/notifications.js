@@ -35,6 +35,36 @@ const Notifications = (() => {
     }
   ];
 
+  function getLocalReadIds() {
+    try {
+      return JSON.parse(localStorage.getItem('vnuis_read_notif_ids') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function saveLocalReadId(id) {
+    if (!id) return;
+    const readIds = getLocalReadIds();
+    const strId = String(id);
+    if (!readIds.includes(strId)) {
+      readIds.push(strId);
+      localStorage.setItem('vnuis_read_notif_ids', JSON.stringify(readIds));
+    }
+  }
+
+  function setAllLocalRead() {
+    localStorage.setItem('vnuis_all_notifs_read', 'true');
+  }
+
+  function isReadLocally(id) {
+    if (localStorage.getItem('vnuis_all_notifs_read') === 'true') return true;
+    if (!id) return false;
+    const strId = String(id);
+    const readIds = getLocalReadIds();
+    return readIds.includes(strId) || readIds.includes(`notif-${strId}`);
+  }
+
   function timeAgo(isoString) {
     if (!isoString) return 'recently';
     const date = new Date(isoString.includes('T') ? isoString : isoString.replace(' ', 'T'));
@@ -50,15 +80,18 @@ const Notifications = (() => {
 
   function normalizeNotification(item) {
     if (!item) return {};
+    const id = item.notification_id || item.id || Math.random();
+    const isRead = isReadLocally(id) || Boolean(item.is_read || item.isRead);
+
     return {
-      notification_id: item.notification_id || item.id || Math.random(),
+      notification_id: id,
       title: item.title || 'Notification',
       message: item.message || item.content || 'System notification',
       created_at: item.created_at || new Date().toISOString(),
-      is_read: Boolean(item.is_read || item.isRead),
+      is_read: isRead,
       order_id: item.order_id || item.orderId || null,
       report_id: item.report_id || item.reportId || null,
-      dotColor: item.dotColor || (item.is_read ? 'bg-amber-600' : 'bg-primary')
+      dotColor: item.dotColor || (isRead ? 'bg-amber-600' : 'bg-primary')
     };
   }
 
@@ -94,7 +127,7 @@ const Notifications = (() => {
 
   let lastChimeTime = 0;
   function playUrgentAudioChime() {
-    if (Date.now() - lastChimeTime < 10000) return; // Limit chime interval
+    if (Date.now() - lastChimeTime < 10000) return;
     lastChimeTime = Date.now();
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -116,22 +149,25 @@ const Notifications = (() => {
 
   async function refreshBadge(customItems) {
     let unreadCount = 0;
-    const normalizedItems = (customItems || []).map(normalizeNotification);
 
-    if (normalizedItems.length > 0) {
+    if (localStorage.getItem('vnuis_all_notifs_read') === 'true') {
+      unreadCount = 0;
+    } else {
+      const rawItems = customItems || SAMPLE_ITEMS;
+      const normalizedItems = (rawItems || []).map(normalizeNotification);
       unreadCount = normalizedItems.filter((n) => !n.is_read).length;
-    }
 
-    if (window.Api) {
-      try {
-        const res = await Api.get('/notifications/unread-count');
-        if (res && typeof res.unreadCount === 'number') {
-          unreadCount = res.unreadCount;
-        } else if (typeof res === 'number') {
-          unreadCount = res;
+      if (window.Api) {
+        try {
+          const res = await Api.get('/notifications/unread-count');
+          if (res && typeof res.unreadCount === 'number') {
+            unreadCount = res.unreadCount;
+          } else if (typeof res === 'number') {
+            unreadCount = res;
+          }
+        } catch (e) {
+          // fallback to normalized unread count
         }
-      } catch (e) {
-        unreadCount = normalizedItems.length > 0 ? unreadCount : 0;
       }
     }
 
@@ -145,6 +181,7 @@ const Notifications = (() => {
         badge.classList.remove('animate-pulse');
       }
     }
+
     const countPill = document.getElementById('notificationUnreadCount');
     if (countPill) {
       countPill.textContent = unreadCount;
@@ -153,8 +190,13 @@ const Notifications = (() => {
   }
 
   async function markAllAsRead(items, container, isDropdown = true) {
+    setAllLocalRead();
+
     const currentItems = Array.isArray(items) ? items : SAMPLE_ITEMS;
-    currentItems.forEach(n => n.is_read = true);
+    currentItems.forEach(n => {
+      n.is_read = true;
+      if (n.notification_id) saveLocalReadId(n.notification_id);
+    });
 
     try {
       if (window.Api) {
@@ -170,8 +212,9 @@ const Notifications = (() => {
 
   async function markNotificationAsRead(id, items, container, isDropdown = true) {
     if (!id) return;
+    saveLocalReadId(id);
 
-    const currentItems = Array.isArray(items) ? items : [];
+    const currentItems = Array.isArray(items) ? items : SAMPLE_ITEMS;
     const target = currentItems.find((n) => String(n.notification_id) === String(id));
     if (target) {
       target.is_read = true;
@@ -204,7 +247,7 @@ const Notifications = (() => {
       .map((n) => `
       <div class="notif-card p-4 ${n.is_read ? 'bg-white' : 'bg-primary-fixed/20'} border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:${n.is_read ? 'bg-surface-container-low' : 'bg-primary-fixed/30'} transition-colors"
            data-id="${n.notification_id}">
-        <div class="w-2 h-2 mt-2 rounded-full ${n.dotColor || (n.is_read ? 'bg-amber-600' : 'bg-primary')} shrink-0"></div>
+        <div class="w-2 h-2 mt-2 rounded-full ${n.is_read ? 'bg-transparent' : 'bg-primary'} shrink-0"></div>
         <div class="flex flex-col gap-1">
           <p class="text-body-sm ${n.is_read ? 'font-medium' : 'font-bold'} text-on-surface">${n.title || n.message || 'Notification'}</p>
           <p class="text-label-md text-on-surface-variant">${n.message}</p>
@@ -274,13 +317,7 @@ const Notifications = (() => {
     const btn = document.getElementById('markAllReadBtn');
     if (!btn) return;
     btn.addEventListener('click', async () => {
-      try {
-        if (window.Api) {
-          await Api.patch('/notifications/read-all');
-        }
-      } catch (e) {}
-      loadDropdown();
-      refreshBadge();
+      await markAllAsRead(SAMPLE_ITEMS, document.getElementById('notificationList'), true);
     });
   }
 
@@ -294,5 +331,5 @@ const Notifications = (() => {
     }, 30000); // 30s
   }
 
-  return { loadDropdown, loadFullList, startPolling, refreshBadge, timeAgo };
+  return { loadDropdown, loadFullList, startPolling, refreshBadge, markAllAsRead, markNotificationAsRead, timeAgo };
 })();

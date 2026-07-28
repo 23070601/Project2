@@ -113,7 +113,7 @@
                   <td class="px-4 py-4 text-center">${UiHelpers.escapeHtml(item.fix_description || item.notes || item.task_status || 'Update')}</td>
                   <td class="px-4 py-4 text-center">${UiHelpers.escapeHtml(item.technician_name || item.technician || 'N/A')}</td>
                   <td class="px-4 py-4 text-center">
-                    <a href="WorkOrderDetails.html?id=${item.order_id ?? item.work_order_id ?? item.orderId ?? ''}" onclick="event.preventDefault(); event.stopPropagation(); window.location.href=this.href;" class="history-action-link inline-flex items-center justify-center rounded-full bg-surface-container-low border border-outline-variant/30 p-2 text-primary hover:bg-primary-fixed/10 transition-colors" title="Go to work order" aria-label="Open work order details">
+                    <a href="./WorkOrderDetails.html?id=${encodeURIComponent(item.order_id ?? item.work_order_id ?? item.orderId ?? '')}" onclick="const href = this.getAttribute('href'); console.log('AssetDetails history link click:', href); event.preventDefault(); event.stopPropagation(); if (href) window.location.assign(href);" class="history-action-link inline-flex items-center justify-center rounded-full bg-surface-container-low border border-outline-variant/30 p-2 text-primary hover:bg-primary-fixed/10 transition-colors" title="Go to work order" aria-label="Open work order details">
                       <span class="material-symbols-outlined">visibility</span>
                     </a>
                   </td>

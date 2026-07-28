@@ -54,6 +54,20 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
+  window.confirmDeleteReport = async function(id) {
+    if (!confirm('Are you sure you want to delete report #' + id + '? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await Api.delete('/fault-reports/' + id);
+      alert('Report #' + id + ' has been deleted successfully.');
+      window.location.href = 'ListReports.html';
+    } catch (err) {
+      console.error('Delete report error:', err);
+      alert('Failed to delete report: ' + (err.message || err));
+    }
+  };
+
   (function() {
     // 1. Get user from Auth
     const user = Auth.getCurrentUser();
@@ -149,24 +163,80 @@
       return div.innerHTML;
     }
 
+    function renderVisualStepper(status) {
+      const steps = [
+        { label: 'Submitted', key: 'Submitted' },
+        { label: 'Reviewed', key: 'Reviewed' },
+        { label: 'Assigned', key: 'Assigned' },
+        { label: 'In Progress', key: 'InProgress' },
+        { label: 'Completed', key: 'Completed' }
+      ];
+
+      const s = status || '';
+      let activeIndex = 0;
+      if (['Pending', 'Pending Approval'].includes(s)) activeIndex = 0;
+      else if (s === 'Processing') activeIndex = 1;
+      else if (s === 'Assigned' || s === 'Received') activeIndex = 2;
+      else if (s === 'In Progress') activeIndex = 3;
+      else if (['Completed', 'Resolved', 'Closed'].includes(s)) activeIndex = 4;
+      else activeIndex = 1;
+
+      return `
+        <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+          <div class="flex items-center justify-between relative max-w-3xl mx-auto px-4">
+            <div class="absolute left-10 right-10 top-5 -translate-y-1/2 h-1 bg-surface-container-high z-0"></div>
+            <div class="absolute left-10 top-5 -translate-y-1/2 h-1 bg-brand-blue z-0 transition-all duration-500" style="width: calc(${(activeIndex / (steps.length - 1)) * 100}% - 20px)"></div>
+            
+            ${steps.map((step, idx) => {
+              const isDone = idx <= activeIndex;
+              const isCurrent = idx === activeIndex;
+              return `
+                <div class="relative z-10 flex flex-col items-center gap-1.5">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${isDone ? 'bg-brand-blue text-white shadow-md' : 'bg-white border-2 border-outline-variant text-on-surface-variant'} ${isCurrent ? 'ring-4 ring-brand-blue/20 scale-110' : ''}">
+                    ${isDone ? '<span class="material-symbols-outlined text-base">check</span>' : (idx + 1)}
+                  </div>
+                  <span class="text-xs font-semibold ${isDone ? 'text-brand-blue' : 'text-on-surface-variant'}">${step.label}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
       const equipment = getFieldValue(report, ['asset_name', 'equipment_name']);
       const room = getFieldValue(report, ['room_name']);
       const history = report.statusHistory || [];
+      const isPending = ['Pending', 'Pending Approval'].includes(report.status);
+
+      const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
+      const imageUrl = report.image_path ? (report.image_path.startsWith('http') ? report.image_path : (backendBase + report.image_path)) : null;
 
       let html = '';
 
       // ===== HEADER =====
       html += `
-        <div class="flex items-center gap-4 mb-6 flex-wrap">
-          <h2 class="text-headline-md font-headline-md text-on-surface">Report Details - ${report.report_id}</h2>
-          <div class="flex gap-2 flex-wrap">
-            ${statusBadge(report.status)}
-            ${priorityBadge(report.priority)}
+        <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
+          <div class="flex items-center gap-4 flex-wrap">
+            <h2 class="text-headline-md font-headline-md text-on-surface">Report Details - ${report.report_id}</h2>
+            <div class="flex gap-2 flex-wrap">
+              ${statusBadge(report.status)}
+              ${priorityBadge(report.priority)}
+            </div>
           </div>
+          ${isPending ? `
+          <button onclick="confirmDeleteReport('${report.report_id}')" class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-lg text-sm transition-colors flex items-center gap-2 border border-red-200 cursor-pointer">
+            <span class="material-symbols-outlined text-sm">delete</span>
+            <span>Delete Report</span>
+          </button>
+          ` : ''}
         </div>
       `;
+
+      // ===== VISUAL STEPPER TIMELINE =====
+      html += renderVisualStepper(report.status);
 
       // ===== 2-COLUMN GRID =====
       html += `
@@ -202,13 +272,16 @@
                 </div>
               </div>
 
-              ${report.image_path ? `
+              ${imageUrl ? `
               <div>
                 <p class="text-label-md text-on-surface-variant mb-2">Uploaded Evidence</p>
                 <div class="flex gap-4">
-                  <a href="${report.image_path}" target="_blank" class="w-32 h-32 bg-surface-container rounded-lg border border-outline-variant/10 flex flex-col items-center justify-center text-outline-variant group cursor-pointer hover:border-brand-blue/30 transition-all">
-                    <span class="material-symbols-outlined text-[32px]">photo_camera</span>
-                    <span class="text-[10px] font-label-md mt-1">View Evidence</span>
+                  <a href="${imageUrl}" target="_blank" class="block relative w-48 h-48 rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group bg-surface-container">
+                    <img src="${imageUrl}" alt="Uploaded Evidence" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 p-2 text-center\\'><span class=\\'material-symbols-outlined text-2xl mb-1\\'>broken_image</span>Failed to load image</div>';" />
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                      <span class="material-symbols-outlined text-sm">visibility</span>
+                      <span>View Full Image</span>
+                    </div>
                   </a>
                 </div>
               </div>

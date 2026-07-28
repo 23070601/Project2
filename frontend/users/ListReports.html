@@ -49,30 +49,58 @@
       </a>
     </div>
 
-    <!-- Control Row -->
-    <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm mb-6 flex flex-wrap items-center gap-4 border border-outline-variant/30">
-      <div class="flex-1 min-w-[300px] relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-        <input id="searchInput" class="w-full pl-10 pr-4 py-2.5 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" placeholder="Search by Equipment / Room..." type="text">
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="text-label-md text-on-surface-variant">Filter by:</span>
-        <select id="statusFilter" class="pl-4 pr-10 py-2.5 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.5rem_center] bg-no-repeat">
-          <option value="">All Reports</option>
-          <option value="Pending">Pending</option>
-          <option value="Pending Approval">Pending Approval</option>
-          <option value="Processing">Processing</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Completed">Completed</option>
-          <option value="Resolved">Resolved</option>
-          <option value="Rejected">Rejected</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
-      </div>
-      <button id="advancedFilterBtn" class="p-2.5 border border-outline-variant rounded-lg hover:bg-secondary-container transition-colors text-on-surface-variant flex items-center gap-2">
-        <span class="material-symbols-outlined">filter_list</span>
-        <span class="text-label-md font-label-md">Advanced</span>
+    <!-- Status Quick Filter Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-4 no-scrollbar" id="statusTabsContainer">
+      <button type="button" data-status="" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm bg-brand-blue text-white cursor-pointer">
+        All <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-white/20 font-bold" id="countAll">0</span>
       </button>
+      <button type="button" data-status="Pending" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
+        Pending <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold" id="countPending">0</span>
+      </button>
+      <button type="button" data-status="In Progress" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
+        In Progress <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold" id="countInProgress">0</span>
+      </button>
+      <button type="button" data-status="Completed" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
+        Completed <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-bold" id="countCompleted">0</span>
+      </button>
+      <button type="button" data-status="Rejected" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
+        Rejected / Cancelled <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-bold" id="countRejected">0</span>
+      </button>
+    </div>
+
+    <!-- Control Row -->
+    <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4 border border-outline-variant/30">
+      <div class="flex-1 min-w-[260px] relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">search</span>
+        <input id="searchInput" class="w-full pl-10 pr-9 py-2.5 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" placeholder="Search by ID, Equipment, Room, Description..." type="text">
+        <button id="clearSearchBtn" type="button" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface text-sm p-1 rounded-full">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Priority Filter -->
+        <div class="flex items-center gap-2">
+          <span class="text-label-md text-on-surface-variant shrink-0 font-medium">Priority:</span>
+          <select id="priorityFilter" class="pl-3 pr-8 py-2 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1em_1em] bg-[right_0.5rem_center] bg-no-repeat">
+            <option value="">All Priorities</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+
+        <!-- Sort By Dropdown -->
+        <div class="flex items-center gap-2">
+          <span class="text-label-md text-on-surface-variant shrink-0 font-medium">Sort:</span>
+          <select id="sortBySelect" class="pl-3 pr-8 py-2 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1em_1em] bg-[right_0.5rem_center] bg-no-repeat">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="priority">Priority: High to Low</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <!-- Data Table Card -->
@@ -178,6 +206,7 @@
     let allReports = [];
     let filteredReports = [];
     let currentPage = 1;
+    let currentStatus = '';
     const itemsPerPage = 5;
 
     // DOM elements
@@ -186,7 +215,9 @@
     const paginationInfo = document.getElementById('paginationInfo');
     const paginationNav = document.getElementById('paginationNav');
     const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const priorityFilter = document.getElementById('priorityFilter');
+    const statusTabBtns = document.querySelectorAll('.status-tab-btn');
 
     // 4. Load reports from API
     async function loadReports() {
@@ -194,6 +225,7 @@
         const reports = await Api.get('/fault-reports', { mine: 'true' });
         console.log('Reports from API:', reports);
         allReports = reports || [];
+        updateStatusCounts();
         applyFilters();
       } catch (err) {
         console.error('Failed to load reports:', err);
@@ -205,31 +237,98 @@
           { report_id: 'REP-0012', equipment_name: 'Smart Board', room_name: 'Room 401', priority: 'High', reported_at: '2026-03-20', status: 'Rejected' },
           { report_id: 'REP-0010', equipment_name: 'Desktop PC', room_name: 'Room 601', priority: 'Medium', reported_at: '2026-02-18', status: 'Cancelled' }
         ];
+        updateStatusCounts();
         applyFilters();
       }
     }
 
-    // 5. Apply filters
+    // Update status tab badge counts dynamically
+    function updateStatusCounts() {
+      const counts = {
+        All: allReports.length,
+        Pending: 0,
+        InProgress: 0,
+        Completed: 0,
+        Rejected: 0
+      };
+
+      allReports.forEach(report => {
+        const s = report.status || '';
+        if (['Pending', 'Pending Approval'].includes(s)) {
+          counts.Pending++;
+        } else if (['In Progress', 'Processing'].includes(s)) {
+          counts.InProgress++;
+        } else if (['Completed', 'Resolved'].includes(s)) {
+          counts.Completed++;
+        } else if (['Rejected', 'Cancelled'].includes(s)) {
+          counts.Rejected++;
+        }
+      });
+
+      const countAll = document.getElementById('countAll');
+      const countPending = document.getElementById('countPending');
+      const countInProgress = document.getElementById('countInProgress');
+      const countCompleted = document.getElementById('countCompleted');
+      const countRejected = document.getElementById('countRejected');
+
+      if (countAll) countAll.textContent = counts.All;
+      if (countPending) countPending.textContent = counts.Pending;
+      if (countInProgress) countInProgress.textContent = counts.InProgress;
+      if (countCompleted) countCompleted.textContent = counts.Completed;
+      if (countRejected) countRejected.textContent = counts.Rejected;
+    }
+
+    // 5. Apply filters & sorting
     function applyFilters() {
-      const searchTerm = searchInput.value.toLowerCase().trim();
-      const statusValue = statusFilter.value;
+      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const priorityValue = priorityFilter ? priorityFilter.value : '';
+      const sortValue = sortBySelect ? sortBySelect.value : 'newest';
 
       filteredReports = allReports.filter(report => {
+        const s = report.status || '';
+
+        // Status tab filter
+        if (currentStatus) {
+          if (currentStatus === 'Pending' && !['Pending', 'Pending Approval'].includes(s)) return false;
+          if (currentStatus === 'In Progress' && !['In Progress', 'Processing'].includes(s)) return false;
+          if (currentStatus === 'Completed' && !['Completed', 'Resolved'].includes(s)) return false;
+          if (currentStatus === 'Rejected' && !['Rejected', 'Cancelled'].includes(s)) return false;
+        }
+
+        // Priority filter
+        if (priorityValue && report.priority !== priorityValue) {
+          return false;
+        }
+
         // Search filter
         if (searchTerm) {
+          const reportId = String(report.report_id || '').toLowerCase();
           const equipment = getFieldValue(report, ['equipment_name', 'equipment', 'asset_name', 'asset']).toLowerCase();
           const room = getFieldValue(report, ['room_name', 'room', 'classroom']).toLowerCase();
-          if (!equipment.includes(searchTerm) && !room.includes(searchTerm)) {
+          const desc = String(report.description || '').toLowerCase();
+
+          if (!reportId.includes(searchTerm) && 
+              !equipment.includes(searchTerm) && 
+              !room.includes(searchTerm) &&
+              !desc.includes(searchTerm)) {
             return false;
           }
         }
 
-        // Status filter
-        if (statusValue && report.status !== statusValue) {
-          return false;
-        }
-
         return true;
+      });
+
+      // Apply sorting
+      const priorityOrder = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+      filteredReports.sort((a, b) => {
+        if (sortValue === 'oldest') {
+          return new Date(a.reported_at || 0) - new Date(b.reported_at || 0);
+        } else if (sortValue === 'priority') {
+          return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+        } else {
+          // default: newest first
+          return new Date(b.reported_at || 0) - new Date(a.reported_at || 0);
+        }
       });
 
       currentPage = 1;
@@ -268,10 +367,20 @@
             <td class="py-4 px-6 text-body-md">${formatDate(r.reported_at)}</td>
             <td class="py-4 px-6">${statusBadge(r.status)}</td>
             <td class="py-4 px-6 text-center">
-              <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all" 
-                      onclick="event.stopPropagation(); location.href='ReportDetails.html?id=${r.report_id}'">
-                <span class="material-symbols-outlined">visibility</span>
-              </button>
+              <div class="flex items-center justify-center gap-1">
+                <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all" 
+                        title="View Details"
+                        onclick="event.stopPropagation(); location.href='ReportDetails.html?id=${r.report_id}'">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                ${['Pending', 'Pending Approval'].includes(r.status) ? `
+                <button class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-all" 
+                        title="Delete Report"
+                        onclick="event.stopPropagation(); deletePendingReport('${r.report_id}')">
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+                ` : ''}
+              </div>
             </td>
           </tr>
         `;
@@ -329,13 +438,78 @@
     };
 
     // 8. Event listeners
+    // Status tab click handlers
+    statusTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentStatus = btn.dataset.status || '';
+
+        // Update tab styles
+        statusTabBtns.forEach(b => {
+          const isSelected = (b.dataset.status || '') === currentStatus;
+          const badge = b.querySelector('span');
+
+          if (isSelected) {
+            b.className = 'status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm bg-brand-blue text-white cursor-pointer';
+            if (badge) badge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-white/20 font-bold';
+          } else {
+            b.className = 'status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer';
+            if (badge) {
+              const statusVal = b.dataset.status || '';
+              let badgeColor = 'bg-gray-100 text-gray-800';
+              if (statusVal === 'Pending') badgeColor = 'bg-amber-100 text-amber-800';
+              else if (statusVal === 'In Progress') badgeColor = 'bg-blue-100 text-blue-800';
+              else if (statusVal === 'Completed') badgeColor = 'bg-green-100 text-green-800';
+              else if (statusVal === 'Rejected') badgeColor = 'bg-red-100 text-red-800';
+              badge.className = `ml-1 text-xs px-2 py-0.5 rounded-full ${badgeColor} font-bold`;
+            }
+          }
+        });
+
+        applyFilters();
+      });
+    });
+
     if (searchInput) {
-      searchInput.addEventListener('input', applyFilters);
+      searchInput.addEventListener('input', () => {
+        if (clearSearchBtn) {
+          if (searchInput.value.trim().length > 0) {
+            clearSearchBtn.classList.remove('hidden');
+          } else {
+            clearSearchBtn.classList.add('hidden');
+          }
+        }
+        applyFilters();
+      });
     }
 
-    if (statusFilter) {
-      statusFilter.addEventListener('change', applyFilters);
+    if (clearSearchBtn && searchInput) {
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        applyFilters();
+      });
     }
+
+    if (priorityFilter) {
+      priorityFilter.addEventListener('change', applyFilters);
+    }
+
+    if (sortBySelect) {
+      sortBySelect.addEventListener('change', applyFilters);
+    }
+
+    window.deletePendingReport = async function(id) {
+      if (!confirm('Are you sure you want to delete report #' + id + '? This action cannot be undone.')) {
+        return;
+      }
+      try {
+        await Api.delete('/fault-reports/' + id);
+        alert('Report #' + id + ' deleted successfully.');
+        loadReports();
+      } catch (err) {
+        alert('Failed to delete report: ' + (err.message || err));
+      }
+    };
 
     // 9. Load data
     loadReports().catch(err => console.error('Failed to load reports', err));

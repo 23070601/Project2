@@ -40,23 +40,51 @@
       <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-8">
         <form id="reportForm" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-2">
-              <label class="text-label-lg font-semibold text-on-surface" for="roomSelect">Classroom <span class="text-error">*</span></label>
-              <div class="relative">
-                <select id="roomSelect" required class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
-                  <option value="">Select Classroom</option>
-                </select>
-                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+            <!-- Custom Classroom Selector -->
+            <div class="space-y-2 relative" id="customRoomContainer">
+              <label class="text-label-lg font-semibold text-on-surface">Classroom <span class="text-error">*</span></label>
+              <select id="roomSelect" required class="hidden">
+                <option value="">Select Classroom</option>
+              </select>
+              
+              <button type="button" id="roomTrigger" class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary flex items-center justify-between transition-all hover:bg-surface-container-low cursor-pointer shadow-sm">
+                <span id="roomTriggerText" class="text-on-surface-variant font-medium flex items-center gap-2 truncate">
+                  <span class="material-symbols-outlined text-primary shrink-0">meeting_room</span>
+                  <span>Select Classroom</span>
+                </span>
+                <span id="roomTriggerArrow" class="material-symbols-outlined text-outline shrink-0 transition-transform duration-200">expand_more</span>
+              </button>
+              
+              <div id="roomPanel" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 p-4 max-h-[380px] flex flex-col gap-3">
+                <div class="relative shrink-0">
+                  <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none">search</span>
+                  <input type="text" id="roomSearchInput" placeholder="Search room or floor..." class="w-full pl-9 pr-3 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div class="overflow-y-auto flex-1 space-y-1 pr-1" id="roomItemsList"></div>
               </div>
             </div>
 
-            <div class="space-y-2">
-              <label class="text-label-lg font-semibold text-on-surface" for="assetSelect">Equipment (optional)</label>
-              <div class="relative">
-                <select id="assetSelect" class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
-                  <option value="">General / not asset-specific</option>
-                </select>
-                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+            <!-- Custom Equipment Selector -->
+            <div class="space-y-2 relative" id="customAssetContainer">
+              <label class="text-label-lg font-semibold text-on-surface">Equipment (optional)</label>
+              <select id="assetSelect" class="hidden">
+                <option value="">General / not asset-specific</option>
+              </select>
+              
+              <button type="button" id="assetTrigger" class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary flex items-center justify-between transition-all hover:bg-surface-container-low cursor-pointer shadow-sm">
+                <span id="assetTriggerText" class="text-on-surface-variant font-medium flex items-center gap-2 truncate">
+                  <span class="material-symbols-outlined text-primary shrink-0">devices</span>
+                  <span>General / not asset-specific</span>
+                </span>
+                <span id="assetTriggerArrow" class="material-symbols-outlined text-outline shrink-0 transition-transform duration-200">expand_more</span>
+              </button>
+              
+              <div id="assetPanel" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-outline-variant/30 z-50 p-4 max-h-[420px] flex flex-col gap-3">
+                <div class="relative shrink-0">
+                  <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none">search</span>
+                  <input type="text" id="assetSearchInput" placeholder="Search equipment by name or type..." class="w-full pl-9 pr-3 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div class="overflow-y-auto flex-1 space-y-1 pr-1" id="assetItemsList"></div>
               </div>
             </div>
           </div>
@@ -92,6 +120,20 @@
               <input class="hidden" type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf">
             </div>
             <div id="fileInfo" class="hidden text-body-sm text-on-surface-variant mt-2"></div>
+            <!-- Image Thumbnail Preview Container -->
+            <div id="imagePreviewContainer" class="hidden mt-3 p-3 bg-surface-container-low border border-outline-variant/30 rounded-xl flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3 overflow-hidden">
+                <img id="previewImg" class="w-16 h-16 object-cover rounded-lg border border-outline-variant/40 shrink-0 hidden" src="" alt="Evidence Preview">
+                <span id="pdfIcon" class="material-symbols-outlined text-primary text-3xl shrink-0 hidden">picture_as_pdf</span>
+                <div class="truncate">
+                  <p id="previewFileName" class="text-body-sm font-semibold text-on-surface truncate">-</p>
+                  <p id="previewFileSize" class="text-xs text-on-surface-variant">-</p>
+                </div>
+              </div>
+              <button id="removeFileBtn" type="button" class="text-error hover:bg-red-50 p-1.5 rounded-full transition-colors shrink-0" title="Remove file">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
           </div>
 
           <!-- Error & Success Messages -->
@@ -166,6 +208,22 @@
       });
     }
 
+    var imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    var previewImg = document.getElementById('previewImg');
+    var pdfIcon = document.getElementById('pdfIcon');
+    var previewFileName = document.getElementById('previewFileName');
+    var previewFileSize = document.getElementById('previewFileSize');
+    var removeFileBtn = document.getElementById('removeFileBtn');
+
+    if (removeFileBtn) {
+      removeFileBtn.addEventListener('click', function() {
+        selectedFile = null;
+        fileInput.value = '';
+        if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
+        if (fileInfo) fileInfo.classList.add('hidden');
+      });
+    }
+
     function handleFile(file) {
       var validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
       if (!validTypes.includes(file.type)) {
@@ -177,142 +235,380 @@
         return;
       }
       selectedFile = file;
-      fileInfo.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
-      fileInfo.classList.remove('hidden');
+
+      if (previewFileName) previewFileName.textContent = file.name;
+      if (previewFileSize) previewFileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+
+      if (file.type.startsWith('image/')) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          if (previewImg) {
+            previewImg.src = e.target.result;
+            previewImg.classList.remove('hidden');
+          }
+          if (pdfIcon) pdfIcon.classList.add('hidden');
+          if (imagePreviewContainer) imagePreviewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else if (file.type === 'application/pdf') {
+        if (previewImg) previewImg.classList.add('hidden');
+        if (pdfIcon) pdfIcon.classList.remove('hidden');
+        if (imagePreviewContainer) imagePreviewContainer.classList.remove('hidden');
+      }
     }
 
-    // 4. Load rooms and assets
-    var roomSelect = document.getElementById('roomSelect');
-    var assetSelect = document.getElementById('assetSelect');
-    
-    // Dữ liệu mẫu cho assets từ database
-    var allAssetsData = [
-      { asset_id: 1, asset_name: 'Sony Projector VPL', asset_type: 'Projector', room_id: 1, status: 'Operational' },
-      { asset_id: 2, asset_name: 'Dell Classroom PC', asset_type: 'Computer', room_id: 1, status: 'Operational' },
-      { asset_id: 3, asset_name: 'Daikin Air Conditioner', asset_type: 'Air Conditioner', room_id: 2, status: 'Operational' },
-      { asset_id: 4, asset_name: 'Interactive Smart TV 65in', asset_type: 'Interactive TV', room_id: 3, status: 'Operational' },
-      { asset_id: 5, asset_name: 'Sony Projector VPL', asset_type: 'Projector', room_id: 1, status: 'Operational' },
-      { asset_id: 6, asset_name: 'Dell Classroom PC', asset_type: 'Computer', room_id: 1, status: 'Operational' },
-      { asset_id: 7, asset_name: 'Daikin Air Conditioner', asset_type: 'Air Conditioner', room_id: 2, status: 'Operational' },
-      { asset_id: 8, asset_name: 'Interactive Smart TV 65in', asset_type: 'Interactive TV', room_id: 3, status: 'Operational' }
-    ];
-
-    // Hàm hiển thị assets
-    function renderAssets(assets) {
-      assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
-      if (!assets || assets.length === 0) {
-        // Nếu không có assets, thêm option báo trống
-        var emptyOption = document.createElement('option');
-        emptyOption.value = '';
-        emptyOption.textContent = 'No equipment available';
-        emptyOption.disabled = true;
-        assetSelect.appendChild(emptyOption);
-        return;
+    // Draft Auto-save for Description
+    var descElem = document.getElementById('description');
+    if (descElem) {
+      const savedDraft = localStorage.getItem('vnu_report_draft_desc');
+      if (savedDraft) {
+        descElem.value = savedDraft;
       }
-      
-      assets.forEach(function(a) {
-        var option = document.createElement('option');
-        option.value = a.asset_id;
-        var displayText = a.asset_name + ' (' + a.asset_type + ')';
-        if (a.status) {
-          displayText += ' - ' + a.status;
-        }
-        option.textContent = displayText;
-        assetSelect.appendChild(option);
+      descElem.addEventListener('input', function() {
+        localStorage.setItem('vnu_report_draft_desc', descElem.value);
       });
     }
 
-    // Hàm lấy assets từ API hoặc fallback
+    // 4. Load rooms and assets with Custom Combobox Selectors
+    var roomSelect = document.getElementById('roomSelect');
+    var assetSelect = document.getElementById('assetSelect');
+    
+    // Rich fallback assets dataset covering all database asset types
+    var allAssetsData = [
+      { asset_id: 1, asset_name: 'Cisco Catalyst 24-Port Switch', asset_type: 'NetworkSwitch', room_id: 1, status: 'Operational' },
+      { asset_id: 2, asset_name: 'Samsung 75in Commercial TV', asset_type: 'TV', room_id: 1, status: 'Recommended for Replacement' },
+      { asset_id: 3, asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Aircon', room_id: 1, status: 'Operational' },
+      { asset_id: 4, asset_name: 'JBL Classroom Wall Speaker', asset_type: 'Speaker', room_id: 1, status: 'Operational' },
+      { asset_id: 63, asset_name: 'Panasonic 4K Laser Projector', asset_type: 'Projector', room_id: 1, status: 'Operational' },
+      { asset_id: 64, asset_name: 'Shure Wireless Dual Microphone', asset_type: 'Microphone', room_id: 1, status: 'Operational' },
+      { asset_id: 65, asset_name: 'Ultra HD 4K HDMI Cable 10m', asset_type: 'Cable', room_id: 1, status: 'Operational' },
+      { asset_id: 66, asset_name: 'Epson HD Document Camera', asset_type: 'DocumentCamera', room_id: 1, status: 'Operational' },
+      { asset_id: 67, asset_name: 'Dell OptiPlex Classroom PC', asset_type: 'Computer', room_id: 1, status: 'Operational' }
+    ];
+
+    function formatAssetTypeName(type) {
+      if (!type || type === 'All') return type || 'Other';
+      if (type === 'NetworkSwitch') return 'Network Switch';
+      if (type === 'DocumentCamera') return 'Document Camera';
+      return type;
+    }
+
+    function getAssetIcon(type) {
+      var t = (type || '').toLowerCase();
+      if (t.includes('aircon') || t.includes('ac')) return 'ac_unit';
+      if (t.includes('projector')) return 'videocam';
+      if (t.includes('tv') || t.includes('display') || t.includes('board')) return 'tv';
+      if (t.includes('speaker')) return 'volume_up';
+      if (t.includes('mic')) return 'mic';
+      if (t.includes('switch') || t.includes('router') || t.includes('network')) return 'router';
+      if (t.includes('cable') || t.includes('hdmi')) return 'cable';
+      if (t.includes('camera')) return 'photo_camera';
+      if (t.includes('pc') || t.includes('computer')) return 'computer';
+      return 'devices';
+    }
+
+    function getStatusBadge(status) {
+      if (status === 'Operational') {
+        return '<span class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-semibold shrink-0">Operational</span>';
+      } else if (status === 'Under Repair') {
+        return '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold shrink-0">Under Repair</span>';
+      } else if (status === 'Recommended for Replacement') {
+        return '<span class="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold shrink-0">Replacement</span>';
+      }
+      return status ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-semibold shrink-0">' + status + '</span>' : '';
+    }
+
+    function getFloorName(r) {
+      if (r.floor_number !== undefined && r.floor_number !== null && r.floor_number !== '') {
+        return 'Floor ' + r.floor_number;
+      }
+      var match = r.room_name ? r.room_name.match(/(\d+)/) : null;
+      if (match && match[1]) {
+        var numStr = match[1];
+        var floorNum = numStr.length >= 3 ? numStr.charAt(0) : numStr;
+        return 'Floor ' + floorNum;
+      }
+      return 'Other Floors';
+    }
+
+    // --- Custom Equipment Combobox Selector Logic ---
+    var currentAssetsList = [];
+
+    function renderCustomAssetsList(assets) {
+      currentAssetsList = assets || [];
+      
+      // Update hidden select for form compatibility
+      assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
+      currentAssetsList.forEach(function(a) {
+        var opt = document.createElement('option');
+        opt.value = a.asset_id;
+        opt.textContent = a.asset_name;
+        assetSelect.appendChild(opt);
+      });
+
+      var searchTerm = (document.getElementById('assetSearchInput').value || '').toLowerCase().trim();
+      var filtered = currentAssetsList.filter(function(a) {
+        return !searchTerm || 
+          (a.asset_name && a.asset_name.toLowerCase().includes(searchTerm)) || 
+          (a.asset_type && a.asset_type.toLowerCase().includes(searchTerm)) ||
+          formatAssetTypeName(a.asset_type).toLowerCase().includes(searchTerm);
+      });
+
+      var listContainer = document.getElementById('assetItemsList');
+      listContainer.innerHTML = '';
+
+      if (!searchTerm) {
+        var genItem = document.createElement('div');
+        genItem.className = 'p-2.5 rounded-lg hover:bg-primary-fixed/20 cursor-pointer flex items-center gap-3 transition-colors border border-transparent hover:border-primary-fixed/40';
+        genItem.innerHTML = `
+          <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 shrink-0">
+            <span class="material-symbols-outlined text-sm">devices</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-body-sm font-semibold text-on-surface">General / not asset-specific</p>
+            <p class="text-[11px] text-on-surface-variant">General issue in this classroom</p>
+          </div>
+        `;
+        genItem.onclick = function() {
+          selectAsset('', 'General / not asset-specific');
+        };
+        listContainer.appendChild(genItem);
+      }
+
+      if (filtered.length === 0) {
+        var emptyDiv = document.createElement('div');
+        emptyDiv.className = 'p-4 text-center text-body-sm text-on-surface-variant';
+        emptyDiv.textContent = 'No matching equipment found.';
+        listContainer.appendChild(emptyDiv);
+        return;
+      }
+
+      filtered.forEach(function(a) {
+        var icon = getAssetIcon(a.asset_type);
+        var typeName = formatAssetTypeName(a.asset_type);
+        var statusBadge = getStatusBadge(a.status);
+        var item = document.createElement('div');
+        item.className = 'p-2.5 rounded-lg hover:bg-primary-fixed/20 cursor-pointer flex items-center justify-between gap-3 transition-colors border border-transparent hover:border-primary-fixed/40 group';
+        item.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="w-8 h-8 rounded-lg bg-primary-fixed/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-sm">${icon}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-body-sm font-bold text-on-surface truncate">${typeName}</p>
+              <p class="text-[11px] text-on-surface-variant truncate">${a.asset_name}</p>
+            </div>
+          </div>
+          ${statusBadge}
+        `;
+        item.onclick = function() {
+          selectAsset(a.asset_id, typeName + ' (' + a.asset_name + ')', a.asset_type);
+        };
+        listContainer.appendChild(item);
+      });
+    }
+
+    function selectAsset(id, label, type) {
+      assetSelect.value = id;
+      var triggerText = document.getElementById('assetTriggerText');
+      triggerText.innerHTML = `
+        <span class="material-symbols-outlined text-primary shrink-0">${id ? getAssetIcon(type || label) : 'devices'}</span>
+        <span class="font-semibold text-on-surface truncate">${label}</span>
+      `;
+      document.getElementById('assetPanel').classList.add('hidden');
+      document.getElementById('assetTriggerArrow').classList.remove('rotate-180');
+    }
+
+    // --- Custom Classroom Combobox Selector Logic ---
+    var currentRoomsList = [];
+
+    function renderCustomRoomsList(rooms) {
+      currentRoomsList = rooms || [];
+      
+      roomSelect.innerHTML = '<option value="">Select Classroom</option>';
+      currentRoomsList.forEach(function(r) {
+        var opt = document.createElement('option');
+        opt.value = r.room_id;
+        opt.textContent = r.room_name;
+        roomSelect.appendChild(opt);
+      });
+
+      var searchTerm = (document.getElementById('roomSearchInput').value || '').toLowerCase().trim();
+      var filtered = currentRoomsList.filter(function(r) {
+        var f = getFloorName(r);
+        return !searchTerm || 
+          (r.room_name && r.room_name.toLowerCase().includes(searchTerm)) || 
+          (r.building && r.building.toLowerCase().includes(searchTerm)) ||
+          f.toLowerCase().includes(searchTerm);
+      });
+
+      var listContainer = document.getElementById('roomItemsList');
+      listContainer.innerHTML = '';
+
+      if (filtered.length === 0) {
+        var emptyDiv = document.createElement('div');
+        emptyDiv.className = 'p-4 text-center text-body-sm text-on-surface-variant';
+        emptyDiv.textContent = 'No matching classrooms found.';
+        listContainer.appendChild(emptyDiv);
+        return;
+      }
+
+      filtered.forEach(function(r) {
+        var floorLabel = getFloorName(r);
+        var cleanRoomName = (r.room_name || '').replace(/-Updated/gi, '');
+        var item = document.createElement('div');
+        item.className = 'p-2.5 rounded-lg hover:bg-primary-fixed/20 cursor-pointer flex items-center justify-between gap-3 transition-colors border border-transparent hover:border-primary-fixed/40 group';
+        item.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="w-8 h-8 rounded-lg bg-primary-fixed/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-sm">meeting_room</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-body-sm font-semibold text-on-surface truncate">${cleanRoomName}</p>
+              <p class="text-[11px] text-on-surface-variant truncate">${r.building ? r.building + ' • ' : ''}${floorLabel}</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary text-sm transition-colors">chevron_right</span>
+        `;
+        item.onclick = function() {
+          selectRoom(r.room_id, cleanRoomName + (r.building ? ' (' + r.building + ')' : ''));
+        };
+        listContainer.appendChild(item);
+      });
+    }
+
+    function selectRoom(id, label) {
+      roomSelect.value = id;
+      var triggerText = document.getElementById('roomTriggerText');
+      triggerText.innerHTML = `
+        <span class="material-symbols-outlined text-primary shrink-0">meeting_room</span>
+        <span class="font-semibold text-on-surface truncate">${label}</span>
+      `;
+      document.getElementById('roomPanel').classList.add('hidden');
+      document.getElementById('roomTriggerArrow').classList.remove('rotate-180');
+
+      // Fetch equipment for selected classroom
+      fetchAssets(id);
+    }
+
+    // --- Fetch & Load Functions ---
     async function fetchAssets(roomId) {
       try {
-        // Thử gọi API
         var response = await Api.get('/assets', { roomId: roomId });
         console.log('Assets from API:', response);
-        
         if (response && response.length > 0) {
-          // Lưu vào localStorage để dùng sau
           localStorage.setItem('cached_assets', JSON.stringify(response));
-          renderAssets(response);
+          renderCustomAssetsList(response);
           return;
         }
       } catch (err) {
         console.warn('API error, using fallback data:', err);
       }
       
-      // Fallback: lọc từ dữ liệu mẫu
       var filtered = allAssetsData.filter(function(a) {
         return a.room_id === Number(roomId);
       });
-      
-      if (filtered.length > 0) {
-        renderAssets(filtered);
-      } else {
-        // Nếu không có assets trong phòng, hiển thị tất cả
-        renderAssets(allAssetsData);
-      }
+      renderCustomAssetsList(filtered.length > 0 ? filtered : allAssetsData);
     }
 
-    // Load rooms
     async function loadRooms() {
       try {
         var rooms = await Api.get('/classrooms');
         console.log('Rooms from API:', rooms);
-        
-        roomSelect.innerHTML = '<option value="">Select Classroom</option>';
         if (rooms && rooms.length > 0) {
-          rooms.forEach(function(r) {
-            var option = document.createElement('option');
-            option.value = r.room_id;
-            option.textContent = r.room_name + ' (' + (r.building || '') + ' - Floor ' + (r.floor_number || '-') + ')';
-            roomSelect.appendChild(option);
-          });
-          
-          // Tự động load assets cho room đầu tiên nếu có
-          if (rooms.length > 0) {
-            var firstRoomId = rooms[0].room_id;
-            fetchAssets(firstRoomId);
-          }
+          renderCustomRoomsList(rooms);
+          var firstRoomId = rooms[0].room_id;
+          selectRoom(firstRoomId, rooms[0].room_name);
         } else {
-          // Fallback rooms
           var fallbackRooms = [
-            { room_id: 1, room_name: 'Room 101', building: 'A', floor_number: 1 },
-            { room_id: 2, room_name: 'Room 102', building: 'A', floor_number: 1 },
-            { room_id: 3, room_name: 'Room 201', building: 'B', floor_number: 2 }
+            { room_id: 1, room_name: 'R101', building: 'Building A', floor_number: 1 },
+            { room_id: 2, room_name: 'R102', building: 'Building A', floor_number: 1 },
+            { room_id: 3, room_name: 'R103', building: 'Building A', floor_number: 1 },
+            { room_id: 6, room_name: 'R301', building: 'Building A', floor_number: 3 },
+            { room_id: 7, room_name: 'R302', building: 'Building A', floor_number: 3 },
+            { room_id: 11, room_name: 'R401', building: 'Building B', floor_number: 4 },
+            { room_id: 16, room_name: 'R501', building: 'Building B', floor_number: 5 },
+            { room_id: 21, room_name: 'R601', building: 'Building C', floor_number: 6 }
           ];
-          fallbackRooms.forEach(function(r) {
-            var option = document.createElement('option');
-            option.value = r.room_id;
-            option.textContent = r.room_name + ' (' + (r.building || '') + ' - Floor ' + (r.floor_number || '-') + ')';
-            roomSelect.appendChild(option);
-          });
-          // Load assets cho room đầu tiên
-          fetchAssets(1);
+          renderCustomRoomsList(fallbackRooms);
+          selectRoom(1, 'R101 (Building A)');
         }
         
-        // Prefill từ QR code
         var params = new URLSearchParams(location.search);
         var prefillRoomId = params.get('room_id');
         if (prefillRoomId) {
-          roomSelect.value = prefillRoomId;
-          fetchAssets(prefillRoomId);
+          var targetRoom = currentRoomsList.find(function(r) { return String(r.room_id) === String(prefillRoomId); });
+          var label = targetRoom ? targetRoom.room_name : 'Room #' + prefillRoomId;
+          selectRoom(prefillRoomId, label);
         }
       } catch (err) {
         console.error('Failed to load rooms:', err);
-        // Thêm rooms mặc định
-        roomSelect.innerHTML = '<option value="">Select Classroom</option>';
         var defaultRooms = [
-          { room_id: 1, room_name: 'Room 101', building: 'A', floor_number: 1 },
-          { room_id: 2, room_name: 'Room 102', building: 'A', floor_number: 1 }
+          { room_id: 1, room_name: 'R101', building: 'Building A', floor_number: 1 },
+          { room_id: 2, room_name: 'R102', building: 'Building A', floor_number: 1 }
         ];
-        defaultRooms.forEach(function(r) {
-          var option = document.createElement('option');
-          option.value = r.room_id;
-          option.textContent = r.room_name + ' (' + (r.building || '') + ' - Floor ' + (r.floor_number || '-') + ')';
-          roomSelect.appendChild(option);
-        });
-        fetchAssets(1);
+        renderCustomRoomsList(defaultRooms);
+        selectRoom(1, 'R101');
       }
     }
+
+    // --- Dropdown Panel Event Listeners ---
+    document.getElementById('roomTrigger').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var panel = document.getElementById('roomPanel');
+      var arrow = document.getElementById('roomTriggerArrow');
+      var isHidden = panel.classList.contains('hidden');
+      document.getElementById('assetPanel').classList.add('hidden');
+      document.getElementById('assetTriggerArrow').classList.remove('rotate-180');
+      
+      if (isHidden) {
+        panel.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+        document.getElementById('roomSearchInput').focus();
+      } else {
+        panel.classList.add('hidden');
+        arrow.classList.remove('rotate-180');
+      }
+    });
+
+    document.getElementById('assetTrigger').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var panel = document.getElementById('assetPanel');
+      var arrow = document.getElementById('assetTriggerArrow');
+      var isHidden = panel.classList.contains('hidden');
+      document.getElementById('roomPanel').classList.add('hidden');
+      document.getElementById('roomTriggerArrow').classList.remove('rotate-180');
+      
+      if (isHidden) {
+        panel.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+        document.getElementById('assetSearchInput').focus();
+      } else {
+        panel.classList.add('hidden');
+        arrow.classList.remove('rotate-180');
+      }
+    });
+
+    document.getElementById('roomSearchInput').addEventListener('input', function() {
+      renderCustomRoomsList(currentRoomsList);
+    });
+
+    document.getElementById('assetSearchInput').addEventListener('input', function() {
+      renderCustomAssetsList(currentAssetsList);
+    });
+
+    document.addEventListener('click', function(e) {
+      var customRoom = document.getElementById('customRoomContainer');
+      var customAsset = document.getElementById('customAssetContainer');
+      if (customRoom && !customRoom.contains(e.target)) {
+        document.getElementById('roomPanel').classList.add('hidden');
+        document.getElementById('roomTriggerArrow').classList.remove('rotate-180');
+      }
+      if (customAsset && !customAsset.contains(e.target)) {
+        document.getElementById('assetPanel').classList.add('hidden');
+        document.getElementById('assetTriggerArrow').classList.remove('rotate-180');
+      }
+    });
 
     // Khi chọn room, load assets
     if (roomSelect) {
@@ -327,85 +623,111 @@
     }
 
     // 5. Submit form
-var reportForm = document.getElementById('reportForm');
-if (reportForm) {
-  reportForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var errorBox = document.getElementById('formError');
-    var successBox = document.getElementById('formSuccess');
-    var submitBtn = document.getElementById('submitBtn');
-    errorBox.classList.add('hidden');
-    successBox.classList.add('hidden');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting...';
+    var reportForm = document.getElementById('reportForm');
+    if (reportForm) {
+      reportForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var errorBox = document.getElementById('formError');
+        var successBox = document.getElementById('formSuccess');
+        var submitBtn = document.getElementById('submitBtn');
+        errorBox.classList.add('hidden');
+        successBox.classList.add('hidden');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
 
-    try {
-      // Kiểm tra dữ liệu bắt buộc
-      if (!roomSelect.value) {
-        throw new Error('Please select a classroom');
-      }
-      if (!document.getElementById('description').value.trim()) {
-        throw new Error('Please enter a description');
-      }
+        try {
+          // Kiểm tra dữ liệu bắt buộc
+          if (!roomSelect.value) {
+            throw new Error('Please select a classroom');
+          }
+          if (!document.getElementById('description').value.trim()) {
+            throw new Error('Please enter a description');
+          }
 
-      // Tạo FormData
-      var formData = new FormData();
-      formData.append('roomId', roomSelect.value);
-      if (assetSelect.value) {
-        formData.append('assetId', assetSelect.value);
-      }
-      formData.append('description', document.getElementById('description').value.trim());
-      formData.append('urgencyHint', document.getElementById('urgencySelect').value);
-      
-      // Thêm file nếu có
-      if (selectedFile) {
-        formData.append('evidence', selectedFile);
-        console.log('Uploading file:', selectedFile.name);
-      }
+          // Tạo FormData
+          var formData = new FormData();
+          formData.append('roomId', roomSelect.value);
+          if (assetSelect.value) {
+            formData.append('assetId', assetSelect.value);
+          }
+          formData.append('description', document.getElementById('description').value.trim());
+          formData.append('urgencyHint', document.getElementById('urgencySelect').value);
+          
+          if (selectedFile) {
+            formData.append('evidence', selectedFile);
+            console.log('Uploading file:', selectedFile.name);
+          }
 
-      // Gửi request - ĐÚNG ENDPOINT
-      var token = localStorage.getItem('auth_token');
-      console.log('Sending to: /api/v1/fault-reports');
-      
-      var response = await fetch('/api/v1/fault-reports', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        body: formData
+          var token = localStorage.getItem('vnuis_token') || localStorage.getItem('auth_token') || '';
+          var currentUser = Auth.getCurrentUser() || {};
+          
+          var headers = {};
+          if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+          }
+          if (currentUser.email) {
+            headers['X-User-Email'] = currentUser.email;
+          }
+          if (currentUser.user_id || currentUser.id) {
+            headers['X-User-Id'] = String(currentUser.user_id || currentUser.id);
+          }
+          
+          var baseUrl = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:4000/api/v1';
+          console.log('Sending report to:', baseUrl + '/fault-reports');
+          
+          var response = await fetch(baseUrl + '/fault-reports', {
+            method: 'POST',
+            headers: headers,
+            body: formData
+          });
+
+          console.log('Response status:', response.status);
+          
+          var responseText = await response.text();
+          var result = {};
+          try {
+            result = JSON.parse(responseText);
+          } catch (jsonErr) {
+            console.error('Failed to parse JSON response:', responseText);
+            throw new Error(responseText || ('Server returned invalid response (' + response.status + ')'));
+          }
+
+          console.log('Response data:', result);
+
+          if (!response.ok) {
+            var errMsg = result.message || (result.error && result.error.message) || ('Failed to submit report (' + response.status + ')');
+            throw new Error(errMsg);
+          }
+
+          var report = result.data || result;
+          successBox.textContent = 'Report #' + (report.report_id || report.id || '') + ' submitted successfully with priority: ' + (report.priority || 'Medium') + '.';
+          successBox.classList.remove('hidden');
+          localStorage.removeItem('vnu_report_draft_desc');
+          reportForm.reset();
+          if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
+          fileInfo.classList.add('hidden');
+          selectedFile = null;
+          selectAsset('', 'General / not asset-specific');
+
+          setTimeout(function() {
+            var reportId = report.report_id || report.id;
+            if (reportId) {
+              location.href = 'ReportDetails.html?id=' + reportId;
+            } else {
+              location.href = 'ListReports.html';
+            }
+          }, 1500);
+
+        } catch (err) {
+          console.error('Submit error:', err);
+          errorBox.textContent = err.message || 'Failed to submit report. Please try again.';
+          errorBox.classList.remove('hidden');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Report';
+        }
       });
-
-      console.log('Response status:', response.status);
-      
-      var result = await response.json();
-      console.log('Response data:', result);
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to submit report');
-      }
-
-      var report = result.data || result;
-      successBox.textContent = 'Report #' + report.report_id + ' submitted successfully with priority: ' + report.priority + '.';
-      successBox.classList.remove('hidden');
-      reportForm.reset();
-      fileInfo.classList.add('hidden');
-      selectedFile = null;
-      assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
-      
-      setTimeout(function() {
-        location.href = 'ReportDetails.html?id=' + report.report_id;
-      }, 1500);
-      
-    } catch (err) {
-      console.error('Submit error:', err);
-      errorBox.textContent = err.message || 'Failed to submit report. Please try again.';
-      errorBox.classList.remove('hidden');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Report';
     }
-  });
-}
 
     // 6. Load rooms on page load
     loadRooms().catch(function(err) {

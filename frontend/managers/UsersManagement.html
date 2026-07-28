@@ -423,7 +423,7 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-label-md font-bold text-on-surface mb-1">Role *</label>
-          <select id="editRole" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none cursor-pointer pl-4 pr-10 transition-all">
+          <select id="editRole" required onchange="toggleSpecialtyVisibility(this.value)" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none cursor-pointer pl-4 pr-10 transition-all">
             <option value="User">User</option>
             <option value="Technician">Technician</option>
             <option value="Manager">Manager</option>
@@ -436,6 +436,14 @@
             <option value="Inactive">Inactive</option>
           </select>
         </div>
+      </div>
+      <div>
+        <label class="block text-label-md font-bold text-on-surface mb-1">Phone Number</label>
+        <input id="editPhone" type="text" placeholder="e.g. 0912345678" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
+      </div>
+      <div id="editSpecialtyWrap" class="hidden">
+        <label class="block text-label-md font-bold text-on-surface mb-1">Technician Specialty</label>
+        <input id="editSpecialty" type="text" placeholder="e.g. Electrical, Network, HVAC" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
       </div>
       <div class="pt-6 flex justify-end items-center gap-3 border-t border-outline-variant/10">
         <button type="button" onclick="closeEditUserModal()" class="px-6 py-2.5 rounded-lg text-on-surface-variant font-bold text-label-lg hover:bg-surface-container transition-colors">
@@ -649,6 +657,14 @@
     }
   }
 
+  function toggleSpecialtyVisibility(role) {
+    const specialtyWrap = document.getElementById('editSpecialtyWrap');
+    if (specialtyWrap) {
+      if (role === 'Technician') specialtyWrap.classList.remove('hidden');
+      else specialtyWrap.classList.add('hidden');
+    }
+  }
+
   // Edit User Modal
   function openEditUserModal(id, name, email, role, status, createdDate) {
     document.getElementById('editUserId').value = id;
@@ -658,6 +674,16 @@
     document.getElementById('editEmail').value = email;
     document.getElementById('editRole').value = role || 'User';
     document.getElementById('editStatus').value = status || 'Active';
+
+    // Populate phone & technician specialty from allUsers state if found
+    const existing = allUsers.find(u => String(u.user_id) === String(id) || String(u.raw_id) === String(id));
+    const phoneVal = existing ? (existing.phone || existing.phone_number || '') : '';
+    const specVal = existing ? (existing.technician_specialty || existing.technicianSpecialty || '') : '';
+
+    document.getElementById('editPhone').value = phoneVal;
+    document.getElementById('editSpecialty').value = specVal;
+    toggleSpecialtyVisibility(role || 'User');
+
     document.getElementById('editUserModal').classList.remove('hidden');
   }
 
@@ -671,6 +697,8 @@
     const email = document.getElementById('editEmail').value.trim();
     const role = document.getElementById('editRole').value;
     const status = document.getElementById('editStatus').value;
+    const phone = document.getElementById('editPhone').value.trim();
+    const technicianSpecialty = document.getElementById('editSpecialty').value.trim() || undefined;
     const btn = document.getElementById('saveUserEditBtn');
 
     btn.disabled = true;
@@ -685,6 +713,8 @@
             fullName: name,
             email,
             role,
+            phone: phone || null,
+            technicianSpecialty: role === 'Technician' ? technicianSpecialty : null,
             isActive: status === 'Active'
           });
         } catch (e) {
@@ -697,6 +727,8 @@
         allUsers[userIndex].full_name = name;
         allUsers[userIndex].email = email;
         allUsers[userIndex].role = role;
+        allUsers[userIndex].phone = phone;
+        allUsers[userIndex].technician_specialty = technicianSpecialty;
         allUsers[userIndex].is_active = status === 'Active';
         saveUsersState();
       }
@@ -796,10 +828,13 @@
         const users = await Api.get('/users');
         if (users && Array.isArray(users) && users.length > 0) {
           allUsers = users.map(u => ({
+            raw_id: u.user_id || u.id,
             user_id: `USR${String(u.user_id || u.id).padStart(3, '0')}`,
             full_name: u.full_name || u.fullName || 'User',
             email: u.email || '',
             role: u.role || 'User',
+            phone: u.phone || u.phone_number || '',
+            technician_specialty: u.technician_specialty || u.technicianSpecialty || '',
             is_active: u.is_active !== undefined ? u.is_active : (u.isActive !== undefined ? u.isActive : true),
             created_at: u.created_at ? new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Jul 28, 2026'
           }));

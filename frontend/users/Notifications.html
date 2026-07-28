@@ -50,7 +50,7 @@
     <!-- Notifications List Container -->
     <div id="notificationFullList" class="space-y-4">
       <!-- Unread Notification 1 -->
-      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='ReportDetails.html'">
+      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-id="notif-1" data-status="unread" onclick="location.href='ReportDetails.html'">
         <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
@@ -62,7 +62,7 @@
       </div>
 
       <!-- Unread Notification 2 -->
-      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-status="unread" onclick="location.href='ListReports.html'">
+      <div class="notif-card bg-primary-fixed/20 p-4 rounded-xl border border-primary-fixed/40 flex items-start gap-4 relative cursor-pointer hover:bg-primary-fixed/30 transition-colors" data-id="notif-2" data-status="unread" onclick="location.href='ListReports.html'">
         <div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
@@ -74,7 +74,7 @@
       </div>
 
       <!-- Read Notification 1 -->
-      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='ListReports.html'">
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-id="notif-3" data-status="read" onclick="location.href='ListReports.html'">
         <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
@@ -86,7 +86,7 @@
       </div>
 
       <!-- Read Notification 2 -->
-      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-status="read" onclick="location.href='ListReports.html'">
+      <div class="notif-card bg-white p-4 rounded-xl border border-outline-variant/20 flex items-start gap-4 cursor-pointer hover:bg-surface-container-low transition-colors" data-id="notif-4" data-status="read" onclick="location.href='ListReports.html'">
         <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
@@ -137,8 +137,88 @@
 
   Layout.init({ role: 'User', activePage: 'Notification' });
 
+  let currentTab = 'all';
+
+  // Helper to get read IDs from localStorage
+  function getLocalReadIds() {
+    try {
+      return JSON.parse(localStorage.getItem('vnuis_read_notif_ids') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  // Helper to save read ID
+  function saveLocalReadId(id) {
+    if (!id) return;
+    const readIds = getLocalReadIds();
+    if (!readIds.includes(id)) {
+      readIds.push(id);
+      localStorage.setItem('vnuis_read_notif_ids', JSON.stringify(readIds));
+    }
+  }
+
+  // Helper to mark all as read locally
+  function setAllLocalRead() {
+    localStorage.setItem('vnuis_all_notifs_read', 'true');
+  }
+
+  // Helper to check if card is read locally
+  function isCardReadLocally(card) {
+    if (localStorage.getItem('vnuis_all_notifs_read') === 'true') return true;
+    const cardId = card.dataset.id;
+    if (cardId && getLocalReadIds().includes(cardId)) return true;
+    return false;
+  }
+
+  // Function to update the unread count badge dynamically
+  function updateUnreadBadge() {
+    const unreadCards = document.querySelectorAll('.notif-card[data-status="unread"]');
+    const countPill = document.getElementById('unreadTabCount');
+    if (countPill) {
+      if (unreadCards.length > 0) {
+        countPill.textContent = unreadCards.length;
+        countPill.style.display = 'inline-block';
+      } else {
+        countPill.textContent = '0';
+        countPill.style.display = 'none';
+      }
+    }
+  }
+
+  // Apply visual read style to a card element
+  function markCardAsReadUI(card) {
+    card.dataset.status = 'read';
+    card.classList.remove('bg-primary-fixed/20', 'border-primary-fixed/40');
+    card.classList.add('bg-white', 'border-outline-variant/20');
+    const dot = card.querySelector('.bg-primary.rounded-full');
+    if (dot) dot.classList.replace('bg-primary', 'bg-transparent');
+  }
+
+  // Initialize saved read statuses on page load
+  document.querySelectorAll('.notif-card').forEach(card => {
+    if (isCardReadLocally(card)) {
+      markCardAsReadUI(card);
+    }
+
+    card.addEventListener('click', function() {
+      if (card.dataset.status === 'unread') {
+        markCardAsReadUI(card);
+        if (card.dataset.id) saveLocalReadId(card.dataset.id);
+        
+        try {
+          if (window.Api && card.dataset.id) Api.patch(`/notifications/${card.dataset.id}/read`);
+        } catch (e) {}
+
+        filterNotifications(currentTab);
+        window.dispatchEvent(new Event('vnuis_notifs_updated'));
+      }
+    });
+  });
+
   // Filter Tabs Handler with Empty State
   function filterNotifications(filterType) {
+    currentTab = filterType;
     const cards = document.querySelectorAll('.notif-card');
     const tabs = document.querySelectorAll('.tab-btn');
     const emptyBox = document.getElementById('emptyStateBox');
@@ -188,34 +268,34 @@
     } else {
       emptyBox.classList.add('hidden');
     }
+
+    updateUnreadBadge();
   }
 
   // Mark All as Read Button Handler
   document.getElementById('markAllReadPageBtn').addEventListener('click', async () => {
+    setAllLocalRead();
+
     try {
       if (window.Api) await Api.patch('/notifications/read-all');
     } catch (e) {}
 
     // Update UI cards to read state
     document.querySelectorAll('.notif-card').forEach(card => {
-      card.dataset.status = 'read';
-      card.classList.remove('bg-primary-fixed/20', 'border-primary-fixed/40');
-      card.classList.add('bg-white', 'border-outline-variant/20');
-      const dot = card.querySelector('.bg-primary.rounded-full');
-      if (dot) dot.classList.replace('bg-primary', 'bg-transparent');
+      markCardAsReadUI(card);
+      if (card.dataset.id) saveLocalReadId(card.dataset.id);
     });
 
-    const countPill = document.getElementById('unreadTabCount');
-    if (countPill) countPill.style.display = 'none';
-
-    if (window.Notifications) Notifications.refreshBadge();
-
-    // Re-apply active tab filter if currently on Unread tab
-    const activeUnread = document.getElementById('tabUnread').classList.contains('text-primary');
-    if (activeUnread) {
-      filterNotifications('unread');
+    if (window.Notifications && Notifications.refreshBadge) {
+      Notifications.refreshBadge();
     }
+
+    filterNotifications(currentTab);
+    window.dispatchEvent(new Event('vnuis_notifs_updated'));
   });
+
+  // Default initial filter & badge update
+  filterNotifications('all');
 </script>
 </body>
 </html>

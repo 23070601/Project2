@@ -24,4 +24,7 @@ router.post('/',
 // Managers/PendingRequestDetail.html (duyệt), RejectReport.html (từ chối)
 router.patch('/:id/status', requireRole(ROLES.MANAGER), asyncHandler(controller.updateStatus));
 
+// Users delete pending report
+router.delete('/:id', asyncHandler(controller.remove));
+
 module.exports = router;

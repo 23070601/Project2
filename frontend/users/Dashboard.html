@@ -36,12 +36,41 @@
   <div id="topbar-placeholder"></div>
 
   <main class="flex-1 p-8">
-    <!-- Student Profile Block -->
-    <div class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
-      <h1 id="welcomeHeading" class="text-brand-blue font-bold text-headline-lg">Welcome back!</h1>
-      <p id="userInfo" class="text-on-surface-variant text-body-md mb-3"></p>
-      <div id="userBadges" class="flex gap-3 flex-wrap">
-        <!-- Dynamic badges will be inserted here -->
+    <!-- Student Profile & Quick Action Block -->
+    <div class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div>
+        <h1 id="welcomeHeading" class="text-brand-blue font-bold text-headline-lg">Welcome back!</h1>
+        <p id="userInfo" class="text-on-surface-variant text-body-md mb-3"></p>
+        <div id="userBadges" class="flex gap-3 flex-wrap">
+          <!-- Dynamic badges will be inserted here -->
+        </div>
+      </div>
+      <div class="shrink-0 flex items-center gap-3 w-full md:w-auto">
+        <a href="CreateReport.html" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-label-lg shadow-md hover:bg-opacity-90 transition-all active:scale-95">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span>Create New Report</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Resolution Progress Bar Widget -->
+    <div class="mb-8 bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand-blue">insights</span>
+          <span class="font-bold text-on-surface text-body-md">Issue Resolution Progress</span>
+        </div>
+        <span id="resolutionRateText" class="text-label-md font-bold text-brand-blue">0% Resolved</span>
+      </div>
+      <div class="w-full bg-surface-container-high h-3 rounded-full overflow-hidden flex">
+        <div id="progressBarCompleted" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%" title="Completed"></div>
+        <div id="progressBarInProgress" class="bg-amber-400 h-full transition-all duration-500" style="width: 0%" title="In Progress"></div>
+        <div id="progressBarPending" class="bg-slate-300 h-full transition-all duration-500" style="width: 0%" title="Pending"></div>
+      </div>
+      <div class="flex items-center gap-6 text-xs text-on-surface-variant mt-2 font-medium">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Completed (<span id="progressCountCompleted">0</span>)</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> In Progress (<span id="progressCountInProgress">0</span>)</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span> Pending (<span id="progressCountPending">0</span>)</span>
       </div>
     </div>
 
@@ -89,14 +118,23 @@
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Priority</th>
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Date</th>
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Status</th>
-              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Actions</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md text-center">Actions</th>
             </tr>
           </thead>
           <tbody id="reportsTableBody" class="text-on-surface-variant">
-            <!-- Data will be loaded dynamically -->
+            <!-- Skeleton Loader State -->
+            <tr class="animate-pulse border-b border-outline-variant/10"><td class="p-4" colspan="8"><div class="h-4 bg-gray-200 rounded w-full"></div></td></tr>
+            <tr class="animate-pulse border-b border-outline-variant/10"><td class="p-4" colspan="8"><div class="h-4 bg-gray-200 rounded w-full"></div></td></tr>
+            <tr class="animate-pulse border-b border-outline-variant/10"><td class="p-4" colspan="8"><div class="h-4 bg-gray-200 rounded w-full"></div></td></tr>
           </tbody>
         </table>
-        <p id="emptyState" class="hidden text-center text-on-surface-variant py-8">No reports yet.</p>
+        <div id="emptyState" class="hidden text-center text-on-surface-variant py-12 flex flex-col items-center justify-center gap-3">
+          <span class="material-symbols-outlined text-4xl text-outline">assignment_late</span>
+          <p class="font-medium text-body-lg">No issue reports submitted yet.</p>
+          <a href="CreateReport.html" class="inline-flex items-center gap-2 px-5 py-2 bg-brand-blue text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-sm">add</span> Create First Report
+          </a>
+        </div>
       </div>
     </section>
   </main>
@@ -223,14 +261,37 @@
         ];
       }
 
-      // 5. Calculate KPIs from real data
-      const pending = reports.filter(r => ['Pending', 'Pending Approval', 'Processing'].includes(r.status)).length;
+      // 5. Calculate KPIs and Progress Bar from real data
+      const pending = reports.filter(r => ['Pending', 'Pending Approval'].includes(r.status)).length;
       const inProgress = reports.filter(r => ['In Progress', 'Processing'].includes(r.status)).length;
       const completed = reports.filter(r => ['Completed', 'Resolved'].includes(r.status)).length;
+      const total = reports.length || 1;
 
       document.getElementById('kpiPending').textContent = pending;
       document.getElementById('kpiInProgress').textContent = inProgress;
       document.getElementById('kpiCompleted').textContent = completed;
+
+      // Update Resolution Progress Bar
+      const completedPct = Math.round((completed / total) * 100);
+      const inProgressPct = Math.round((inProgress / total) * 100);
+      const pendingPct = Math.max(0, 100 - completedPct - inProgressPct);
+
+      const resText = document.getElementById('resolutionRateText');
+      if (resText) resText.textContent = `${completedPct}% Resolved`;
+
+      const barCompleted = document.getElementById('progressBarCompleted');
+      const barInProgress = document.getElementById('progressBarInProgress');
+      const barPending = document.getElementById('progressBarPending');
+      if (barCompleted) barCompleted.style.width = `${completedPct}%`;
+      if (barInProgress) barInProgress.style.width = `${inProgressPct}%`;
+      if (barPending) barPending.style.width = `${pendingPct}%`;
+
+      const countCompleted = document.getElementById('progressCountCompleted');
+      const countInProgress = document.getElementById('progressCountInProgress');
+      const countPending = document.getElementById('progressCountPending');
+      if (countCompleted) countCompleted.textContent = completed;
+      if (countInProgress) countInProgress.textContent = inProgress;
+      if (countPending) countPending.textContent = pending;
 
       // 6. Render table
       const tbody = document.getElementById('reportsTableBody');
