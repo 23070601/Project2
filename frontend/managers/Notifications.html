@@ -120,13 +120,13 @@
           <p class="text-body-sm text-on-surface-variant mt-1">New technician account created for <span class="font-medium">Pham Van D</span>.</p>
         </div>
       </div>
+    </div>
 
-      <!-- Empty State Container (Hidden by default) -->
-      <div id="emptyStateBox" class="hidden bg-white p-12 rounded-xl border border-outline-variant/20 flex flex-col items-center justify-center text-center my-6">
-        <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">mark_chat_read</span>
-        <h4 id="emptyStateTitle" class="text-body-md font-bold text-on-surface">No unread notifications</h4>
-        <p id="emptyStateDesc" class="text-label-md text-on-surface-variant mt-1 max-w-md">You are all caught up! There are no unread notifications at the moment.</p>
-      </div>
+    <!-- Empty State Container (Hidden by default) -->
+    <div id="emptyStateBox" class="hidden bg-white p-12 rounded-xl border border-outline-variant/20 flex flex-col items-center justify-center text-center my-6">
+      <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">mark_chat_read</span>
+      <h4 id="emptyStateTitle" class="text-body-md font-bold text-on-surface">No unread notifications</h4>
+      <p id="emptyStateDesc" class="text-label-md text-on-surface-variant mt-1 max-w-md">You are all caught up! There are no unread notifications at the moment.</p>
     </div>
 
     <!-- Pagination Controls -->
@@ -162,15 +162,91 @@
 
   Layout.init({ role: 'Manager', activePage: 'Notifications' });
 
-  // Filter Tabs Handler with Empty State
-  function filterNotifications(filterType) {
-    const cards = document.querySelectorAll('.notif-card');
-    const tabs = document.querySelectorAll('.tab-btn');
+  let allNotifications = [];
+  let currentFilter = 'all';
+
+  function updateUnreadTabCount() {
+    const countEl = document.getElementById('unreadTabCount');
+    if (countEl) {
+      const unreadCount = allNotifications.filter((n) => !n.isRead).length;
+      countEl.textContent = unreadCount;
+      countEl.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+    }
+  }
+
+  function renderNotifications() {
+    const container = document.getElementById('notificationFullList');
     const emptyBox = document.getElementById('emptyStateBox');
     const emptyTitle = document.getElementById('emptyStateTitle');
     const emptyDesc = document.getElementById('emptyStateDesc');
 
-    tabs.forEach(t => {
+    const visibleItems = allNotifications.filter((n) => currentFilter === 'all' || n.status === currentFilter);
+
+    if (visibleItems.length === 0) {
+      if (container) container.innerHTML = '';
+      if (emptyBox) emptyBox.classList.remove('hidden');
+      if (emptyTitle && emptyDesc) {
+        if (currentFilter === 'unread') {
+          emptyTitle.textContent = 'No unread notifications';
+          emptyDesc.textContent = 'You are all caught up! There are no unread notifications at the moment.';
+        } else if (currentFilter === 'read') {
+          emptyTitle.textContent = 'No read notifications';
+          emptyDesc.textContent = 'You have not read any notifications yet.';
+        } else {
+          emptyTitle.textContent = 'No notifications';
+          emptyDesc.textContent = 'You do not have any notifications.';
+        }
+      }
+      return;
+    }
+
+    if (emptyBox) emptyBox.classList.add('hidden');
+    if (container) {
+      container.innerHTML = visibleItems.map((n) => `
+        <div class="notif-card ${n.status === 'unread' ? 'bg-primary-fixed/20 border-primary-fixed/40' : 'bg-white border-outline-variant/20'} p-4 rounded-xl border flex items-start gap-4 relative cursor-pointer hover:${n.status === 'unread' ? 'bg-primary-fixed/30' : 'bg-surface-container-low'} transition-colors"
+             data-id="${n.id}"
+             data-status="${n.status}">
+          <div class="w-2 h-2 ${n.status === 'unread' ? 'bg-primary' : 'bg-transparent'} rounded-full mt-2 shrink-0"></div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start gap-3">
+              <h4 class="text-body-md font-${n.status === 'unread' ? 'bold' : 'medium'} text-on-surface">${n.title}</h4>
+              <span class="text-label-md text-on-surface-variant">${n.time}</span>
+            </div>
+            <p class="text-body-sm text-on-surface-variant mt-1">${n.message}</p>
+          </div>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('.notif-card').forEach((card) => {
+        card.addEventListener('click', async () => {
+          const id = Number(card.dataset.id);
+          if (id) {
+            const target = allNotifications.find((item) => item.id === id);
+            if (target && target.status === 'unread') {
+              target.status = 'read';
+              target.isRead = true;
+              renderNotifications();
+              updateUnreadTabCount();
+              if (window.Notifications) Notifications.refreshBadge(allNotifications);
+              try {
+                await Api.patch(`/notifications/${id}/read`);
+              } catch (e) {}
+            }
+          }
+          const target = allNotifications.find((item) => item.id === id);
+          if (target) {
+            const route = target.order_id ? `PendingRequest.html` : (target.report_id ? `PendingRequestDetail.html?id=${target.report_id}` : 'PendingRequest.html');
+            window.location.href = route;
+          }
+        });
+      });
+    }
+  }
+
+  function filterNotifications(filterType) {
+    currentFilter = filterType;
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach((t) => {
       t.classList.remove('text-primary', 'border-b-2', 'border-primary');
       t.classList.add('text-on-surface-variant');
     });
@@ -186,61 +262,50 @@
       document.getElementById('tabRead').classList.remove('text-on-surface-variant');
     }
 
-    let visibleCount = 0;
-    cards.forEach(card => {
-      const status = card.dataset.status;
-      let show = false;
-      if (filterType === 'all') show = true;
-      else if (filterType === 'unread') show = (status === 'unread');
-      else if (filterType === 'read') show = (status === 'read');
-
-      card.style.display = show ? 'flex' : 'none';
-      if (show) visibleCount++;
-    });
-
-    if (visibleCount === 0) {
-      emptyBox.classList.remove('hidden');
-      if (filterType === 'unread') {
-        emptyTitle.textContent = 'No unread notifications';
-        emptyDesc.textContent = 'You are all caught up! There are no unread notifications at the moment.';
-      } else if (filterType === 'read') {
-        emptyTitle.textContent = 'No read notifications';
-        emptyDesc.textContent = 'You have not read any notifications yet.';
-      } else {
-        emptyTitle.textContent = 'No notifications';
-        emptyDesc.textContent = 'You do not have any notifications.';
-      }
-    } else {
-      emptyBox.classList.add('hidden');
-    }
+    renderNotifications();
   }
 
-  // Mark All as Read Button Handler
+  async function loadNotifications() {
+    const container = document.getElementById('notificationFullList');
+    if (container) {
+      container.innerHTML = '<div class="p-8 text-center text-on-surface-variant">Loading notifications...</div>';
+    }
+
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        const data = await Api.get('/notifications', { limit: 100 });
+        allNotifications = (data || []).map((n) => ({
+          id: n.notification_id,
+          title: n.title || n.message || 'Notification',
+          message: n.message || n.title || 'You have a new notification',
+          time: Notifications.timeAgo(n.created_at),
+          status: n.is_read ? 'read' : 'unread',
+          isRead: Boolean(n.is_read),
+          order_id: n.order_id,
+          report_id: n.report_id
+        }));
+      }
+    } catch (e) {
+      console.warn('Failed to load notifications from API', e);
+    }
+
+    updateUnreadTabCount();
+    renderNotifications();
+    if (window.Notifications) Notifications.refreshBadge(allNotifications);
+  }
+
   document.getElementById('markAllReadPageBtn').addEventListener('click', async () => {
     try {
       if (window.Api) await Api.patch('/notifications/read-all');
     } catch (e) {}
 
-    // Update UI cards to read state
-    document.querySelectorAll('.notif-card').forEach(card => {
-      card.dataset.status = 'read';
-      card.classList.remove('bg-primary-fixed/20', 'border-primary-fixed/40');
-      card.classList.add('bg-white', 'border-outline-variant/20');
-      const dot = card.querySelector('.bg-primary.rounded-full');
-      if (dot) dot.classList.replace('bg-primary', 'bg-transparent');
-    });
-
-    const countPill = document.getElementById('unreadTabCount');
-    if (countPill) countPill.style.display = 'none';
-
-    if (window.Notifications) Notifications.refreshBadge();
-
-    // Re-apply active tab filter if currently on Unread tab
-    const activeUnread = document.getElementById('tabUnread').classList.contains('text-primary');
-    if (activeUnread) {
-      filterNotifications('unread');
-    }
+    allNotifications = allNotifications.map((n) => ({ ...n, status: 'read', isRead: true }));
+    updateUnreadTabCount();
+    renderNotifications();
+    if (window.Notifications) Notifications.refreshBadge(allNotifications);
   });
+
+  loadNotifications();
 </script>
 </body>
 </html>

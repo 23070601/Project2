@@ -100,7 +100,10 @@ const Layout = (() => {
     wireUserProfileDropdown();
 
     if (window.Notifications) {
-      Notifications.loadDropdown();
+      setTimeout(() => {
+        Notifications.loadDropdown();
+        Notifications.refreshBadge();
+      }, 150);
       Notifications.startPolling();
     }
   }

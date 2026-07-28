@@ -5,7 +5,10 @@ const { toPositiveInt } = require('../../shared/utils/validators');
 // */Notifications.html (User, Technician, Manager đều dùng chung endpoint này)
 async function list(req, res) {
   const unreadOnly = req.query.unreadOnly === 'true';
-  const notifications = await notificationsRepository.findAllForUser(req.user.userId, { unreadOnly });
+  const rawLimit = Number(req.query.limit || 50);
+  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 100) : 50;
+
+  const notifications = await notificationsRepository.findAllForUser(req.user.userId, { unreadOnly, limit });
   ok(res, notifications);
 }
 

@@ -8,20 +8,24 @@ const upload = require('../../middlewares/upload.middleware');
 
 const router = express.Router();
 
+// Apply authentication to all routes
 router.use(authenticate);
 
-// Users/ListReports.html, ReportDetails.html | Managers/PendingRequest.html
+// GET routes
 router.get('/', asyncHandler(controller.list));
 router.get('/:id', asyncHandler(controller.getById));
 
-// Users/CreateReport.html
+// ✅ POST route - QUAN TRỌNG: PHẢI CÓ DÒNG NÀY
 router.post('/', 
   requireRole(ROLES.USER), 
-  upload.single('evidence'), // THÊM DÒNG NÀY
+  upload.single('evidence'),
   asyncHandler(controller.create)
 );
 
-// Managers/PendingRequestDetail.html (duyệt), RejectReport.html (từ chối)
-router.patch('/:id/status', requireRole(ROLES.MANAGER), asyncHandler(controller.updateStatus));
+// PATCH route
+router.patch('/:id/status', 
+  requireRole(ROLES.MANAGER), 
+  asyncHandler(controller.updateStatus)
+);
 
 module.exports = router;

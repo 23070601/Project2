@@ -10,24 +10,39 @@ function authenticate(req, res, next) {
 
     if (!token || token.startsWith('demo_')) {
       const userEmail = (req.headers['x-user-email'] || '').toLowerCase();
-      let userId = 3;
-      let role = 'Technician';
-      let fullName = 'Le Van C';
-      let email = 'tech.c@vnuis.edu.vn';
+      const userIdHeader = Number(req.headers['x-user-id']);
+      const userRoleHeader = req.headers['x-user-role'];
 
-      if (userEmail.includes('tech.d') || userEmail.includes('d@vnuis')) {
+      let userId = userIdHeader || 1;
+      let role = userRoleHeader || 'User';
+      let fullName = 'Nguyen Van A';
+      let email = userEmail || 'lecturer.a@vnuis.edu.vn';
+
+      if (userEmail.includes('tech.d') || userEmail.includes('d@vnuis') || userId === 4) {
         userId = 4;
+        role = 'Technician';
         fullName = 'Pham Thi D';
         email = 'tech.d@vnuis.edu.vn';
-      } else if (userEmail.includes('tech.f') || userEmail.includes('f@vnuis')) {
+      } else if (userEmail.includes('tech.f') || userEmail.includes('f@vnuis') || userId === 6) {
         userId = 6;
+        role = 'Technician';
         fullName = 'Vu Van F';
         email = 'tech.f@vnuis.edu.vn';
-      } else if (userEmail.includes('manager') || userEmail.includes('e@vnuis')) {
-        userId = 5;
+      } else if (userEmail.includes('tech') || userEmail.includes('c@vnuis') || userId === 3 || (userRoleHeader === 'Technician' && !userIdHeader)) {
+        userId = userIdHeader || 3;
+        role = 'Technician';
+        fullName = 'Le Van C';
+        email = userEmail || 'tech.c@vnuis.edu.vn';
+      } else if (userEmail.includes('manager') || userEmail.includes('e@vnuis') || userId === 5 || userRoleHeader === 'Manager') {
+        userId = userIdHeader || 5;
         role = 'Manager';
         fullName = 'Hoang Van E';
-        email = 'manager.e@vnuis.edu.vn';
+        email = userEmail || 'manager.e@vnuis.edu.vn';
+      } else {
+        userId = userIdHeader || (userEmail.includes('b@vnuis') || userEmail.includes('student.b') ? 2 : 1);
+        role = 'User';
+        fullName = userId === 2 ? 'Tran Thi B' : 'Nguyen Van A';
+        email = userEmail || 'lecturer.a@vnuis.edu.vn';
       }
 
       req.user = { userId, role, fullName, email };

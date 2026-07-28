@@ -1,7 +1,7 @@
 /**
- * auth.js - quản lý phiên đăng nhập ở phía trình duyệt.
- * Token JWT + thông tin user được lưu ở localStorage.
- * Tích hợp fallback đăng nhập demo mượt mà khi Backend không chạy hoặc trong demo mode.
+ * auth.js - handles browser-side login sessions.
+ * JWT tokens and user data are stored in localStorage.
+ * Includes a smooth demo-mode fallback when the backend is unavailable.
  */
 const Auth = (() => {
   const TOKEN_KEY = 'vnuis_token';

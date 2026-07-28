@@ -149,11 +149,50 @@
       return div.innerHTML;
     }
 
+    function resolveEvidenceUrl(path) {
+      if (!path) return '';
+      if (/^https?:\/\//i.test(path)) return path;
+
+      let normalizedPath = path;
+      if (normalizedPath.startsWith('./')) {
+        normalizedPath = normalizedPath.replace(/^\.\//, '/');
+      }
+      if (!normalizedPath.startsWith('/')) {
+        normalizedPath = '/' + normalizedPath;
+      }
+
+      const apiBaseUrl = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:4000/api/v1';
+      const backendOrigin = apiBaseUrl.replace(/\/api\/v1\/?$/, '');
+      return `${backendOrigin}${normalizedPath}`;
+    }
+
+    function isImageEvidence(path) {
+      if (!path) return false;
+      return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(path);
+    }
+
+    function getEvidenceItems(report) {
+      if (report.image_path && isImageEvidence(report.image_path)) {
+        return [{
+          src: resolveEvidenceUrl(report.image_path),
+          alt: 'Uploaded evidence',
+          caption: 'Your uploaded evidence'
+        }];
+      }
+
+      return [];
+    }
+
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
       const equipment = getFieldValue(report, ['asset_name', 'equipment_name']);
       const room = getFieldValue(report, ['room_name']);
+      const roomId = getFieldValue(report, ['room_id'], 'N/A');
+      const assetType = getFieldValue(report, ['asset_type', 'assetType'], 'N/A');
+      const reporter = getFieldValue(report, ['reporter_name'], 'N/A');
       const history = report.statusHistory || [];
+      const evidenceItems = getEvidenceItems(report);
+      const mainEvidence = evidenceItems[0];
 
       let html = '';
 
@@ -168,55 +207,86 @@
         </div>
       `;
 
-      // ===== 2-COLUMN GRID =====
+      // ===== MAIN CONTENT =====
       html += `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- LEFT COLUMN (2/3) -->
-          <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div class="xl:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6 space-y-6">
+              <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
+                  <p class="text-label-md text-on-surface-variant">Issue summary</p>
+                  <h3 class="text-headline-sm font-headline-sm text-on-surface mt-1">${escapeHtml(report.description || 'No description provided')}</h3>
+                </div>
+                <div class="rounded-full bg-primary-fixed px-3 py-1 text-sm font-semibold text-brand-blue">
+                  ${escapeHtml(report.priority || 'Medium')}
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Equipment</p>
-                  <p class="text-body-md font-medium text-on-surface">${equipment || 'N/A'}</p>
+                  <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(equipment || 'N/A')}</p>
                 </div>
-                <div>
+                <div class="rounded-xl bg-surface-container-low p-4">
+                  <p class="text-label-md text-on-surface-variant">Asset type</p>
+                  <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(assetType || 'N/A')}</p>
+                </div>
+                <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Room</p>
-                  <p class="text-body-md font-medium text-on-surface">${room}</p>
+                  <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(room || 'N/A')}</p>
                 </div>
-                <div>
-                  <p class="text-label-md text-on-surface-variant">Reported Date</p>
-                  <p class="text-body-md font-medium text-on-surface">${formatDate(report.reported_at)}</p>
+                <div class="rounded-xl bg-surface-container-low p-4">
+                  <p class="text-label-md text-on-surface-variant">Room ID</p>
+                  <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(roomId)}</p>
                 </div>
-                ${report.reporter_name ? `
-                <div>
-                  <p class="text-label-md text-on-surface-variant">Reported By</p>
-                  <p class="text-body-md font-medium text-on-surface">${escapeHtml(report.reporter_name)}</p>
+                <div class="rounded-xl bg-surface-container-low p-4">
+                  <p class="text-label-md text-on-surface-variant">Reported by</p>
+                  <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(reporter)}</p>
                 </div>
-                ` : ''}
-              </div>
-
-              <div>
-                <p class="text-label-md text-on-surface-variant mb-2">Fault Description</p>
-                <div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/10">
-                  <p class="text-body-md text-on-surface whitespace-pre-line">${escapeHtml(report.description)}</p>
+                <div class="rounded-xl bg-surface-container-low p-4">
+                  <p class="text-label-md text-on-surface-variant">Reported date</p>
+                  <p class="text-body-md font-medium text-on-surface mt-1">${formatDate(report.reported_at)}</p>
                 </div>
               </div>
 
-              ${report.image_path ? `
-              <div>
-                <p class="text-label-md text-on-surface-variant mb-2">Uploaded Evidence</p>
-                <div class="flex gap-4">
-                  <a href="${report.image_path}" target="_blank" class="w-32 h-32 bg-surface-container rounded-lg border border-outline-variant/10 flex flex-col items-center justify-center text-outline-variant group cursor-pointer hover:border-brand-blue/30 transition-all">
+              <div class="rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <p class="text-label-md text-on-surface-variant">Fault description</p>
+                    <p class="text-body-md text-on-surface mt-1 whitespace-pre-line">${escapeHtml(report.description || 'No description provided')}</p>
+                  </div>
+                  <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-on-surface-variant">Detailed report</span>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-outline-variant/10 bg-white p-4">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                  <div>
+                    <p class="text-label-md text-on-surface-variant">Evidence gallery</p>
+                    <p class="text-body-sm text-on-surface-variant">Your uploaded evidence appears here</p>
+                  </div>
+                  <span class="rounded-full bg-primary-fixed px-3 py-1 text-xs font-semibold text-brand-blue">Uploaded media</span>
+                </div>
+
+                ${evidenceItems.length > 0 ? `
+                  <div class="overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container">
+                    <img src="${mainEvidence.src}" alt="${escapeHtml(mainEvidence.alt)}" class="h-72 w-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <div class="hidden h-72 flex flex-col items-center justify-center text-outline-variant">
+                      <span class="material-symbols-outlined text-[32px]">image_not_supported</span>
+                      <span class="text-[10px] font-label-md mt-1">Unable to preview this file</span>
+                    </div>
+                  </div>
+                ` : `
+                  <div class="rounded-2xl border border-dashed border-outline-variant/30 bg-surface-container-low p-8 text-center text-on-surface-variant">
                     <span class="material-symbols-outlined text-[32px]">photo_camera</span>
-                    <span class="text-[10px] font-label-md mt-1">View Evidence</span>
-                  </a>
-                </div>
+                    <p class="mt-2 text-body-md font-medium">No uploaded image available for this report</p>
+                    <p class="text-body-sm mt-1">The reporter’s own evidence will appear here once uploaded.</p>
+                  </div>
+                `}
               </div>
-              ` : ''}
             </div>
           </div>
 
-          <!-- RIGHT COLUMN (1/3) -->
           <div class="space-y-6">
             ${workOrder ? renderWorkOrder(workOrder) : ''}
             ${renderTimeline(workOrder)}
