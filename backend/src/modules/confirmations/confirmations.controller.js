@@ -1,5 +1,6 @@
 const confirmationsRepository = require('./confirmations.repository');
 const workOrdersRepository = require('../workOrders/workOrders.repository');
+const notificationsRepository = require('../notifications/notifications.repository');
 const { created, ok, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, toPositiveInt } = require('../../shared/utils/validators');
 const { TASK_STATUS } = require('../../shared/constants/statusEnums');
@@ -35,6 +36,24 @@ async function create(req, res) {
     rating: req.body.rating,
     feedback: req.body.feedback,
   });
+
+  const ratingStr = req.body.rating ? ` đánh giá ${req.body.rating}★` : '';
+  if (order.technician_id) {
+    await notificationsRepository.createNotification({
+      userId: order.technician_id,
+      reportId: order.report_id,
+      orderId: order.order_id,
+      message: `Người dùng đã gửi xác nhận kết quả${ratingStr} cho Đơn công việc #${orderId}.`,
+    });
+  }
+  if (order.manager_id) {
+    await notificationsRepository.createNotification({
+      userId: order.manager_id,
+      reportId: order.report_id,
+      orderId: order.order_id,
+      message: `Người dùng đã xác nhận kết quả${ratingStr} cho Đơn công việc #${orderId}.`,
+    });
+  }
 
   created(res, confirmation);
 }
