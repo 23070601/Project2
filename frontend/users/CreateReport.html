@@ -160,6 +160,13 @@
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
   (function() {
+    function cleanLabel(val) {
+      if (!val) return '';
+      return String(val)
+        .replace(/^(meeting_room|router|devices|ac_unit|videocam|tv|volume_up|mic|cable|photo_camera|computer)\s+/gi, '')
+        .trim();
+    }
+
     // 1. Get user from Auth
     var user = Auth.getCurrentUser();
     if (!user) {
@@ -429,38 +436,24 @@
       { room_id: 1, room_name: 'R101', floor_number: 1 },
       { room_id: 2, room_name: 'R102', floor_number: 1 },
       { room_id: 3, room_name: 'R103', floor_number: 1 },
-      { room_id: 4, room_name: 'R104', floor_number: 1 },
-      { room_id: 5, room_name: 'R105', floor_number: 1 },
-      { room_id: 6, room_name: 'R106', floor_number: 1 },
-      { room_id: 7, room_name: 'R107', floor_number: 1 },
-      { room_id: 8, room_name: 'R301', floor_number: 3 },
-      { room_id: 9, room_name: 'R302', floor_number: 3 },
-      { room_id: 10, room_name: 'R303', floor_number: 3 },
-      { room_id: 11, room_name: 'R304', floor_number: 3 },
-      { room_id: 12, room_name: 'R305', floor_number: 3 },
-      { room_id: 13, room_name: 'R401', floor_number: 4 },
-      { room_id: 14, room_name: 'R402', floor_number: 4 },
-      { room_id: 15, room_name: 'R403', floor_number: 4 },
-      { room_id: 16, room_name: 'R404', floor_number: 4 },
-      { room_id: 17, room_name: 'R405', floor_number: 4 },
-      { room_id: 18, room_name: 'R501', floor_number: 5 },
-      { room_id: 19, room_name: 'R502', floor_number: 5 },
-      { room_id: 20, room_name: 'R503', floor_number: 5 },
-      { room_id: 21, room_name: 'R504', floor_number: 5 },
-      { room_id: 22, room_name: 'R505', floor_number: 5 },
-      { room_id: 23, room_name: 'R506', floor_number: 5 },
-      { room_id: 24, room_name: 'R507', floor_number: 5 },
-      { room_id: 25, room_name: 'R508', floor_number: 5 },
-      { room_id: 26, room_name: 'R509', floor_number: 5 },
-      { room_id: 27, room_name: 'R510', floor_number: 5 },
-      { room_id: 28, room_name: 'R511', floor_number: 5 },
-      { room_id: 29, room_name: 'R512', floor_number: 5 },
-      { room_id: 30, room_name: 'R601', floor_number: 6 },
-      { room_id: 31, room_name: 'R602', floor_number: 6 },
-      { room_id: 32, room_name: 'R603', floor_number: 6 },
-      { room_id: 33, room_name: 'R604', floor_number: 6 },
-      { room_id: 34, room_name: 'R605', floor_number: 6 },
-      { room_id: 35, room_name: 'R606', floor_number: 6 }
+      { room_id: 4, room_name: 'R106', floor_number: 1 },
+      { room_id: 5, room_name: 'R107', floor_number: 1 },
+      { room_id: 11, room_name: 'R401', floor_number: 4 },
+      { room_id: 12, room_name: 'R402', floor_number: 4 },
+      { room_id: 13, room_name: 'R403', floor_number: 4 },
+      { room_id: 14, room_name: 'R404', floor_number: 4 },
+      { room_id: 15, room_name: 'R405', floor_number: 4 },
+      { room_id: 16, room_name: 'R501', floor_number: 5 },
+      { room_id: 17, room_name: 'R502', floor_number: 5 },
+      { room_id: 18, room_name: 'R503', floor_number: 5 },
+      { room_id: 19, room_name: 'R504', floor_number: 5 },
+      { room_id: 20, room_name: 'R512', floor_number: 5 },
+      { room_id: 21, room_name: 'R601', floor_number: 6 },
+      { room_id: 22, room_name: 'R602', floor_number: 6 },
+      { room_id: 23, room_name: 'R603', floor_number: 6 },
+      { room_id: 24, room_name: 'R604', floor_number: 6 },
+      { room_id: 25, room_name: 'R605', floor_number: 6 },
+      { room_id: 26, room_name: 'R606', floor_number: 6 }
     ];
 
     function renderRoomFloorFilters() {

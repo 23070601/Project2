@@ -111,13 +111,13 @@
                 <td class="px-6 py-4 font-bold text-primary">#FR-7</td>
                 <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NA</div><span class="font-medium">Nguyen Van A</span></div></td>
                 <td class="px-6 py-4">Daikin Inverter AC 18000 BTU</td>
-                <td class="px-6 py-4 font-mono text-sm">R301</td>
+                <td class="px-6 py-4 font-mono text-sm">R201</td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 29, 2026</td>
                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="openApproveModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R301', 'Medium', 'Air conditioner leaking water heavily onto student desks.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-                    <button onclick="openRejectModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R301')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                    <button onclick="openApproveModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R201', 'Medium', 'Air conditioner leaking water heavily onto student desks.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R201')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
                   </div>
                 </td>
               </tr>
@@ -542,7 +542,7 @@
       const priorityClass = r.priority === 'High' ? 'bg-error-container text-on-error-container' : (r.priority === 'Medium' ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-primary-fixed text-on-primary-fixed-variant');
       return `
         <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=pending'">
-          <td class="px-6 py-4 font-bold text-primary">#FR-${r.report_id}</td>
+          <td class="px-6 py-4 font-bold text-primary">${UiHelpers.formatReportId(r.report_id)}</td>
           <td class="px-6 py-4">
             <div class="flex items-center gap-2">
               <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">${initials}</div>

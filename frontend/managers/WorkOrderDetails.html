@@ -81,7 +81,12 @@
               </div>
               <div>
                 <p class="text-label-md text-on-surface-variant mb-1">Deadline Date</p>
-                <p id="woDeadlineDate" class="text-body-md font-medium text-[#DC3545]">--</p>
+                <div class="flex items-center gap-2">
+                  <p id="woDeadlineDate" class="text-body-md font-medium text-[#DC3545]">--</p>
+                  <button id="editDeadlineBtn" onclick="openDeadlineModal()" class="text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">edit</span> Edit
+                  </button>
+                </div>
               </div>
               <div>
                 <p class="text-label-md text-on-surface-variant mb-1">Task Status</p>
@@ -201,6 +206,31 @@
   </div>
 </div>
 
+<!-- EDIT DEADLINE MODAL -->
+<div id="deadlineModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+  <div class="bg-white rounded-xl shadow-xl border border-outline-variant/20 w-full max-w-md overflow-hidden">
+    <div class="p-6 border-b border-outline-variant/20 flex items-center justify-between">
+      <div>
+        <h2 class="text-headline-sm font-headline-sm text-on-surface">Update Deadline</h2>
+        <p class="text-body-sm text-on-surface-variant">Select a new deadline for WorkOrder <span id="deadlineWoIdTitle">WO-1</span>.</p>
+      </div>
+      <button onclick="closeDeadlineModal()" class="text-on-surface-variant hover:bg-surface-container rounded-full p-1 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-label-md font-bold text-on-surface-variant mb-1">New Deadline Date & Time *</label>
+        <input type="datetime-local" id="newDeadlineInput" class="w-full border border-outline-variant/30 rounded-lg p-3 text-body-md focus:ring-primary focus:border-primary outline-none" />
+      </div>
+    </div>
+    <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant/20 flex justify-end gap-3">
+      <button onclick="closeDeadlineModal()" class="px-4 py-2 text-body-sm font-bold text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">Cancel</button>
+      <button onclick="updateDeadline(cleanId)" class="px-4 py-2 bg-primary text-white text-body-sm font-bold rounded-lg hover:opacity-90 transition-all">Save Deadline</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -284,6 +314,44 @@
     }
   }
 
+  function openDeadlineModal() {
+    const rawVal = document.getElementById('woDeadlineDate')?.getAttribute('data-raw');
+    if (rawVal) {
+      const dt = new Date(rawVal);
+      if (!isNaN(dt.getTime())) {
+        const isoLocal = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        document.getElementById('newDeadlineInput').value = isoLocal;
+      }
+    }
+    document.getElementById('deadlineModal').classList.remove('hidden');
+  }
+
+  function closeDeadlineModal() {
+    document.getElementById('deadlineModal').classList.add('hidden');
+  }
+
+  async function updateDeadline(orderId) {
+    const newDeadline = document.getElementById('newDeadlineInput').value;
+    if (!newDeadline) {
+      if (window.showToast) showToast('Please select a deadline', 'warning');
+      else alert('Please select a deadline');
+      return;
+    }
+    try {
+      if (window.Api) {
+        await Api.patch(`/work-orders/${orderId}/deadline`, { deadline_at: newDeadline });
+        if (window.showToast) showToast('✅ Deadline updated successfully!', 'success');
+        else alert('Deadline updated successfully!');
+        closeDeadlineModal();
+        loadWorkOrderData();
+      }
+    } catch (error) {
+      const msg = error.response?.data?.message || error.message || 'Failed to update deadline';
+      if (window.showToast) showToast(msg, 'error');
+      else alert(msg);
+    }
+  }
+
   async function loadWorkOrderData() {
     try {
       if (window.Api) {
@@ -296,6 +364,8 @@
           document.getElementById('woIdText').textContent = `WO-${data.order_id}`;
           const titleSpan = document.getElementById('reassignWoIdTitle');
           if (titleSpan) titleSpan.textContent = `WO-${data.order_id}`;
+          const deadlineTitleSpan = document.getElementById('deadlineWoIdTitle');
+          if (deadlineTitleSpan) deadlineTitleSpan.textContent = `WO-${data.order_id}`;
 
           // Asset and room
           if (data.asset_name) document.getElementById('woEquipment').textContent = data.asset_name;
@@ -325,6 +395,15 @@
           const deadlineEl = document.getElementById('woDeadlineDate');
           if (deadlineEl) {
             deadlineEl.textContent = data.deadline_at ? UiHelpers.formatDate(data.deadline_at) : 'N/A';
+            deadlineEl.setAttribute('data-raw', data.deadline_at || '');
+          }
+          const editBtn = document.getElementById('editDeadlineBtn');
+          if (editBtn) {
+            if (['Closed', 'Completed'].includes(data.task_status)) {
+              editBtn.classList.add('hidden');
+            } else {
+              editBtn.classList.remove('hidden');
+            }
           }
           
           // Rejection info card

@@ -314,4 +314,128 @@ async function reassign(req, res) {
   ok(res, updated);
 }
 
-module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign };
+async function updateDeadline(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  const deadlineAt = req.body.deadline_at || req.body.deadlineAt;
+
+  if (!deadlineAt) {
+    throw new ApiError(400, 'Please provide deadline_at');
+  }
+
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) {
+    throw new ApiError(404, 'Work order not found');
+  }
+
+  if (['Closed', 'Completed'].includes(order.task_status)) {
+    throw new ApiError(400, 'Cannot update deadline for completed/closed work order');
+  }
+
+  const deadlineDate = new Date(deadlineAt);
+  if (isNaN(deadlineDate.getTime())) {
+    throw new ApiError(400, 'Invalid deadline date format');
+  }
+
+  if (deadlineDate < new Date()) {
+    throw new ApiError(400, 'Deadline cannot be in the past');
+  }
+
+  const formattedDeadline = deadlineDate.toISOString().slice(0, 19).replace('T', ' ');
+
+  const updated = await workOrdersRepository.updateDeadline(orderId, formattedDeadline);
+
+  await auditLogRepository.log({
+    userId: req.user.userId,
+    actionType: 'UPDATE',
+    entityTable: 'WorkOrders',
+    entityId: orderId,
+    roomId: order.room_id,
+    assetId: order.asset_id,
+    description: `Manager updated deadline to ${formattedDeadline} for WorkOrder ${orderId}`,
+  });
+
+  if (order.technician_id) {
+    try {
+      await notificationsRepository.createNotification({
+        userId: order.technician_id,
+        reportId: order.report_id,
+        orderId: orderId,
+        message: `Deadline for WorkOrder WO-${orderId} has been updated to ${deadlineDate.toLocaleString()}`,
+      });
+    } catch (e) {
+      console.log('Failed to send notification on deadline update:', e.message);
+    }
+  }
+
+  return ok(res, updated);
+}
+
+async function reopen(req, res) {
+  const rawId = req.params.orderId || req.params.id;
+  const orderId = toPositiveInt(rawId, 'orderId');
+  requireFields(req.body, ['reason']);
+  const { reason } = req.body;
+
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) {
+    throw new ApiError(404, `Work order #${orderId} not found`);
+  }
+
+  if (order.task_status === TASK_STATUS.CLOSED) {
+    throw new ApiError(400, 'Work order is already closed and cannot be reopened');
+  }
+
+  if (order.task_status !== TASK_STATUS.COMPLETED) {
+    throw new ApiError(400, `Work order is not in Completed status (current status: ${order.task_status})`);
+  }
+
+  // Update WorkOrder status -> In Progress
+  await workOrdersRepository.updateStatus(orderId, TASK_STATUS.IN_PROGRESS);
+
+  // Update FaultReport status -> Processing
+  if (order.report_id) {
+    await faultReportsRepository.updateStatus(order.report_id, FAULT_REPORT_STATUS.PROCESSING);
+  }
+
+  // Record status history log
+  await workOrdersRepository.addStatusHistory({
+    orderId,
+    oldStatus: 'Completed',
+    newStatus: 'In Progress',
+    note: `User reported issue persists: ${reason}`,
+    changedBy: req.user ? req.user.userId : null,
+  });
+
+  // Notify Technician & Manager
+  if (order.technician_id) {
+    try {
+      await notificationsRepository.create({
+        userId: order.technician_id,
+        reportId: order.report_id,
+        orderId: orderId,
+        message: `WorkOrder WO-${orderId} has been reopened. User reported issue persists.`,
+      });
+    } catch (e) {
+      console.log('Failed to send technician notification on reopen:', e.message);
+    }
+  }
+
+  if (order.manager_id) {
+    try {
+      await notificationsRepository.create({
+        userId: order.manager_id,
+        reportId: order.report_id,
+        orderId: orderId,
+        message: `WorkOrder WO-${orderId} was reopened by User. Please review.`,
+      });
+    } catch (e) {
+      console.log('Failed to send manager notification on reopen:', e.message);
+    }
+  }
+
+  const updatedOrder = await workOrdersRepository.findById(orderId);
+  return ok(res, updatedOrder);
+}
+
+module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign, updateDeadline, reopen };
+

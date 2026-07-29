@@ -281,28 +281,53 @@
         localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
       } catch(e) {}
 
+      let deletedReports = [];
+      try {
+        deletedReports = JSON.parse(localStorage.getItem('vnu_deleted_reports') || '[]');
+      } catch(e) {}
+
       const reportMap = new Map();
+
+      const isDeleted = (id) => {
+        if (!id) return false;
+        const formatted = UiHelpers.formatReportId(id);
+        const raw = String(id).replace(/\D/g, '');
+        return deletedReports.includes(formatted) || (raw && deletedReports.includes(raw)) || deletedReports.includes(String(id));
+      };
 
       // Nạp dữ liệu seed chuẩn cho đúng user_id đang đăng nhập
       const userSeedReports = DEMO_REPORTS_BY_USER[user.user_id] || DEMO_REPORTS_BY_USER[1];
       userSeedReports.forEach(r => {
-        if (r && r.report_id) reportMap.set(String(r.report_id), r);
+        if (r && r.report_id && !isDeleted(r.report_id)) {
+          r.report_id = UiHelpers.formatReportId(r.report_id);
+          reportMap.set(r.report_id, r);
+        }
       });
 
       apiReports.forEach(r => {
-        if (r && r.report_id) reportMap.set(String(r.report_id), r);
+        if (r && r.report_id && !isDeleted(r.report_id)) {
+          const formattedId = UiHelpers.formatReportId(r.report_id);
+          const existing = reportMap.get(formattedId);
+          if (existing) {
+            Object.assign(existing, r, { report_id: formattedId });
+          } else {
+            r.report_id = formattedId;
+            reportMap.set(formattedId, r);
+          }
+        }
       });
 
       localReports.forEach(r => {
-        if (r && r.report_id) {
+        if (r && r.report_id && !isDeleted(r.report_id)) {
           const isBelongsToUser = (!r.user_email && !r.reporter_id) || r.user_email === user.email || String(r.reporter_id) === String(user.user_id);
           if (isBelongsToUser) {
-            const idStr = String(r.report_id);
-            const existing = reportMap.get(idStr);
+            const formattedId = UiHelpers.formatReportId(r.report_id);
+            const existing = reportMap.get(formattedId);
             if (existing) {
               if (r.status) existing.status = r.status;
             } else {
-              reportMap.set(idStr, r);
+              r.report_id = formattedId;
+              reportMap.set(formattedId, r);
             }
           }
         }

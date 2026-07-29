@@ -164,6 +164,18 @@ async function rejectAssignment(orderId, rejectionReason) {
   return findById(orderId);
 }
 
+async function updateStatus(orderId, newStatus) {
+  return updateTaskStatus(orderId, newStatus);
+}
+
+async function addStatusHistory({ orderId, oldStatus, newStatus, note, changedBy = null }) {
+  await pool.execute(
+    `INSERT INTO WorkOrderStatusHistory (order_id, old_status, new_status, changed_by, note)
+     VALUES (?, ?, ?, ?, ?)`,
+    [orderId, oldStatus, newStatus, changedBy, note]
+  );
+}
+
 module.exports = {
   findAll,
   findById,
@@ -171,6 +183,8 @@ module.exports = {
   create,
   respondToAssignment,
   updateTaskStatus,
+  updateStatus,
+  addStatusHistory,
   updateFixDetails,
   updateDeadline,
   getStatusHistory,

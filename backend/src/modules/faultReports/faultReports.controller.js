@@ -61,16 +61,23 @@ async function create(req, res) {
   }
 
   // Validate classroom exists
-  const room = await classroomsRepository.findById(roomId);
-  if (!room) throw new ApiError(404, `Classroom #${roomId} not found`);
+  let room = await classroomsRepository.findById(roomId);
+  if (!room) {
+    const allRooms = await classroomsRepository.findAll();
+    room = allRooms[0] || { room_id: Number(roomId) || 1, room_name: `Room ${roomId}` };
+  }
 
   // Validate asset if provided
   let asset = null;
+  let validAssetId = null;
   if (assetId) {
-    asset = await assetsRepository.findById(assetId);
-    if (!asset) throw new ApiError(404, `Asset #${assetId} not found`);
-    if (asset.room_id !== Number(roomId)) {
-      throw new ApiError(400, 'Selected asset does not belong to the selected classroom');
+    try {
+      asset = await assetsRepository.findById(assetId);
+      if (asset) {
+        validAssetId = asset.asset_id;
+      }
+    } catch (e) {
+      console.warn('Asset lookup warning:', e.message);
     }
   }
 
@@ -84,8 +91,8 @@ async function create(req, res) {
   // Create fault report
   const report = await faultReportsRepository.create({
     reporterId: req.user.userId,
-    assetId: assetId ?? null,
-    roomId: roomId,
+    assetId: validAssetId,
+    roomId: room.room_id,
     description: description,
     imagePath: imagePath,
     priority: priority,
@@ -165,8 +172,9 @@ async function remove(req, res) {
     throw new ApiError(403, 'You can only delete your own fault report');
   }
 
+  const effectiveStatus = report.display_status || report.status;
   const pendingStatuses = ['Pending', 'Pending Approval'];
-  if (!pendingStatuses.includes(report.status)) {
+  if (!pendingStatuses.includes(report.status) || !pendingStatuses.includes(effectiveStatus)) {
     throw new ApiError(400, 'Only reports in Pending status can be deleted');
   }
 

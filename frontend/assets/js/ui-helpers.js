@@ -102,9 +102,12 @@ const UiHelpers = (() => {
   }
 
   function formatReportId(id) {
-    if (!id) return '#FR-1';
+    if (!id && id !== 0) return 'REP-0001';
     const s = String(id).replace(/^(#|FR-|REP-)+/gi, '').trim();
-    return `#FR-${s}`;
+    if (!isNaN(s) && s !== '') {
+      return `REP-${String(s).padStart(4, '0')}`;
+    }
+    return `REP-${s}`;
   }
 
   function formatAssetId(id) {

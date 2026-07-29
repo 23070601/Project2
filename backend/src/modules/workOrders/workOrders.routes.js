@@ -23,13 +23,17 @@ router.post('/', requireRole(ROLES.MANAGER), asyncHandler(controller.create));
 router.patch('/:id/response', requireRole(ROLES.TECHNICIAN), asyncHandler(controller.respond));
 router.patch('/:id/reject', requireRole(ROLES.TECHNICIAN), asyncHandler(controller.reject));
 
-// Technicians/WorkOrderDetails.html cập nhật deadline
-router.patch('/:id/deadline', requireRole(ROLES.TECHNICIAN, ROLES.MANAGER), asyncHandler(controller.updateDeadline));
+// Managers/WorkOrderDetails.html cập nhật deadline
+router.patch('/:id/deadline', requireRole(ROLES.MANAGER), asyncHandler(controller.updateDeadline));
 
 // Technicians/WorkOrderDetails.html cập nhật tiến độ
 router.patch('/:id/status', requireRole(ROLES.TECHNICIAN, ROLES.MANAGER), asyncHandler(controller.updateStatus));
 
 // Managers reassign technician
 router.patch('/:id/reassign', requireRole(ROLES.MANAGER), asyncHandler(controller.reassign));
+
+// User reopens WorkOrder when issue persists
+router.post('/:orderId/reopen', asyncHandler(controller.reopen));
+router.post('/:id/reopen', asyncHandler(controller.reopen));
 
 module.exports = router;

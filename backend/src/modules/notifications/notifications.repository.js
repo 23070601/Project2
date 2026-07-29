@@ -50,11 +50,17 @@ async function notifyRole(role, { reportId = null, orderId = null, message }) {
   return createdIds;
 }
 
+async function create(data) {
+  const { userId, reportId = null, orderId = null, message } = data || {};
+  return createNotification({ userId, reportId, orderId, message });
+}
+
 module.exports = {
   findAllForUser,
   countUnread,
   markAsRead,
   markAllAsRead,
   createNotification,
+  create,
   notifyRole,
 };

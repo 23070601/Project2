@@ -210,11 +210,6 @@ INSERT INTO Classrooms (room_id, room_name, qr_code) VALUES
 (3,  'R103', 'QR-R103'),
 (4,  'R106', 'QR-R106'),
 (5,  'R107', 'QR-R107'),
-(6,  'R301', 'QR-R301'),
-(7,  'R302', 'QR-R302'),
-(8,  'R303', 'QR-R303'),
-(9,  'R304', 'QR-R304'),
-(10, 'R305', 'QR-R305'),
 (11, 'R401', 'QR-R401'),
 (12, 'R402', 'QR-R402'),
 (13, 'R403', 'QR-R403'),
@@ -258,29 +253,6 @@ INSERT INTO Assets (asset_id, asset_name, asset_type, room_id, status, failure_c
 -- Room 5 (R107)
 (14, 'LG Commercial TV 65in',            'TV',               5,  'Operational',                  0, NULL),
 (15, 'AKG Wireless Microphone',          'Microphone',       5,  'Operational',                  0, NULL),
-
--- Room 6 (R301)
-(16, 'Mitsubishi Heavy AC Unit',          'Aircon',           6,  'Recommended for Replacement', 3, NOW() - INTERVAL 2 DAY),
-(17, 'Sony Laser Projector 4K',           'Projector',        6,  'Operational',                  0, NULL),
-(18, 'Cisco Gigabit Switch 24-Port',      'NetworkSwitch',    6,  'Operational',                  0, NULL),
-
--- Room 7 (R302)
-(19, 'Sony Laser Projector VPL-PHZ60',   'Projector',        7,  'Operational',                  0, NULL),
-(20, 'LG Commercial Display 55in TV',     'TV',               7,  'Under Repair',                 1, NOW() - INTERVAL 2 DAY),
-(21, 'Ultra HD 4K HDMI Cable 15m',        'Cable',            7,  'Retired',                      4, NOW() - INTERVAL 30 DAY),
-(22, 'JBL Speaker System R302',          'Speaker',          7,  'Operational',                  0, NULL),
-
--- Room 8 (R303)
-(23, 'Panasonic Laser Projector',         'Projector',        8,  'Operational',                  0, NULL),
-(24, 'Daikin AC Unit R303',               'Aircon',           8,  'Operational',                  0, NULL),
-
--- Room 9 (R304)
-(25, 'Samsung 65in TV R304',             'TV',               9,  'Operational',                  0, NULL),
-(26, 'Shure Mic System R304',            'Microphone',       9,  'Operational',                  0, NULL),
-
--- Room 10 (R305)
-(27, 'Epson Document Camera R305',        'DocumentCamera',   10, 'Operational',                  0, NULL),
-(28, 'JBL Ceiling Speaker R305',          'Speaker',          10, 'Operational',                  0, NULL),
 
 -- Room 11 (R401)
 (29, 'Daikin Inverter AC 24000 BTU',      'Aircon',           11, 'Operational',                  1, NOW() - INTERVAL 10 DAY),
@@ -407,7 +379,7 @@ INSERT INTO WorkOrderStatusHistory (history_id, order_id, old_status, new_status
 -- 8. AUDIT LOG
 INSERT INTO AuditLog (log_id, user_id, action_type, entity_table, entity_id, room_id, asset_id, description, action_at) VALUES
 (1,  5, 'LOGIN',  'Users', 5, NULL, NULL, 'User manager.e@vnuis.edu.vn logged into the system', NOW() - INTERVAL 2 DAY),
-(2,  1, 'CREATE', 'FaultReports', 1, 7, 19, 'Fault report #1 created for Sony Projector in Room R302', NOW() - INTERVAL 2 DAY),
+(2,  1, 'CREATE', 'FaultReports', 1, 1, 1, 'Fault report #1 created for Sony Projector in Room R101', NOW() - INTERVAL 2 DAY),
 (3,  5, 'CREATE', 'WorkOrders', 1, 7, 19, 'Work order #1 generated and assigned to Technician Le Van C', NOW() - INTERVAL 40 HOUR),
 (4,  3, 'UPDATE', 'WorkOrders', 1, 7, 19, 'Technician Le Van C updated task status to In Progress', NOW() - INTERVAL 35 HOUR),
 (5,  5, 'UPDATE', 'Assets', 21, 7, 21, 'Asset #21 status updated to Retired due to repeated failures', NOW() - INTERVAL 30 DAY),
@@ -424,10 +396,10 @@ INSERT INTO AuditLog (log_id, user_id, action_type, entity_table, entity_id, roo
 INSERT INTO Notifications (notification_id, user_id, report_id, order_id, message, is_read, created_at) VALUES
 (1,  5, NULL, NULL, 'User manager.e@vnuis.edu.vn logged into the system successfully.', TRUE, NOW() - INTERVAL 2 DAY),
 (2,  5, 2, NULL, 'New fault report #2 submitted by Tran Thi B requires your approval.', FALSE, NOW() - INTERVAL 1 DAY),
-(3,  5, 7, NULL, 'New fault report #7 submitted by Nguyen Van A for Room R301.', FALSE, NOW() - INTERVAL 3 HOUR),
+(3,  5, 7, NULL, 'New fault report #7 submitted by Nguyen Van A for Room R201.', FALSE, NOW() - INTERVAL 3 HOUR),
 (4,  5, 10, NULL, 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', FALSE, NOW() - INTERVAL 2 HOUR),
 (5,  5, 15, NULL, 'Critical report #15 submitted by Doan Van G: Network switch down in Room R601.', FALSE, NOW() - INTERVAL 1 HOUR),
-(6,  3, 1, 1, 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', TRUE, NOW() - INTERVAL 40 HOUR),
+(6,  3, 1, 1, 'You have been assigned to Work Order #1 (Sony Projector in Room R101).', TRUE, NOW() - INTERVAL 40 HOUR),
 (7,  1, 1, 1, 'Your fault report #1 has been approved and assigned to Technician Le Van C.', TRUE, NOW() - INTERVAL 40 HOUR),
 (8,  3, 1, 1, 'Status updated: Work Order #1 is now In Progress.', TRUE, NOW() - INTERVAL 35 HOUR),
 (9,  4, 9, 5, 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', FALSE, NOW() - INTERVAL 5 HOUR),
@@ -505,6 +477,17 @@ LEFT JOIN WorkOrders wo ON wo.report_id = fr.report_id;
 
 DELIMITER $$
 
+DROP TRIGGER IF EXISTS trg_workorders_before_insert$$
+
+CREATE TRIGGER trg_workorders_before_insert
+BEFORE INSERT ON WorkOrders
+FOR EACH ROW
+BEGIN
+    IF NEW.deadline_at IS NULL THEN
+        SET NEW.deadline_at = DATE_ADD(IFNULL(NEW.assigned_at, CURRENT_TIMESTAMP), INTERVAL 48 HOUR);
+    END IF;
+END$$
+
 DROP TRIGGER IF EXISTS trg_workorders_after_insert$$
 
 CREATE TRIGGER trg_workorders_after_insert
@@ -520,12 +503,12 @@ BEGIN
 
     INSERT INTO Notifications (user_id, report_id, order_id, message)
     SELECT reporter_id, NEW.report_id, NEW.order_id,
-           CONCAT('Your report #', NEW.report_id, ' has been assigned to a technician.')
+           CONCAT('Your report #', NEW.report_id, ' has been assigned. Deadline: ', NEW.deadline_at)
     FROM FaultReports WHERE report_id = NEW.report_id;
 
     INSERT INTO Notifications (user_id, report_id, order_id, message)
     VALUES (NEW.technician_id, NEW.report_id, NEW.order_id,
-            CONCAT('New task assigned: Work Order #', NEW.order_id));
+            CONCAT('New task assigned: Work Order #', NEW.order_id, '. Deadline: ', NEW.deadline_at));
 END$$
 
 DROP TRIGGER IF EXISTS trg_workorders_after_update$$
