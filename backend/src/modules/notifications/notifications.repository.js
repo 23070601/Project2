@@ -17,7 +17,7 @@ async function countUnread(userId) {
     'SELECT COUNT(*) AS unreadCount FROM Notifications WHERE user_id = ? AND is_read = FALSE',
     [userId]
   );
-  return rows[0].unreadCount;
+  return Number(rows[0]?.unreadCount || 0);
 }
 
 async function markAsRead(notificationId, userId) {
@@ -31,4 +31,30 @@ async function markAllAsRead(userId) {
   await pool.execute('UPDATE Notifications SET is_read = TRUE WHERE user_id = ?', [userId]);
 }
 
-module.exports = { findAllForUser, countUnread, markAsRead, markAllAsRead };
+async function createNotification({ userId, reportId = null, orderId = null, message }) {
+  if (!userId || !message) return null;
+  const [result] = await pool.execute(
+    'INSERT INTO Notifications (user_id, report_id, order_id, message) VALUES (?, ?, ?, ?)',
+    [userId, reportId, orderId, message]
+  );
+  return result.insertId;
+}
+
+async function notifyRole(role, { reportId = null, orderId = null, message }) {
+  const [users] = await pool.execute('SELECT user_id FROM Users WHERE role = ? AND is_active = TRUE', [role]);
+  const createdIds = [];
+  for (const u of users) {
+    const id = await createNotification({ userId: u.user_id, reportId, orderId, message });
+    if (id) createdIds.push(id);
+  }
+  return createdIds;
+}
+
+module.exports = {
+  findAllForUser,
+  countUnread,
+  markAsRead,
+  markAllAsRead,
+  createNotification,
+  notifyRole,
+};

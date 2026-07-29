@@ -67,10 +67,10 @@ async function findByReportId(reportId) {
 
 // INSERT vào WorkOrders sẽ tự kích hoạt trigger trg_workorders_after_insert
 // (ghi WorkOrderStatusHistory + Notification + set FaultReports.status='Processing')
-async function create({ reportId, managerId, technicianId }) {
+async function create({ reportId, managerId, technicianId, deadlineAt = null }) {
   const [result] = await pool.execute(
-    `INSERT INTO WorkOrders (report_id, manager_id, technician_id) VALUES (?, ?, ?)`,
-    [reportId, managerId, technicianId]
+    `INSERT INTO WorkOrders (report_id, manager_id, technician_id, deadline_at) VALUES (?, ?, ?, ?)`,
+    [reportId, managerId, technicianId, deadlineAt]
   );
   return findById(result.insertId);
 }
@@ -105,6 +105,11 @@ async function updateFixDetails(orderId, { fixDescription, partsUsed }) {
 
   params.push(orderId);
   await pool.execute(`UPDATE WorkOrders SET ${fields.join(', ')} WHERE order_id = ?`, params);
+  return findById(orderId);
+}
+
+async function updateDeadline(orderId, deadlineAt) {
+  await pool.execute('UPDATE WorkOrders SET deadline_at = ? WHERE order_id = ?', [deadlineAt, orderId]);
   return findById(orderId);
 }
 
@@ -156,6 +161,7 @@ module.exports = {
   respondToAssignment,
   updateTaskStatus,
   updateFixDetails,
+  updateDeadline,
   getStatusHistory,
   reassign,
   rejectAssignment,

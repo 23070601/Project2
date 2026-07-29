@@ -23,6 +23,9 @@ router.post('/', requireRole(ROLES.MANAGER), asyncHandler(controller.create));
 router.patch('/:id/response', requireRole(ROLES.TECHNICIAN), asyncHandler(controller.respond));
 router.patch('/:id/reject', requireRole(ROLES.TECHNICIAN), asyncHandler(controller.reject));
 
+// Technicians/WorkOrderDetails.html cập nhật deadline
+router.patch('/:id/deadline', requireRole(ROLES.TECHNICIAN, ROLES.MANAGER), asyncHandler(controller.updateDeadline));
+
 // Technicians/WorkOrderDetails.html cập nhật tiến độ
 router.patch('/:id/status', requireRole(ROLES.TECHNICIAN, ROLES.MANAGER), asyncHandler(controller.updateStatus));
 
