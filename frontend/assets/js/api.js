@@ -22,7 +22,11 @@ const Api = (() => {
   // ============================================
   
   function getToken() {
+
     return localStorage.getItem('vnuis_token') || 'demo_dev_token';
+
+
+    
   }
 
   function setToken(token) {
@@ -90,6 +94,8 @@ const Api = (() => {
       if (currentUser.email) headers['X-User-Email'] = currentUser.email;
     } else {
       headers['X-User-Email'] = 'tech.c@vnuis.edu.vn';
+
+
       headers['X-User-Id'] = '3';
     }
 
@@ -205,7 +211,9 @@ const Api = (() => {
     }
   }
 
-<<<<<<< HEAD
+
+
+  <<<<<<< HEAD
   // ============================================
   // PUBLIC API
   // ============================================
@@ -213,8 +221,9 @@ const Api = (() => {
   return {
     // HTTP Methods
 =======
-  const api = {
->>>>>>> Linh
+
+
+const api = {
     get: (path, query) => request(path, { method: 'GET', query }),
     post: (path, body) => request(path, { method: 'POST', body }),
     put: (path, body) => request(path, { method: 'PUT', body }),
@@ -254,6 +263,8 @@ const Api = (() => {
   if (typeof window !== 'undefined') {
     window.Api = api;
   }
+
+
 
   return api;
 })();
