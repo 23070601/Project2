@@ -56,7 +56,7 @@ const Layout = (() => {
       }
     });
     document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target) && e.target !== bell) {
+      if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
         dropdown.classList.add('hidden');
       }
     });
@@ -82,6 +82,17 @@ const Layout = (() => {
     await loadPartial(SIDEBAR_FILE[role], '#sidebar-placeholder');
     await loadPartial('../partials/topbar.html', '#topbar-placeholder');
 
+    // Set correct "View all notifications" link based on role
+    const viewAllLink = document.getElementById('viewAllNotificationsLink');
+    if (viewAllLink) {
+      const rolePaths = {
+        User: '../users/Notifications.html',
+        Technician: '../technicians/Notifications.html',
+        Manager: '../managers/Notifications.html',
+      };
+      viewAllLink.href = rolePaths[role] || 'Notifications.html';
+    }
+
     let footerTarget = document.querySelector('#footer-placeholder');
     if (!footerTarget) {
       footerTarget = document.createElement('div');
@@ -100,10 +111,13 @@ const Layout = (() => {
     wireUserProfileDropdown();
 
     if (window.Notifications) {
-      setTimeout(() => {
-        Notifications.loadDropdown();
-        Notifications.refreshBadge();
-      }, 150);
+      // Load dropdown immediately since topbar is already in DOM
+      try {
+        await Notifications.loadDropdown();
+        await Notifications.refreshBadge();
+      } catch (e) {
+        console.warn('Initial notification load failed:', e);
+      }
       Notifications.startPolling();
     }
   }

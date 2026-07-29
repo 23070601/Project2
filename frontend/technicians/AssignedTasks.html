@@ -309,18 +309,6 @@
     }
   }
 
-<<<<<<< HEAD
-  async function acceptTaskRow(btnEl, orderId) {
-    try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        await Api.patch(`/work-orders/${orderId}/response`, { technicianResponse: 'Accepted' });
-        await loadTasksFromApi();
-        alert(`Work order WO-${orderId} accepted successfully!`);
-      }
-    } catch (e) {
-      console.error('Failed to accept task', e);
-      alert('Unable to accept this work order right now.');
-=======
   let currentViewMode = 'table';
 
   function switchTaskViewMode(mode) {
@@ -424,7 +412,6 @@
       alert(`Work order WO-${cleanId} accepted successfully!`);
     } else {
       alert(`Unable to accept work order WO-${cleanId}. Please try again.`);
->>>>>>> Linh
     }
   }
 
@@ -498,18 +485,6 @@
           technicianResponse: 'Rejected',
           rejectionReason: reason,
         });
-<<<<<<< HEAD
-        closeRejectModal();
-        await loadTasksFromApi();
-        alert(`Work order WO-${activeRejectOrderId} rejected.`);
-      }
-    } catch (err) {
-      console.error('Failed to reject task', err);
-      alert('Unable to reject this work order right now.');
-    }
-  }
-
-=======
         apiSuccess = true;
       }
     } catch (err) {
@@ -544,7 +519,7 @@
     ]
   };
 
->>>>>>> Linh
+
   async function loadTasksFromApi() {
     const tbody = document.getElementById('taskTableBody');
     if (!tbody) return;
@@ -556,29 +531,12 @@
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
-<<<<<<< HEAD
-        if (Array.isArray(data)) {
-=======
         if (data && Array.isArray(data)) {
->>>>>>> Linh
           tasks = data;
           loadedFromApi = true;
         }
       }
     } catch (err) {
-<<<<<<< HEAD
-      console.log('API fetch error', err);
-      tasks = [];
-    }
-
-    if (!tasks.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant">No assigned work orders found.</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = tasks.map(o => `
-      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority || ''}" data-status="${o.task_status || ''}" data-assigned-at="${o.assigned_at || ''}">
-=======
       console.warn('API fetch error, using local fallback:', err);
     }
 
@@ -598,13 +556,11 @@
 
     const activeDisplayTasks = currentTasks.filter(o => getDisplayTaskStatus(o) !== 'Rejected');
 
-    const tbody = document.getElementById('taskTableBody');
     tbody.innerHTML = activeDisplayTasks.map(o => {
       const displayStatus = getDisplayTaskStatus(o);
       const isAssigned = o.technician_response === 'Pending' && displayStatus === 'Assigned';
       return `
       <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${displayStatus}" data-assigned-at="${o.assigned_at || ''}">
->>>>>>> Linh
         <td class="px-6 py-4 text-body-sm font-bold text-center">WO-${o.order_id}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.room_name || 'Room')}</td>

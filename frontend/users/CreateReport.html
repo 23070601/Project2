@@ -288,6 +288,13 @@
       { asset_id: 67, asset_name: 'Dell OptiPlex Classroom PC', asset_type: 'Computer', room_id: 1, status: 'Operational' }
     ];
 
+    function cleanLabel(val) {
+      if (!val) return '';
+      return String(val)
+        .replace(/^(meeting_room|router|devices|ac_unit|videocam|tv|volume_up|mic|cable|photo_camera|computer)\s+/gi, '')
+        .trim();
+    }
+
     function formatAssetTypeName(type) {
       if (!type || type === 'All') return type || 'Other';
       if (type === 'NetworkSwitch') return 'Network Switch';
@@ -720,11 +727,7 @@
         submitBtn.textContent = 'Submitting...';
 
         try {
-<<<<<<< HEAD
-          // Validate required fields
-=======
           // Kiểm tra dữ liệu bắt buộc
->>>>>>> Linh
           if (!roomSelect.value) {
             throw new Error('Please select a classroom');
           }
@@ -732,55 +735,6 @@
             throw new Error('Please enter a description');
           }
 
-<<<<<<< HEAD
-          var formData = new FormData();
-          formData.append('roomId', parseInt(roomSelect.value));
-          if (assetSelect.value) {
-            formData.append('assetId', parseInt(assetSelect.value));
-          }
-          formData.append('description', document.getElementById('description').value.trim());
-          formData.append('urgencyHint', document.getElementById('urgencySelect').value);
-
-          if (selectedFile) {
-            formData.append('evidence', selectedFile);
-          }
-
-          console.log('📤 Sending multipart data with file:', selectedFile ? selectedFile.name : 'none');
-
-          // Get token with correct key
-          var token = localStorage.getItem('vnuis_token');
-          console.log('Token exists:', !!token);
-          
-          if (!token) {
-            var currentUrl = encodeURIComponent(window.location.pathname);
-            window.location.href = 'Login.html?redirect=' + currentUrl;
-            throw new Error('Please login again');
-          }
-
-          // Send request through shared API layer so it hits the backend server
-          var result = await Api.upload('/fault-reports', formData);
-          var report = result && result.data ? result.data : result;
-          console.log('Response data:', result);
-          successBox.textContent = '✅ Report #' + (report.report_id || '') + ' submitted successfully with priority: ' + (report.priority || 'N/A');
-          successBox.classList.remove('hidden');
-          reportForm.reset();
-          fileInfo.classList.add('hidden');
-          selectedFile = null;
-          assetSelect.innerHTML = '<option value="">General / not asset-specific</option>';
-          
-          setTimeout(function() {
-            var reportId = report.report_id || report.id;
-            if (reportId) {
-              location.href = 'ReportDetails.html?id=' + reportId;
-            } else {
-              location.href = 'ListReports.html';
-            }
-          }, 1500);
-          
-        } catch (err) {
-          console.error('❌ Submit error:', err);
-          errorBox.textContent = '❌ ' + (err.message || 'Failed to submit report. Please try again.');
-=======
           // Tạo FormData
           var formData = new FormData();
           formData.append('roomId', roomSelect.value);
@@ -930,7 +884,6 @@
           } catch (localErr) {}
 
           errorBox.textContent = err.message || 'Failed to submit report. Please try again.';
->>>>>>> Linh
           errorBox.classList.remove('hidden');
         } finally {
           submitBtn.disabled = false;

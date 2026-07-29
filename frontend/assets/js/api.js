@@ -26,7 +26,7 @@ const Api = (() => {
     return localStorage.getItem('vnuis_token') || 'demo_dev_token';
 
 
-    
+
   }
 
   function setToken(token) {
@@ -88,28 +88,49 @@ const Api = (() => {
     return url;
   }
 
-    const currentUser = window.Auth ? Auth.getCurrentUser() : null;
+  function resolveLoginPath() {
+    const loginPath = '/users/Login.html';
+    return loginPath;
+  }
+
+  function redirectToLogin() {
+    const loginPath = resolveLoginPath();
+    if (typeof window !== 'undefined' && window.location.pathname !== loginPath) {
+      window.location.href = loginPath;
+    }
+  }
+
+  async function request(path, options = {}) {
+    const {
+      method = 'GET',
+      body,
+      query,
+      isFormData = false,
+    } = options;
+
+    const headers = {};
+    const currentUser = typeof window !== 'undefined' && window.Auth
+      ? window.Auth.getCurrentUser()
+      : getCurrentUser();
+
     if (currentUser) {
       if (currentUser.user_id) headers['X-User-Id'] = String(currentUser.user_id);
       if (currentUser.email) headers['X-User-Email'] = currentUser.email;
+      if (currentUser.role) headers['X-User-Role'] = currentUser.role;
     } else {
       headers['X-User-Email'] = 'tech.c@vnuis.edu.vn';
-
-
       headers['X-User-Id'] = '3';
     }
 
     const url = buildUrl(path, query);
-    
-    // Prepare headers
+
     const requestHeaders = { ...headers };
     const token = getToken();
-    
+
     if (token) {
       requestHeaders['Authorization'] = `Bearer ${token}`;
     }
 
-    // Add user context headers if available
     const user = getCurrentUser();
     if (user) {
       if (user.user_id) requestHeaders['X-User-Id'] = String(user.user_id);
@@ -117,23 +138,20 @@ const Api = (() => {
       if (user.role) requestHeaders['X-User-Role'] = user.role;
     }
 
-    // Set Content-Type only if not FormData
     if (!isFormData) {
       requestHeaders['Content-Type'] = 'application/json';
     }
 
-    // Prepare body
     let requestBody = body;
     if (body !== undefined && !isFormData) {
       requestBody = JSON.stringify(body);
     }
 
-    // Log request for debugging (only in development)
-    if (window.DEBUG_MODE) {
+    if (typeof window !== 'undefined' && window.DEBUG_MODE) {
       console.log(`🚀 ${method} ${url}`, {
         headers: requestHeaders,
         body: isFormData ? 'FormData' : requestBody,
-        query
+        query,
       });
     }
 
@@ -144,15 +162,13 @@ const Api = (() => {
         body: requestBody !== undefined ? requestBody : undefined,
       });
 
-      // Handle 204 No Content
       if (response.status === 204) {
         return null;
       }
 
-      // Parse response
       const contentType = response.headers.get('content-type');
       let payload = null;
-      
+
       if (contentType && contentType.includes('application/json')) {
         payload = await response.json();
       } else {
@@ -166,25 +182,21 @@ const Api = (() => {
         }
       }
 
-      // Handle error responses
       if (!response.ok) {
-        const errorMessage = payload?.error?.message || 
-                           payload?.message || 
-                           `Request failed with status ${response.status}`;
-        
+        const errorMessage = payload?.error?.message ||
+          payload?.message ||
+          `Request failed with status ${response.status}`;
+
         const error = new Error(errorMessage);
         error.status = response.status;
         error.details = payload?.error?.details || null;
         error.response = payload;
 
-        // Handle 401 Unauthorized
         if (response.status === 401) {
           const currentToken = getToken();
-          // Only clear token and redirect if NOT a demo token
           if (currentToken && !currentToken.startsWith(DEMO_TOKEN_PREFIX)) {
             removeToken();
-            // Avoid redirect loop
-            if (!window.location.pathname.includes('Login.html')) {
+            if (typeof window !== 'undefined' && !window.location.pathname.includes('Login.html')) {
               redirectToLogin();
             }
           } else if (!currentToken) {
@@ -195,58 +207,44 @@ const Api = (() => {
         throw error;
       }
 
-      // Log success response (only in development)
-      if (window.DEBUG_MODE) {
+      if (typeof window !== 'undefined' && window.DEBUG_MODE) {
         console.log(`✅ ${method} ${path} ->`, payload?.data);
       }
 
       return payload?.data || payload;
-
     } catch (error) {
-      // Log error (only in development)
-      if (window.DEBUG_MODE) {
+      if (typeof window !== 'undefined' && window.DEBUG_MODE) {
         console.error(`❌ ${method} ${path} error:`, error);
       }
       throw error;
     }
   }
 
-
-
-  <<<<<<< HEAD
   // ============================================
   // PUBLIC API
   // ============================================
-  
-  return {
-    // HTTP Methods
-=======
 
-
-const api = {
+  const api = {
     get: (path, query) => request(path, { method: 'GET', query }),
     post: (path, body) => request(path, { method: 'POST', body }),
     put: (path, body) => request(path, { method: 'PUT', body }),
     patch: (path, body) => request(path, { method: 'PATCH', body }),
     delete: (path) => request(path, { method: 'DELETE' }),
-    
-    // File Upload (multipart/form-data)
-    upload: (path, formData, query) => request(path, { 
-      method: 'POST', 
-      body: formData, 
-      query, 
-      isFormData: true 
-    }),
-    
-    // Upload with PUT method
-    uploadPut: (path, formData, query) => request(path, { 
-      method: 'PUT', 
-      body: formData, 
-      query, 
-      isFormData: true 
+
+    upload: (path, formData, query) => request(path, {
+      method: 'POST',
+      body: formData,
+      query,
+      isFormData: true,
     }),
 
-    // Token Management
+    uploadPut: (path, formData, query) => request(path, {
+      method: 'PUT',
+      body: formData,
+      query,
+      isFormData: true,
+    }),
+
     getToken,
     setToken,
     removeToken,
@@ -254,7 +252,6 @@ const api = {
     isTokenValid,
     getCurrentUser,
 
-    // URL Helpers
     buildUrl,
     resolveLoginPath,
     redirectToLogin,
@@ -264,8 +261,6 @@ const api = {
     window.Api = api;
   }
 
-
-
   return api;
 })();
 
@@ -273,8 +268,8 @@ const api = {
 // EXPOSE FOR LEGACY CODE
 // ============================================
 // Keep backward compatibility for pages that use old Api functions
-if (typeof window.Api === 'undefined') {
-  window.Api = Api;
+if (typeof window !== 'undefined' && typeof window.Api === 'undefined') {
+  window.Api = window.Api;
 }
 
 // ============================================
@@ -282,15 +277,15 @@ if (typeof window.Api === 'undefined') {
 // ============================================
 // Check token validity on page load
 document.addEventListener('DOMContentLoaded', () => {
-  // Skip login page and public pages
+  if (typeof window === 'undefined') return;
+
   if (window.location.pathname.includes('Login.html')) return;
-  
-  // Check if token is valid
-  const token = Api.getToken();
-  if (token && !Api.isTokenValid()) {
+
+  const token = window.Api.getToken();
+  if (token && !window.Api.isTokenValid()) {
     console.warn('⚠️ Token expired, redirecting to login...');
-    Api.removeToken();
-    Api.redirectToLogin();
+    window.Api.removeToken();
+    window.Api.redirectToLogin();
   }
 });
 

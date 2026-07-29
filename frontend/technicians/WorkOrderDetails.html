@@ -585,24 +585,6 @@
       console.warn('Error fetching order detail from API:', err);
     }
 
-<<<<<<< HEAD
-    if (!order) {
-      order = {
-        order_id: cleanId,
-        asset_name: 'Equipment',
-        room_name: 'Room',
-        priority: 'Medium',
-        task_status: 'Assigned',
-        assigned_at: null,
-        reporter_name: currentUser?.full_name || 'Technician',
-        created_at: null,
-        description: 'No work order details were returned by the server.',
-        failure_count: 0,
-        asset_type: 'Equipment',
-        statusHistory: [],
-        repairHistory: [],
-      };
-=======
     const WORK_ORDERS_MAP = {
       '1': { 
         order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.', failure_count: 3, asset_type: 'Projector',
@@ -671,21 +653,14 @@
         storedOrders.push(order);
       }
       saveStoredWorkOrders(storedOrders);
->>>>>>> Linh
     }
 
     currentOrderData = order;
 
-<<<<<<< HEAD
-    const orderIdLabel = `WO-${order.order_id}`;
-    document.getElementById('detailHeaderOrderId').textContent = orderIdLabel;
-    document.getElementById('detailOrderId').textContent = orderIdLabel;
-=======
     // Render Basic Data from DB
     const displayWoId = UiHelpers.formatWorkOrderId(order.order_id);
     document.getElementById('detailHeaderOrderId').textContent = displayWoId;
     document.getElementById('detailOrderId').textContent = displayWoId;
->>>>>>> Linh
     document.getElementById('detailEquipment').textContent = order.asset_name || 'Equipment';
     document.getElementById('detailRoom').textContent = order.room_name || 'Room';
 
@@ -694,15 +669,6 @@
 
     const displayStatus = getDisplayTaskStatus(order);
     const statusContainer = document.getElementById('detailStatusBadgeContainer');
-<<<<<<< HEAD
-    if (statusContainer) statusContainer.innerHTML = getStatusBadgeHtml(order.task_status);
-    document.getElementById('detailAssignedDate').textContent = formatAssignedDate(order.assigned_at || order.created_at);
-    document.getElementById('detailReporterName').textContent = order.reporter_name || currentUser?.full_name || 'Technician';
-    document.getElementById('detailReportedDate').textContent = formatAssignedDate(order.created_at || order.assigned_at);
-    document.getElementById('detailFaultQuote').textContent = order.description ? `"${order.description}"` : 'No fault description provided.';
-    document.getElementById('detailFaultSubtext').textContent = order.description ? 'Reported issue from the connected fault report.' : 'The system has no additional description for this work order.';
-
-=======
     if (statusContainer) statusContainer.innerHTML = getStatusBadgeHtml(displayStatus);
     document.getElementById('detailAssignedDate').textContent = formatAssignedDate(order.assigned_at);
     document.getElementById('detailReporterName').textContent = order.reporter_name || 'Nguyen Van A';
@@ -713,90 +679,16 @@
     document.getElementById('detailFaultSubtext').textContent = `Reported issue for ${order.asset_name || 'equipment'} in Room ${order.room_name || ''}.`;
 
     // Asset Info Box
->>>>>>> Linh
     document.getElementById('detailAssetBoxName').textContent = order.asset_name || 'Equipment';
     document.getElementById('detailAssetBoxSn').textContent = `SN: SN-${order.order_id}928374-X`;
     document.getElementById('detailAssetType').textContent = order.asset_type || 'Equipment';
     document.getElementById('detailAssetRoom').textContent = order.room_name || 'Room';
-<<<<<<< HEAD
-    
-    const count = order.failure_count || 0;
-=======
 
     const count = order.failure_count || (WORK_ORDERS_MAP[cleanId] ? WORK_ORDERS_MAP[cleanId].failure_count : 4);
->>>>>>> Linh
     document.getElementById('detailAssetFailureCount').textContent = `${count} (In last 6 months)`;
     document.getElementById('dss3FailureCountText').textContent = count;
     document.getElementById('updateStatusSelect').value = order.task_status || 'Assigned';
 
-<<<<<<< HEAD
-    const timelineContainer = document.getElementById('detailTimelineContainer');
-    if (timelineContainer) {
-      const history = Array.isArray(order.statusHistory) && order.statusHistory.length > 0
-        ? order.statusHistory
-        : [{ task_status: order.task_status || 'Assigned', changed_at: order.assigned_at || order.created_at, notes: 'Work order status recorded in the system.' }];
-
-      timelineContainer.innerHTML = history.map((h, index) => {
-        const isFirst = index === (history.length - 1);
-        const statusName = h.task_status || h.status_name || 'Assigned';
-        let icon = 'assignment_ind';
-        if (statusName.includes('Progress')) icon = 'play_arrow';
-        if (statusName.includes('Received')) icon = 'task_alt';
-        if (statusName.includes('Completed')) icon = 'check_circle';
-        if (statusName.includes('Closed')) icon = 'lock';
-
-        return `
-          <div class="relative flex items-center group">
-            <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white ${isFirst ? 'bg-primary text-white' : 'bg-outline text-white'} shadow shrink-0 z-10">
-              <span class="material-symbols-outlined text-[18px]">${icon}</span>
-            </div>
-            <div class="ml-4 flex-1 ${isFirst ? 'bg-surface-container-low p-3 rounded-lg border border-outline-variant/20' : 'p-3 rounded-lg border border-outline-variant/10'}">
-              <div class="flex justify-between items-start">
-                <h5 class="text-body-sm font-bold ${isFirst ? 'text-on-surface' : 'text-outline'}">${UiHelpers.escapeHtml(statusName)}</h5>
-                <span class="text-[10px] text-outline font-medium">${formatAssignedDate(h.changed_at)}</span>
-              </div>
-              <p class="text-label-md ${isFirst ? 'text-on-surface-variant' : 'text-outline'}">${UiHelpers.escapeHtml(h.notes || h.note || 'Status updated in system.')}</p>
-            </div>
-          </div>
-        `;
-      }).reverse().join('');
-    }
-
-    const historyBody = document.getElementById('detailRepairHistoryBody');
-    if (historyBody) {
-      const repairHistory = Array.isArray(order.repairHistory) ? order.repairHistory : [];
-      if (repairHistory.length > 0) {
-        historyBody.innerHTML = repairHistory.map(r => `
-          <tr class="hover:bg-surface-container-lowest transition-colors">
-            <td class="px-6 py-4 text-center">
-              <div class="flex flex-col items-center">
-                <span class="text-body-sm font-bold">${formatAssignedDate(r.assigned_at)}</span>
-                <span class="text-[10px] text-green-600 font-bold uppercase tracking-widest">${UiHelpers.escapeHtml(r.task_status || 'Completed')}</span>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <div class="flex flex-col items-center">
-                <span class="text-body-sm text-on-surface">${UiHelpers.escapeHtml(r.fix_description || r.description || 'Maintenance check')}</span>
-                <span class="text-label-md text-outline">Parts: ${UiHelpers.escapeHtml(r.parts_used || 'Standard tools')}</span>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <div class="flex items-center gap-2 justify-center">
-                <div class="w-6 h-6 rounded-full bg-primary-fixed text-primary text-[10px] flex items-center justify-center font-bold">TECH</div>
-                <span class="text-body-sm">${UiHelpers.escapeHtml(r.technician_name || 'Technician')}</span>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <button onclick="location.href='WorkOrderDetails.html?id=${r.order_id}'" class="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors flex items-center justify-center mx-auto" title="View WorkOrder">
-                <span class="material-symbols-outlined">visibility</span>
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      } else {
-        historyBody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-on-surface-variant">No repair history found for this asset yet.</td></tr>';
-      }
-=======
     // Update Status Select Dropdown to match current status
     const statusSelect = document.getElementById('updateStatusSelect');
     if (statusSelect) {
@@ -971,7 +863,6 @@
       history.push({ task_status: 'In Progress', changed_at: new Date().toISOString(), notes: 'Technician started the repair process.' });
     } else if (displayStatus === 'Completed' && !history.some(h => (h.task_status || '').includes('Completed'))) {
       history.push({ task_status: 'Completed', changed_at: new Date().toISOString(), notes: 'Repair completed successfully and submitted.' });
->>>>>>> Linh
     }
 
     timelineContainer.innerHTML = history.map((h, index) => {

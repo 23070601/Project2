@@ -176,40 +176,6 @@
       return div.innerHTML;
     }
 
-<<<<<<< HEAD
-    function resolveEvidenceUrl(path) {
-      if (!path) return '';
-      if (/^https?:\/\//i.test(path)) return path;
-
-      let normalizedPath = path;
-      if (normalizedPath.startsWith('./')) {
-        normalizedPath = normalizedPath.replace(/^\.\//, '/');
-      }
-      if (!normalizedPath.startsWith('/')) {
-        normalizedPath = '/' + normalizedPath;
-      }
-
-      const apiBaseUrl = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:4000/api/v1';
-      const backendOrigin = apiBaseUrl.replace(/\/api\/v1\/?$/, '');
-      return `${backendOrigin}${normalizedPath}`;
-    }
-
-    function isImageEvidence(path) {
-      if (!path) return false;
-      return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(path);
-    }
-
-    function getEvidenceItems(report) {
-      if (report.image_path && isImageEvidence(report.image_path)) {
-        return [{
-          src: resolveEvidenceUrl(report.image_path),
-          alt: 'Uploaded evidence',
-          caption: 'Your uploaded evidence'
-        }];
-      }
-
-      return [];
-=======
     function renderVisualStepper(status) {
       const steps = [
         { label: 'Submitted', key: 'Submitted' },
@@ -256,26 +222,18 @@
       return String(val)
         .replace(/^(meeting_room|router|devices|ac_unit|videocam|tv|volume_up|mic|cable|photo_camera|computer)\s+/gi, '')
         .trim();
->>>>>>> Linh
     }
 
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
-<<<<<<< HEAD
-      const equipment = getFieldValue(report, ['asset_name', 'equipment_name']);
-      const room = getFieldValue(report, ['room_name']);
-      const roomId = getFieldValue(report, ['room_id'], 'N/A');
-      const assetType = getFieldValue(report, ['asset_type', 'assetType'], 'N/A');
-      const reporter = getFieldValue(report, ['reporter_name'], 'N/A');
-      const history = report.statusHistory || [];
-      const evidenceItems = getEvidenceItems(report);
-      const mainEvidence = evidenceItems[0];
-=======
       const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name']);
       const rawRoom = getFieldValue(report, ['room_name']);
       const equipment = cleanLabel(rawEquipment);
       const room = cleanLabel(rawRoom);
       const history = report.statusHistory || [];
+      const assetType = getFieldValue(report, ['asset_type', 'category', 'type']);
+      const roomId = getFieldValue(report, ['room_id', 'classroom_id']);
+      const reporter = getFieldValue(report, ['reporter_name', 'reported_by', 'user_name', 'user_email']);
       const isPending = ['Pending', 'Pending Approval'].includes(report.status);
       
       // If workOrder is Completed, report status MUST also be Completed (unless already Closed)
@@ -300,7 +258,6 @@
           parts_used: report.parts_used || (isCompleted ? 'Linh kiện thay thế mới (1 bộ)' : null)
         };
       }
->>>>>>> Linh
 
       let html = '';
 
@@ -341,11 +298,7 @@
               <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Equipment</p>
-<<<<<<< HEAD
-                  <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(equipment || 'N/A')}</p>
-=======
                   <p class="text-body-md font-bold text-on-surface">${escapeHtml(equipment || 'General / Not specified')}</p>
->>>>>>> Linh
                 </div>
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Asset type</p>
@@ -353,11 +306,7 @@
                 </div>
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Room</p>
-<<<<<<< HEAD
-                  <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(room || 'N/A')}</p>
-=======
                   <p class="text-body-md font-bold text-on-surface">${escapeHtml(room)}</p>
->>>>>>> Linh
                 </div>
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Room ID</p>
@@ -373,40 +322,6 @@
                 </div>
               </div>
 
-<<<<<<< HEAD
-              <div class="rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4">
-                <div class="flex items-center justify-between gap-3 mb-3">
-                  <div>
-                    <p class="text-label-md text-on-surface-variant">Fault description</p>
-                    <p class="text-body-md text-on-surface mt-1 whitespace-pre-line">${escapeHtml(report.description || 'No description provided')}</p>
-                  </div>
-                  <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-on-surface-variant">Detailed report</span>
-                </div>
-              </div>
-
-              <div class="rounded-2xl border border-outline-variant/10 bg-white p-4">
-                <div class="flex items-center justify-between gap-3 mb-4">
-                  <div>
-                    <p class="text-label-md text-on-surface-variant">Evidence gallery</p>
-                    <p class="text-body-sm text-on-surface-variant">Your uploaded evidence appears here</p>
-                  </div>
-                  <span class="rounded-full bg-primary-fixed px-3 py-1 text-xs font-semibold text-brand-blue">Uploaded media</span>
-                </div>
-
-                ${evidenceItems.length > 0 ? `
-                  <div class="overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container">
-                    <img src="${mainEvidence.src}" alt="${escapeHtml(mainEvidence.alt)}" class="h-72 w-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                    <div class="hidden h-72 flex flex-col items-center justify-center text-outline-variant">
-                      <span class="material-symbols-outlined text-[32px]">image_not_supported</span>
-                      <span class="text-[10px] font-label-md mt-1">Unable to preview this file</span>
-                    </div>
-                  </div>
-                ` : `
-                  <div class="rounded-2xl border border-dashed border-outline-variant/30 bg-surface-container-low p-8 text-center text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[32px]">photo_camera</span>
-                    <p class="mt-2 text-body-md font-medium">No uploaded image available for this report</p>
-                    <p class="text-body-sm mt-1">The reporter’s own evidence will appear here once uploaded.</p>
-=======
               <!-- Uploaded Evidence -->
               <div>
                 <p class="text-label-md text-on-surface-variant mb-2">Uploaded Evidence</p>
@@ -423,7 +338,6 @@
                     <span class="material-symbols-outlined text-3xl text-outline">image</span>
                     <span class="text-xs font-medium text-outline">Img_0001.jpg</span>
                     <span class="text-[10px] text-outline/70">Evidence Preview</span>
->>>>>>> Linh
                   </div>
                 `}
               </div>

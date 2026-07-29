@@ -17,7 +17,7 @@ async function countUnread(userId) {
     'SELECT COUNT(*) AS unreadCount FROM Notifications WHERE user_id = ? AND is_read = FALSE',
     [userId]
   );
-  return rows[0].unreadCount;
+  return Number(rows[0]?.unreadCount || 0);
 }
 
 async function markAsRead(notificationId, userId) {

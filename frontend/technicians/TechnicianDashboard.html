@@ -204,8 +204,6 @@
     }
   }
 
-<<<<<<< HEAD
-=======
   const TASKS_BY_EMAIL = {
     'tech.c@vnuis.edu.vn': [
       { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', technician_response: 'Accepted' },
@@ -224,7 +222,6 @@
     ]
   };
 
->>>>>>> Linh
   async function loadDashboardData() {
     const upcomingContainer = document.getElementById('upcomingTasksContainer');
     if (upcomingContainer) {
@@ -236,26 +233,13 @@
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
-<<<<<<< HEAD
-        if (Array.isArray(data)) {
-=======
         if (data && Array.isArray(data)) {
->>>>>>> Linh
           orders = data;
           loadedFromApi = true;
         }
       }
     } catch (err) {
       console.log('API fetch error', err);
-<<<<<<< HEAD
-      orders = [];
-    }
-
-    const inProgress = orders.filter(o => ['Received', 'In Progress'].includes(o.task_status)).length;
-    const completed = orders.filter(o => ['Completed', 'Closed'].includes(o.task_status)).length;
-    const overdue = orders.filter(o => String(o.task_status || '').toLowerCase() === 'overdue').length;
-    
-=======
     }
 
     if (loadedFromApi) {
@@ -279,31 +263,11 @@
     const completed = activeOrders.filter(o => ['Completed', 'Closed'].includes(getDisplayTaskStatus(o))).length;
     const overdue = activeOrders.filter(o => getDisplayTaskStatus(o) === 'Overdue' || (o.priority === 'High' && !['Completed', 'Closed'].includes(getDisplayTaskStatus(o)))).length;
 
->>>>>>> Linh
     document.getElementById('kpiInProgress').textContent = inProgress;
     document.getElementById('kpiCompleted').textContent = completed;
     document.getElementById('kpiOverdue').textContent = overdue;
     document.getElementById('kpiTotal').textContent = activeOrders.length;
 
-<<<<<<< HEAD
-    if (!orders.length) {
-      upcomingContainer.innerHTML = '<div class="text-center text-on-surface-variant py-6">No assigned work orders found.</div>';
-      return;
-    }
-
-    upcomingContainer.innerHTML = orders.slice(0, 5).map(o => `
-      <div class="flex gap-6 group cursor-pointer" onclick="location.href='WorkOrderDetails.html?id=${o.order_id}'">
-        <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
-          <div class="flex justify-between items-start">
-            <div>
-              <h4 class="text-body-md font-bold text-on-surface">WO-${o.order_id} - ${UiHelpers.escapeHtml(o.asset_name || o.description || 'Maintenance Task')}</h4>
-              <div class="flex items-center gap-4 mt-1">
-                <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[16px]">location_on</span>${UiHelpers.escapeHtml(o.room_name || 'Classroom')}
-                </span>
-                ${getPriorityBadgeHtml(o.priority)}
-=======
-    const upcomingContainer = document.getElementById('upcomingTasksContainer');
     if (upcomingContainer) {
       if (activeOrders.length === 0) {
         upcomingContainer.innerHTML = `<p class="text-on-surface-variant text-body-sm py-4 text-center">No assigned work orders found.</p>`;
@@ -322,7 +286,6 @@
                   </div>
                 </div>
                 ${getStatusBadgeHtml(o)}
->>>>>>> Linh
               </div>
             </div>
           </div>

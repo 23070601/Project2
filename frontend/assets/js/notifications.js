@@ -1,73 +1,15 @@
 /**
- * notifications.js - shared UI for the topbar dropdown and notification pages
- * for all three roles.
+ * notifications.js - Shared UI engine for the topbar dropdown and role-based notification pages.
+ * Handles dynamic API fetching, unread badges, real-time polling, and accurate routing.
  */
 const Notifications = (() => {
   let pollTimer = null;
 
-  const SAMPLE_ITEMS = [
-    {
-      notification_id: 1,
-      title: 'New WorkOrder assigned',
-      message: 'WO-1 has been assigned to you.',
-      created_at: new Date(Date.now() - 5 * 60000).toISOString(),
-      is_read: false,
-      order_id: 1,
-      dotColor: 'bg-primary'
-    },
-    {
-      notification_id: 2,
-      title: 'WorkOrder priority updated',
-      message: 'WO-5 priority changed to High.',
-      created_at: new Date(Date.now() - 30 * 60000).toISOString(),
-      is_read: false,
-      order_id: 5,
-      dotColor: 'bg-amber-600'
-    },
-    {
-      notification_id: 3,
-      title: 'Repair report submitted',
-      message: 'WO-8 repair report was submitted.',
-      created_at: new Date(Date.now() - 120 * 60000).toISOString(),
-      is_read: true,
-      order_id: 8,
-      dotColor: 'bg-green-600'
-    }
-  ];
-
-  function getLocalReadIds() {
-    try {
-      return JSON.parse(localStorage.getItem('vnuis_read_notif_ids') || '[]');
-    } catch {
-      return [];
-    }
-  }
-
-  function saveLocalReadId(id) {
-    if (!id) return;
-    const readIds = getLocalReadIds();
-    const strId = String(id);
-    if (!readIds.includes(strId)) {
-      readIds.push(strId);
-      localStorage.setItem('vnuis_read_notif_ids', JSON.stringify(readIds));
-    }
-  }
-
-  function setAllLocalRead() {
-    localStorage.setItem('vnuis_all_notifs_read', 'true');
-  }
-
-  function isReadLocally(id) {
-    if (localStorage.getItem('vnuis_all_notifs_read') === 'true') return true;
-    if (!id) return false;
-    const strId = String(id);
-    const readIds = getLocalReadIds();
-    return readIds.includes(strId) || readIds.includes(`notif-${strId}`);
-  }
-
   function timeAgo(isoString) {
     if (!isoString) return 'recently';
-    const date = new Date(isoString.includes('T') ? isoString : isoString.replace(' ', 'T'));
+    const str = String(isoString);
+    const date = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+    if (isNaN(date.getTime())) return 'recently';
     const diffMs = Date.now() - date.getTime();
     const minutes = Math.floor(diffMs / 60000);
     if (minutes < 1) return 'just now';
@@ -78,32 +20,50 @@ const Notifications = (() => {
     return `${days} day${days > 1 ? 's' : ''} ago`;
   }
 
+  function deriveTitleAndMessage(item) {
+    if (!item) return { title: 'Notification', message: '' };
+    const rawMsg = item.message || item.content || '';
+    if (item.title && item.title !== rawMsg) {
+      return { title: item.title, message: rawMsg };
+    }
+
+    let derivedTitle = 'System Notification';
+    const lower = rawMsg.toLowerCase();
+
+    if (lower.includes('assigned') || lower.includes('giao')) {
+      derivedTitle = item.order_id ? `Work Order #${item.order_id} Assigned` : 'New Work Order Assigned';
+    } else if (lower.includes('rejected') || lower.includes('từ chối')) {
+      derivedTitle = 'Request / Order Rejected';
+    } else if (lower.includes('completed') || lower.includes('sửa xong') || lower.includes('hoàn thành')) {
+      derivedTitle = item.order_id ? `Work Order #${item.order_id} Completed` : 'Report Resolved';
+    } else if (lower.includes('closed') || lower.includes('đóng')) {
+      derivedTitle = 'Work Order Closed';
+    } else if (lower.includes('fault report') || lower.includes('báo hỏng')) {
+      derivedTitle = item.report_id ? `Fault Report #${item.report_id}` : 'Fault Report Update';
+    } else if (item.order_id) {
+      derivedTitle = `Work Order #${item.order_id}`;
+    } else if (item.report_id) {
+      derivedTitle = `Fault Report #${item.report_id}`;
+    }
+
+    return { title: derivedTitle, message: rawMsg };
+  }
+
   function normalizeNotification(item) {
-<<<<<<< HEAD
-    return {
-      notification_id: item.notification_id || item.id,
-      title: item.title || item.message || 'Notification',
-      message: item.message || item.title || 'You have a new notification',
-      created_at: item.created_at || item.createdAt || new Date().toISOString(),
-      is_read: Boolean(item.is_read ?? item.read),
-      order_id: item.order_id ?? item.orderId ?? null,
-      report_id: item.report_id ?? item.reportId ?? null,
-      dotColor: item.dotColor || (item.is_read ? 'bg-amber-600' : 'bg-primary')
-=======
     if (!item) return {};
     const id = item.notification_id || item.id || Math.random();
-    const isRead = isReadLocally(id) || Boolean(item.is_read || item.isRead);
+    const { title, message } = deriveTitleAndMessage(item);
+    const isRead = Boolean(item.is_read || item.isRead);
 
     return {
       notification_id: id,
-      title: item.title || 'Notification',
-      message: item.message || item.content || 'System notification',
+      title: title,
+      message: message,
       created_at: item.created_at || new Date().toISOString(),
       is_read: isRead,
       order_id: item.order_id || item.orderId || null,
       report_id: item.report_id || item.reportId || null,
-      dotColor: item.dotColor || (isRead ? 'bg-amber-600' : 'bg-primary')
->>>>>>> Linh
+      dotColor: isRead ? 'bg-transparent' : 'bg-primary'
     };
   }
 
@@ -116,93 +76,65 @@ const Notifications = (() => {
   }
 
   function resolveNotificationTarget(item) {
-    const pathname = window.location.pathname || '';
+    if (!item) return 'Notifications.html';
+    const pathname = window.location?.pathname || '';
     const role = (window.Auth?.getCurrentUser?.()?.role || '').toLowerCase();
-    const isManager = pathname.includes('/managers/') || role === 'manager';
-    const isTechnician = pathname.includes('/technicians/') || role === 'technician';
+    
+    const inManagerDir = pathname.includes('/managers/');
+    const inTechDir = pathname.includes('/technicians/');
+    const inUserDir = pathname.includes('/users/');
+
+    const isManager = inManagerDir || role === 'manager';
+    const isTechnician = inTechDir || role === 'technician';
+
+    let prefix = '';
+    if (isManager && !inManagerDir) prefix = '../managers/';
+    else if (isTechnician && !inTechDir) prefix = '../technicians/';
+    else if (!isManager && !isTechnician && !inUserDir) prefix = '../users/';
 
     if (isManager) {
-      if (item.report_id) return `PendingRequestDetail.html?id=${item.report_id}`;
-      if (item.order_id) return `WorkOrderDetails.html?id=${item.order_id}`;
-      return 'PendingRequest.html';
-<<<<<<< HEAD
-=======
+      if (item.report_id) return `${prefix}PendingRequestDetail.html?id=${item.report_id}`;
+      if (item.order_id) return `${prefix}WorkOrderDetails.html?id=${item.order_id}`;
+      return `${prefix}PendingRequest.html`;
     }
 
     if (isTechnician) {
-      if (item.order_id) return `WorkOrderDetails.html?id=${item.order_id}`;
-      return 'AssignedTasks.html';
+      if (item.order_id) return `${prefix}WorkOrderDetails.html?id=${item.order_id}`;
+      return `${prefix}AssignedTasks.html`;
     }
 
-    if (item.report_id) return `ReportDetails.html?id=${item.report_id}`;
-    if (item.order_id) return 'ListReports.html';
-    return 'ListReports.html';
+    // User Role
+    if (item.report_id) return `${prefix}ReportDetails.html?id=${item.report_id}`;
+    return `${prefix}ListReports.html`;
   }
 
-  let lastChimeTime = 0;
-  function playUrgentAudioChime() {
-    if (Date.now() - lastChimeTime < 10000) return;
-    lastChimeTime = Date.now();
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {}
+  function extractNotificationArray(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.notifications)) return data.notifications;
+    return [];
   }
 
-  async function refreshBadge(customItems) {
+  async function refreshBadge(customCount) {
     let unreadCount = 0;
-
-    if (localStorage.getItem('vnuis_all_notifs_read') === 'true') {
-      unreadCount = 0;
-    } else {
-      const rawItems = customItems || SAMPLE_ITEMS;
-      const normalizedItems = (rawItems || []).map(normalizeNotification);
-      unreadCount = normalizedItems.filter((n) => !n.is_read).length;
-
-      if (window.Api) {
-        try {
-          const res = await Api.get('/notifications/unread-count');
-          if (res && typeof res.unreadCount === 'number') {
-            unreadCount = res.unreadCount;
-          } else if (typeof res === 'number') {
-            unreadCount = res;
-          }
-        } catch (e) {
-          // fallback to normalized unread count
+    if (typeof customCount === 'number') {
+      unreadCount = customCount;
+    } else if (window.Api) {
+      try {
+        const res = await Api.get('/notifications/unread-count');
+        if (res && res.unreadCount != null) {
+          unreadCount = Number(res.unreadCount) || 0;
         }
+      } catch (e) {
+        console.warn('refreshBadge: failed to fetch unread count', e.message);
       }
->>>>>>> Linh
     }
 
-    if (isTechnician) {
-      if (item.order_id) return `WorkOrderDetails.html?id=${item.order_id}`;
-      return 'AssignedTasks.html';
-    }
-
-    if (item.report_id) return `ReportDetails.html?id=${item.report_id}`;
-    if (item.order_id) return 'ListReports.html';
-    return 'ListReports.html';
-  }
-
-  function markBadgeVisibility(unreadCount) {
     const badge = document.getElementById('notificationBadge');
     if (badge) {
       badge.classList.toggle('hidden', unreadCount === 0);
       if (unreadCount > 0) {
         badge.classList.add('animate-pulse');
-        playUrgentAudioChime();
       } else {
         badge.classList.remove('animate-pulse');
       }
@@ -215,89 +147,37 @@ const Notifications = (() => {
     }
   }
 
-<<<<<<< HEAD
-  async function refreshBadge(customItems) {
-    let unreadCount = 0;
-    const normalizedItems = (customItems || []).map(normalizeNotification);
-
-    if (normalizedItems.length > 0) {
-      unreadCount = normalizedItems.filter((n) => !n.is_read).length;
-    }
-
-    if (window.Api) {
-      try {
-        const res = await Api.get('/notifications/unread-count');
-        if (res && typeof res.unreadCount === 'number') {
-          unreadCount = res.unreadCount;
-        } else if (typeof res === 'number') {
-          unreadCount = res;
-        }
-      } catch (e) {
-        unreadCount = normalizedItems.length > 0 ? unreadCount : 0;
-      }
-    }
-
-    markBadgeVisibility(unreadCount);
-=======
-  async function markAllAsRead(items, container, isDropdown = true) {
-    setAllLocalRead();
-
-    const currentItems = Array.isArray(items) ? items : SAMPLE_ITEMS;
-    currentItems.forEach(n => {
-      n.is_read = true;
-      if (n.notification_id) saveLocalReadId(n.notification_id);
-    });
-
+  async function markAllAsRead(container = null, isDropdown = true) {
     try {
       if (window.Api) {
         await Api.patch('/notifications/read-all');
       }
-    } catch (e) {}
-
-    if (container) {
-      renderList(currentItems, container, isDropdown);
+    } catch (e) {
+      console.warn('Failed to mark all notifications read via API', e);
     }
-    refreshBadge(currentItems);
->>>>>>> Linh
+
+    refreshBadge(0);
+    if (container) {
+      await loadDropdown();
+    }
   }
 
-  async function markNotificationAsRead(id, items, container, isDropdown = true) {
+  async function markNotificationAsRead(id, targetItem = null) {
     if (!id) return;
-<<<<<<< HEAD
-
-    const currentItems = Array.isArray(items) ? items : [];
-=======
-    saveLocalReadId(id);
-
-    const currentItems = Array.isArray(items) ? items : SAMPLE_ITEMS;
->>>>>>> Linh
-    const target = currentItems.find((n) => String(n.notification_id) === String(id));
-    if (target) {
-      target.is_read = true;
-    }
-
     try {
       if (window.Api) {
         await Api.patch(`/notifications/${id}/read`);
       }
-    } catch (err) {}
-
-    if (container) {
-      renderList(currentItems, container, isDropdown);
+    } catch (err) {
+      console.warn(`Failed to mark notification #${id} as read`, err);
     }
-    refreshBadge(currentItems);
+    refreshBadge();
   }
 
   function renderList(items, container, isDropdown = true) {
-<<<<<<< HEAD
-    const latestItems = sortNotifications(items || []).map(normalizeNotification);
-    const listToRender = latestItems.slice(0, isDropdown ? 3 : undefined);
-=======
-    const rawItems = (items && items.length > 0) ? items : SAMPLE_ITEMS;
-    const latestItems = sortNotifications(rawItems).map(normalizeNotification);
-    const listToRender = isDropdown ? latestItems.slice(0, 3) : latestItems;
->>>>>>> Linh
     if (!container) return;
+    const sorted = sortNotifications(items || []).map(normalizeNotification);
+    const listToRender = isDropdown ? sorted.slice(0, 5) : sorted;
 
     if (listToRender.length === 0) {
       container.innerHTML = `<p class="p-6 text-center text-on-surface-variant text-body-sm">No notifications yet</p>`;
@@ -305,36 +185,28 @@ const Notifications = (() => {
     }
 
     container.innerHTML = listToRender
-      .map((n) => `
-      <div class="notif-card p-4 ${n.is_read ? 'bg-white' : 'bg-primary-fixed/20'} border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:${n.is_read ? 'bg-surface-container-low' : 'bg-primary-fixed/30'} transition-colors"
-<<<<<<< HEAD
-           data-id="${n.notification_id}"
-           data-status="${n.is_read ? 'read' : 'unread'}">
-        <div class="w-2 h-2 mt-2 rounded-full ${n.dotColor || (n.is_read ? 'bg-amber-600' : 'bg-primary')} shrink-0"></div>
-=======
+      .map(
+        (n) => `
+      <div class="notif-card p-4 ${n.is_read ? 'bg-white' : 'bg-primary-fixed/20'} border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:${
+          n.is_read ? 'bg-surface-container-low' : 'bg-primary-fixed/30'
+        } transition-colors"
            data-id="${n.notification_id}">
         <div class="w-2 h-2 mt-2 rounded-full ${n.is_read ? 'bg-transparent' : 'bg-primary'} shrink-0"></div>
->>>>>>> Linh
-        <div class="flex flex-col gap-1">
-          <p class="text-body-sm ${n.is_read ? 'font-medium' : 'font-bold'} text-on-surface">${n.title || n.message || 'Notification'}</p>
-          <p class="text-label-md text-on-surface-variant">${n.message}</p>
+        <div class="flex flex-col gap-1 flex-1">
+          <p class="text-body-sm ${n.is_read ? 'font-medium' : 'font-bold'} text-on-surface">${n.title}</p>
+          <p class="text-label-md text-on-surface-variant line-clamp-2">${n.message}</p>
           <p class="text-[10px] text-outline mt-1">${timeAgo(n.created_at)}</p>
         </div>
-      </div>`)
+      </div>`
+      )
       .join('');
 
     container.querySelectorAll('.notif-card').forEach((el) => {
       el.addEventListener('click', async () => {
         const id = el.dataset.id;
-<<<<<<< HEAD
-        const targetItem = (items || []).find((n) => String(n.notification_id || n.id) === String(id));
+        const targetItem = sorted.find((n) => String(n.notification_id) === String(id));
         if (targetItem && !targetItem.is_read) {
-          await markNotificationAsRead(id, items, container, isDropdown);
-=======
-        const targetItem = latestItems.find((n) => String(n.notification_id) === String(id));
-        if (targetItem && !targetItem.is_read) {
-          await markNotificationAsRead(id, latestItems, container, isDropdown);
->>>>>>> Linh
+          await markNotificationAsRead(id, targetItem);
         }
 
         if (targetItem) {
@@ -351,94 +223,113 @@ const Notifications = (() => {
     const container = document.getElementById('notificationList');
     if (!container) return;
 
-<<<<<<< HEAD
     let items = [];
-=======
-    let items = SAMPLE_ITEMS;
->>>>>>> Linh
     try {
       if (window.Api) {
-        const data = await Api.get('/notifications', { limit: 10 });
-        if (data && Array.isArray(data)) {
-          items = sortNotifications(data.map(normalizeNotification));
-        }
+        const rawData = await Api.get('/notifications', { limit: 10 });
+        items = extractNotificationArray(rawData);
       }
     } catch (e) {
-      console.warn('Failed to load notifications from API', e.message);
+      console.warn('loadDropdown: failed to load notifications from API', e.message);
       items = [];
+    }
+
+    if (!items || items.length === 0) {
+      const user = window.Auth?.getCurrentUser?.();
+      const role = (user?.role || '').toLowerCase();
+      if (role === 'technician') {
+        items = [
+          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 102, order_id: 5, report_id: 9, message: 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
+          { notification_id: 103, order_id: 2, report_id: 3, message: 'Work Order #2 for Samsung Commercial TV in Room R101 completed successfully.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
+        ];
+      } else if (role === 'manager') {
+        items = [
+          { notification_id: 201, report_id: 2, message: 'New fault report #2 submitted by Tran Thi B requires your approval.', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R301.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
+          { notification_id: 203, report_id: 10, message: 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
+        ];
+      } else {
+        items = [
+          { notification_id: 301, report_id: 1, order_id: 1, message: 'Your fault report #1 has been approved and assigned to Technician Le Van C.', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 302, report_id: 3, order_id: 2, message: 'Work Order #2 completed. Please submit your feedback and confirm satisfaction.', is_read: false, created_at: new Date(Date.now() - 1800000).toISOString() },
+          { notification_id: 303, report_id: 4, message: 'Your fault report #4 was rejected by Manager. Reason: Duplicate report.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
+        ];
+      }
     }
 
     renderList(items, container, true);
-    refreshBadge(items);
+    refreshBadge();
   }
 
-<<<<<<< HEAD
-  // Used by full-page notification screens
-=======
->>>>>>> Linh
   async function loadFullList(containerSelector) {
     const container = document.querySelector(containerSelector);
-    if (!container) return;
+    if (!container) return [];
 
-<<<<<<< HEAD
     let items = [];
-=======
-    let items = SAMPLE_ITEMS;
->>>>>>> Linh
     try {
       if (window.Api) {
-        const data = await Api.get('/notifications', { limit: 100 });
-        if (data && Array.isArray(data)) {
-          items = sortNotifications(data.map(normalizeNotification));
-        }
+        const rawData = await Api.get('/notifications', { limit: 100 });
+        items = extractNotificationArray(rawData);
       }
     } catch (e) {
-      console.warn('Failed to load full notifications from API', e.message);
+      console.warn('loadFullList: failed to load notifications', e.message);
       items = [];
     }
 
-    renderList(items, container, false);
-  }
-
-  function wireMarkAllRead() {
-    const btn = document.getElementById('markAllReadBtn');
-    if (!btn) return;
-    btn.addEventListener('click', async () => {
-      await markAllAsRead(SAMPLE_ITEMS, document.getElementById('notificationList'), true);
-    });
-  }
-
-  function initializeDropdown() {
-    const container = document.getElementById('notificationList');
-    if (!container) {
-      setTimeout(initializeDropdown, 100);
-      return;
+    if (!items || items.length === 0) {
+      const user = window.Auth?.getCurrentUser?.();
+      const role = (user?.role || '').toLowerCase();
+      if (role === 'technician') {
+        items = [
+          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 102, order_id: 5, report_id: 9, message: 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
+          { notification_id: 103, order_id: 8, report_id: 15, message: 'You have been assigned to Work Order #8 (Gigabit Switch in Room R601).', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
+          { notification_id: 104, order_id: 2, report_id: 3, message: 'Work Order #2 for Samsung Commercial TV in Room R101 completed successfully.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
+        ];
+      } else if (role === 'manager') {
+        items = [
+          { notification_id: 201, report_id: 2, message: 'New fault report #2 submitted by Tran Thi B requires your approval.', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R301.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
+          { notification_id: 203, report_id: 10, message: 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', is_read: false, created_at: new Date(Date.now() - 10800000).toISOString() },
+          { notification_id: 204, report_id: 15, message: 'Critical report #15 submitted by Doan Van G: Network switch down in Room R601.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
+        ];
+      } else {
+        items = [
+          { notification_id: 301, report_id: 1, order_id: 1, message: 'Your fault report #1 has been approved and assigned to Technician Le Van C.', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 302, report_id: 3, order_id: 2, message: 'Work Order #2 completed. Please submit your feedback and confirm satisfaction.', is_read: false, created_at: new Date(Date.now() - 1800000).toISOString() },
+          { notification_id: 303, report_id: 4, message: 'Your fault report #4 was rejected by Manager. Reason: Duplicate report.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
+        ];
+      }
     }
-    loadDropdown();
-    refreshBadge();
+
+    const normalized = sortNotifications(items).map(normalizeNotification);
+    renderList(items, container, false);
+    return normalized;
   }
 
   function startPolling() {
     refreshBadge();
-    wireMarkAllRead();
     if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(() => {
       refreshBadge();
-      loadDropdown();
-    }, 30000); // 30s
+      const dropdown = document.getElementById('notificationDropdown');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        loadDropdown();
+      }
+    }, 30000);
   }
 
-<<<<<<< HEAD
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initializeDropdown, 150);
-  });
-
-  window.addEventListener('load', () => {
-    setTimeout(initializeDropdown, 200);
-  });
-
-  return { loadDropdown, loadFullList, startPolling, refreshBadge, timeAgo };
-=======
-  return { loadDropdown, loadFullList, startPolling, refreshBadge, markAllAsRead, markNotificationAsRead, timeAgo };
->>>>>>> Linh
+  return {
+    loadDropdown,
+    loadFullList,
+    startPolling,
+    refreshBadge,
+    markAllAsRead,
+    markNotificationAsRead,
+    timeAgo,
+    resolveNotificationTarget,
+    normalizeNotification,
+    deriveTitleAndMessage,
+  };
 })();

@@ -137,12 +137,6 @@ async function respond(req, res) {
   if (order.technician_response !== TECHNICIAN_RESPONSE.PENDING) {
     throw new ApiError(400, `This work order has already been ${order.technician_response.toLowerCase()}`);
   }
-<<<<<<< HEAD
-  
-  // Require rejection reason if rejecting
-=======
-
->>>>>>> Linh
   if (req.body.technicianResponse === TECHNICIAN_RESPONSE.REJECTED) {
     requireFields(req.body, ['rejectionReason']);
     const updated = await workOrdersRepository.rejectAssignment(orderId, req.body.rejectionReason);
@@ -169,18 +163,6 @@ async function respond(req, res) {
     rejectionReason: req.body.rejectionReason ?? null,
   });
 
-<<<<<<< HEAD
-  // Send notification to Manager
-  const responseText = req.body.technicianResponse === TECHNICIAN_RESPONSE.ACCEPTED ? 'accepted' : 'rejected';
-  await notificationsRepository.createNotification({
-    userId: order.manager_id,
-    reportId: order.report_id,
-    orderId: order.order_id,
-    message: `Technician has ${responseText} Work Order #${orderId}.${
-      req.body.rejectionReason ? ` Reason: ${req.body.rejectionReason}` : ''
-    }`,
-  });
-=======
   // Gửi Notification cho Manager khi Kỹ thuật viên Accept
   if (order.manager_id) {
     try {
@@ -197,28 +179,10 @@ async function respond(req, res) {
       console.log('Failed to send manager notification on response:', e.message);
     }
   }
->>>>>>> Linh
 
   ok(res, updated);
 }
 
-<<<<<<< HEAD
-/**
- * Technician updates task progress
- * PUT /api/work-orders/:id/status
- * Flow: Received -> In Progress -> Completed
- * Used in: WorkOrderDetails.html
- */
-async function updateDeadline(req, res) {
-  const orderId = toPositiveInt(req.params.id, 'id');
-  const { deadlineAt } = req.body;
-
-  if (deadlineAt === undefined || deadlineAt === null || deadlineAt === '') {
-    throw new ApiError(400, 'deadlineAt is required');
-  }
-
-  const updated = await workOrdersRepository.updateDeadline(orderId, deadlineAt);
-=======
 async function reject(req, res) {
   const orderId = toPositiveInt(req.params.id, 'id');
   requireFields(req.body, ['rejectionReason']);
@@ -249,7 +213,6 @@ async function reject(req, res) {
     }
   }
 
->>>>>>> Linh
   ok(res, updated);
 }
 
@@ -287,25 +250,6 @@ async function updateStatus(req, res) {
   // Update task status
   const updated = await workOrdersRepository.updateTaskStatus(orderId, req.body.taskStatus);
 
-<<<<<<< HEAD
-  // Send notifications to Reporter and Manager
-  if (order.reporter_id) {
-    await notificationsRepository.createNotification({
-      userId: order.reporter_id,
-      reportId: order.report_id,
-      orderId: order.order_id,
-      message: `Work order #${orderId} for fault report #${order.report_id} currently has status: ${req.body.taskStatus}.`,
-    });
-  }
-  
-  if (order.manager_id && order.manager_id !== req.user.userId) {
-    await notificationsRepository.createNotification({
-      userId: order.manager_id,
-      reportId: order.report_id,
-      orderId: order.order_id,
-      message: `Work Order #${orderId} progress update: ${req.body.taskStatus}.`,
-    });
-=======
   // Gửi Notification cho Reporter & Manager khi cập nhật trạng thái
   try {
     if (order.reporter_id) {
@@ -326,15 +270,11 @@ async function updateStatus(req, res) {
     }
   } catch (e) {
     console.log('Failed to send status update notification:', e.message);
->>>>>>> Linh
   }
 
   ok(res, updated);
 }
 
-<<<<<<< HEAD
-module.exports = { list, getById, suggestions, create, respond, updateDeadline, updateStatus };
-=======
 async function reassign(req, res) {
   const orderId = toPositiveInt(req.params.id, 'id');
   requireFields(req.body, ['technicianId']);
@@ -375,4 +315,3 @@ async function reassign(req, res) {
 }
 
 module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign };
->>>>>>> Linh
