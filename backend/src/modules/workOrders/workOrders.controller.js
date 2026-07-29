@@ -111,6 +111,20 @@ async function create(req, res) {
     description: `Manager ${req.user.email} assigned report #${reportId} to technician #${technicianId}`,
   });
 
+  // Notify technician about the new assignment
+  try {
+    const assetName = report.asset_name || `Asset #${report.asset_id}`;
+    const roomName = report.room_name || `Room #${report.room_id}`;
+    await notificationsRepository.createNotification({
+      userId: technicianId,
+      reportId: reportId,
+      orderId: order.order_id,
+      message: `You have been assigned to Work Order #${order.order_id} (${assetName} in ${roomName}).`,
+    });
+  } catch (e) {
+    console.log('Failed to send technician notification on assign:', e.message);
+  }
+
   created(res, order);
 }
 

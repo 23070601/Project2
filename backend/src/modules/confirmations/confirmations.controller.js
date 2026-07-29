@@ -39,13 +39,13 @@ async function create(req, res) {
     feedback: req.body.feedback,
   });
 
-  const ratingStr = req.body.rating ? ` đánh giá ${req.body.rating}★` : '';
+  const ratingStr = req.body.rating ? ` with a ${req.body.rating}★ rating` : '';
   if (order.technician_id) {
     await notificationsRepository.createNotification({
       userId: order.technician_id,
       reportId: order.report_id,
       orderId: order.order_id,
-      message: `Người dùng đã gửi xác nhận kết quả${ratingStr} cho Đơn công việc #${orderId}.`,
+      message: `User has confirmed completion of Work Order #${orderId}${ratingStr}.`,
     });
   }
   if (order.manager_id) {
@@ -53,7 +53,7 @@ async function create(req, res) {
       userId: order.manager_id,
       reportId: order.report_id,
       orderId: order.order_id,
-      message: `Người dùng đã xác nhận kết quả${ratingStr} cho Đơn công việc #${orderId}.`,
+      message: `User has confirmed completion of Work Order #${orderId}${ratingStr}.`,
     });
   }
 

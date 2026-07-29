@@ -160,8 +160,11 @@
         const errorBox = document.getElementById('assignError');
         if (errorBox) errorBox.classList.add('hidden');
         const selected = document.querySelector('input[name="technicianId"]:checked');
-<<<<<<< HEAD
-        if (!selected) return;
+        if (!selected) {
+          if (window.showToast) showToast('Please select a technician!', 'warning');
+          else alert('Please select a technician.');
+          return;
+        }
 
         const deadlineInput = document.getElementById('deadlineInput');
         const deadlineValue = deadlineInput ? deadlineInput.value : '';
@@ -169,29 +172,18 @@
 
         approveBtn.disabled = true;
         try {
-          await Api.post('/work-orders', {
-            reportId: Number(reportId),
-            technicianId: Number(selected.value),
-            deadlineAt,
-          });
-          location.href = 'PendingRequest.html';
-=======
-        if (!selected) {
-          if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
-          else alert('Please select a technician.');
-          return;
-        }
-        approveBtn.disabled = true;
-        try {
           if (window.Api) {
-            await Api.post('/work-orders', { reportId: Number(cleanId), technicianId: Number(selected.value) });
+            await Api.post('/work-orders', {
+              reportId: Number(cleanId),
+              technicianId: Number(selected.value),
+              deadlineAt,
+            });
           }
-          if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
+          if (window.showToast) showToast('Report approved and work order assigned successfully!', 'success');
           else alert(`Report approved and assigned successfully!`);
           setTimeout(() => {
             location.href = `PendingRequest.html?tab=${sourceTab}`;
           }, 1000);
->>>>>>> Linh
         } catch (err) {
           if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
           else alert(`Failed: ${err.message}`);

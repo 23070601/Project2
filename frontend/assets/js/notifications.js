@@ -236,7 +236,14 @@ const Notifications = (() => {
 
     if (!items || items.length === 0) {
       const user = window.Auth?.getCurrentUser?.();
-      const role = (user?.role || '').toLowerCase();
+      let role = (user?.role || '').toLowerCase();
+      
+      if (!role && window.location?.pathname) {
+        if (window.location.pathname.includes('/technicians/')) role = 'technician';
+        else if (window.location.pathname.includes('/managers/')) role = 'manager';
+        else role = 'user';
+      }
+
       if (role === 'technician') {
         items = [
           { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', is_read: false, created_at: new Date().toISOString() },
@@ -263,9 +270,6 @@ const Notifications = (() => {
   }
 
   async function loadFullList(containerSelector) {
-    const container = document.querySelector(containerSelector);
-    if (!container) return [];
-
     let items = [];
     try {
       if (window.Api) {
@@ -277,9 +281,17 @@ const Notifications = (() => {
       items = [];
     }
 
+    // Demo fallback when API is unavailable or returns no data
     if (!items || items.length === 0) {
       const user = window.Auth?.getCurrentUser?.();
-      const role = (user?.role || '').toLowerCase();
+      let role = (user?.role || '').toLowerCase();
+      
+      if (!role && window.location?.pathname) {
+        if (window.location.pathname.includes('/technicians/')) role = 'technician';
+        else if (window.location.pathname.includes('/managers/')) role = 'manager';
+        else role = 'user';
+      }
+
       if (role === 'technician') {
         items = [
           { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', is_read: false, created_at: new Date().toISOString() },
@@ -304,7 +316,6 @@ const Notifications = (() => {
     }
 
     const normalized = sortNotifications(items).map(normalizeNotification);
-    renderList(items, container, false);
     return normalized;
   }
 
@@ -317,7 +328,13 @@ const Notifications = (() => {
       if (dropdown && !dropdown.classList.contains('hidden')) {
         loadDropdown();
       }
-    }, 30000);
+      // Reload full list if we are on the Notifications page
+      if (window.location.pathname.includes('Notifications.html')) {
+        if (typeof window.loadPageNotifications === 'function') {
+          window.loadPageNotifications();
+        }
+      }
+    }, 10000); // reduced to 10 seconds for more real-time feel
   }
 
   return {
