@@ -104,6 +104,15 @@
       </div>`;
   }
 
+  const sourceTab = new URLSearchParams(location.search).get('tab') || 'pending';
+
+  // Update back button link dynamically
+  const backLink = document.querySelector('main a');
+  if (backLink) {
+    backLink.href = `PendingRequest.html?tab=${sourceTab}`;
+    backLink.innerHTML = `<span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to ${sourceTab === 'pending' ? 'Pending Requests' : 'Assigned Tasks'}`;
+  }
+
   async function load() {
     let report = null;
     let suggestions = DEMO_SUGGESTIONS;
@@ -143,19 +152,27 @@
     if (approveBtn) {
       approveBtn.addEventListener('click', async () => {
         const errorBox = document.getElementById('assignError');
-        errorBox.classList.add('hidden');
+        if (errorBox) errorBox.classList.add('hidden');
         const selected = document.querySelector('input[name="technicianId"]:checked');
-        if (!selected) return;
+        if (!selected) {
+          if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
+          else alert('Please select a technician.');
+          return;
+        }
         approveBtn.disabled = true;
         try {
           if (window.Api) {
             await Api.post('/work-orders', { reportId: Number(cleanId), technicianId: Number(selected.value) });
           }
-          alert(`Report ${UiHelpers.formatReportId(cleanId)} approved and assigned successfully!`);
-          location.href = 'PendingRequest.html';
+          if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
+          else alert(`Report approved and assigned successfully!`);
+          setTimeout(() => {
+            location.href = `PendingRequest.html?tab=${sourceTab}`;
+          }, 1000);
         } catch (err) {
-          alert(`Report ${UiHelpers.formatReportId(cleanId)} approved and assigned successfully!`);
-          location.href = 'PendingRequest.html';
+          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          else alert(`Failed: ${err.message}`);
+          approveBtn.disabled = false;
         }
       });
     }
@@ -174,19 +191,27 @@
         const errorBox = document.getElementById('rejectError');
         const reason = document.getElementById('rejectReason').value.trim();
         if (!reason) {
-          errorBox.textContent = 'Please provide a reason.';
-          errorBox.classList.remove('hidden');
+          if (errorBox) {
+            errorBox.textContent = 'Please provide a reason.';
+            errorBox.classList.remove('hidden');
+          }
+          if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
           return;
         }
+        confirmRejectBtn.disabled = true;
         try {
           if (window.Api) {
             await Api.patch(`/fault-reports/${cleanId}/status`, { status: 'Rejected', rejectionReason: reason });
           }
-          alert(`Report ${UiHelpers.formatReportId(cleanId)} rejected successfully.`);
-          location.href = 'PendingRequest.html';
+          if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
+          else alert(`Report rejected successfully.`);
+          setTimeout(() => {
+            location.href = `PendingRequest.html?tab=${sourceTab}`;
+          }, 1000);
         } catch (err) {
-          alert(`Report ${UiHelpers.formatReportId(cleanId)} rejected successfully.`);
-          location.href = 'PendingRequest.html';
+          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          else alert(`Failed: ${err.message}`);
+          confirmRejectBtn.disabled = false;
         }
       });
     }

@@ -121,4 +121,42 @@ async function deactivate(req, res) {
   noContent(res);
 }
 
-module.exports = { list, listTechnicians, getById, create, update, resetPassword, deactivate };
+async function toggleActive(req, res) {
+  const userId = toPositiveInt(req.params.id, 'id');
+  const existing = await usersRepository.findById(userId);
+  if (!existing) throw new ApiError(404, 'User not found');
+
+  let newActive = req.body.isActive !== undefined ? req.body.isActive : req.body.is_active;
+  if (newActive === undefined) {
+    newActive = !existing.is_active;
+  }
+
+  const updated = await usersRepository.update(userId, { isActive: newActive });
+
+  await auditLogRepository.log({
+    userId: req.user.userId,
+    actionType: 'UPDATE',
+    entityTable: 'Users',
+    entityId: userId,
+    description: `Manager ${req.user.email} toggled status of user #${userId} to ${newActive ? 'Active' : 'Inactive'}`,
+  });
+
+  ok(res, updated);
+}
+
+async function stats(req, res) {
+  const { pool } = require('../../config/db');
+  const [[{ totalUsers }]] = await pool.query('SELECT COUNT(*) as totalUsers FROM Users');
+  const [[{ activeUsers }]] = await pool.query('SELECT COUNT(*) as activeUsers FROM Users WHERE is_active = TRUE');
+  const [[{ technicians }]] = await pool.query("SELECT COUNT(*) as technicians FROM Users WHERE role = 'Technician'");
+  const [[{ managers }]] = await pool.query("SELECT COUNT(*) as managers FROM Users WHERE role = 'Manager'");
+
+  ok(res, {
+    totalUsers,
+    activeUsers,
+    technicians,
+    managers
+  });
+}
+
+module.exports = { list, listTechnicians, getById, create, update, toggleActive, stats, resetPassword, deactivate };

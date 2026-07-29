@@ -106,8 +106,25 @@ async function respond(req, res) {
   if (order.technician_response !== TECHNICIAN_RESPONSE.PENDING) {
     throw new ApiError(400, `This work order has already been ${order.technician_response.toLowerCase()}`);
   }
+
   if (req.body.technicianResponse === TECHNICIAN_RESPONSE.REJECTED) {
     requireFields(req.body, ['rejectionReason']);
+    const updated = await workOrdersRepository.rejectAssignment(orderId, req.body.rejectionReason);
+    
+    if (order.manager_id) {
+      try {
+        const technicianName = req.user.fullName || 'Technician';
+        await notificationsRepository.createNotification({
+          userId: order.manager_id,
+          reportId: order.report_id,
+          orderId: order.order_id,
+          message: `Technician ${technicianName} rejected WorkOrder WO-${orderId}. Reason: ${req.body.rejectionReason}`,
+        });
+      } catch (e) {
+        console.log('Failed to send manager notification on reject:', e.message);
+      }
+    }
+    return ok(res, updated);
   }
 
   // UPDATE kích hoạt trigger DB: ghi lịch sử + notification cho reporter
@@ -116,7 +133,7 @@ async function respond(req, res) {
     rejectionReason: req.body.rejectionReason ?? null,
   });
 
-  // Gửi Notification cho Manager khi Kỹ thuật viên Accept / Reject
+  // Gửi Notification cho Manager khi Kỹ thuật viên Accept
   if (order.manager_id) {
     try {
       const responseText = req.body.technicianResponse === TECHNICIAN_RESPONSE.ACCEPTED ? 'accepted' : 'rejected';
@@ -130,6 +147,39 @@ async function respond(req, res) {
       });
     } catch (e) {
       console.log('Failed to send manager notification on response:', e.message);
+    }
+  }
+
+  ok(res, updated);
+}
+
+async function reject(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  requireFields(req.body, ['rejectionReason']);
+
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) throw new ApiError(404, 'Work order not found');
+  if (order.technician_id !== req.user.userId) {
+    throw new ApiError(403, 'You can only respond to your own assigned work orders');
+  }
+  if (order.technician_response !== TECHNICIAN_RESPONSE.PENDING) {
+    throw new ApiError(400, `This work order has already been ${order.technician_response.toLowerCase()}`);
+  }
+
+  const updated = await workOrdersRepository.rejectAssignment(orderId, req.body.rejectionReason);
+
+  // Send Notification to Manager on reject
+  if (order.manager_id) {
+    try {
+      const technicianName = req.user.fullName || 'Technician';
+      await notificationsRepository.createNotification({
+        userId: order.manager_id,
+        reportId: order.report_id,
+        orderId: order.order_id,
+        message: `Technician ${technicianName} rejected WorkOrder WO-${orderId}. Reason: ${req.body.rejectionReason}`,
+      });
+    } catch (e) {
+      console.log('Failed to send manager notification on reject:', e.message);
     }
   }
 
@@ -192,4 +242,43 @@ async function updateStatus(req, res) {
   ok(res, updated);
 }
 
-module.exports = { list, getById, suggestions, create, respond, updateStatus };
+async function reassign(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  requireFields(req.body, ['technicianId']);
+  const { technicianId } = req.body;
+
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) throw new ApiError(404, 'Work order not found');
+
+  const technician = await usersRepository.findById(technicianId);
+  if (!technician || technician.role !== ROLES.TECHNICIAN) {
+    throw new ApiError(404, `Technician #${technicianId} not found`);
+  }
+
+  const updated = await workOrdersRepository.reassign(orderId, technicianId);
+
+  await auditLogRepository.log({
+    userId: req.user.userId,
+    actionType: 'UPDATE',
+    entityTable: 'WorkOrders',
+    entityId: orderId,
+    roomId: order.room_id,
+    assetId: order.asset_id,
+    description: `Manager ${req.user.email} reassigned work order #${orderId} to technician #${technicianId}`,
+  });
+
+  try {
+    await notificationsRepository.createNotification({
+      userId: technicianId,
+      reportId: order.report_id,
+      orderId: order.order_id,
+      message: `New task assigned: Work Order #${orderId}`,
+    });
+  } catch (e) {
+    console.log('Failed to send technician notification on reassign:', e.message);
+  }
+
+  ok(res, updated);
+}
+
+module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign };

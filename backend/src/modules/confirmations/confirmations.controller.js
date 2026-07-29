@@ -19,7 +19,9 @@ async function create(req, res) {
   }
 
   const existing = await confirmationsRepository.findByOrderId(orderId);
-  if (existing) throw new ApiError(409, 'This work order has already been confirmed');
+  if (existing && existing.confirmed_at !== null) {
+    throw new ApiError(409, 'This work order has already been confirmed');
+  }
 
   if (req.body.rating !== undefined) {
     const rating = Number(req.body.rating);

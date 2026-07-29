@@ -14,9 +14,11 @@ router.get('/technicians', requireRole(ROLES.MANAGER), asyncHandler(controller.l
 
 // Quản lý người dùng - chỉ Manager (UsersManagement.html, AddNewUser.html, EditUserModal.html)
 router.get('/', requireRole(ROLES.MANAGER), asyncHandler(controller.list));
+router.get('/stats', requireRole(ROLES.MANAGER), asyncHandler(controller.stats));
 router.get('/:id', requireRole(ROLES.MANAGER), asyncHandler(controller.getById));
 router.post('/', requireRole(ROLES.MANAGER), asyncHandler(controller.create));
 router.patch('/:id', requireRole(ROLES.MANAGER), asyncHandler(controller.update));
+router.patch('/:id/toggle', requireRole(ROLES.MANAGER), asyncHandler(controller.toggleActive));
 router.patch('/:id/password', requireRole(ROLES.MANAGER), asyncHandler(controller.resetPassword));
 router.delete('/:id', requireRole(ROLES.MANAGER), asyncHandler(controller.deactivate));
 

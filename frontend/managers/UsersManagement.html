@@ -512,7 +512,7 @@
 
   function updateKpiStats() {
     document.getElementById('statTotalUsers').textContent = allUsers.length;
-    document.getElementById('statActiveUsers').textContent = allUsers.filter(u => u.is_active !== false).length;
+    document.getElementById('statActiveUsers').textContent = allUsers.filter(u => Boolean(u.is_active)).length;
     document.getElementById('statTechnicians').textContent = allUsers.filter(u => u.role === 'Technician').length;
     document.getElementById('statManagers').textContent = allUsers.filter(u => u.role === 'Manager').length;
   }
@@ -529,7 +529,7 @@
 
     tbody.innerHTML = list.map((u, idx) => {
       const initials = (u.full_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-      const isActive = u.is_active !== false;
+      const isActive = Boolean(u.is_active);
 
       let roleBadgeClass = 'bg-secondary-fixed/40 text-secondary';
       if (u.role === 'Manager') roleBadgeClass = 'bg-primary-fixed/30 text-primary';
@@ -585,7 +585,7 @@
     return allUsers.filter(u => {
       const matchSearch = !search || u.full_name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search);
       const matchRole = role === 'All' || u.role === role;
-      const isActive = u.is_active !== false;
+      const isActive = Boolean(u.is_active);
       const matchStatus = status === 'All' || (status === 'Active' && isActive) || (status === 'Inactive' && !isActive);
       return matchSearch && matchRole && matchStatus;
     });
@@ -804,22 +804,44 @@
     const cleanNumId = parseInt(String(id).replace(/\D/g, ''), 10);
     try {
       if (window.Api && cleanNumId) {
-        try {
-          await Api.patch(`/users/${cleanNumId}`, { isActive });
-        } catch (e) {
-          console.warn('API toggle status error:', e);
-        }
+        await Api.patch(`/users/${cleanNumId}/toggle`, { isActive: isActive });
+        if (window.showToast) showToast(`Đã cập nhật trạng thái user thành công!`, 'success');
       }
-    } catch (err) {}
+    } catch (err) {
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+    }
 
-    const userObj = allUsers.find(u => String(u.user_id) === String(id));
-    if (userObj) {
-      userObj.is_active = isActive;
+    const idx = allUsers.findIndex(u => u.user_id === id);
+    if (idx !== -1) {
+      allUsers[idx].is_active = isActive;
       saveUsersState();
     }
 
     await loadUsers();
-    if (window.showToast) showToast(`User ${id} status changed to ${isActive ? 'Active' : 'Inactive'}`, 'info');
+  }
+
+  async function loadKpiStats() {
+    try {
+      if (window.Api) {
+        const stats = await Api.get('/users/stats');
+        if (stats) {
+          document.getElementById('statTotalUsers').textContent = stats.totalUsers;
+          document.getElementById('statActiveUsers').textContent = stats.activeUsers;
+          document.getElementById('statTechnicians').textContent = stats.technicians;
+          document.getElementById('statManagers').textContent = stats.managers;
+          
+          // Calculate percentage for active users
+          const activePercent = stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 100;
+          const activeKpi = document.getElementById('statActiveUsers').nextElementSibling;
+          if (activeKpi) {
+            activeKpi.innerHTML = `<span class="material-symbols-outlined text-xs">trending_up</span>${activePercent}%`;
+          }
+        }
+      }
+    } catch (err) {
+      console.log('Failed to load user stats from API, falling back to local computation', err);
+      updateKpiStats();
+    }
   }
 
   async function loadUsers() {
@@ -861,6 +883,7 @@
 
     saveUsersState();
     renderUsersTable();
+    await loadKpiStats();
   }
 
   document.getElementById('searchInput').addEventListener('input', () => renderUsersTable());

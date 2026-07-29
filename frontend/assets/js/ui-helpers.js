@@ -50,6 +50,11 @@ const UiHelpers = (() => {
     return div.innerHTML;
   }
 
+  function escapeJsString(str) {
+    if (!str) return '';
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '\\"');
+  }
+
   /**
    * Hiển thị thông báo Toast nhỏ ở góc phải màn hình
    * @param {string} message Nguồn thông báo
@@ -114,5 +119,5 @@ const UiHelpers = (() => {
   window.formatReportId = formatReportId;
   window.formatAssetId = formatAssetId;
 
-  return { priorityBadge, statusBadge, formatDate, escapeHtml, showToast, formatWorkOrderId, formatReportId, formatAssetId };
+  return { priorityBadge, statusBadge, formatDate, escapeHtml, escapeJsString, showToast, formatWorkOrderId, formatReportId, formatAssetId };
 })();

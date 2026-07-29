@@ -116,6 +116,38 @@ async function getStatusHistory(orderId) {
   return rows;
 }
 
+async function reassign(orderId, technicianId) {
+  await pool.execute(
+    `UPDATE WorkOrders SET technician_id = ?, technician_response = 'Pending', task_status = 'Assigned', rejection_reason = NULL WHERE order_id = ?`,
+    [technicianId, orderId]
+  );
+  await pool.execute(
+    `INSERT INTO WorkOrderStatusHistory (order_id, old_status, new_status, note)
+     VALUES (?, NULL, 'Assigned', 'WorkOrder reassigned to new technician')`,
+    [orderId]
+  );
+  return findById(orderId);
+}
+
+async function rejectAssignment(orderId, rejectionReason) {
+  await pool.execute(
+    `UPDATE WorkOrders 
+     SET technician_response = 'Rejected', 
+         rejection_reason = ?, 
+         task_status = 'Assigned' 
+     WHERE order_id = ?`,
+    [rejectionReason, orderId]
+  );
+  
+  await pool.execute(
+    `INSERT INTO WorkOrderStatusHistory (order_id, old_status, new_status, note)
+     VALUES (?, 'Assigned', 'Assigned', ?)`,
+    [orderId, `Technician rejected the WorkOrder.`]
+  );
+
+  return findById(orderId);
+}
+
 module.exports = {
   findAll,
   findById,
@@ -125,4 +157,6 @@ module.exports = {
   updateTaskStatus,
   updateFixDetails,
   getStatusHistory,
+  reassign,
+  rejectAssignment,
 };

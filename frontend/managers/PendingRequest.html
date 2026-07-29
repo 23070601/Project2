@@ -457,7 +457,9 @@
 
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
 
-  let currentActiveReqId = '#FR-10';
+  let currentActiveReqId = null;
+  let allPendingReports = [];
+  let allAssignedTasks = [];
 
   function switchTab(tabName) {
     const pendingView = document.getElementById('pending-requests-view');
@@ -484,10 +486,138 @@
     }
   }
 
+  function renderPendingTable(reports) {
+    const tbody = document.getElementById('pendingTableBody');
+    if (!tbody) return;
+    if (!reports || reports.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant font-medium">No pending requests found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = reports.map(r => {
+      const initials = r.reporter_name ? r.reporter_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+      const cleanDesc = (r.description || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
+      const priorityClass = r.priority === 'High' ? 'bg-error-container text-on-error-container' : (r.priority === 'Medium' ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-primary-fixed text-on-primary-fixed-variant');
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=pending'">
+          <td class="px-6 py-4 font-bold text-primary">#FR-${r.report_id}</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">${initials}</div>
+              <span class="font-medium">${UiHelpers.escapeHtml(r.reporter_name || 'Anonymous')}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
+          <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
+          <td class="px-6 py-4"><span class="px-3 py-1 ${priorityClass} text-[11px] font-bold rounded-full capitalize">${r.priority}</span></td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(r.reported_at)}</td>
+          <td class="px-6 py-4" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-center gap-2">
+              <button onclick="openApproveModal(${r.report_id}, '${r.reporter_name.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}', '${r.priority}', '${cleanDesc}')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+              <button onclick="openRejectModal(${r.report_id}, '${r.reporter_name.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderAssignedTable(orders) {
+    const tbody = document.getElementById('assignedTableBody');
+    if (!tbody) return;
+    if (!orders || orders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant font-medium">No assigned tasks found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = orders.map((o, index) => {
+      const isRejected = o.technician_response === 'Rejected';
+      let badgeClass = 'bg-surface-container text-on-surface-variant';
+      let statusText = o.task_status;
+      
+      if (isRejected) {
+        badgeClass = 'bg-[#ffdf9e] text-[#5b4300]';
+        statusText = '⚠️ Rejected';
+      } else if (o.task_status === 'Assigned') {
+        badgeClass = 'bg-blue-50 text-brand-blue';
+      } else if (o.task_status === 'Received') {
+        badgeClass = 'bg-indigo-50 text-indigo-700';
+      } else if (o.task_status === 'In Progress') {
+        badgeClass = 'bg-amber-50 text-amber-700';
+      } else if (o.task_status === 'Completed') {
+        badgeClass = 'bg-green-50 text-green-700';
+      } else if (o.task_status === 'Closed') {
+        badgeClass = 'bg-surface-container text-on-surface-variant';
+      }
+      
+      const actionBtn = isRejected 
+        ? `<button onclick="location.href='WorkOrderDetails.html?id=${o.order_id}&tab=assigned'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>`
+        : `<button onclick="location.href='WorkOrderDetails.html?id=${o.order_id}&tab=assigned'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>`;
+        
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors">
+          <td class="px-6 py-4 font-medium">${index + 1}</td>
+          <td class="px-6 py-4 font-bold text-primary">WO-${o.order_id}</td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(o.asset_name || 'General Asset')}</td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(o.technician_name || 'Unassigned')}</td>
+          <td class="px-6 py-4"><span class="px-3 py-1 ${badgeClass} text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">${statusText}</span></td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(o.assigned_at)}</td>
+          <td class="px-6 py-4 text-center">
+            ${actionBtn}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterPending() {
+    const searchVal = document.getElementById('pendingSearch').value.toLowerCase();
+    const prioVal = document.getElementById('pendingPriorityFilter').value;
+    
+    let filtered = allPendingReports;
+    if (searchVal) {
+      filtered = filtered.filter(r => 
+        (r.reporter_name || '').toLowerCase().includes(searchVal) ||
+        (r.asset_name || '').toLowerCase().includes(searchVal) ||
+        (r.room_name || '').toLowerCase().includes(searchVal) ||
+        (r.description || '').toLowerCase().includes(searchVal)
+      );
+    }
+    if (prioVal !== 'All') {
+      filtered = filtered.filter(r => r.priority === prioVal);
+    }
+    renderPendingTable(filtered);
+  }
+
+  function filterAssigned() {
+    const searchVal = document.getElementById('assignedSearch').value.toLowerCase();
+    const statusVal = document.getElementById('assignedStatusFilter').value;
+    
+    let filtered = allAssignedTasks;
+    if (searchVal) {
+      filtered = filtered.filter(o => 
+        (o.technician_name || '').toLowerCase().includes(searchVal) ||
+        (o.asset_name || '').toLowerCase().includes(searchVal) ||
+        (o.room_name || '').toLowerCase().includes(searchVal)
+      );
+    }
+    if (statusVal !== 'All') {
+      filtered = filtered.filter(o => o.task_status === statusVal);
+    }
+    renderAssignedTable(filtered);
+    
+    const start = filtered.length > 0 ? 1 : 0;
+    document.getElementById('assignedPaginationInfo').textContent = `Showing ${start}-${filtered.length} of ${filtered.length} tasks`;
+  }
+
+  // Bind filter events
+  document.getElementById('pendingSearch').addEventListener('input', filterPending);
+  document.getElementById('pendingPriorityFilter').addEventListener('change', filterPending);
+  document.getElementById('assignedSearch').addEventListener('input', filterAssigned);
+  document.getElementById('assignedStatusFilter').addEventListener('change', filterAssigned);
+
   // --- APPROVE MODAL ---
-  function openApproveModal(reqId, reporter, equipment, room, priority, description) {
+  async function openApproveModal(reqId, reporter, equipment, room, priority, description) {
     currentActiveReqId = reqId;
-    document.getElementById('modalReqTitle').textContent = `Approve & Assign — ${reqId}`;
+    document.getElementById('modalReqTitle').textContent = `Approve & Assign — #FR-${reqId}`;
     document.getElementById('modalEquipment').textContent = equipment;
     document.getElementById('modalRoom').textContent = room;
     document.getElementById('modalDescription').textContent = description;
@@ -502,7 +632,60 @@
       prioSpan.className = 'inline-block px-2 py-0.5 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold rounded-full';
     }
 
+    // Clear and show loading state
+    const radioGroup = document.getElementById('techRadioGroup');
+    radioGroup.innerHTML = `<p class="text-body-sm text-outline">Loading suggestions...</p>`;
+
     document.getElementById('approveAssignModal').classList.remove('hidden');
+
+    try {
+      if (window.Api) {
+        const suggestions = await Api.get(`/work-orders/suggestions/${reqId}`);
+        if (suggestions && suggestions.length > 0) {
+          radioGroup.innerHTML = suggestions.map((tech, idx) => {
+            const initials = tech.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const checked = idx === 0 ? 'checked' : '';
+            const borderClass = idx === 0 ? 'border-primary bg-primary/5' : 'border-outline-variant/30 hover:bg-surface-container-low';
+            return `
+              <label class="flex items-center justify-between p-3 border ${borderClass} rounded-lg cursor-pointer transition-colors tech-card-option">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">${initials}</div>
+                  <div>
+                    <p class="text-body-sm font-bold">${UiHelpers.escapeHtml(tech.fullName)}</p>
+                    <p class="text-xs text-on-surface-variant">Specialty: ${tech.specialty || 'General'} • <span class="text-primary font-medium">${tech.activeWorkload} active tasks</span></p>
+                  </div>
+                </div>
+                <input ${checked} name="techRadio" value="${tech.technicianId}" type="radio" class="text-primary focus:ring-primary">
+              </label>
+            `;
+          }).join('');
+
+          // Update manual select
+          const manualSelect = document.getElementById('manualTechSelect');
+          manualSelect.innerHTML = `<option value="">Select from all technicians...</option>` + suggestions.map(tech => `
+            <option value="${tech.technicianId}">${UiHelpers.escapeHtml(tech.fullName)} (${tech.specialty || 'General'})</option>
+          `).join('');
+
+          // Bind radio highlight events
+          document.querySelectorAll('input[name="techRadio"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+              document.querySelectorAll('.tech-card-option').forEach(card => {
+                card.className = 'flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option';
+              });
+              const label = e.target.closest('.tech-card-option');
+              if (label) {
+                label.className = 'flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option';
+              }
+            });
+          });
+        } else {
+          radioGroup.innerHTML = `<p class="text-body-sm text-outline">No active technicians found.</p>`;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load technician suggestions', e);
+      radioGroup.innerHTML = `<p class="text-body-sm text-error">Failed to load suggested technicians.</p>`;
+    }
   }
 
   function closeApproveModal() {
@@ -513,27 +696,29 @@
     const btn = document.getElementById('assignConfirmBtn');
     const selectedRadio = document.querySelector('input[name="techRadio"]:checked');
     const manualSelect = document.getElementById('manualTechSelect').value;
-    const techName = manualSelect || (selectedRadio ? selectedRadio.value : 'Le Van C');
+    const techId = manualSelect || (selectedRadio ? selectedRadio.value : null);
+
+    if (!techId) {
+      if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
+      else alert('Please select a technician.');
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = 'Assigning...';
 
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        try {
-          await Api.post('/work-orders/assign', { report_id: currentActiveReqId, technician_name: techName });
-        } catch (e) {
-          console.log('Work order created in demo mode');
-        }
+      if (window.Api) {
+        await Api.post('/work-orders', { reportId: currentActiveReqId, technicianId: Number(techId) });
+        if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
+        else alert(`Successfully approved report #FR-${currentActiveReqId} and created work order!`);
+        closeApproveModal();
+        loadData();
+        switchTab('assigned');
       }
-
-      alert(`Successfully approved ${currentActiveReqId} and assigned WorkOrder to ${techName}!`);
-      closeApproveModal();
-      switchTab('assigned');
     } catch (err) {
-      alert(err.message || 'Assigned successfully!');
-      closeApproveModal();
-      switchTab('assigned');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to assign work order.');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Assign & Create WorkOrder';
@@ -543,11 +728,11 @@
   // --- REJECT MODAL ---
   function openRejectModal(reqId, reporter, equipment, room) {
     currentActiveReqId = reqId;
-    document.getElementById('rejectModalTitle').textContent = `Reject Report — ${reqId}`;
+    document.getElementById('rejectModalTitle').textContent = `Reject Report — #FR-${reqId}`;
     document.getElementById('rejectModalEquipment').textContent = equipment;
     document.getElementById('rejectModalRoom').textContent = room;
     document.getElementById('rejectModalReporter').textContent = reporter;
-    document.getElementById('rejectModalReqId').textContent = reqId;
+    document.getElementById('rejectModalReqId').textContent = `#FR-${reqId}`;
     document.getElementById('rejectionReasonInput').value = '';
 
     document.getElementById('rejectReportModal').classList.remove('hidden');
@@ -560,7 +745,8 @@
   async function confirmRejectReport() {
     const reason = document.getElementById('rejectionReasonInput').value.trim();
     if (!reason) {
-      alert('Please provide a reason for rejection.');
+      if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
+      else alert('Please provide a reason for rejection.');
       return;
     }
 
@@ -569,52 +755,52 @@
     btn.textContent = 'Rejecting...';
 
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        try {
-          await Api.patch(`/fault-reports/${currentActiveReqId}/reject`, { reason });
-        } catch (e) {
-          console.log('Report rejected in demo mode');
-        }
+      if (window.Api) {
+        await Api.patch(`/fault-reports/${currentActiveReqId}/status`, { status: 'Rejected', rejectionReason: reason });
+        if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
+        else alert(`Report #FR-${currentActiveReqId} rejected successfully.`);
+        closeRejectModal();
+        loadData();
       }
-
-      alert(`Report ${currentActiveReqId} rejected successfully.`);
-      closeRejectModal();
     } catch (err) {
-      alert(err.message || `Report ${currentActiveReqId} rejected successfully.`);
-      closeRejectModal();
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to reject report.');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Confirm Reject';
     }
   }
 
-  // Update card styling on radio selection
-  document.querySelectorAll('input[name="techRadio"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      document.querySelectorAll('.tech-card-option').forEach(card => {
-        card.className = 'flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option';
-      });
-      const label = e.target.closest('.tech-card-option');
-      if (label) {
-        label.className = 'flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option';
-      }
-    });
-  });
-
   async function loadData() {
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api) {
+        // Fetch Pending Approval Reports
         const pendingReports = await Api.get('/fault-reports', { status: 'Pending Approval' });
-        if (pendingReports && Array.isArray(pendingReports) && pendingReports.length > 0) {
+        if (pendingReports && Array.isArray(pendingReports)) {
+          allPendingReports = pendingReports;
           document.getElementById('pendingCountBadge').textContent = pendingReports.length;
+          filterPending();
+        }
+
+        // Fetch Work Orders for Assigned Tasks
+        const assignedTasks = await Api.get('/work-orders');
+        if (assignedTasks && Array.isArray(assignedTasks)) {
+          allAssignedTasks = assignedTasks;
+          const activeAssignedCount = assignedTasks.filter(o => ['Assigned', 'Received', 'In Progress'].includes(o.task_status)).length;
+          document.getElementById('assignedCountBadge').textContent = activeAssignedCount;
+          filterAssigned();
         }
       }
     } catch (err) {
-      console.log('Using default mock data for requests & assignments table', err);
+      console.log('Failed to fetch requests & assignments table data', err);
     }
   }
 
-  loadData();
+  loadData().then(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const initialTab = urlParams.get('tab') || 'pending';
+    switchTab(initialTab);
+  });
 </script>
 </body>
 </html>

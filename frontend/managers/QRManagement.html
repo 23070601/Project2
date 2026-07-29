@@ -33,7 +33,7 @@
     </div>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
       <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between">
         <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Total QR Codes</p>
         <p id="statTotalQr" class="text-headline-md font-headline-md text-on-surface">12</p>
@@ -45,10 +45,6 @@
       <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between">
         <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Classrooms Connected</p>
         <p id="statRoomsConnected" class="text-headline-md font-headline-md text-on-surface">12</p>
-      </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between">
-        <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Buildings</p>
-        <p id="statBuildings" class="text-headline-md font-headline-md text-on-surface">1 <span class="text-body-sm font-normal text-on-surface-variant">(Building R)</span></p>
       </div>
     </div>
 
@@ -89,173 +85,12 @@
             <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-center">QR ID</th>
             <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-center">Classroom Name</th>
             <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-center">Floor</th>
-            <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-center">Location</th>
             <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-center">Created Date</th>
             <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-center">Status</th>
             <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-center">Actions</th>
           </tr>
         </thead>
-        <tbody id="qrTableBody" class="divide-y divide-outline-variant/10">
-          <!-- Row 1 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">1</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-001</td>
-            <td class="p-4 text-body-sm">Room R401</td>
-            <td class="p-4 text-body-sm">Floor 4</td>
-            <td class="p-4 text-body-sm">Building R - Floor 4</td>
-            <td class="p-4 text-body-sm">Oct 12, 2025</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-001', 'R401', 'Room R401', 'Floor 4', 'ACTIVE', '20 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 2 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">2</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-002</td>
-            <td class="p-4 text-body-sm">Room R302</td>
-            <td class="p-4 text-body-sm">Floor 3</td>
-            <td class="p-4 text-body-sm">Building R - Floor 3</td>
-            <td class="p-4 text-body-sm">Oct 15, 2025</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-002', 'R302', 'Room R302', 'Floor 3', 'ACTIVE', '15 Oct 2025')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 3 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">3</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-003</td>
-            <td class="p-4 text-body-sm">Room R101</td>
-            <td class="p-4 text-body-sm">Floor 1</td>
-            <td class="p-4 text-body-sm">Building R - Floor 1</td>
-            <td class="p-4 text-body-sm">Jul 18, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-003', 'R101', 'Room R101', 'Floor 1', 'ACTIVE', '18 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 4 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">4</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-004</td>
-            <td class="p-4 text-body-sm">Room R512</td>
-            <td class="p-4 text-body-sm">Floor 5</td>
-            <td class="p-4 text-body-sm">Building R - Floor 5</td>
-            <td class="p-4 text-body-sm">Jul 15, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-error/10 text-error rounded-full text-[10px] font-bold uppercase">Inactive</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-004', 'R512', 'Room R512', 'Floor 5', 'INACTIVE', '15 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 5 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">5</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-005</td>
-            <td class="p-4 text-body-sm">Room R102</td>
-            <td class="p-4 text-body-sm">Floor 1</td>
-            <td class="p-4 text-body-sm">Building R - Floor 1</td>
-            <td class="p-4 text-body-sm">Jul 20, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-005', 'R102', 'Room R102', 'Floor 1', 'ACTIVE', '20 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 6 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">6</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-006</td>
-            <td class="p-4 text-body-sm">Room R103</td>
-            <td class="p-4 text-body-sm">Floor 1</td>
-            <td class="p-4 text-body-sm">Building R - Floor 1</td>
-            <td class="p-4 text-body-sm">Jul 15, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-006', 'R103', 'Room R103', 'Floor 1', 'ACTIVE', '15 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 7 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">7</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-007</td>
-            <td class="p-4 text-body-sm">Room R301</td>
-            <td class="p-4 text-body-sm">Floor 3</td>
-            <td class="p-4 text-body-sm">Building R - Floor 3</td>
-            <td class="p-4 text-body-sm">Jul 22, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-007', 'R301', 'Room R301', 'Floor 3', 'ACTIVE', '22 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 8 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">8</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-008</td>
-            <td class="p-4 text-body-sm">Room R305</td>
-            <td class="p-4 text-body-sm">Floor 3</td>
-            <td class="p-4 text-body-sm">Building R - Floor 3</td>
-            <td class="p-4 text-body-sm">Jul 19, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-008', 'R305', 'Room R305', 'Floor 3', 'ACTIVE', '19 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 9 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">9</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-009</td>
-            <td class="p-4 text-body-sm">Room R402</td>
-            <td class="p-4 text-body-sm">Floor 4</td>
-            <td class="p-4 text-body-sm">Building R - Floor 4</td>
-            <td class="p-4 text-body-sm">Jul 22, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-009', 'R402', 'Room R402', 'Floor 4', 'ACTIVE', '22 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 10 -->
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="p-4 text-body-sm">10</td>
-            <td class="p-4 text-body-sm font-medium text-primary">QR-010</td>
-            <td class="p-4 text-body-sm">Physics Lab</td>
-            <td class="p-4 text-body-sm">Floor 2</td>
-            <td class="p-4 text-body-sm">Science Block</td>
-            <td class="p-4 text-body-sm">Sep 15, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
-            <td class="p-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-010', 'CR-PHY', 'Physics Lab', 'Floor 2', 'ACTIVE', '15 Sep 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
+        <tbody id="qrTableBody" class="divide-y divide-outline-variant/10"></tbody>
       </table>
     </div>
   </main>
@@ -351,8 +186,8 @@
       <!-- Left Column: QR Code Image Card -->
       <div class="flex flex-col items-center">
         <div class="w-[220px] h-[220px] bg-black p-4 rounded-xl flex flex-col items-center justify-center shadow-lg border border-outline-variant/30">
-          <div class="w-full h-full bg-white p-3 rounded-lg flex items-center justify-center">
-            <span class="material-symbols-outlined text-[130px] text-on-surface">qr_code_2</span>
+          <div class="w-full h-full bg-white p-3 rounded-lg flex items-center justify-center" id="qrModalImageContainer">
+            <img id="qrModalImage" src="" class="w-full h-full object-contain" alt="QR Code">
           </div>
         </div>
         <p class="text-body-sm text-on-surface-variant mt-4 font-medium">Scan to view classroom details</p>
@@ -421,7 +256,46 @@
   Layout.init({ role: 'Manager', activePage: 'QRManagement' });
 
   // Generate QR Modal
+  let allQrs = [];
+
+  function getFloorFromName(name) {
+    const match = name.match(/\d/);
+    return match ? parseInt(match[0], 10) : 1;
+  }
+
   function openGenerateQrModal() {
+    const genSelect = document.getElementById('genClassroomSelect');
+    const btn = document.getElementById('submitGenQrBtn');
+    
+    // Filter rooms without QR Code
+    const noQrRooms = allQrs.filter(q => !q.hasQrCode);
+    
+    if (noQrRooms.length === 0) {
+      genSelect.innerHTML = `<option value="" disabled selected>No classrooms available</option>`;
+      btn.disabled = true;
+      document.getElementById('previewRoomName').textContent = 'N/A';
+      document.getElementById('previewCodeId').textContent = 'N/A';
+      document.getElementById('previewFloor').textContent = 'N/A';
+    } else {
+      btn.disabled = false;
+      genSelect.innerHTML = noQrRooms.map((r, idx) => {
+        const floor = getFloorFromName(r.roomName);
+        const selected = idx === 0 ? 'selected' : '';
+        return `<option value="${r.roomId}|${r.roomName}|Floor ${floor}" ${selected}>${UiHelpers.escapeHtml(r.roomName)}</option>`;
+      }).join('');
+      
+      // Select the first room by default and update preview
+      if (noQrRooms.length > 0) {
+        const first = noQrRooms[0];
+        const fl = getFloorFromName(first.roomName);
+        document.getElementById('previewRoomName').textContent = first.roomName;
+        document.getElementById('previewCodeId').textContent = `Room ${first.roomName}`;
+        document.getElementById('previewFloor').textContent = `Floor ${fl}`;
+        document.getElementById('genFloorSelect').value = `Floor ${fl}`;
+        genSelect.value = `${first.roomId}|${first.roomName}|Floor ${fl}`;
+      }
+    }
+    
     document.getElementById('generateQrModal').classList.remove('hidden');
   }
 
@@ -433,8 +307,8 @@
     if (!val) return;
     const parts = val.split('|');
     if (parts.length >= 3) {
-      document.getElementById('previewRoomName').textContent = parts[0];
-      document.getElementById('previewCodeId').textContent = parts[1];
+      document.getElementById('previewRoomName').textContent = parts[1];
+      document.getElementById('previewCodeId').textContent = `Room ${parts[1]}`;
       document.getElementById('previewFloor').textContent = parts[2];
       document.getElementById('genFloorSelect').value = parts[2];
     }
@@ -442,25 +316,26 @@
 
   async function submitGenerateQr() {
     const btn = document.getElementById('submitGenQrBtn');
-    const roomName = document.getElementById('previewRoomName').textContent;
+    const selectVal = document.getElementById('genClassroomSelect').value;
+    if (!selectVal) return;
+    const parts = selectVal.split('|');
+    const roomId = parts[0];
+    const roomName = parts[1];
+    
     btn.disabled = true;
     btn.textContent = 'Generating...';
 
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        try {
-          await Api.post('/qrcodes', { room_name: roomName });
-        } catch (e) {
-          console.log('QR Code generated in demo mode');
-        }
+      if (window.Api) {
+        await Api.post(`/qrcodes/${roomId}/generate`);
+        if (window.showToast) showToast('Đã tạo mã QR thành công!', 'success');
+        else alert(`QR Code generated successfully!`);
+        closeGenerateQrModal();
+        loadQrCodes();
       }
-      if (window.showToast) showToast(`QR Code for "${roomName}" generated successfully!`, 'success');
-      else alert(`QR Code for "${roomName}" generated successfully!`);
-      closeGenerateQrModal();
     } catch (err) {
-      if (window.showToast) showToast(`QR Code for "${roomName}" generated successfully!`, 'success');
-      else alert(`QR Code for "${roomName}" generated successfully!`);
-      closeGenerateQrModal();
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to generate QR Code.');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Generate QR Code';
@@ -468,22 +343,27 @@
   }
 
   // View QR Modal
-  function openViewQrModal(qrId, classroomId, name, floor, status, createdDate) {
-    document.getElementById('qrModalId').textContent = qrId;
-    document.getElementById('qrModalClassroomId').textContent = classroomId;
-    document.getElementById('qrModalName').textContent = name;
-    document.getElementById('qrModalFloor').textContent = floor;
-    document.getElementById('qrModalCreatedDate').textContent = createdDate || '20 Jul 2026';
-    
-    const badge = document.getElementById('qrModalStatusBadge');
-    badge.textContent = status || 'ACTIVE';
-    if (status === 'INACTIVE' || status === 'Inactive') {
-      badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-error/10 text-error';
-    } else {
-      badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-green-600/10 text-green-600';
+  async function openViewQrModal(roomId, roomName, floor) {
+    try {
+      if (window.Api) {
+        const data = await Api.get(`/qrcodes/${roomId}`);
+        if (data) {
+          document.getElementById('qrModalId').textContent = data.qrCode || 'N/A';
+          document.getElementById('qrModalClassroomId').textContent = `Room ${data.roomName}`;
+          document.getElementById('qrModalName').textContent = data.roomName;
+          document.getElementById('qrModalFloor').textContent = `Floor ${getFloorFromName(data.roomName)}`;
+          document.getElementById('qrModalStatusBadge').textContent = 'ACTIVE';
+          document.getElementById('qrModalStatusBadge').className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-green-600/10 text-green-600';
+          document.getElementById('qrModalCreatedDate').textContent = 'Jul 29, 2026';
+          
+          document.getElementById('qrModalImage').src = data.qrImageDataUrl;
+          document.getElementById('viewQrModal').classList.remove('hidden');
+        }
+      }
+    } catch (err) {
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to load QR Code details.');
     }
-    
-    document.getElementById('viewQrModal').classList.remove('hidden');
   }
 
   function closeViewQrModal() {
@@ -491,20 +371,126 @@
   }
 
   function downloadQr(qrId) {
-    alert(`Downloading QR Code Image for ${qrId}...`);
+    const img = document.getElementById('qrModalImage');
+    if (!img || !img.src) {
+      if (window.showToast) showToast('Không tìm thấy ảnh QR để tải!', 'error');
+      else alert('No QR image found to download.');
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = `${qrId}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (window.showToast) showToast('Đã tải ảnh mã QR thành công!', 'success');
   }
+
+  function renderQrTable(qrs) {
+    const tbody = document.getElementById('qrTableBody');
+    if (!tbody) return;
+    if (!qrs || qrs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-on-surface-variant font-medium">No QR Codes found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = qrs.map((q, idx) => {
+      const fl = getFloorFromName(q.roomName);
+      const lastUpdated = 'Jul 29, 2026';
+      
+      const badge = q.hasQrCode
+        ? '<span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span>'
+        : '<span class="px-2.5 py-1 bg-error/10 text-error rounded-full text-[10px] font-bold uppercase">Inactive</span>';
+        
+      const viewBtn = q.hasQrCode
+        ? `<button onclick="openViewQrModal(${q.roomId}, '${q.roomName}', 'Floor ${fl}')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>`
+        : `<button disabled title="No QR Code" class="p-1.5 opacity-30 rounded-lg text-on-surface-variant"><span class="material-symbols-outlined text-lg">visibility_off</span></button>`;
+        
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors">
+          <td class="p-4 text-body-sm">${idx + 1}</td>
+          <td class="p-4 text-body-sm font-medium text-primary">${q.qrCode || 'N/A'}</td>
+          <td class="p-4 text-body-sm">Room ${UiHelpers.escapeHtml(q.roomName)}</td>
+          <td class="p-4 text-body-sm">Floor ${fl}</td>
+          <td class="p-4 text-body-sm">${lastUpdated}</td>
+          <td class="p-4 text-center">${badge}</td>
+          <td class="p-4">
+            <div class="flex items-center justify-center gap-2">
+              ${viewBtn}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterQrs() {
+    const searchVal = document.getElementById('searchQrInput').value.trim().toLowerCase();
+    const floorVal = document.getElementById('floorFilterSelect').value;
+    const statusVal = document.getElementById('statusFilterSelect').value;
+
+    let filtered = allQrs;
+    if (searchVal) {
+      filtered = filtered.filter(q => 
+        q.roomName.toLowerCase().includes(searchVal) ||
+        (q.qrCode || '').toLowerCase().includes(searchVal)
+      );
+    }
+    if (floorVal !== 'All') {
+      const targetFloor = parseInt(floorVal.replace(/\D/g, ''), 10);
+      filtered = filtered.filter(q => getFloorFromName(q.roomName) === targetFloor);
+    }
+    if (statusVal !== 'All') {
+      const wantActive = statusVal === 'Active';
+      filtered = filtered.filter(q => q.hasQrCode === wantActive);
+    }
+
+    renderQrTable(filtered);
+  }
+
+  function updateFloorFilterDropdown(qrs) {
+    const floorSelect = document.getElementById('floorFilterSelect');
+    if (!floorSelect) return;
+
+    const currentVal = floorSelect.value;
+    const uniqueFloors = Array.from(new Set(qrs.map(q => getFloorFromName(q.roomName)))).sort((a, b) => a - b);
+
+    let html = `<option value="All">All Floors</option>`;
+    uniqueFloors.forEach(fl => {
+      html += `<option value="Floor ${fl}">Floor ${fl}</option>`;
+    });
+
+    floorSelect.innerHTML = html;
+
+    if (uniqueFloors.map(fl => `Floor ${fl}`).includes(currentVal)) {
+      floorSelect.value = currentVal;
+    } else {
+      floorSelect.value = 'All';
+    }
+  }
+
+  // Bind filter events
+  document.getElementById('searchQrInput').addEventListener('input', filterQrs);
+  document.getElementById('floorFilterSelect').addEventListener('change', filterQrs);
+  document.getElementById('statusFilterSelect').addEventListener('change', filterQrs);
 
   async function loadQrCodes() {
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api) {
         const qrs = await Api.get('/qrcodes');
-        if (qrs && Array.isArray(qrs) && qrs.length > 0) {
+        if (qrs && Array.isArray(qrs)) {
+          allQrs = qrs;
+          
+          const activeCount = qrs.filter(q => q.hasQrCode).length;
           document.getElementById('statTotalQr').textContent = qrs.length;
-          document.getElementById('statActiveQr').textContent = qrs.filter(q => q.status === 'Active' || q.hasQrCode).length;
+          document.getElementById('statActiveQr').textContent = activeCount;
+          document.getElementById('statRoomsConnected').textContent = activeCount;
+
+          updateFloorFilterDropdown(qrs);
+          filterQrs();
         }
       }
     } catch (err) {
-      console.log('Using default mock data for QRManagement view', err);
+      console.log('Failed to load QR codes list', err);
     }
   }
 

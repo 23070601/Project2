@@ -80,4 +80,42 @@ async function findReplacementAlerts() {
   return rows;
 }
 
-module.exports = { findAll, findById, create, update, remove, findReplacementAlerts };
+// All Assets tab: trả về tất cả assets kèm số lần hỏng trong 3 tháng gần nhất
+async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
+  const clauses = [];
+  const params = [];
+
+  if (assetType) { clauses.push('a.asset_type = ?'); params.push(assetType); }
+  if (roomId) { clauses.push('a.room_id = ?'); params.push(roomId); }
+  if (status === 'Critical') { clauses.push('COALESCE(f3.recent_failures, 0) >= 3'); }
+  if (status === 'Normal') { clauses.push('COALESCE(f3.recent_failures, 0) < 3'); }
+  if (search) { clauses.push('(a.asset_name LIKE ? OR a.asset_type LIKE ?)'); params.push(`%${search}%`, `%${search}%`); }
+
+  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+  const [rows] = await pool.query(
+    `SELECT
+        a.asset_id,
+        a.asset_name,
+        a.asset_type,
+        a.status,
+        a.failure_count,
+        c.room_name,
+        a.room_id,
+        COALESCE(f3.recent_failures, 0) AS recent_failures
+     FROM Assets a
+     JOIN Classrooms c ON c.room_id = a.room_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS recent_failures
+       FROM FaultReports
+       WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+         AND asset_id IS NOT NULL
+       GROUP BY asset_id
+     ) f3 ON f3.asset_id = a.asset_id
+     ${where}
+     ORDER BY recent_failures DESC, a.failure_count DESC, a.asset_name`,
+    params
+  );
+  return rows;
+}
+
+module.exports = { findAll, findById, create, update, remove, findReplacementAlerts, findAllWithFailures };
