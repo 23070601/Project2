@@ -33,7 +33,7 @@
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
           Back to Tasks
         </button>
-        <h3 class="text-headline-md font-headline-md mt-2">Task Detail — <span id="detailHeaderOrderId" class="text-primary">WO-2024-001</span></h3>
+        <h3 class="text-headline-md font-headline-md mt-2">Task Detail — <span id="detailHeaderOrderId" class="text-primary">WO-1</span></h3>
       </div>
     </div>
 
@@ -50,8 +50,8 @@
           </div>
           <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
-              <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Order ID</p>
-              <p id="detailOrderId" class="text-body-md font-bold text-on-surface">WO-2024-001</p>
+              <p class="text-label-md text-outline mb-1 uppercase tracking-wider">WorkOrder ID</p>
+              <p id="detailOrderId" class="text-body-md font-bold text-on-surface">WO-1</p>
             </div>
             <div>
               <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Equipment</p>
@@ -80,8 +80,8 @@
             <div>
               <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Reported By</p>
               <div class="flex items-center gap-2">
-                <div id="detailReporterAvatar" class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">JD</div>
-                <p id="detailReporterName" class="text-body-md font-medium text-on-surface">John Doe</p>
+                <div id="detailReporterAvatar" class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">NA</div>
+                <p id="detailReporterName" class="text-body-md font-medium text-on-surface">Nguyen Van A</p>
               </div>
             </div>
             <div>
@@ -346,7 +346,7 @@
       <div class="grid grid-cols-2 gap-4">
         <div class="space-y-2">
           <label class="text-label-lg font-bold text-on-surface">WorkOrder</label>
-          <input id="reportModalWorkOrderId" type="text" value="WO-2024-001" disabled class="w-full bg-surface-container-low border-outline-variant rounded-lg text-outline font-bold">
+          <input id="reportModalWorkOrderId" type="text" value="WO-1" disabled class="w-full bg-surface-container-low border-outline-variant rounded-lg text-outline font-bold">
         </div>
         <div class="space-y-2">
           <label class="text-label-lg font-bold text-on-surface">New Status</label>
@@ -586,23 +586,63 @@
     }
 
     const WORK_ORDERS_MAP = {
-      '1': { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.', failure_count: 3, asset_type: 'Projector' },
-      '2': { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', assigned_at: '2026-07-20 07:52:24', reporter_name: 'Tran Van B', created_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.', failure_count: 2, asset_type: 'TV' },
-      '3': { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Le Thi C', created_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.', failure_count: 1, asset_type: 'Visualizer' },
-      '4': { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.', failure_count: 4, asset_type: 'TV' },
-      '5': { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Pham Van H', created_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.', failure_count: 2, asset_type: 'Microphone' },
-      '6': { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Bui Van K', created_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.', failure_count: 1, asset_type: 'TV' },
-      '7': { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-15 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.', failure_count: 5, asset_type: 'Microphone' },
-      '8': { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', assigned_at: '2026-07-23 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.', failure_count: 2, asset_type: 'Network' }
+      '1': { 
+        order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.', failure_count: 3, asset_type: 'Projector',
+        repairHistory: [
+          { order_id: '10', report_id: '18', reporter_name: 'Nguyen Van A', reported_issue: 'HDMI input port loose contact', root_cause: 'Soldering joint cracked due to frequent cable plugging', assigned_at: '2026-05-10 09:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Re-soldered HDMI female socket and secured mainboard casing.', parts_used: 'HDMI Port Socket' }
+        ]
+      },
+      '2': { 
+        order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', assigned_at: '2026-07-20 07:52:24', reporter_name: 'Tran Van B', created_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.', failure_count: 2, asset_type: 'TV',
+        repairHistory: [
+          { order_id: '2', report_id: '3', reporter_name: 'Nguyen Van A', reported_issue: 'Samsung Commercial TV screen sensor unresponsive', root_cause: 'Power supply board capacitor fatigue', assigned_at: '2026-06-12 10:30:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Replaced display panel driver board and updated firmware.', parts_used: 'Display Controller Board' }
+        ]
+      },
+      '3': { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Le Thi C', created_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.', failure_count: 1, asset_type: 'Visualizer', repairHistory: [] },
+      '4': { 
+        order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.', failure_count: 4, asset_type: 'TV',
+        repairHistory: [
+          { order_id: '11', report_id: '20', reporter_name: 'Doan Van G', reported_issue: 'LVDS ribbon cable loose', root_cause: 'Connector latch clip broken', assigned_at: '2026-04-18 14:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced LVDS display ribbon cable.', parts_used: '55in LVDS Cable Harness' }
+        ]
+      },
+      '5': { 
+        order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Pham Van H', created_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.', failure_count: 4, asset_type: 'Microphone',
+        repairHistory: [
+          { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Internal battery spring contact oxidation causing power disconnection.', assigned_at: '2026-06-23 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
+        ]
+      },
+      '6': { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Bui Van K', created_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.', failure_count: 1, asset_type: 'TV', repairHistory: [] },
+      '7': { 
+        order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-15 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.', failure_count: 5, asset_type: 'Microphone',
+        repairHistory: [
+          { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Physical wear on plastic latch clip.', assigned_at: '2026-07-15 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
+        ]
+      },
+      '8': { 
+        order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', assigned_at: '2026-07-23 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.', failure_count: 2, asset_type: 'Network',
+        repairHistory: [
+          { order_id: '8', report_id: '15', reporter_name: 'Doan Van G', reported_issue: 'Gigabit switch power LED off', root_cause: 'Power supply transformer burnt out due to power surge', assigned_at: '2026-07-29 08:45:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Đã kiểm tra và thay thế bộ nguồn switch mạng.', parts_used: 'Bộ nguồn Gigabit Switch 12V' }
+        ]
+      },
+      '10': { 
+        order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', assigned_at: '2026-06-15 09:00:00', reporter_name: 'Nguyen Van A', created_at: '2026-06-15 09:00:00', description: 'Wireless mic battery springs replaced and tested in Room R504.', failure_count: 1, asset_type: 'Microphone',
+        repairHistory: [
+          { order_id: '10', report_id: '17', reporter_name: 'Nguyen Van A', reported_issue: 'Loose battery contact springs causing audio dropout', root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.', assigned_at: '2026-06-15 09:00:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Tightened internal battery terminal contacts and replaced antenna sleeve.', parts_used: 'AKG Battery Terminal Spring' }
+        ]
+      }
     };
 
     if (!loadedFromApi || !order) {
       const storedOrders = getStoredWorkOrders();
       const localMatch = storedOrders.find(o => String(o.order_id) === String(cleanId));
+      const defaultMapItem = WORK_ORDERS_MAP[cleanId] || WORK_ORDERS_MAP['1'];
       if (localMatch) {
-        order = localMatch;
+        order = { ...defaultMapItem, ...localMatch };
+        if (!order.repairHistory || !Array.isArray(order.repairHistory) || order.repairHistory.length === 0) {
+          order.repairHistory = defaultMapItem.repairHistory || [];
+        }
       } else {
-        order = WORK_ORDERS_MAP[cleanId] || WORK_ORDERS_MAP['1'];
+        order = defaultMapItem;
       }
     } else {
       const storedOrders = getStoredWorkOrders() || [];
@@ -618,8 +658,9 @@
     currentOrderData = order;
 
     // Render Basic Data from DB
-    document.getElementById('detailHeaderOrderId').textContent = `WO-${order.order_id}`;
-    document.getElementById('detailOrderId').textContent = `WO-${order.order_id}`;
+    const displayWoId = UiHelpers.formatWorkOrderId(order.order_id);
+    document.getElementById('detailHeaderOrderId').textContent = displayWoId;
+    document.getElementById('detailOrderId').textContent = displayWoId;
     document.getElementById('detailEquipment').textContent = order.asset_name || 'Equipment';
     document.getElementById('detailRoom').textContent = order.room_name || 'Room';
 
@@ -643,7 +684,7 @@
     document.getElementById('detailAssetType').textContent = order.asset_type || 'Visual Equipment';
     document.getElementById('detailAssetRoom').textContent = order.room_name || 'Room';
 
-    const count = order.failure_count || 4;
+    const count = order.failure_count || (WORK_ORDERS_MAP[cleanId] ? WORK_ORDERS_MAP[cleanId].failure_count : 4);
     document.getElementById('detailAssetFailureCount').textContent = `${count} (In last 6 months)`;
     document.getElementById('dss3FailureCountText').textContent = count;
 
@@ -679,8 +720,8 @@
 
     if (!item) {
       item = {
-        order_id: '10',
-        report_id: '17',
+        order_id: '7',
+        report_id: '12',
         reporter_name: 'Nguyen Van A',
         reported_issue: 'Loose battery contact springs causing audio dropout',
         root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.',
@@ -692,8 +733,8 @@
       };
     }
 
-    const targetId = item.order_id || '10';
-    const reportId = item.report_id || '17';
+    const targetWoId = UiHelpers.formatWorkOrderId(item.order_id || '7');
+    const targetReportId = UiHelpers.formatReportId(item.report_id || '12');
     const reporterName = item.reporter_name || 'Nguyen Van A';
     const reportedIssue = item.reported_issue || item.description || 'Loose battery contact springs causing audio dropout';
     const rootCause = item.root_cause || 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.';
@@ -704,8 +745,8 @@
     const fixDesc = item.fix_description || 'Tightened internal battery terminal contacts and replaced antenna sleeve.';
     const partsUsed = item.parts_used || 'AKG Battery Terminal Spring';
 
-    document.getElementById('historyModalOrderId').textContent = `WO-${targetId}`;
-    document.getElementById('historyModalReportId').textContent = `#FR-${reportId}`;
+    document.getElementById('historyModalOrderId').textContent = targetWoId;
+    document.getElementById('historyModalReportId').textContent = targetReportId;
     document.getElementById('historyModalReporter').textContent = reporterName;
     document.getElementById('historyModalReportedIssue').textContent = `"${reportedIssue}"`;
     document.getElementById('historyModalRootCause').textContent = rootCause;
@@ -726,9 +767,32 @@
     const tbody = document.getElementById('detailRepairHistoryBody');
     if (!tbody) return;
 
-    let historyList = (order && Array.isArray(order.repairHistory)) 
+    let historyList = (order && Array.isArray(order.repairHistory) && order.repairHistory.length > 0) 
       ? order.repairHistory.filter(r => (r.task_status === 'Completed' || r.task_status === 'Closed') && String(r.order_id) !== String(cleanId)) 
       : [];
+
+    if (historyList.length === 0 && WORK_ORDERS_MAP[cleanId] && WORK_ORDERS_MAP[cleanId].repairHistory) {
+      historyList = WORK_ORDERS_MAP[cleanId].repairHistory.filter(r => String(r.order_id) !== String(cleanId));
+    }
+
+    if (historyList.length === 0 && (order.failure_count > 1 || (WORK_ORDERS_MAP[cleanId] && WORK_ORDERS_MAP[cleanId].failure_count > 1))) {
+      historyList = [
+        {
+          order_id: 'WO-2024-0007',
+          report_id: '12',
+          reporter_name: 'Doan Van G',
+          reported_issue: `${order.asset_name || 'Equipment'} intermittent signal loss during lecture`,
+          root_cause: 'Internal power terminal oxidation causing intermittent disconnection.',
+          assigned_at: '2026-06-15 09:00:00',
+          technician_name: 'Le Van C',
+          task_status: 'Closed',
+          fix_description: 'Cleaned contacts, re-soldered power leads, and tested operation.',
+          parts_used: 'Power Terminal Clip & Cable Assembly'
+        }
+      ];
+    }
+
+    currentRepairHistory = historyList;
 
     currentRepairHistory = historyList;
 

@@ -287,16 +287,21 @@
 
   Layout.init({ role: 'Technician', activePage: 'AssetLookup' });
 
-  // Fallback MySQL Assets
+  // Fallback MySQL Assets matching Database Seeds
   let allAssets = [
-    { asset_id: 1, asset_name: 'Cisco Catalyst 24-Port Switch', asset_type: 'NetworkSwitch', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
-    { asset_id: 2, asset_name: 'Samsung 75in Commercial TV', asset_type: 'TV', room_name: 'R101', status: 'Recommended for Replacement', failure_count: 3, install_date: '2026-07-21' },
-    { asset_id: 3, asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Aircon', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
-    { asset_id: 4, asset_name: 'JBL Classroom Wall Speaker', asset_type: 'Speaker', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
-    { asset_id: 5, asset_name: 'Panasonic 4K Projector PT-VMZ51', asset_type: 'Projector', room_name: 'R102', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
-    { asset_id: 6, asset_name: 'Shure Wireless Dual Microphone', asset_type: 'Microphone', room_name: 'R102', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
-    { asset_id: 10, asset_name: 'Ultra HD HDMI Cable 10m', asset_type: 'Cable', room_name: 'R103', status: 'Operational', failure_count: 0, install_date: '2026-07-22' },
-    { asset_id: 27, asset_name: 'Epson Document Camera R305', asset_type: 'DocumentCamera', room_name: 'R305', status: 'Operational', failure_count: 0, install_date: '2026-07-22' }
+    { asset_id: 1, asset_name: 'Sony Laser Projector VPL-PHZ60', asset_type: 'Projector', room_name: 'R302', status: 'Recommended for Replacement', failure_count: 3, install_date: '2025-01-15' },
+    { asset_id: 2, asset_name: 'Samsung 75in Commercial TV', asset_type: 'TV', room_name: 'R101', status: 'Under Repair', failure_count: 2, install_date: '2025-03-10' },
+    { asset_id: 3, asset_name: 'Epson Visualizer Document Camera', asset_type: 'DocumentCamera', room_name: 'R512', status: 'Operational', failure_count: 1, install_date: '2025-04-20' },
+    { asset_id: 4, asset_name: 'LG Commercial Display 55in', asset_type: 'TV', room_name: 'R302', status: 'Recommended for Replacement', failure_count: 4, install_date: '2024-11-05' },
+    { asset_id: 5, asset_name: 'Panasonic Commercial TV 65in', asset_type: 'TV', room_name: 'R403', status: 'Operational', failure_count: 1, install_date: '2025-02-14' },
+    { asset_id: 6, asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Aircon', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2025-05-01' },
+    { asset_id: 7, asset_name: 'Shure Wireless Dual Microphone', asset_type: 'Microphone', room_name: 'R512', status: 'Recommended for Replacement', failure_count: 5, install_date: '2024-09-12' },
+    { asset_id: 8, asset_name: 'Cisco Gigabit Switch R601', asset_type: 'NetworkSwitch', room_name: 'R601', status: 'Operational', failure_count: 2, install_date: '2024-10-10' },
+    { asset_id: 9, asset_name: 'JBL Classroom Wall Speaker', asset_type: 'Speaker', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2025-06-01' },
+    { asset_id: 10, asset_name: 'Ultra HD HDMI Cable 10m', asset_type: 'Cable', room_name: 'R103', status: 'Operational', failure_count: 0, install_date: '2025-06-15' },
+    { asset_id: 27, asset_name: 'Epson Document Camera R305', asset_type: 'DocumentCamera', room_name: 'R305', status: 'Operational', failure_count: 0, install_date: '2025-07-01' },
+    { asset_id: 32, asset_name: 'AKG Lavalier Wireless Mic', asset_type: 'Microphone', room_name: 'R402', status: 'Recommended for Replacement', failure_count: 4, install_date: '2024-08-20' },
+    { asset_id: 33, asset_name: 'AKG Lavalier Wireless Mic', asset_type: 'Microphone', room_name: 'R504', status: 'Operational', failure_count: 1, install_date: '2025-02-10' }
   ];
 
   let currentCategoryTypeKey = null;
@@ -365,22 +370,15 @@
 
     const qLower = q.toLowerCase();
 
-    // STRICT ASSET NAME & ID MATCHING
+    // FLEXIBLE SUBSTRING & ASSET ID MATCHING
     const matches = allAssets.filter(a => {
       const name = (a.asset_name || '').toLowerCase();
       const astId = `ast-${String(a.asset_id).padStart(3, '0')}`.toLowerCase();
       const idStr = String(a.asset_id).toLowerCase();
+      const typeStr = (a.asset_type || '').toLowerCase();
 
-      const words = name.split(/\s+/);
-      const nameMatchesWordStart = words.some(w => w.startsWith(qLower));
-      const astMatches = astId.startsWith(qLower) || idStr === qLower;
-
-      if (qLower.length === 1) {
-        return nameMatchesWordStart || astMatches;
-      }
-
-      return nameMatchesWordStart || name.includes(qLower) || astMatches;
-    }).slice(0, 7);
+      return name.includes(qLower) || astId.includes(qLower) || idStr === qLower || typeStr.includes(qLower);
+    }).slice(0, 10);
 
     if (matches.length === 0) {
       dropdown.innerHTML = `

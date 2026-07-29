@@ -90,8 +90,29 @@ const UiHelpers = (() => {
     }, duration);
   }
 
+  function formatWorkOrderId(id) {
+    if (!id) return 'WO-1';
+    const s = String(id).replace(/^(WO-)+/gi, '').replace(/^(WO)+/gi, '').trim();
+    return `WO-${s}`;
+  }
+
+  function formatReportId(id) {
+    if (!id) return '#FR-1';
+    const s = String(id).replace(/^(#|FR-|REP-)+/gi, '').trim();
+    return `#FR-${s}`;
+  }
+
+  function formatAssetId(id) {
+    if (!id) return 'AST-001';
+    const s = String(id).replace(/^(AST-)+/gi, '').replace(/^(AST)+/gi, '').trim();
+    return `AST-${s.padStart(3, '0')}`;
+  }
+
   // Bind to window for global access
   window.showToast = showToast;
+  window.formatWorkOrderId = formatWorkOrderId;
+  window.formatReportId = formatReportId;
+  window.formatAssetId = formatAssetId;
 
-  return { priorityBadge, statusBadge, formatDate, escapeHtml, showToast };
+  return { priorityBadge, statusBadge, formatDate, escapeHtml, showToast, formatWorkOrderId, formatReportId, formatAssetId };
 })();

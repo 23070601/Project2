@@ -467,7 +467,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Elina', role: 'Manager' };
+  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn', role: 'Manager', user_id: 5 };
   try {
     user = Auth.guard('Manager');
   } catch (e) {
@@ -477,8 +477,9 @@
   Layout.init({ role: 'Manager', activePage: 'ClassroomsManagement' });
 
   const params = new URLSearchParams(window.location.search);
-  const roomId = params.get('id') || '401';
-  const displayRoom = roomId.startsWith('Room') || roomId.startsWith('R') ? roomId : `Room ${roomId}`;
+  const roomId = params.get('id') || 'R401';
+  const cleanRoomCode = roomId.replace(/^Room\s*/i, '').replace(/^R/i, '');
+  const displayRoom = `Room R${cleanRoomCode || '401'}`;
 
   document.getElementById('breadcrumbRoomName').textContent = displayRoom;
   document.getElementById('pageRoomTitle').textContent = displayRoom;

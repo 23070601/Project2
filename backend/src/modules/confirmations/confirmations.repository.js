@@ -11,6 +11,19 @@ async function create({ orderId, reporterId, isConfirmed, rating, feedback }) {
      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
     [orderId, reporterId, isConfirmed, rating ?? null, feedback ?? null]
   );
+
+  // Update WorkOrder task_status to Closed
+  await pool.execute(
+    `UPDATE WorkOrders SET task_status = 'Closed', closed_at = CURRENT_TIMESTAMP WHERE order_id = ?`,
+    [orderId]
+  );
+
+  // Update FaultReport status to Closed
+  await pool.execute(
+    `UPDATE FaultReports fr JOIN WorkOrders wo ON fr.report_id = wo.report_id SET fr.status = 'Closed' WHERE wo.order_id = ?`,
+    [orderId]
+  );
+
   return findByOrderId(orderId);
 }
 

@@ -40,31 +40,31 @@
 
     <!-- Compact Summary Cards (KPI Style) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow text-center">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between hover:shadow-md transition-shadow text-center">
         <div class="flex items-center justify-center mb-3">
           <span class="material-symbols-outlined text-primary bg-primary-fixed/30 p-2 rounded-lg">meeting_room</span>
         </div>
         <div>
           <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Total Classrooms</p>
-          <p id="totalClassroomsCount" class="text-headline-md font-headline-md text-on-surface">25</p>
+          <p id="totalClassroomsCount" class="text-headline-md font-headline-md text-on-surface">12</p>
         </div>
       </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow text-center">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-tertiary flex flex-col justify-between hover:shadow-md transition-shadow text-center">
         <div class="flex items-center justify-center mb-3">
           <span class="material-symbols-outlined text-tertiary bg-tertiary-fixed/30 p-2 rounded-lg">layers</span>
         </div>
         <div>
           <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Floors</p>
-          <p id="floorsCount" class="text-headline-md font-headline-md text-on-surface">3</p>
+          <p id="floorsCount" class="text-headline-md font-headline-md text-on-surface">5</p>
         </div>
       </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow text-center">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-secondary flex flex-col justify-between hover:shadow-md transition-shadow text-center">
         <div class="flex items-center justify-center mb-3">
           <span class="material-symbols-outlined text-secondary bg-secondary-fixed/40 p-2 rounded-lg">inventory_2</span>
         </div>
         <div>
           <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Total Assets</p>
-          <p id="totalAssetsCount" class="text-headline-md font-headline-md text-on-surface">152</p>
+          <p id="totalAssetsCount" class="text-headline-md font-headline-md text-on-surface">28</p>
         </div>
       </div>
     </div>
@@ -78,6 +78,8 @@
         </div>
         <select id="floorFilterSelect" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md font-label-md focus:ring-primary focus:border-primary shadow-sm cursor-pointer outline-none">
           <option value="All">All Floors</option>
+          <option value="Floor 1">Floor 1</option>
+          <option value="Floor 3">Floor 3</option>
           <option value="Floor 4">Floor 4</option>
           <option value="Floor 5">Floor 5</option>
           <option value="Floor 6">Floor 6</option>
@@ -92,13 +94,153 @@
 
     <!-- Accordion Floor Groups -->
     <div class="space-y-6">
+      <!-- Floor 1 Accordion -->
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+        <button class="w-full flex items-center justify-between p-5 bg-primary-container text-white transition-colors" onclick="toggleAccordion('floor-1-content', 'floor-1-chevron')">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined">apartment</span>
+            <span class="text-headline-sm font-headline-sm">Floor 1 - Lecture Rooms &amp; Labs</span>
+            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">3 Classrooms</span>
+          </div>
+          <span class="material-symbols-outlined transition-transform duration-300" id="floor-1-chevron">expand_more</span>
+        </button>
+        <div class="overflow-x-auto" id="floor-1-content">
+          <table class="w-full border-collapse">
+            <thead class="bg-surface-container-high text-on-surface">
+              <tr>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Room</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Assets</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Status</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">QR Code</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Last Updated</th>
+                <th class="text-center py-4 px-6 text-label-lg font-label-lg">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/30">
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R101</td>
+                <td class="py-4 px-6 text-body-sm">4 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 18, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R101'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-003', 'Room R101', 'Floor 1')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R101', 'Room R101')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R102</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 20, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R102'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-005', 'Room R102', 'Floor 1')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R102', 'Room R102')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R103</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 15, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R103'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-006', 'Room R103', 'Floor 1')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R103', 'Room R103')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Floor 3 Accordion -->
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+        <button class="w-full flex items-center justify-between p-5 bg-primary-container text-white transition-colors" onclick="toggleAccordion('floor-3-content', 'floor-3-chevron')">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined">apartment</span>
+            <span class="text-headline-sm font-headline-sm">Floor 3 - Multimedia &amp; IT Labs</span>
+            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">3 Classrooms</span>
+          </div>
+          <span class="material-symbols-outlined transition-transform duration-300" id="floor-3-chevron">expand_more</span>
+        </button>
+        <div class="overflow-x-auto" id="floor-3-content">
+          <table class="w-full border-collapse">
+            <thead class="bg-surface-container-high text-on-surface">
+              <tr>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Room</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Assets</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Status</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">QR Code</th>
+                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Last Updated</th>
+                <th class="text-center py-4 px-6 text-label-lg font-label-lg">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/30">
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R301</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 22, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R301'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-007', 'Room R301', 'Floor 3')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R301', 'Room R301')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R302</td>
+                <td class="py-4 px-6 text-body-sm">3 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 21, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R302'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-002', 'Room R302', 'Floor 3')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R302', 'Room R302')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R305</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 19, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R305'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-008', 'Room R305', 'Floor 3')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R305', 'Room R305')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Floor 4 Accordion -->
       <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
         <button class="w-full flex items-center justify-between p-5 bg-primary-container text-white transition-colors" onclick="toggleAccordion('floor-4-content', 'floor-4-chevron')">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined">apartment</span>
             <span class="text-headline-sm font-headline-sm">Floor 4 - Management &amp; Administrative Units</span>
-            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">8 Classrooms</span>
+            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">3 Classrooms</span>
           </div>
           <span class="material-symbols-outlined transition-transform duration-300" id="floor-4-chevron">expand_more</span>
         </button>
@@ -116,28 +258,51 @@
             </thead>
             <tbody class="divide-y divide-outline-variant/30">
               <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">401</td>
-                <td class="py-4 px-6 text-body-sm">3 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
+                <td class="py-4 px-6 font-bold text-primary">Room R401</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">10 Jul 2026</td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 20, 2026</td>
                 <td class="py-4 px-6 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=401'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-401', 'Classroom 401', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('401', 'Classroom 401')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                    <button onclick="location.href='ClassroomsDetail.html?id=R401'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-001', 'Room R401', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R401', 'Room R401')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
                   </div>
                 </td>
               </tr>
               <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">402</td>
+                <td class="py-4 px-6 font-bold text-primary">Room R402</td>
                 <td class="py-4 px-6 text-body-sm">2 Assets</td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">08 Jul 2026</td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 22, 2026</td>
                 <td class="py-4 px-6 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=402'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="location.href='ClassroomsDetail.html?id=R402'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-009', 'Room R402', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R402', 'Room R402')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R403</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 22, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R403'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-010', 'Room R403', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R403', 'Room R403')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
                     <button onclick="openQrModal('CR-402', 'Classroom 402', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
                     <button onclick="openDeleteModal('402', 'Classroom 402')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
                   </div>
@@ -168,9 +333,9 @@
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined">apartment</span>
             <span class="text-headline-sm font-headline-sm">Floor 5 – Teaching Classrooms</span>
-            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">4 Classrooms</span>
+            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">2 Classrooms</span>
           </div>
-          <span class="material-symbols-outlined rotate-180 transition-transform duration-300" id="floor-5-chevron">expand_more</span>
+          <span class="material-symbols-outlined transition-transform duration-300" id="floor-5-chevron">expand_more</span>
         </button>
         <div class="overflow-x-auto" id="floor-5-content">
           <table class="w-full border-collapse">
@@ -186,58 +351,30 @@
             </thead>
             <tbody class="divide-y divide-outline-variant/30">
               <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">501</td>
-                <td class="py-4 px-6 text-body-sm">4 Assets</td>
+                <td class="py-4 px-6 font-bold text-primary">Room R504</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">12 Jul 2026</td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 12, 2026</td>
                 <td class="py-4 px-6 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=501'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-501', 'Classroom 501', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('501', 'Classroom 501')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                    <button onclick="location.href='ClassroomsDetail.html?id=R504'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-011', 'Room R504', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R504', 'Room R504')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
                   </div>
                 </td>
               </tr>
               <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">502</td>
-                <td class="py-4 px-6 text-body-sm">1 Asset</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">09 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=502'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-502', 'Classroom 502', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('502', 'Classroom 502')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">503</td>
+                <td class="py-4 px-6 font-bold text-primary">Room R512</td>
                 <td class="py-4 px-6 text-body-sm">3 Assets</td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">11 Jul 2026</td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 15, 2026</td>
                 <td class="py-4 px-6 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=503'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-503', 'Classroom 503', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('503', 'Classroom 503')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">504</td>
-                <td class="py-4 px-6 text-body-sm">2 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-error-container text-error">Critical</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-surface-container-high text-outline">Not Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">—</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=504'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-504', 'Classroom 504', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('504', 'Classroom 504')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                    <button onclick="location.href='ClassroomsDetail.html?id=R512'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-004', 'Room R512', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R512', 'Room R512')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
                   </div>
                 </td>
               </tr>
@@ -270,19 +407,37 @@
             </thead>
             <tbody class="divide-y divide-outline-variant/30">
               <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">601</td>
-                <td class="py-4 px-6 text-body-sm">6 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
+                <td class="py-4 px-6 font-bold text-primary">Room R601</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
                 <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">11 Jul 2026</td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 23, 2026</td>
                 <td class="py-4 px-6 text-center">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=601'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-601', 'Classroom 601', 'Floor 6')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('601', 'Classroom 601')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                    <button onclick="location.href='ClassroomsDetail.html?id=R601'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-012', 'Room R601', 'Floor 6')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R601', 'Room R601')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
                   </div>
                 </td>
               </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-4 px-6 font-bold text-primary">Room R606</td>
+                <td class="py-4 px-6 text-body-sm">2 Assets</td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
+                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
+                <td class="py-4 px-6 text-body-sm text-outline">Jul 18, 2026</td>
+                <td class="py-4 px-6 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="location.href='ClassroomsDetail.html?id=R606'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                    <button onclick="openQrModal('QR-013', 'Room R606', 'Floor 6')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                    <button onclick="openDeleteModal('R606', 'Room R606')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="py-4 px-6 font-bold text-primary">602</td>
                 <td class="py-4 px-6 text-body-sm">4 Assets</td>
@@ -305,7 +460,7 @@
 
     <!-- Pagination -->
     <div class="mt-8 flex items-center justify-between">
-      <p class="text-body-sm text-on-surface-variant">Showing 1–9 of 25 classrooms</p>
+      <p class="text-body-sm text-on-surface-variant">Showing 1–12 of 12 classrooms</p>
       <div class="flex items-center gap-2">
         <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors disabled:opacity-50" disabled>
           <span class="material-symbols-outlined">chevron_left</span>
@@ -388,7 +543,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Elina', role: 'Manager' };
+  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn', role: 'Manager', user_id: 5 };
   try {
     user = Auth.guard('Manager');
   } catch (e) {

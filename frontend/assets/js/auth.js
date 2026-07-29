@@ -28,7 +28,7 @@ const Auth = (() => {
 
     if (!user) {
       // Fallback cho Demo Mode / Offline Live Server:
-      const cleanEmail = email.toLowerCase();
+      const cleanEmail = email.toLowerCase().trim();
       const savedPwKey = `vnuis_password_${cleanEmail}`;
       const savedPw = localStorage.getItem(savedPwKey);
       const expectedPassword = savedPw ? savedPw : '123456';
@@ -36,26 +36,46 @@ const Auth = (() => {
       if (password === expectedPassword) {
         const selRoleNorm = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1).toLowerCase()) : null;
 
-        let role = 'User';
-        let name = 'Nguyen Van A';
+        // Catalog các tài khoản seed khớp dữ liệu vnuis_asset_maintenance_dss.sql
+        const DEMO_USERS = {
+          'lecturer.a@vnuis.edu.vn': { user_id: 1, full_name: 'Nguyen Van A', role: 'User' },
+          'student.b@vnuis.edu.vn':  { user_id: 2, full_name: 'Tran Thi B',   role: 'User' },
+          'tech.c@vnuis.edu.vn':     { user_id: 3, full_name: 'Le Van C',     role: 'Technician' },
+          'tech.d@vnuis.edu.vn':     { user_id: 4, full_name: 'Pham Thi D',   role: 'Technician' },
+          'manager.e@vnuis.edu.vn':  { user_id: 5, full_name: 'Hoang Van E',  role: 'Manager' },
+          'tech.f@vnuis.edu.vn':     { user_id: 6, full_name: 'Vu Van F',     role: 'Technician' },
+          'lecturer.g@vnuis.edu.vn': { user_id: 7, full_name: 'Doan Van G',   role: 'User' },
+          'student.h@vnuis.edu.vn':  { user_id: 8, full_name: 'Bui Thi H',    role: 'User' },
+        };
 
-        if (cleanEmail.includes('tech') || cleanEmail.includes('c@vnuis')) {
-          role = 'Technician';
-          name = 'Le Van C';
-        } else if (cleanEmail.includes('manager') || cleanEmail.includes('e@vnuis')) {
-          role = 'Manager';
-          name = 'Hoang Van E';
-        } else if (selRoleNorm) {
-          role = selRoleNorm;
-          name = role === 'Technician' ? 'Le Van C' : (role === 'Manager' ? 'Hoang Van E' : 'Nguyen Van A');
+        let seedUser = DEMO_USERS[cleanEmail];
+        if (!seedUser) {
+          const matchedKey = Object.keys(DEMO_USERS).find(k => k.startsWith(cleanEmail) || cleanEmail.startsWith(k.split('@')[0]));
+          if (matchedKey) seedUser = DEMO_USERS[matchedKey];
         }
 
-        user = {
-          user_id: role === 'Manager' ? 2 : (role === 'Technician' ? 3 : 1),
-          full_name: name,
-          email: email,
-          role: role
-        };
+        if (seedUser) {
+          user = {
+            user_id: seedUser.user_id,
+            full_name: seedUser.full_name,
+            email: email,
+            role: seedUser.role
+          };
+        } else {
+          let role = selRoleNorm || 'User';
+          if (cleanEmail.includes('tech')) role = 'Technician';
+          else if (cleanEmail.includes('manager') || cleanEmail.includes('admin')) role = 'Manager';
+
+          const prefix = cleanEmail.split('@')[0] || 'User';
+          const nameFormatted = prefix.split(/[._-]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+          user = {
+            user_id: 99,
+            full_name: nameFormatted,
+            email: email,
+            role: role
+          };
+        }
       } else {
         throw new Error('Invalid email or password. Please check your credentials.');
       }

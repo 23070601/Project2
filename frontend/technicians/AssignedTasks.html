@@ -141,13 +141,13 @@
     </button>
 
     <!-- Modal Title -->
-    <h3 class="text-title-lg font-bold text-on-surface">Reject WorkOrder — <span id="rejectModalOrderTitleId">WO-2024-001</span></h3>
+    <h3 class="text-title-lg font-bold text-on-surface">Reject WorkOrder — <span id="rejectModalOrderTitleId">WO-1</span></h3>
 
     <!-- WorkOrder Details Summary Card -->
     <div class="bg-surface-container-low p-5 rounded-2xl grid grid-cols-2 gap-y-4 gap-x-6 text-left">
       <div>
         <p class="text-label-sm text-on-surface-variant font-medium mb-0.5">WorkOrder ID</p>
-        <p id="rejectModalOrderId" class="text-body-md font-bold text-on-surface">WO-2024-001</p>
+        <p id="rejectModalOrderId" class="text-body-md font-bold text-on-surface">WO-1</p>
       </div>
       <div>
         <p class="text-label-sm text-on-surface-variant font-medium mb-0.5">Equipment</p>
@@ -190,9 +190,10 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let currentUser = { full_name: 'Nguyen Van A' };
+  let currentUser = { full_name: 'Le Van C', role: 'Technician' };
   try {
-    currentUser = Auth.guard('Technician');
+    const user = Auth.guard('Technician');
+    if (user) currentUser = user;
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }
@@ -509,7 +510,8 @@
     'tech.d@vnuis.edu.vn': [
       { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.' },
       { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.' },
-      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending', assigned_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.' }
+      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending', assigned_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.' },
+      { order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-06-15 09:00:00', description: 'Wireless mic battery springs replaced and tested in Room R504.' }
     ],
     'tech.f@vnuis.edu.vn': [
       { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected', assigned_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.' },

@@ -76,45 +76,48 @@
               </tr>
             </thead>
             <tbody id="pendingTableBody" class="divide-y divide-outline-variant/20">
-              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-042'">
-                <td class="px-6 py-4 font-bold text-primary">REQ-042</td>
-                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">PH</div><span class="font-medium">Prof. Hoang</span></div></td>
-                <td class="px-6 py-4">Projector Sony VPL-FHZ65</td>
-                <td class="px-6 py-4 font-mono text-sm">P512</td>
+              <!-- Row 1: FR-10 -->
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=10'">
+                <td class="px-6 py-4 font-bold text-primary">#FR-10</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NA</div><span class="font-medium">Nguyen Van A</span></div></td>
+                <td class="px-6 py-4">Panasonic 4K Projector PT-VMZ51</td>
+                <td class="px-6 py-4 font-mono text-sm">R102</td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full capitalize">High</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 24, 2026</td>
+                <td class="px-6 py-4 text-body-sm">Jul 29, 2026</td>
                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="openApproveModal('REQ-042', 'Prof. Hoang', 'Sony Projector VPL-FHZ65', 'P512', 'HIGH', 'Projector image is blurry and color is not accurate.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-                    <button onclick="openRejectModal('REP-0021', 'John Doe', 'Sony Projector VPL-FHZ65', 'P512')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                    <button onclick="openApproveModal('#FR-10', 'Nguyen Van A', 'Panasonic 4K Projector PT-VMZ51', 'R102', 'High', 'Panasonic Projector power light turns amber and powers down.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('#FR-10', 'Nguyen Van A', 'Panasonic 4K Projector PT-VMZ51', 'R102')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
                   </div>
                 </td>
               </tr>
-              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-045'">
-                <td class="px-6 py-4 font-bold text-primary">REQ-045</td>
-                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NT</div><span class="font-medium">Nguyen Thu</span></div></td>
-                <td class="px-6 py-4">Air Conditioner Unit B-04</td>
-                <td class="px-6 py-4 font-mono text-sm">Lobby A1</td>
+              <!-- Row 2: FR-2 -->
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=2'">
+                <td class="px-6 py-4 font-bold text-primary">#FR-2</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">TB</div><span class="font-medium">Tran Thi B</span></div></td>
+                <td class="px-6 py-4">Daikin Inverter AC 18000 BTU</td>
+                <td class="px-6 py-4 font-mono text-sm">R401</td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 25, 2026</td>
+                <td class="px-6 py-4 text-body-sm">Jul 28, 2026</td>
                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="openApproveModal('REQ-045', 'Nguyen Thu', 'Air Conditioner Unit B-04', 'Lobby A1', 'MEDIUM', 'AC unit is leaking water.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-                    <button onclick="openRejectModal('REQ-045', 'Nguyen Thu', 'Air Conditioner Unit B-04', 'Lobby A1')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                    <button onclick="openApproveModal('#FR-2', 'Tran Thi B', 'Daikin Inverter AC 18000 BTU', 'R401', 'Medium', 'Air conditioner is running but blowing warm air into the classroom.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('#FR-2', 'Tran Thi B', 'Daikin Inverter AC 18000 BTU', 'R401')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
                   </div>
                 </td>
               </tr>
-              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-048'">
-                <td class="px-6 py-4 font-bold text-primary">REQ-048</td>
-                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">LV</div><span class="font-medium">Le Van</span></div></td>
-                <td class="px-6 py-4">Flickering Lighting Panel</td>
-                <td class="px-6 py-4 font-mono text-sm">Room 302</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full capitalize">Low</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 26, 2026</td>
+              <!-- Row 3: FR-7 -->
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=7'">
+                <td class="px-6 py-4 font-bold text-primary">#FR-7</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NA</div><span class="font-medium">Nguyen Van A</span></div></td>
+                <td class="px-6 py-4">Daikin Inverter AC 18000 BTU</td>
+                <td class="px-6 py-4 font-mono text-sm">R301</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 29, 2026</td>
                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="openApproveModal('REQ-048', 'Le Van', 'Flickering Lighting Panel', 'Room 302', 'LOW', 'Light panel flickers when turned on.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-                    <button onclick="openRejectModal('REQ-048', 'Le Van', 'Flickering Lighting Panel', 'Room 302')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                    <button onclick="openApproveModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R301', 'Medium', 'Air conditioner leaking water heavily onto student desks.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R301')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
                   </div>
                 </td>
               </tr>
@@ -167,47 +170,107 @@
             <tbody id="assignedTableBody" class="divide-y divide-outline-variant/20">
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="px-6 py-4 font-medium">1</td>
-                <td class="px-6 py-4 font-bold text-primary">WO-2024-001</td>
-                <td class="px-6 py-4">Sony Projector VPL-FHZ65</td>
-                <td class="px-6 py-4">Nguyen Van A</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap flex items-center gap-1 w-fit">⚠️ Rejected</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 20, 2026</td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-001'" class="px-3 py-1.5 bg-primary text-white rounded font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>
-                  </div>
+                <td class="px-6 py-4 font-bold text-primary">WO-1</td>
+                <td class="px-6 py-4">Sony Laser Projector VPL-PHZ60</td>
+                <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-amber-50 text-amber-700 text-[11px] font-bold rounded-full">In Progress</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 21, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=1'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
                 </td>
               </tr>
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="px-6 py-4 font-medium">2</td>
-                <td class="px-6 py-4 font-bold text-primary">WO-2024-005</td>
-                <td class="px-6 py-4">Air Conditioner</td>
-                <td class="px-6 py-4">Tran Thi B</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed-variant text-[11px] font-bold rounded-full">Assigned</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 21, 2026</td>
-                <td class="px-6 py-4">
-                  <div class="flex justify-center">
-                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-005'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors flex items-center justify-center mx-auto"><span class="material-symbols-outlined">visibility</span></button>
-                  </div>
+                <td class="px-6 py-4 font-bold text-primary">WO-2</td>
+                <td class="px-6 py-4">Samsung 75in Commercial TV</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 20, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=2'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
                 </td>
               </tr>
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="px-6 py-4 font-medium">3</td>
-                <td class="px-6 py-4 font-bold text-primary">WO-2024-008</td>
-                <td class="px-6 py-4">Lighting Panel</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-3</td>
+                <td class="px-6 py-4">Epson Visualizer Document Camera</td>
+                <td class="px-6 py-4">Vu Van F</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">⚠️ Rejected</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 21, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=3'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">4</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-4</td>
+                <td class="px-6 py-4">LG Commercial Display 55in</td>
                 <td class="px-6 py-4">Le Van C</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full">Accepted</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 19, 2026</td>
-                <td class="px-6 py-4">
-                  <div class="flex justify-center">
-                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-008'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors flex items-center justify-center mx-auto"><span class="material-symbols-outlined">visibility</span></button>
-                  </div>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-[11px] font-bold rounded-full">Received</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=4'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">5</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-5</td>
+                <td class="px-6 py-4">AKG Lavalier Wireless Mic</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-amber-50 text-amber-700 text-[11px] font-bold rounded-full">In Progress</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=5'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">6</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-6</td>
+                <td class="px-6 py-4">Panasonic Commercial TV 65in</td>
+                <td class="px-6 py-4">Vu Van F</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=6'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">7</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-7</td>
+                <td class="px-6 py-4">Shure Wireless Dual Microphone</td>
+                <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 15, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=7'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">8</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-8</td>
+                <td class="px-6 py-4">Cisco Gigabit Switch R601</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-50 text-brand-blue text-[11px] font-bold rounded-full">Assigned</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 23, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=8'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">9</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-10</td>
+                <td class="px-6 py-4">AKG Lavalier Wireless Mic</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jun 15, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=10'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
                 </td>
               </tr>
             </tbody>
           </table>
           <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
-            <p id="assignedPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-3 of 12 tasks (10 per page)</p>
+            <p id="assignedPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-9 of 9 tasks (10 per page)</p>
             <div class="flex items-center gap-2">
               <button class="p-2 rounded-lg border border-outline-variant text-outline hover:bg-surface-container transition-colors disabled:opacity-40" disabled><span class="material-symbols-outlined">chevron_left</span></button>
               <button class="w-10 h-10 bg-primary text-white font-bold rounded-lg shadow-sm">1</button>
@@ -269,38 +332,38 @@
       <div>
         <h3 class="text-label-lg font-bold text-on-surface mb-3 uppercase tracking-wider">Suggested Technicians</h3>
         <div class="space-y-2" id="techRadioGroup">
-          <!-- Tech Card 1 -->
+          <!-- Tech Card 1: Le Van C -->
           <label class="flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">NA</div>
-              <div>
-                <p class="text-body-sm font-bold">Nguyen Van A</p>
-                <p class="text-xs text-on-surface-variant">Expertise: Projector • <span class="text-primary font-medium">2 tasks active</span></p>
-              </div>
-            </div>
-            <input checked name="techRadio" value="Nguyen Van A" type="radio" class="text-primary focus:ring-primary">
-          </label>
-          <!-- Tech Card 2 -->
-          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">TB</div>
-              <div>
-                <p class="text-body-sm font-bold">Tran Thi B</p>
-                <p class="text-xs text-on-surface-variant">Expertise: Electronics • <span class="text-on-surface-variant">3 tasks active</span></p>
-              </div>
-            </div>
-            <input name="techRadio" value="Tran Thi B" type="radio" class="text-primary focus:ring-primary">
-          </label>
-          <!-- Tech Card 3 -->
-          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">LC</div>
               <div>
                 <p class="text-body-sm font-bold">Le Van C</p>
-                <p class="text-xs text-on-surface-variant">Expertise: General • <span class="text-primary font-medium">1 task active</span></p>
+                <p class="text-xs text-on-surface-variant">Specialty: Projector / Display • <span class="text-primary font-medium">1 active task</span></p>
               </div>
             </div>
-            <input name="techRadio" value="Le Van C" type="radio" class="text-primary focus:ring-primary">
+            <input checked name="techRadio" value="Le Van C" type="radio" class="text-primary focus:ring-primary">
+          </label>
+          <!-- Tech Card 2: Pham Thi D -->
+          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">PD</div>
+              <div>
+                <p class="text-body-sm font-bold">Pham Thi D</p>
+                <p class="text-xs text-on-surface-variant">Specialty: Audio / TV / Switch • <span class="text-on-surface-variant">1 active task</span></p>
+              </div>
+            </div>
+            <input name="techRadio" value="Pham Thi D" type="radio" class="text-primary focus:ring-primary">
+          </label>
+          <!-- Tech Card 3: Vu Van F -->
+          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">VF</div>
+              <div>
+                <p class="text-body-sm font-bold">Vu Van F</p>
+                <p class="text-xs text-on-surface-variant">Specialty: Microphone / Electronics • <span class="text-primary font-medium">0 active tasks</span></p>
+              </div>
+            </div>
+            <input name="techRadio" value="Vu Van F" type="radio" class="text-primary focus:ring-primary">
           </label>
         </div>
       </div>
@@ -310,8 +373,9 @@
         <label class="block text-label-md font-bold text-on-surface-variant mb-1">Or manually select technician</label>
         <select id="manualTechSelect" class="w-full border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary focus:border-primary outline-none">
           <option value="">Select from all technicians...</option>
-          <option value="Pham Van D">Pham Van D (HVAC)</option>
-          <option value="Hoang Thi E">Hoang Thi E (Plumbing)</option>
+          <option value="Le Van C">Le Van C (Projector / Display)</option>
+          <option value="Pham Thi D">Pham Thi D (Audio / TV / Switch)</option>
+          <option value="Vu Van F">Vu Van F (Microphone / Electronics)</option>
         </select>
       </div>
     </div>
@@ -353,7 +417,7 @@
           </div>
           <div>
             <p class="text-[11px] text-on-surface-variant uppercase font-bold">Reporter</p>
-            <p id="rejectModalReporter" class="font-medium text-on-surface">John Doe</p>
+            <p id="rejectModalReporter" class="font-medium text-on-surface">Tran Thi B</p>
           </div>
           <div>
             <p class="text-[11px] text-on-surface-variant uppercase font-bold">Request ID</p>
@@ -384,7 +448,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Elina', role: 'Manager' };
+  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn', role: 'Manager', user_id: 5 };
   try {
     user = Auth.guard('Manager');
   } catch (e) {
@@ -393,7 +457,7 @@
 
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
 
-  let currentActiveReqId = 'REQ-042';
+  let currentActiveReqId = '#FR-10';
 
   function switchTab(tabName) {
     const pendingView = document.getElementById('pending-requests-view');
@@ -449,7 +513,7 @@
     const btn = document.getElementById('assignConfirmBtn');
     const selectedRadio = document.querySelector('input[name="techRadio"]:checked');
     const manualSelect = document.getElementById('manualTechSelect').value;
-    const techName = manualSelect || (selectedRadio ? selectedRadio.value : 'Nguyen Van A');
+    const techName = manualSelect || (selectedRadio ? selectedRadio.value : 'Le Van C');
 
     btn.disabled = true;
     btn.textContent = 'Assigning...';

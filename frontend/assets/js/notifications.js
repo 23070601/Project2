@@ -9,7 +9,7 @@ const Notifications = (() => {
     {
       notification_id: 1,
       title: 'New WorkOrder assigned',
-      message: 'WO-2024-001 has been assigned to you.',
+      message: 'WO-1 has been assigned to you.',
       created_at: new Date(Date.now() - 5 * 60000).toISOString(),
       is_read: false,
       order_id: 1,
@@ -18,7 +18,7 @@ const Notifications = (() => {
     {
       notification_id: 2,
       title: 'WorkOrder priority updated',
-      message: 'WO-2024-005 priority changed to High.',
+      message: 'WO-5 priority changed to High.',
       created_at: new Date(Date.now() - 30 * 60000).toISOString(),
       is_read: false,
       order_id: 5,
@@ -27,7 +27,7 @@ const Notifications = (() => {
     {
       notification_id: 3,
       title: 'Repair report submitted',
-      message: 'WO-2024-008 repair report was submitted.',
+      message: 'WO-8 repair report was submitted.',
       created_at: new Date(Date.now() - 120 * 60000).toISOString(),
       is_read: true,
       order_id: 8,

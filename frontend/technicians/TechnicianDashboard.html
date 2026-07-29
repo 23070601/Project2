@@ -97,10 +97,10 @@
           <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
             <div class="flex justify-between items-start">
               <div>
-                <h4 class="text-body-md font-bold text-on-surface">WO-2024-001 - Sony Projector</h4>
+                <h4 class="text-body-md font-bold text-on-surface">WO-1 - Sony Laser Projector VPL-PHZ60</h4>
                 <div class="flex items-center gap-4 mt-1">
                   <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room P512
+                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room R302
                   </span>
                   <span class="px-2 py-0.5 rounded-full bg-error-container/40 text-error text-[10px] font-bold">High Priority</span>
                 </div>
@@ -115,15 +115,15 @@
           <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
             <div class="flex justify-between items-start">
               <div>
-                <h4 class="text-body-md font-bold text-on-surface">WO-2024-005 - Air Conditioner</h4>
+                <h4 class="text-body-md font-bold text-on-surface">WO-5 - AKG Lavalier Wireless Mic</h4>
                 <div class="flex items-center gap-4 mt-1">
                   <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room A101
+                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room R402
                   </span>
                   <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">Medium Priority</span>
                 </div>
               </div>
-              <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">In Progress</span>
             </div>
           </div>
         </div>
@@ -133,12 +133,12 @@
           <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
             <div class="flex justify-between items-start">
               <div>
-                <h4 class="text-body-md font-bold text-on-surface">WO-2024-008 - Printer Maintenance</h4>
+                <h4 class="text-body-md font-bold text-on-surface">WO-8 - Cisco Gigabit Switch R601</h4>
                 <div class="flex items-center gap-4 mt-1">
                   <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room B203
+                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room R601
                   </span>
-                  <span class="px-2 py-0.5 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold">Low Priority</span>
+                  <span class="px-2 py-0.5 rounded-full bg-error-container/40 text-error text-[10px] font-bold">High Priority</span>
                 </div>
               </div>
               <span class="px-3 py-1 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>
@@ -160,15 +160,16 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let currentUser = { full_name: 'Nguyen Van A' };
+  let currentUser = { full_name: 'Le Van C', role: 'Technician' };
   try {
-    currentUser = Auth.guard('Technician');
+    const user = Auth.guard('Technician');
+    if (user) currentUser = user;
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }
 
   Layout.init({ role: 'Technician', activePage: 'TechnicianDashboard' });
-  document.getElementById('welcomeHeading').textContent = `Welcome back, ${currentUser.full_name || 'Nguyen Van A'}!`;
+  document.getElementById('welcomeHeading').textContent = `Welcome back, ${currentUser.full_name || 'Technician'}!`;
 
   function getPriorityBadgeHtml(priority) {
     const p = (priority || '').toLowerCase();
@@ -212,7 +213,8 @@
     'tech.d@vnuis.edu.vn': [
       { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted' },
       { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted' },
-      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending' }
+      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending' },
+      { order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
     ],
     'tech.f@vnuis.edu.vn': [
       { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected' },

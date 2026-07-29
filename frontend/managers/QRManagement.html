@@ -36,19 +36,19 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between">
         <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Total QR Codes</p>
-        <p id="statTotalQr" class="text-headline-md font-headline-md text-on-surface">45</p>
+        <p id="statTotalQr" class="text-headline-md font-headline-md text-on-surface">12</p>
       </div>
       <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between">
         <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Active QR Codes</p>
-        <p id="statActiveQr" class="text-headline-md font-headline-md text-on-surface">42</p>
+        <p id="statActiveQr" class="text-headline-md font-headline-md text-on-surface">12</p>
       </div>
       <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between">
         <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Classrooms Connected</p>
-        <p id="statRoomsConnected" class="text-headline-md font-headline-md text-on-surface">42</p>
+        <p id="statRoomsConnected" class="text-headline-md font-headline-md text-on-surface">12</p>
       </div>
       <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between">
-        <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Recently Generated</p>
-        <p id="statRecentGenerated" class="text-headline-md font-headline-md text-on-surface">5</p>
+        <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Buildings</p>
+        <p id="statBuildings" class="text-headline-md font-headline-md text-on-surface">1 <span class="text-body-sm font-normal text-on-surface-variant">(Building R)</span></p>
       </div>
     </div>
 
@@ -100,14 +100,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">1</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-001</td>
-            <td class="p-4 text-body-sm">Classroom 401</td>
+            <td class="p-4 text-body-sm">Room R401</td>
             <td class="p-4 text-body-sm">Floor 4</td>
-            <td class="p-4 text-body-sm">North Wing</td>
-            <td class="p-4 text-body-sm">Oct 12, 2023</td>
+            <td class="p-4 text-body-sm">Building R - Floor 4</td>
+            <td class="p-4 text-body-sm">Oct 12, 2025</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-001', 'CR-401', 'Classroom 401', 'Floor 4', 'ACTIVE', '20 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-001', 'R401', 'Room R401', 'Floor 4', 'ACTIVE', '20 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -116,14 +116,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">2</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-002</td>
-            <td class="p-4 text-body-sm">Classroom 302</td>
+            <td class="p-4 text-body-sm">Room R302</td>
             <td class="p-4 text-body-sm">Floor 3</td>
-            <td class="p-4 text-body-sm">South Wing</td>
-            <td class="p-4 text-body-sm">Oct 15, 2023</td>
+            <td class="p-4 text-body-sm">Building R - Floor 3</td>
+            <td class="p-4 text-body-sm">Oct 15, 2025</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-002', 'CR-302', 'Classroom 302', 'Floor 3', 'ACTIVE', '15 Oct 2023')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-002', 'R302', 'Room R302', 'Floor 3', 'ACTIVE', '15 Oct 2025')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -132,14 +132,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">3</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-003</td>
-            <td class="p-4 text-body-sm">Lab 205</td>
-            <td class="p-4 text-body-sm">Floor 2</td>
-            <td class="p-4 text-body-sm">Building B - Floor 2</td>
+            <td class="p-4 text-body-sm">Room R101</td>
+            <td class="p-4 text-body-sm">Floor 1</td>
+            <td class="p-4 text-body-sm">Building R - Floor 1</td>
             <td class="p-4 text-body-sm">Jul 18, 2026</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-003', 'CR-205', 'Lab 205', 'Floor 2', 'ACTIVE', '18 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-003', 'R101', 'Room R101', 'Floor 1', 'ACTIVE', '18 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -148,14 +148,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">4</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-004</td>
-            <td class="p-4 text-body-sm">Lecture Hall C1</td>
-            <td class="p-4 text-body-sm">Floor 1</td>
-            <td class="p-4 text-body-sm">Building C - Floor 1</td>
+            <td class="p-4 text-body-sm">Room R512</td>
+            <td class="p-4 text-body-sm">Floor 5</td>
+            <td class="p-4 text-body-sm">Building R - Floor 5</td>
             <td class="p-4 text-body-sm">Jul 15, 2026</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-error/10 text-error rounded-full text-[10px] font-bold uppercase">Inactive</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-004', 'CR-C1', 'Lecture Hall C1', 'Floor 1', 'INACTIVE', '15 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-004', 'R512', 'Room R512', 'Floor 5', 'INACTIVE', '15 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -164,14 +164,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">5</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-005</td>
-            <td class="p-4 text-body-sm">Library - Zone A</td>
-            <td class="p-4 text-body-sm">Floor 2</td>
-            <td class="p-4 text-body-sm">Main Building - Floor 2</td>
-            <td class="p-4 text-body-sm">Jul 10, 2026</td>
+            <td class="p-4 text-body-sm">Room R102</td>
+            <td class="p-4 text-body-sm">Floor 1</td>
+            <td class="p-4 text-body-sm">Building R - Floor 1</td>
+            <td class="p-4 text-body-sm">Jul 20, 2026</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-005', 'CR-LIB-A', 'Library - Zone A', 'Floor 2', 'ACTIVE', '10 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-005', 'R102', 'Room R102', 'Floor 1', 'ACTIVE', '20 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -180,14 +180,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">6</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-006</td>
-            <td class="p-4 text-body-sm">Seminar Room 102</td>
+            <td class="p-4 text-body-sm">Room R103</td>
             <td class="p-4 text-body-sm">Floor 1</td>
-            <td class="p-4 text-body-sm">Building A - East</td>
-            <td class="p-4 text-body-sm">Aug 05, 2026</td>
+            <td class="p-4 text-body-sm">Building R - Floor 1</td>
+            <td class="p-4 text-body-sm">Jul 15, 2026</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-006', 'CR-102', 'Seminar Room 102', 'Floor 1', 'ACTIVE', '05 Aug 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-006', 'R103', 'Room R103', 'Floor 1', 'ACTIVE', '15 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -196,14 +196,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">7</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-007</td>
-            <td class="p-4 text-body-sm">Computer Lab 3</td>
+            <td class="p-4 text-body-sm">Room R301</td>
             <td class="p-4 text-body-sm">Floor 3</td>
-            <td class="p-4 text-body-sm">IT Block</td>
-            <td class="p-4 text-body-sm">Aug 12, 2026</td>
+            <td class="p-4 text-body-sm">Building R - Floor 3</td>
+            <td class="p-4 text-body-sm">Jul 22, 2026</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-007', 'CR-LAB3', 'Computer Lab 3', 'Floor 3', 'ACTIVE', '12 Aug 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-007', 'R301', 'Room R301', 'Floor 3', 'ACTIVE', '22 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -212,14 +212,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">8</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-008</td>
-            <td class="p-4 text-body-sm">Hall 101</td>
-            <td class="p-4 text-body-sm">Floor 1</td>
-            <td class="p-4 text-body-sm">Main Auditorium</td>
-            <td class="p-4 text-body-sm">Sep 01, 2026</td>
-            <td class="p-4"><span class="px-2.5 py-1 bg-error/10 text-error rounded-full text-[10px] font-bold uppercase">Inactive</span></td>
+            <td class="p-4 text-body-sm">Room R305</td>
+            <td class="p-4 text-body-sm">Floor 3</td>
+            <td class="p-4 text-body-sm">Building R - Floor 3</td>
+            <td class="p-4 text-body-sm">Jul 19, 2026</td>
+            <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-008', 'CR-101', 'Hall 101', 'Floor 1', 'INACTIVE', '01 Sep 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-008', 'R305', 'Room R305', 'Floor 3', 'ACTIVE', '19 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -228,14 +228,14 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="p-4 text-body-sm">9</td>
             <td class="p-4 text-body-sm font-medium text-primary">QR-009</td>
-            <td class="p-4 text-body-sm">Faculty Lounge</td>
+            <td class="p-4 text-body-sm">Room R402</td>
             <td class="p-4 text-body-sm">Floor 4</td>
-            <td class="p-4 text-body-sm">Admin Building</td>
-            <td class="p-4 text-body-sm">Sep 10, 2026</td>
+            <td class="p-4 text-body-sm">Building R - Floor 4</td>
+            <td class="p-4 text-body-sm">Jul 22, 2026</td>
             <td class="p-4"><span class="px-2.5 py-1 bg-green-600/10 text-green-600 rounded-full text-[10px] font-bold uppercase">Active</span></td>
             <td class="p-4">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="openViewQrModal('QR-009', 'CR-FL', 'Faculty Lounge', 'Floor 4', 'ACTIVE', '10 Sep 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                <button onclick="openViewQrModal('QR-009', 'R402', 'Room R402', 'Floor 4', 'ACTIVE', '22 Jul 2026')" title="View QR Code" class="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button>
               </div>
             </td>
           </tr>
@@ -411,7 +411,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Elina', role: 'Manager' };
+  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn', role: 'Manager', user_id: 5 };
   try {
     user = Auth.guard('Manager');
   } catch (e) {
