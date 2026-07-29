@@ -150,4 +150,39 @@ async function updateStatus(req, res) {
   ok(res, updated);
 }
 
-module.exports = { list, getById, create, updateStatus };
+async function remove(req, res) {
+  const reportId = toPositiveInt(req.params.id, 'id');
+  const report = await faultReportsRepository.findById(reportId);
+  if (!report) throw new ApiError(404, 'Fault report not found');
+
+  const currentUserId = req.user?.userId || Number(req.headers['x-user-id'] || 0);
+
+  // Cho phép xóa nếu là người tạo báo cáo HOẶC là Manager
+  const isOwner = Number(report.reporter_id) === Number(currentUserId);
+  const isManager = req.user.role === ROLES.MANAGER;
+
+  if (!isOwner && !isManager) {
+    throw new ApiError(403, 'You can only delete your own fault report');
+  }
+
+  const pendingStatuses = ['Pending', 'Pending Approval'];
+  if (!pendingStatuses.includes(report.status)) {
+    throw new ApiError(400, 'Only reports in Pending status can be deleted');
+  }
+
+  await faultReportsRepository.remove(reportId);
+
+  await auditLogRepository.log({
+    userId: currentUserId || 1,
+    actionType: 'DELETE',
+    entityTable: 'FaultReports',
+    entityId: reportId,
+    roomId: report.room_id,
+    assetId: report.asset_id,
+    description: `User ${req.user.email} deleted pending report #${reportId}`,
+  });
+
+  ok(res, { message: 'Fault report deleted successfully' });
+}
+
+module.exports = { list, getById, create, updateStatus, remove };

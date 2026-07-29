@@ -11,12 +11,14 @@ router.use(authenticate);
 
 // Đọc: mọi vai trò (User tạo report chọn asset, Technician tra cứu AssetLookup/AssetList/AssetDetails)
 router.get('/replacement-alerts', requireRole(ROLES.MANAGER), asyncHandler(controller.replacementAlerts));
+router.get('/all', requireRole(ROLES.MANAGER), asyncHandler(controller.listAll));
 router.get('/', asyncHandler(controller.list));
 router.get('/:id', asyncHandler(controller.getById));
 
 // Ghi: chỉ Manager (AddNewAssetClass.html, EditAssetClass.html)
 router.post('/', requireRole(ROLES.MANAGER), asyncHandler(controller.create));
 router.patch('/:id', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.update));
+router.put('/:id', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.update));
 router.delete('/:id', requireRole(ROLES.MANAGER), asyncHandler(controller.remove));
 
 module.exports = router;

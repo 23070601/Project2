@@ -28,4 +28,7 @@ router.patch('/:id/status',
   asyncHandler(controller.updateStatus)
 );
 
+// Users delete pending report
+router.delete('/:id', asyncHandler(controller.remove));
+
 module.exports = router;

@@ -44,7 +44,7 @@
       </div>
 
       <!-- Priority Filter -->
-      <div class="w-full md:w-48">
+      <div class="w-full md:w-44">
         <label class="block text-label-md font-bold text-on-surface mb-2">Priority</label>
         <select id="priorityFilter" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary outline-none" onchange="filterTasksTable()">
           <option value="">All Priorities</option>
@@ -55,7 +55,7 @@
       </div>
 
       <!-- Status Filter -->
-      <div class="w-full md:w-48">
+      <div class="w-full md:w-36">
         <label class="block text-label-md font-bold text-on-surface mb-2">Status</label>
         <select id="statusFilter" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary outline-none" onchange="filterTasksTable()">
           <option value="">All Statuses</option>
@@ -67,13 +67,33 @@
       </div>
     </div>
 
+    <!-- Quick Floor & Room Pills Bar -->
+    <div id="quickRoomPillsContainer" class="flex flex-wrap items-center gap-2 mb-8 p-4 bg-white rounded-xl border border-outline-variant/20 shadow-xs">
+      <span class="text-xs font-bold text-slate-600 flex items-center gap-1 mr-2"><span class="material-symbols-outlined text-[16px] text-primary">stairs</span> Quick Floor Filter:</span>
+      <button onclick="selectQuickFloorPill('', this)" class="floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all">All Floors</button>
+      <!-- Floor pills rendered dynamically -->
+    </div>
+
     <!-- WorkOrders Table Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden">
-      <div class="p-6 border-b border-outline-variant/10">
+      <div class="p-6 border-b border-outline-variant/10 flex items-center justify-between">
         <h3 class="text-headline-sm font-headline-sm text-on-surface">My Assigned WorkOrders</h3>
+        
+        <!-- View Toggle Controls -->
+        <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/20">
+          <button id="viewToggleTableBtn" onclick="switchTaskViewMode('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-primary shadow-xs flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">table_rows</span>
+            <span class="hidden sm:inline">Table View</span>
+          </button>
+          <button id="viewToggleGridBtn" onclick="switchTaskViewMode('grid')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-primary flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">grid_view</span>
+            <span class="hidden sm:inline">Card View</span>
+          </button>
+        </div>
       </div>
 
-      <div class="overflow-x-auto">
+      <!-- Table View Container -->
+      <div id="tableViewContainer" class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead class="bg-surface-container-low border-b border-outline-variant/20">
             <tr class="text-label-md font-bold text-on-surface-variant uppercase tracking-wider text-center">
@@ -91,15 +111,18 @@
         </table>
       </div>
 
+      <!-- Card Grid View Container -->
+      <div id="gridViewContainer" class="hidden p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-slate-50/50">
+        <!-- Dynamic Cards rendered here -->
+      </div>
+
       <!-- Table Footer / Pagination -->
       <div class="p-6 border-t border-outline-variant/10 flex items-center justify-between">
-        <p id="tablePaginationInfo" class="text-label-md text-on-surface-variant">Showing 1 to 3 of 12 entries</p>
-        <div class="flex items-center gap-2">
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">Previous</button>
+        <p id="tablePaginationInfo" class="text-label-md text-on-surface-variant">Showing 1 entry</p>
+        <div id="tablePaginationControls" class="flex items-center gap-2">
+          <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>
           <button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">1</button>
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">2</button>
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">3</button>
-          <button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">Next</button>
+          <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>
         </div>
       </div>
     </div>
@@ -118,13 +141,13 @@
     </button>
 
     <!-- Modal Title -->
-    <h3 class="text-title-lg font-bold text-on-surface">Reject WorkOrder — <span id="rejectModalOrderTitleId">WO-2024-001</span></h3>
+    <h3 class="text-title-lg font-bold text-on-surface">Reject WorkOrder — <span id="rejectModalOrderTitleId">WO-1</span></h3>
 
     <!-- WorkOrder Details Summary Card -->
     <div class="bg-surface-container-low p-5 rounded-2xl grid grid-cols-2 gap-y-4 gap-x-6 text-left">
       <div>
         <p class="text-label-sm text-on-surface-variant font-medium mb-0.5">WorkOrder ID</p>
-        <p id="rejectModalOrderId" class="text-body-md font-bold text-on-surface">WO-2024-001</p>
+        <p id="rejectModalOrderId" class="text-body-md font-bold text-on-surface">WO-1</p>
       </div>
       <div>
         <p class="text-label-sm text-on-surface-variant font-medium mb-0.5">Equipment</p>
@@ -167,9 +190,10 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let currentUser = { full_name: 'Nguyen Van A' };
+  let currentUser = { full_name: 'Le Van C', role: 'Technician' };
   try {
-    currentUser = Auth.guard('Technician');
+    const user = Auth.guard('Technician');
+    if (user) currentUser = user;
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }
@@ -177,9 +201,82 @@
   Layout.init({ role: 'Technician', activePage: 'AssignedTasks' });
 
   let activeRejectOrderId = null;
+  let currentTasks = [];
+
+  function getStoredWorkOrders() {
+    try {
+      const stored = localStorage.getItem('vnuis_work_orders');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return null;
+  }
+
+  function saveStoredWorkOrders(tasks) {
+    localStorage.setItem('vnuis_work_orders', JSON.stringify(tasks));
+  }
+
+  function getDisplayTaskStatus(task) {
+    if (!task) return '';
+    if (task.technician_response === 'Rejected') return 'Rejected';
+    return task.task_status || '';
+  }
+
+  function getFloorFromRoom(roomName) {
+    if (!roomName) return 'Other';
+    const match = String(roomName).match(/(\d+)/);
+    if (!match) return 'Other';
+    const numStr = match[1];
+    if (numStr.length >= 3) {
+      return `Floor ${numStr.substring(0, numStr.length - 2)}`;
+    }
+    return `Floor ${numStr[0]}`;
+  }
+
+  let activeQuickFloorFilter = '';
+
+  function updatePaginationControls(visibleCount) {
+    const info = document.getElementById('tablePaginationInfo');
+    const controls = document.getElementById('tablePaginationControls');
+
+    if (visibleCount === 0) {
+      if (info) info.textContent = 'Showing 0 matching entries';
+      if (controls) controls.innerHTML = '';
+      return;
+    }
+
+    const pageSize = 10;
+    const totalPages = Math.ceil(visibleCount / pageSize);
+
+    if (info) {
+      info.textContent = `Showing 1 to ${visibleCount} of ${visibleCount} matching entry${visibleCount > 1 ? 's' : ''}`;
+    }
+
+    if (!controls) return;
+
+    if (totalPages <= 1) {
+      controls.innerHTML = `
+        <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>
+        <button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">1</button>
+        <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>
+      `;
+      return;
+    }
+
+    let buttonsHtml = `<button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>`;
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === 1) {
+        buttonsHtml += `<button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">${p}</button>`;
+      } else {
+        buttonsHtml += `<button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">${p}</button>`;
+      }
+    }
+    buttonsHtml += `<button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>`;
+    controls.innerHTML = buttonsHtml;
+  }
 
   function filterTasksTable() {
     const search = document.getElementById('taskSearchInput').value.toLowerCase().trim();
+    const floor = activeQuickFloorFilter.toLowerCase();
     const priority = document.getElementById('priorityFilter').value;
     const status = document.getElementById('statusFilter').value;
     const rows = document.querySelectorAll('#taskTableBody .task-row');
@@ -189,14 +286,16 @@
       const rowId = row.dataset.id.toLowerCase();
       const rowEquip = row.dataset.equipment.toLowerCase();
       const rowRoom = row.dataset.room.toLowerCase();
+      const rowFloor = getFloorFromRoom(row.dataset.room).toLowerCase();
       const rowPriority = row.dataset.priority;
       const rowStatus = row.dataset.status;
 
       const matchesSearch = !search || rowId.includes(search) || rowEquip.includes(search) || rowRoom.includes(search);
+      const matchesFloor = !floor || rowFloor === floor;
       const matchesPriority = !priority || rowPriority === priority;
       const matchesStatus = !status || rowStatus === status;
 
-      if (matchesSearch && matchesPriority && matchesStatus) {
+      if (matchesSearch && matchesFloor && matchesPriority && matchesStatus) {
         row.style.display = '';
         visibleCount++;
       } else {
@@ -204,12 +303,13 @@
       }
     });
 
-    const info = document.getElementById('tablePaginationInfo');
-    if (info) {
-      info.textContent = `Showing 1 to ${visibleCount} of ${rows.length} entries`;
+    updatePaginationControls(visibleCount);
+    if (currentViewMode === 'grid') {
+      renderTaskGridCards();
     }
   }
 
+<<<<<<< HEAD
   async function acceptTaskRow(btnEl, orderId) {
     try {
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
@@ -220,6 +320,111 @@
     } catch (e) {
       console.error('Failed to accept task', e);
       alert('Unable to accept this work order right now.');
+=======
+  let currentViewMode = 'table';
+
+  function switchTaskViewMode(mode) {
+    currentViewMode = mode;
+    const tableContainer = document.getElementById('tableViewContainer');
+    const gridContainer = document.getElementById('gridViewContainer');
+    const tableBtn = document.getElementById('viewToggleTableBtn');
+    const gridBtn = document.getElementById('viewToggleGridBtn');
+
+    if (mode === 'grid') {
+      tableContainer.classList.add('hidden');
+      gridContainer.classList.remove('hidden');
+      tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-primary flex items-center gap-1.5 transition-all';
+      gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-primary shadow-xs flex items-center gap-1.5 transition-all';
+      renderTaskGridCards();
+    } else {
+      gridContainer.classList.add('hidden');
+      tableContainer.classList.remove('hidden');
+      gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-primary flex items-center gap-1.5 transition-all';
+      tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-primary shadow-xs flex items-center gap-1.5 transition-all';
+    }
+  }
+
+  function renderTaskGridCards() {
+    const gridContainer = document.getElementById('gridViewContainer');
+    if (!gridContainer) return;
+
+    const visibleRows = document.querySelectorAll('#taskTableBody .task-row:not([style*="display: none"])');
+    if (visibleRows.length === 0) {
+      gridContainer.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 font-medium">No matching work orders found.</div>`;
+      return;
+    }
+
+    gridContainer.innerHTML = Array.from(visibleRows).map(row => {
+      const id = row.dataset.id;
+      const cleanId = String(id).replace(/^WO-/, '');
+      const equipment = row.dataset.equipment;
+      const room = row.dataset.room;
+      const priority = row.dataset.priority;
+      const status = row.dataset.status;
+
+      return `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between gap-4 hover:shadow-md transition-all">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center font-bold shrink-0">
+                <span class="material-symbols-outlined text-[20px]">build</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-body-md font-bold text-on-surface">${id}</span>
+                <span class="text-xs text-slate-400 font-medium">${UiHelpers.escapeHtml(equipment)}</span>
+              </div>
+            </div>
+            ${getPriorityBadgeHtml(priority)}
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-slate-100 text-slate-600">
+            <div><span class="font-bold text-slate-800">Room:</span> ${UiHelpers.escapeHtml(room || 'Room')}</div>
+            <div><span class="font-bold text-slate-800">Status:</span> ${getStatusBadgeHtml(status)}</div>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <button onclick="location.href='WorkOrderDetails.html?id=${cleanId}'" class="flex-1 py-2 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary-container transition-colors flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">visibility</span>
+              <span>View Details</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.switchTaskViewMode = switchTaskViewMode;
+
+  function selectQuickFloorPill(floorName, btnEl) {
+    document.querySelectorAll('.floor-pill-btn').forEach(btn => {
+      btn.className = 'floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
+    });
+    if (btnEl) {
+      btnEl.className = 'floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all';
+    }
+
+    activeQuickFloorFilter = floorName;
+    filterTasksTable();
+  }
+
+  async function acceptTaskRow(btnEl, orderId) {
+    const cleanId = String(orderId).replace(/^WO-/, '');
+    let apiSuccess = false;
+    try {
+      if (window.Api) {
+        await Api.patch(`/work-orders/${cleanId}/response`, { technicianResponse: 'Accepted' });
+        apiSuccess = true;
+      }
+    } catch (e) {
+      console.error('Accept task API error:', e);
+    }
+
+    if (apiSuccess) {
+      await loadTasksFromApi();
+      alert(`Work order WO-${cleanId} accepted successfully!`);
+    } else {
+      alert(`Unable to accept work order WO-${cleanId}. Please try again.`);
+>>>>>>> Linh
     }
   }
 
@@ -284,12 +489,16 @@
       return;
     }
 
+    const cleanId = String(activeRejectOrderId).replace(/^WO-/, '');
+
+    let apiSuccess = false;
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        await Api.patch(`/work-orders/${activeRejectOrderId}/response`, {
+      if (window.Api) {
+        await Api.patch(`/work-orders/${cleanId}/response`, {
           technicianResponse: 'Rejected',
           rejectionReason: reason,
         });
+<<<<<<< HEAD
         closeRejectModal();
         await loadTasksFromApi();
         alert(`Work order WO-${activeRejectOrderId} rejected.`);
@@ -300,6 +509,42 @@
     }
   }
 
+=======
+        apiSuccess = true;
+      }
+    } catch (err) {
+      console.error('Reject task API error:', err);
+    }
+
+    closeRejectModal();
+
+    if (apiSuccess) {
+      await loadTasksFromApi();
+      alert(`Work order WO-${cleanId} rejected.`);
+    } else {
+      alert(`Unable to reject work order WO-${cleanId}. Please try again.`);
+    }
+  }
+
+  const TASKS_BY_EMAIL = {
+    'tech.c@vnuis.edu.vn': [
+      { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.' },
+      { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.' },
+      { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.' }
+    ],
+    'tech.d@vnuis.edu.vn': [
+      { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.' },
+      { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.' },
+      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending', assigned_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.' },
+      { order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-06-15 09:00:00', description: 'Wireless mic battery springs replaced and tested in Room R504.' }
+    ],
+    'tech.f@vnuis.edu.vn': [
+      { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected', assigned_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.' },
+      { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.' }
+    ]
+  };
+
+>>>>>>> Linh
   async function loadTasksFromApi() {
     const tbody = document.getElementById('taskTableBody');
     if (!tbody) return;
@@ -307,14 +552,21 @@
     tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant">Loading assigned work orders...</td></tr>';
 
     let tasks = [];
+    let loadedFromApi = false;
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
+<<<<<<< HEAD
         if (Array.isArray(data)) {
+=======
+        if (data && Array.isArray(data)) {
+>>>>>>> Linh
           tasks = data;
+          loadedFromApi = true;
         }
       }
     } catch (err) {
+<<<<<<< HEAD
       console.log('API fetch error', err);
       tasks = [];
     }
@@ -326,20 +578,74 @@
 
     tbody.innerHTML = tasks.map(o => `
       <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority || ''}" data-status="${o.task_status || ''}" data-assigned-at="${o.assigned_at || ''}">
+=======
+      console.warn('API fetch error, using local fallback:', err);
+    }
+
+    if (loadedFromApi) {
+      saveStoredWorkOrders(tasks);
+    } else {
+      const stored = getStoredWorkOrders();
+      if (stored && Array.isArray(stored) && stored.length > 0) {
+        tasks = stored;
+      } else {
+        const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
+        tasks = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+      }
+    }
+
+    currentTasks = tasks;
+
+    const activeDisplayTasks = currentTasks.filter(o => getDisplayTaskStatus(o) !== 'Rejected');
+
+    const tbody = document.getElementById('taskTableBody');
+    tbody.innerHTML = activeDisplayTasks.map(o => {
+      const displayStatus = getDisplayTaskStatus(o);
+      const isAssigned = o.technician_response === 'Pending' && displayStatus === 'Assigned';
+      return `
+      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${displayStatus}" data-assigned-at="${o.assigned_at || ''}">
+>>>>>>> Linh
         <td class="px-6 py-4 text-body-sm font-bold text-center">WO-${o.order_id}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.room_name || 'Room')}</td>
         <td class="px-6 py-4 text-center">${getPriorityBadgeHtml(o.priority)}</td>
-        <td class="px-6 py-4 text-center">${getStatusBadgeHtml(o.task_status)}</td>
+        <td class="px-6 py-4 text-center">${getStatusBadgeHtml(o)}</td>
         <td class="px-6 py-4 flex items-center gap-3 text-center justify-center">
-          ${o.technician_response === 'Pending' ? `
+          ${isAssigned ? `
             <button onclick="acceptTaskRow(this, '${o.order_id}')" class="text-green-600 hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="Accept"><span class="material-symbols-outlined">check_circle</span></button>
-            <button onclick="openRejectModal('${o.order_id}')" class="text-error hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="Reject"><span class="material-symbols-outlined">block</span></button>
+            <button onclick="openRejectModal('${o.order_id}')" class="text-error hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="Reject"><span class="material-symbols-outlined">cancel</span></button>
           ` : ''}
           <button onclick="location.href='WorkOrderDetails.html?id=${o.order_id}'" class="text-primary hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="View Details"><span class="material-symbols-outlined">visibility</span></button>
         </td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
+
+    // Populate Floor & Room Select Dropdowns & Quick Floor Pills dynamically
+    const rooms = [...new Set(activeDisplayTasks.map(o => o.room_name).filter(Boolean))];
+    const floors = [...new Set(activeDisplayTasks.map(o => getFloorFromRoom(o.room_name)).filter(Boolean))].sort();
+
+    const floorSelect = document.getElementById('floorFilter');
+    if (floorSelect) {
+      floorSelect.innerHTML = '<option value="">All Floors</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
+    }
+
+    const roomSelect = document.getElementById('roomFilter');
+    if (roomSelect) {
+      roomSelect.innerHTML = '<option value="">All Rooms</option>' + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+    }
+
+    const pillsBox = document.getElementById('quickRoomPillsContainer');
+    if (pillsBox) {
+      pillsBox.innerHTML = `
+        <span class="text-xs font-bold text-slate-600 flex items-center gap-1 mr-2"><span class="material-symbols-outlined text-[16px] text-primary">stairs</span> Quick Floor Filter:</span>
+        <button onclick="selectQuickFloorPill('', this)" class="floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all">All Floors (${activeDisplayTasks.length})</button>
+        ${floors.map(f => {
+          const count = activeDisplayTasks.filter(o => getFloorFromRoom(o.room_name) === f).length;
+          return `<button onclick="selectQuickFloorPill('${f}', this)" class="floor-pill-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">${f} (${count})</button>`;
+        }).join('')}
+      `;
+    }
 
     filterTasksTable();
   }
@@ -351,15 +657,46 @@
     return '<span class="px-2 py-0.5 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold">Low</span>';
   }
 
-  function getStatusBadgeHtml(s) {
-    s = (s || '').toLowerCase();
+  function getStatusBadgeHtml(taskOrStatus) {
+    const raw = typeof taskOrStatus === 'object' && taskOrStatus !== null
+      ? (taskOrStatus.technician_response === 'Rejected' ? 'Rejected' : (taskOrStatus.task_status || ''))
+      : (taskOrStatus || '');
+    const s = (raw || '').toLowerCase();
     if (s.includes('progress')) return '<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">In Progress</span>';
     if (s.includes('received')) return '<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>';
     if (s.includes('completed')) return '<span class="px-2 py-0.5 rounded-full bg-green-50 text-green-600 text-[10px] font-bold">Completed</span>';
-    return '<span class="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>';
+    if (s.includes('closed')) return '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Closed</span>';
+    if (s.includes('rejected')) return '<span class="px-2 py-0.5 rounded-full bg-error-container/40 text-error text-[10px] font-bold">Rejected</span>';
+    if (s.includes('assigned')) return '<span class="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>';
+    return `<span class="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">${UiHelpers.escapeHtml(raw)}</span>`;
   }
 
   loadTasksFromApi();
+</script>
+
+<!-- Back to Top Floating Button -->
+<button id="backToTopBtn" onclick="scrollToTopMain()" class="hidden fixed bottom-8 right-8 z-[999] p-3.5 bg-primary text-white rounded-full shadow-2xl hover:bg-primary-container transition-all flex items-center justify-center border-2 border-white" title="Back to top">
+  <span class="material-symbols-outlined text-[24px]">arrow_upward</span>
+</button>
+<script>
+  function scrollToTopMain() {
+    const mainEl = document.querySelector('main');
+    if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.addEventListener('scroll', () => {
+        const btn = document.getElementById('backToTopBtn');
+        if (btn) {
+          if (mainEl.scrollTop > 80) btn.classList.remove('hidden');
+          else btn.classList.add('hidden');
+        }
+      });
+    }
+  });
 </script>
 </body>
 </html>

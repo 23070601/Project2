@@ -36,11 +36,13 @@ async function findById(orderId) {
   if (order && order.asset_id) {
     try {
       const [historyRows] = await pool.execute(
-        `SELECT wo.*, tech.full_name AS technician_name
+        `SELECT wo.*, tech.full_name AS technician_name, mgr.full_name AS manager_name, fr.description AS reported_issue, fr.report_id, reporter.full_name AS reporter_name
          FROM WorkOrders wo
          JOIN Users tech ON tech.user_id = wo.technician_id
+         LEFT JOIN Users mgr ON mgr.user_id = wo.manager_id
          JOIN FaultReports fr ON fr.report_id = wo.report_id
-         WHERE fr.asset_id = ? AND wo.order_id != ?
+         LEFT JOIN Users reporter ON reporter.user_id = fr.reporter_id
+         WHERE fr.asset_id = ? AND wo.task_status IN ('Completed', 'Closed') AND wo.order_id != ?
          ORDER BY wo.assigned_at DESC LIMIT 5`,
         [order.asset_id, orderId]
       );
@@ -119,6 +121,38 @@ async function getStatusHistory(orderId) {
   return rows;
 }
 
+async function reassign(orderId, technicianId) {
+  await pool.execute(
+    `UPDATE WorkOrders SET technician_id = ?, technician_response = 'Pending', task_status = 'Assigned', rejection_reason = NULL WHERE order_id = ?`,
+    [technicianId, orderId]
+  );
+  await pool.execute(
+    `INSERT INTO WorkOrderStatusHistory (order_id, old_status, new_status, note)
+     VALUES (?, NULL, 'Assigned', 'WorkOrder reassigned to new technician')`,
+    [orderId]
+  );
+  return findById(orderId);
+}
+
+async function rejectAssignment(orderId, rejectionReason) {
+  await pool.execute(
+    `UPDATE WorkOrders 
+     SET technician_response = 'Rejected', 
+         rejection_reason = ?, 
+         task_status = 'Assigned' 
+     WHERE order_id = ?`,
+    [rejectionReason, orderId]
+  );
+  
+  await pool.execute(
+    `INSERT INTO WorkOrderStatusHistory (order_id, old_status, new_status, note)
+     VALUES (?, 'Assigned', 'Assigned', ?)`,
+    [orderId, `Technician rejected the WorkOrder.`]
+  );
+
+  return findById(orderId);
+}
+
 module.exports = {
   findAll,
   findById,
@@ -129,4 +163,6 @@ module.exports = {
   updateFixDetails,
   updateDeadline,
   getStatusHistory,
+  reassign,
+  rejectAssignment,
 };

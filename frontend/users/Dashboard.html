@@ -36,12 +36,41 @@
   <div id="topbar-placeholder"></div>
 
   <main class="flex-1 p-8">
-    <!-- Student Profile Block -->
-    <div class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
-      <h1 id="welcomeHeading" class="text-brand-blue font-bold text-headline-lg">Welcome back!</h1>
-      <p id="userInfo" class="text-on-surface-variant text-body-md mb-3"></p>
-      <div id="userBadges" class="flex gap-3 flex-wrap">
-        <!-- Dynamic badges will be inserted here -->
+    <!-- Student Profile & Quick Action Block -->
+    <div class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div>
+        <h1 id="welcomeHeading" class="text-brand-blue font-bold text-headline-lg">Welcome back!</h1>
+        <p id="userInfo" class="text-on-surface-variant text-body-md mb-3"></p>
+        <div id="userBadges" class="flex gap-3 flex-wrap">
+          <!-- Dynamic badges will be inserted here -->
+        </div>
+      </div>
+      <div class="shrink-0 flex items-center gap-3 w-full md:w-auto">
+        <a href="CreateReport.html" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-label-lg shadow-md hover:bg-opacity-90 transition-all active:scale-95">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span>Create New Report</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Resolution Progress Bar Widget -->
+    <div class="mb-8 bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand-blue">insights</span>
+          <span class="font-bold text-on-surface text-body-md">Issue Resolution Progress</span>
+        </div>
+        <span id="resolutionRateText" class="text-label-md font-bold text-brand-blue">0% Resolved</span>
+      </div>
+      <div class="w-full bg-surface-container-high h-3 rounded-full overflow-hidden flex">
+        <div id="progressBarCompleted" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%" title="Completed"></div>
+        <div id="progressBarInProgress" class="bg-amber-400 h-full transition-all duration-500" style="width: 0%" title="In Progress"></div>
+        <div id="progressBarPending" class="bg-slate-300 h-full transition-all duration-500" style="width: 0%" title="Pending"></div>
+      </div>
+      <div class="flex items-center gap-6 text-xs text-on-surface-variant mt-2 font-medium">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Completed (<span id="progressCountCompleted">0</span>)</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> In Progress (<span id="progressCountInProgress">0</span>)</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span> Pending (<span id="progressCountPending">0</span>)</span>
       </div>
     </div>
 
@@ -89,14 +118,23 @@
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Priority</th>
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Date</th>
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Status</th>
-              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">Actions</th>
+              <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md text-center">Actions</th>
             </tr>
           </thead>
           <tbody id="reportsTableBody" class="text-on-surface-variant">
-            <!-- Data will be loaded dynamically -->
+            <!-- Skeleton Loader State -->
+            <tr class="animate-pulse border-b border-outline-variant/10"><td class="p-4" colspan="8"><div class="h-4 bg-gray-200 rounded w-full"></div></td></tr>
+            <tr class="animate-pulse border-b border-outline-variant/10"><td class="p-4" colspan="8"><div class="h-4 bg-gray-200 rounded w-full"></div></td></tr>
+            <tr class="animate-pulse border-b border-outline-variant/10"><td class="p-4" colspan="8"><div class="h-4 bg-gray-200 rounded w-full"></div></td></tr>
           </tbody>
         </table>
-        <p id="emptyState" class="hidden text-center text-on-surface-variant py-8">No reports yet.</p>
+        <div id="emptyState" class="hidden text-center text-on-surface-variant py-12 flex flex-col items-center justify-center gap-3">
+          <span class="material-symbols-outlined text-4xl text-outline">assignment_late</span>
+          <p class="font-medium text-body-lg">No issue reports submitted yet.</p>
+          <a href="CreateReport.html" class="inline-flex items-center gap-2 px-5 py-2 bg-brand-blue text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-sm">add</span> Create First Report
+          </a>
+        </div>
       </div>
     </section>
   </main>
@@ -132,15 +170,15 @@
 
   const statusBadge = (status) => {
     const colors = {
-      'Pending': 'bg-yellow-100 text-yellow-800',
-      'Pending Approval': 'bg-yellow-100 text-yellow-800',
-      'Processing': 'bg-blue-100 text-blue-800',
-      'In Progress': 'bg-blue-100 text-blue-800',
-      'Completed': 'bg-green-100 text-green-800',
-      'Resolved': 'bg-green-100 text-green-800',
-      'Rejected': 'bg-red-100 text-red-800'
+      'Pending': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+      'Processing': 'bg-blue-100 text-blue-800 border border-blue-200',
+      'In Progress': 'bg-blue-100 text-blue-800 border border-blue-200',
+      'Completed': 'bg-green-100 text-green-800 border border-green-200',
+      'Resolved': 'bg-green-100 text-green-800 border border-green-200',
+      'Closed': 'bg-gray-200 text-gray-800 border border-gray-300',
+      'Rejected': 'bg-red-100 text-red-800 border border-red-200'
     };
-    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
+    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
   };
 
   const formatDate = (dateStr) => {
@@ -202,35 +240,109 @@
         badgesContainer.appendChild(semesterBadge);
       }
 
-      // 4. Load reports from API
-      let reports = [];
+      // 4. Load reports from API, Local Storage & Mock Data
+      // Danh mục báo cáo seed chuẩn từ SQL database (vnuis_asset_maintenance_dss.sql) theo từng user_id
+      const DEMO_REPORTS_BY_USER = {
+        1: [ // Lecturer A (lecturer.a@vnuis.edu.vn)
+          { report_id: 'REP-0010', equipment_name: 'Panasonic 4K Laser Projector', room_name: 'Room 102', priority: 'High', reported_at: '2026-07-28 21:38:35', status: 'Pending Approval', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' },
+          { report_id: 'REP-0007', equipment_name: 'Daikin Inverter AC 18000 BTU', room_name: 'Room 301', priority: 'Medium', reported_at: '2026-07-28 20:38:35', status: 'Pending Approval', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' },
+          { report_id: 'REP-0001', equipment_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'Room 302', priority: 'High', reported_at: '2026-07-26 23:38:35', status: 'Processing', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' },
+          { report_id: 'REP-0003', equipment_name: 'Samsung 75in Commercial TV', room_name: 'Room 101', priority: 'High', reported_at: '2026-07-23 23:38:35', status: 'Completed', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' },
+          { report_id: 'REP-0014', equipment_name: 'Ceiling Speaker R104', room_name: 'Room 104', priority: 'Low', reported_at: '2026-07-21 23:38:35', status: 'Cancelled', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' }
+        ],
+        2: [ // Student B (student.b@vnuis.edu.vn)
+          { report_id: 'REP-0002', equipment_name: 'Daikin Inverter AC 18000 BTU', room_name: 'Room 401', priority: 'Medium', reported_at: '2026-07-27 23:38:35', status: 'Pending Approval', reporter_id: 2, user_email: 'student.b@vnuis.edu.vn' },
+          { report_id: 'REP-0004', equipment_name: 'JBL Classroom Wall Speaker', room_name: 'Room 401', priority: 'Low', reported_at: '2026-07-25 23:38:35', status: 'Rejected', reporter_id: 2, user_email: 'student.b@vnuis.edu.vn' },
+          { report_id: 'REP-0011', equipment_name: 'Samsung 75in Commercial TV', room_name: 'Room 103', priority: 'Medium', reported_at: '2026-07-22 23:38:35', status: 'Completed', reporter_id: 2, user_email: 'student.b@vnuis.edu.vn' }
+        ],
+        7: [ // Lecturer G (lecturer.g@vnuis.edu.vn)
+          { report_id: 'REP-0015', equipment_name: 'Gigabit Switch R601', room_name: 'Room 601', priority: 'High', reported_at: '2026-07-29 08:38:35', status: 'Closed', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' },
+          { report_id: 'REP-0008', equipment_name: 'Samsung 75in Commercial TV', room_name: 'Room 302', priority: 'High', reported_at: '2026-07-28 11:38:35', status: 'Processing', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' },
+          { report_id: 'REP-0005', equipment_name: 'Ultra HD 4K HDMI Cable', room_name: 'Room 302', priority: 'Low', reported_at: '2026-07-25 23:38:35', status: 'Cancelled', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' },
+          { report_id: 'REP-0012', equipment_name: 'Shure Wireless Dual Microphone', room_name: 'Room 503', priority: 'Low', reported_at: '2026-07-22 23:38:35', status: 'Completed', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' }
+        ],
+        8: [ // Student H (student.h@vnuis.edu.vn)
+          { report_id: 'REP-0009', equipment_name: 'Shure Wireless Dual Microphone', room_name: 'Room 303', priority: 'Medium', reported_at: '2026-07-28 23:38:35', status: 'Processing', reporter_id: 8, user_email: 'student.h@vnuis.edu.vn' },
+          { report_id: 'REP-0006', equipment_name: 'Epson HD Document Camera', room_name: 'Room 503', priority: 'Medium', reported_at: '2026-07-28 17:38:35', status: 'Processing', reporter_id: 8, user_email: 'student.h@vnuis.edu.vn' },
+          { report_id: 'REP-0013', equipment_name: 'Cisco Catalyst 24-Port Switch', room_name: 'Room 101', priority: 'High', reported_at: '2026-07-24 23:38:35', status: 'Rejected', reporter_id: 8, user_email: 'student.h@vnuis.edu.vn' }
+        ]
+      };
+
+      let apiReports = [];
       try {
-        reports = await Api.get('/fault-reports', { mine: 'true' });
-        
-        // Log để debug - xem cấu trúc dữ liệu từ API
-        console.log('API Response - first report:', reports[0]);
-        
+        const res = await Api.get('/fault-reports', { mine: 'true' });
+        if (Array.isArray(res) && res.length > 0) apiReports = res;
       } catch (apiError) {
         console.warn('API error, using mock data:', apiError);
-        // Fallback mock data for demo
-        reports = [
-          { report_id: 'REP-0021', equipment_name: 'Air Conditioner Unit', room_name: 'Room 404', priority: 'High', reported_at: '2026-06-24', status: 'Pending' },
-          { report_id: 'REP-0019', equipment_name: 'Digital Projector', room_name: 'Room 602', priority: 'Medium', reported_at: '2026-05-23', status: 'Processing' },
-          { report_id: 'REP-0015', equipment_name: 'Network Switch', room_name: 'Room 505', priority: 'Low', reported_at: '2026-04-22', status: 'Completed' },
-          { report_id: 'REP-0012', equipment_name: 'Whiteboard', room_name: 'Room 301', priority: 'Low', reported_at: '2026-04-15', status: 'Completed' },
-          { report_id: 'REP-0010', equipment_name: 'Projector Screen', room_name: 'Room 202', priority: 'Medium', reported_at: '2026-04-10', status: 'In Progress' },
-          { report_id: 'REP-0008', equipment_name: 'Computer Monitor', room_name: 'Room 105', priority: 'Critical', reported_at: '2026-04-05', status: 'Pending' }
-        ];
       }
 
-      // 5. Calculate KPIs from real data
-      const pending = reports.filter(r => ['Pending', 'Pending Approval', 'Processing'].includes(r.status)).length;
+      let localReports = [];
+      try {
+        localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+      } catch(e) {}
+
+      const reportMap = new Map();
+
+      // Nạp dữ liệu seed chuẩn cho đúng user_id đang đăng nhập
+      const userSeedReports = DEMO_REPORTS_BY_USER[user.user_id] || DEMO_REPORTS_BY_USER[1];
+      userSeedReports.forEach(r => {
+        if (r && r.report_id) reportMap.set(String(r.report_id), r);
+      });
+
+      apiReports.forEach(r => {
+        if (r && r.report_id) reportMap.set(String(r.report_id), r);
+      });
+
+      localReports.forEach(r => {
+        if (r && r.report_id) {
+          const isBelongsToUser = (!r.user_email && !r.reporter_id) || r.user_email === user.email || String(r.reporter_id) === String(user.user_id);
+          if (isBelongsToUser) {
+            const idStr = String(r.report_id);
+            const existing = reportMap.get(idStr);
+            if (existing) {
+              if (r.status) existing.status = r.status;
+            } else {
+              reportMap.set(idStr, r);
+            }
+          }
+        }
+      });
+
+      const reports = Array.from(reportMap.values()).sort((a, b) => {
+        return new Date(b.reported_at || 0) - new Date(a.reported_at || 0);
+      });
+
+      // 5. Calculate KPIs and Progress Bar from real data
+      const pending = reports.filter(r => ['Pending', 'Pending Approval'].includes(r.status)).length;
       const inProgress = reports.filter(r => ['In Progress', 'Processing'].includes(r.status)).length;
       const completed = reports.filter(r => ['Completed', 'Resolved'].includes(r.status)).length;
+      const total = reports.length || 1;
 
       document.getElementById('kpiPending').textContent = pending;
       document.getElementById('kpiInProgress').textContent = inProgress;
       document.getElementById('kpiCompleted').textContent = completed;
+
+      // Update Resolution Progress Bar
+      const completedPct = Math.round((completed / total) * 100);
+      const inProgressPct = Math.round((inProgress / total) * 100);
+      const pendingPct = Math.max(0, 100 - completedPct - inProgressPct);
+
+      const resText = document.getElementById('resolutionRateText');
+      if (resText) resText.textContent = `${completedPct}% Resolved`;
+
+      const barCompleted = document.getElementById('progressBarCompleted');
+      const barInProgress = document.getElementById('progressBarInProgress');
+      const barPending = document.getElementById('progressBarPending');
+      if (barCompleted) barCompleted.style.width = `${completedPct}%`;
+      if (barInProgress) barInProgress.style.width = `${inProgressPct}%`;
+      if (barPending) barPending.style.width = `${pendingPct}%`;
+
+      const countCompleted = document.getElementById('progressCountCompleted');
+      const countInProgress = document.getElementById('progressCountInProgress');
+      const countPending = document.getElementById('progressCountPending');
+      if (countCompleted) countCompleted.textContent = completed;
+      if (countInProgress) countInProgress.textContent = inProgress;
+      if (countPending) countPending.textContent = pending;
 
       // 6. Render table
       const tbody = document.getElementById('reportsTableBody');

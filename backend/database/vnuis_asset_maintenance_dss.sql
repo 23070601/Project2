@@ -364,24 +364,25 @@ INSERT INTO FaultReports (report_id, reporter_id, asset_id, room_id, description
 (12, 7, 48, 20, 'Microphone battery compartment cover broken and wire frayed.', 'Low',    'Completed',        NOW() - INTERVAL 7 DAY),
 (13, 8, 1,  1,  'Network switch port #12 dead, no internet connection in Room R101.', 'High',   'Rejected',         NOW() - INTERVAL 5 DAY),
 (14, 1, 12, 4,  'Ceiling speaker buzzing sound when audio volume exceeds 50%.', 'Low',    'Cancelled',        NOW() - INTERVAL 8 DAY),
-(15, 7, 52, 21, 'Gigabit switch power LED off, room R601 network completely down.', 'High',   'Processing',       NOW() - INTERVAL 1 HOUR);
+(15, 7, 52, 21, 'Gigabit switch power LED off, room R601 network completely down.', 'High',   'Closed',           NOW() - INTERVAL 1 HOUR);
 
 -- 5. WORK ORDERS (8 UNIQUE REPORT_ID VALUES: 1, 3, 6, 8, 9, 11, 12, 15)
 INSERT INTO WorkOrders (order_id, report_id, manager_id, technician_id, assigned_at, technician_response, rejection_reason, task_status, fix_description, parts_used, resolved_at, closed_at) VALUES
-(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, 'Accepted', NULL,            'In Progress', 'Inspected optical engine and power supply unit.', 'Spare Lamp Module', NULL, NULL),
+(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, 'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
 (2,  3,  5, 4, NOW() - INTERVAL 5 DAY,  'Accepted', NULL,            'Closed',      'Replaced display panel driver and updated firmware.', 'Display Controller Board', NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
 (3,  6,  5, 6, NOW() - INTERVAL 10 HOUR, 'Rejected', 'overloaded',   'Assigned',    NULL, NULL, NULL, NULL),
 (4,  8,  5, 3, NOW() - INTERVAL 16 HOUR, 'Accepted', NULL,            'Received',    NULL, NULL, NULL, NULL),
-(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  'Accepted', NULL,            'In Progress', 'Replaced wireless receiver module and antenna.', 'Mic Receiver Antenna', NULL, NULL),
+(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
 (6,  11, 5, 6, NOW() - INTERVAL 6 DAY,  'Accepted', NULL,            'Closed',      'Fixed HDMI port connection and replaced TV remote battery.', 'HDMI Female Socket', NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
 (7,  12, 5, 3, NOW() - INTERVAL 7 DAY,  'Accepted', NULL,            'Closed',      'Replaced microphone shell casing and soldered broken audio lead.', 'Mic Housing Clip', NOW() - INTERVAL 6 DAY, NOW() - INTERVAL 6 DAY),
-(8,  15, 5, 4, NOW() - INTERVAL 1 HOUR,  'Pending',  NULL,            'Assigned',    NULL, NULL, NULL, NULL);
+(8,  15, 5, 4, NOW() - INTERVAL 1 HOUR,  'Accepted', NULL,            'Closed',      'Đã kiểm tra và thay thế bộ nguồn switch mạng.', 'Bộ nguồn Gigabit Switch 12V', NOW() - INTERVAL 30 MINUTE, NOW() - INTERVAL 5 MINUTE);
 
 -- 6. USER CONFIRMATIONS
 INSERT INTO UserConfirmations (confirmation_id, order_id, reporter_id, is_confirmed, rating, feedback, confirmed_at) VALUES
 (1, 2, 1, TRUE, 5, 'Excellent repair work! Samsung TV display response is perfect now.', NOW() - INTERVAL 4 DAY),
 (2, 6, 2, TRUE, 4, 'TV remote and HDMI port working fine now. Thank you!', NOW() - INTERVAL 5 DAY),
-(3, 7, 7, TRUE, 5, 'Microphone repaired quickly. Sound quality is crystal clear.', NOW() - INTERVAL 6 DAY);
+(3, 7, 7, TRUE, 5, 'Microphone repaired quickly. Sound quality is crystal clear.', NOW() - INTERVAL 6 DAY),
+(4, 8, 7, TRUE, 5, NULL, NOW() - INTERVAL 5 MINUTE);
 
 -- 7. WORK ORDER STATUS HISTORY
 INSERT INTO WorkOrderStatusHistory (history_id, order_id, old_status, new_status, changed_by, changed_at, note) VALUES
@@ -447,12 +448,22 @@ SELECT
     a.asset_name,
     a.asset_type,
     c.room_name,
-    a.failure_count,
+    COALESCE(recent_counts.recent_failures, 0) AS recent_failures,
     a.last_fault_at,
     a.status
 FROM Assets a
 JOIN Classrooms c ON c.room_id = a.room_id
-WHERE a.failure_count >= 3 OR a.status = 'Recommended for Replacement';
+LEFT JOIN (
+    SELECT
+        fr.asset_id,
+        COUNT(*) AS recent_failures
+    FROM FaultReports fr
+    WHERE fr.asset_id IS NOT NULL
+      AND fr.status NOT IN ('Rejected', 'Cancelled')
+      AND fr.reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+    GROUP BY fr.asset_id
+) recent_counts ON recent_counts.asset_id = a.asset_id
+WHERE COALESCE(recent_counts.recent_failures, 0) >= 3;
 
 CREATE OR REPLACE VIEW v_dss2_technician_workload AS
 SELECT
@@ -546,19 +557,76 @@ BEGIN
     END IF;
 END$$
 
+DROP TRIGGER IF EXISTS trg_faultreports_after_insert_dss3$$
+
 CREATE TRIGGER trg_faultreports_after_insert_dss3
 AFTER INSERT ON FaultReports
 FOR EACH ROW
 BEGIN
-    IF NEW.asset_id IS NOT NULL THEN
+    IF NEW.asset_id IS NOT NULL AND NEW.status NOT IN ('Rejected', 'Cancelled') THEN
         UPDATE Assets
         SET failure_count = failure_count + 1,
             last_fault_at = NEW.reported_at,
             status = CASE
                 WHEN failure_count + 1 >= 3 THEN 'Recommended for Replacement'
-                ELSE 'Under Repair'
+                WHEN failure_count + 1 > 0 THEN 'Under Repair'
+                ELSE 'Operational'
             END
         WHERE asset_id = NEW.asset_id;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_faultreports_after_update_dss3
+AFTER UPDATE ON FaultReports
+FOR EACH ROW
+BEGIN
+    IF OLD.status <> NEW.status THEN
+        IF OLD.asset_id IS NOT NULL AND OLD.status NOT IN ('Rejected', 'Cancelled') THEN
+            UPDATE Assets
+            SET failure_count = GREATEST(failure_count - 1, 0),
+                status = CASE
+                    WHEN GREATEST(failure_count - 1, 0) >= 3 THEN 'Recommended for Replacement'
+                    WHEN GREATEST(failure_count - 1, 0) > 0 THEN 'Under Repair'
+                    ELSE 'Operational'
+                END,
+                last_fault_at = CASE
+                    WHEN GREATEST(failure_count - 1, 0) > 0 THEN last_fault_at
+                    ELSE NULL
+                END
+            WHERE asset_id = OLD.asset_id;
+        END IF;
+
+        IF NEW.asset_id IS NOT NULL AND NEW.status NOT IN ('Rejected', 'Cancelled') THEN
+            UPDATE Assets
+            SET failure_count = failure_count + 1,
+                last_fault_at = NEW.reported_at,
+                status = CASE
+                    WHEN failure_count + 1 >= 3 THEN 'Recommended for Replacement'
+                    WHEN failure_count + 1 > 0 THEN 'Under Repair'
+                    ELSE 'Operational'
+                END
+            WHERE asset_id = NEW.asset_id;
+        END IF;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_faultreports_after_delete_dss3
+AFTER DELETE ON FaultReports
+FOR EACH ROW
+BEGIN
+    IF OLD.asset_id IS NOT NULL AND OLD.status NOT IN ('Rejected', 'Cancelled') THEN
+        UPDATE Assets
+        SET failure_count = GREATEST(failure_count - 1, 0),
+            status = CASE
+                WHEN GREATEST(failure_count - 1, 0) >= 3 THEN 'Recommended for Replacement'
+                WHEN GREATEST(failure_count - 1, 0) > 0 THEN 'Under Repair'
+                ELSE 'Operational'
+            END,
+            last_fault_at = CASE
+                WHEN GREATEST(failure_count - 1, 0) > 0 THEN last_fault_at
+                ELSE NULL
+            END
+        WHERE asset_id = OLD.asset_id;
     END IF;
 END$$
 

@@ -40,272 +40,125 @@
 
     <!-- Compact Summary Cards (KPI Style) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow text-center">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-primary flex flex-col justify-between hover:shadow-md transition-shadow text-center">
         <div class="flex items-center justify-center mb-3">
           <span class="material-symbols-outlined text-primary bg-primary-fixed/30 p-2 rounded-lg">meeting_room</span>
         </div>
         <div>
           <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Total Classrooms</p>
-          <p id="totalClassroomsCount" class="text-headline-md font-headline-md text-on-surface">25</p>
+          <p id="totalClassroomsCount" class="text-headline-md font-headline-md text-on-surface">12</p>
         </div>
       </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow text-center">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-tertiary flex flex-col justify-between hover:shadow-md transition-shadow text-center">
         <div class="flex items-center justify-center mb-3">
           <span class="material-symbols-outlined text-tertiary bg-tertiary-fixed/30 p-2 rounded-lg">layers</span>
         </div>
         <div>
           <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Floors</p>
-          <p id="floorsCount" class="text-headline-md font-headline-md text-on-surface">3</p>
+          <p id="floorsCount" class="text-headline-md font-headline-md text-on-surface">5</p>
         </div>
       </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow text-center">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-secondary flex flex-col justify-between hover:shadow-md transition-shadow text-center">
         <div class="flex items-center justify-center mb-3">
           <span class="material-symbols-outlined text-secondary bg-secondary-fixed/40 p-2 rounded-lg">inventory_2</span>
         </div>
         <div>
           <p class="text-outline text-label-md font-label-md uppercase tracking-wider">Total Assets</p>
-          <p id="totalAssetsCount" class="text-headline-md font-headline-md text-on-surface">152</p>
+          <p id="totalAssetsCount" class="text-headline-md font-headline-md text-on-surface">28</p>
         </div>
       </div>
     </div>
 
-    <!-- Toolbar Section -->
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
-      <div class="flex items-center gap-4 w-full">
-        <div class="relative flex-grow max-w-md">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-          <input id="searchRoomInput" class="w-full pl-10 pr-4 py-2.5 bg-white rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary text-body-sm shadow-sm transition-all outline-none" placeholder="Search Classroom..." type="text">
-        </div>
-        <select id="floorFilterSelect" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md font-label-md focus:ring-primary focus:border-primary shadow-sm cursor-pointer outline-none">
-          <option value="All">All Floors</option>
-          <option value="Floor 4">Floor 4</option>
-          <option value="Floor 5">Floor 5</option>
-          <option value="Floor 6">Floor 6</option>
-        </select>
-        <select id="sortBySelect" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md font-label-md focus:ring-primary focus:border-primary shadow-sm cursor-pointer outline-none">
-          <option value="name">Sort By: Room Name</option>
-          <option value="assets">Sort By: Asset Count</option>
-          <option value="status">Sort By: Status</option>
-        </select>
-      </div>
+    <!-- Tab Navigation -->
+    <div class="flex items-center gap-1 mb-6 bg-surface-container-low p-1 rounded-xl border border-outline-variant/30 w-fit">
+      <button id="tabClassrooms" onclick="switchTab('classrooms')" class="px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all bg-primary text-white shadow-sm">🏫 Classrooms</button>
+      <button id="tabAllAssets" onclick="switchTab('allAssets')" class="px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all text-on-surface-variant hover:bg-surface-container">📦 All Assets</button>
     </div>
 
-    <!-- Accordion Floor Groups -->
-    <div class="space-y-6">
-      <!-- Floor 4 Accordion -->
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-        <button class="w-full flex items-center justify-between p-5 bg-primary-container text-white transition-colors" onclick="toggleAccordion('floor-4-content', 'floor-4-chevron')">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined">apartment</span>
-            <span class="text-headline-sm font-headline-sm">Floor 4 - Management &amp; Administrative Units</span>
-            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">8 Classrooms</span>
+    <!-- TAB: CLASSROOMS -->
+    <div id="panelClassrooms">
+      <!-- Toolbar Section -->
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
+        <div class="flex items-center gap-4 w-full">
+          <div class="relative flex-grow max-w-md">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+            <input id="searchRoomInput" class="w-full pl-10 pr-4 py-2.5 bg-white rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary text-body-sm shadow-sm transition-all outline-none" placeholder="Search Classroom..." type="text">
           </div>
-          <span class="material-symbols-outlined transition-transform duration-300" id="floor-4-chevron">expand_more</span>
-        </button>
-        <div class="overflow-x-auto" id="floor-4-content">
-          <table class="w-full border-collapse">
-            <thead class="bg-surface-container-high text-on-surface">
-              <tr>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Room</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Assets</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Status</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">QR Code</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Last Updated</th>
-                <th class="text-center py-4 px-6 text-label-lg font-label-lg">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-variant/30">
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">401</td>
-                <td class="py-4 px-6 text-body-sm">3 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">10 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=401'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-401', 'Classroom 401', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('401', 'Classroom 401')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">402</td>
-                <td class="py-4 px-6 text-body-sm">2 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">08 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=402'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-402', 'Classroom 402', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('402', 'Classroom 402')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">403</td>
-                <td class="py-4 px-6 text-body-sm">5 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-error-container text-error">Critical</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-surface-container-high text-outline">Not Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">—</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=403'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-403', 'Classroom 403', 'Floor 4')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('403', 'Classroom 403')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <select id="floorFilterSelect" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md font-label-md focus:ring-primary focus:border-primary shadow-sm cursor-pointer outline-none">
+            <option value="All">All Floors</option>
+          </select>
+          <select id="sortBySelect" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md font-label-md focus:ring-primary focus:border-primary shadow-sm cursor-pointer outline-none">
+            <option value="name">Sort By: Room Name</option>
+            <option value="assets">Sort By: Asset Count</option>
+            <option value="status">Sort By: Status</option>
+          </select>
+        </div>
+      </div>
+      <!-- Accordion Floor Groups -->
+      <div id="floorAccordionsContainer" class="space-y-6"></div>
+    </div>
+
+    <!-- TAB: ALL ASSETS -->
+    <div id="panelAllAssets" class="hidden">
+      <!-- Critical Banner -->
+      <div id="criticalBanner" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-l-red-500 rounded-r-xl flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-red-600 text-2xl">warning</span>
+          <p id="criticalBannerText" class="text-red-800 font-bold text-label-lg">⚠️ Critical Assets: 0 assets need attention.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="filterCriticalOnly()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-label-md font-bold hover:bg-red-700 transition-colors">View Critical Only</button>
+          <button onclick="exportAssetsCSV()" class="px-4 py-2 border border-red-400 text-red-700 rounded-lg text-label-md font-bold hover:bg-red-50 transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-base">download</span> Export Report
+          </button>
         </div>
       </div>
 
-      <!-- Floor 5 Accordion -->
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-        <button class="w-full flex items-center justify-between p-5 bg-primary-container text-white transition-colors" onclick="toggleAccordion('floor-5-content', 'floor-5-chevron')">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined">apartment</span>
-            <span class="text-headline-sm font-headline-sm">Floor 5 – Teaching Classrooms</span>
-            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">4 Classrooms</span>
-          </div>
-          <span class="material-symbols-outlined rotate-180 transition-transform duration-300" id="floor-5-chevron">expand_more</span>
-        </button>
-        <div class="overflow-x-auto" id="floor-5-content">
-          <table class="w-full border-collapse">
-            <thead class="bg-surface-container-high text-on-surface">
-              <tr>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Room</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Assets</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Status</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">QR Code</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Last Updated</th>
-                <th class="text-center py-4 px-6 text-label-lg font-label-lg">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-variant/30">
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">501</td>
-                <td class="py-4 px-6 text-body-sm">4 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">12 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=501'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-501', 'Classroom 501', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('501', 'Classroom 501')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">502</td>
-                <td class="py-4 px-6 text-body-sm">1 Asset</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">09 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=502'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-502', 'Classroom 502', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('502', 'Classroom 502')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">503</td>
-                <td class="py-4 px-6 text-body-sm">3 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">11 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=503'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-503', 'Classroom 503', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('503', 'Classroom 503')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">504</td>
-                <td class="py-4 px-6 text-body-sm">2 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-error-container text-error">Critical</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-surface-container-high text-outline">Not Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">—</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=504'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-504', 'Classroom 504', 'Floor 5')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('504', 'Classroom 504')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Filters for All Assets -->
+      <div class="flex flex-wrap items-center gap-3 mb-6 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
+        <div class="relative flex-grow max-w-xs">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base">search</span>
+          <input id="assetSearchInput" oninput="renderAllAssetsTable()" class="w-full pl-9 pr-4 py-2.5 bg-white rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary text-body-sm shadow-sm outline-none" placeholder="Search asset..." type="text">
         </div>
+        <select id="assetTypeFilter" onchange="renderAllAssetsTable()" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md focus:ring-primary shadow-sm cursor-pointer outline-none">
+          <option value="">All Types</option>
+        </select>
+        <select id="assetRoomFilter" onchange="renderAllAssetsTable()" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md focus:ring-primary shadow-sm cursor-pointer outline-none">
+          <option value="">All Rooms</option>
+        </select>
+        <select id="assetStatusFilter" onchange="renderAllAssetsTable()" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md focus:ring-primary shadow-sm cursor-pointer outline-none">
+          <option value="">All Status</option>
+          <option value="Critical">⚠️ Critical</option>
+          <option value="Normal">✅ Normal</option>
+        </select>
+        <button onclick="resetAssetFilters()" class="px-4 py-2.5 text-label-md text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors border border-outline-variant/50">Reset</button>
       </div>
 
-      <!-- Floor 6 Accordion -->
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-        <button class="w-full flex items-center justify-between p-5 bg-primary-container text-white transition-colors" onclick="toggleAccordion('floor-6-content', 'floor-6-chevron')">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined">apartment</span>
-            <span class="text-headline-sm font-headline-sm">Floor 6 – Research &amp; Graduate Centers</span>
-            <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">2 Classrooms</span>
-          </div>
-          <span class="material-symbols-outlined transition-transform duration-300" id="floor-6-chevron">expand_more</span>
-        </button>
-        <div class="overflow-x-auto" id="floor-6-content">
-          <table class="w-full border-collapse">
-            <thead class="bg-surface-container-high text-on-surface">
-              <tr>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Room</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Assets</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Status</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">QR Code</th>
-                <th class="text-left py-4 px-6 text-label-lg font-label-lg">Last Updated</th>
-                <th class="text-center py-4 px-6 text-label-lg font-label-lg">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-variant/30">
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">601</td>
-                <td class="py-4 px-6 text-body-sm">6 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">11 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=601'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-601', 'Classroom 601', 'Floor 6')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('601', 'Classroom 601')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="py-4 px-6 font-bold text-primary">602</td>
-                <td class="py-4 px-6 text-body-sm">4 Assets</td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span></td>
-                <td class="py-4 px-6"><span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span></td>
-                <td class="py-4 px-6 text-body-sm text-outline">07 Jul 2026</td>
-                <td class="py-4 px-6 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='ClassroomsDetail.html?id=602'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    <button onclick="openQrModal('CR-602', 'Classroom 602', 'Floor 6')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
-                    <button onclick="openDeleteModal('602', 'Classroom 602')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- All Assets Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden">
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant/20">
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase">#</th>
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-left">Asset Name</th>
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase text-left">Type</th>
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase">Room</th>
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase">Total Failures</th>
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase">Failures (3 months)</th>
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase">Status</th>
+              <th class="p-4 text-label-md font-bold text-on-surface-variant uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="allAssetsTableBody" class="divide-y divide-outline-variant/10">
+            <tr><td colspan="8" class="p-8 text-outline">Loading assets...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- Pagination -->
     <div class="mt-8 flex items-center justify-between">
-      <p class="text-body-sm text-on-surface-variant">Showing 1–9 of 25 classrooms</p>
+      <p class="text-body-sm text-on-surface-variant">Showing 1–12 of 12 classrooms</p>
       <div class="flex items-center gap-2">
         <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors disabled:opacity-50" disabled>
           <span class="material-symbols-outlined">chevron_left</span>
@@ -345,7 +198,7 @@
           <span id="qrModalRoomName" class="text-body-sm font-medium text-on-surface">Classroom 401</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Location</span>
+          <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Floor</span>
           <span id="qrModalLocation" class="text-body-sm font-medium text-on-surface">Floor 4</span>
         </div>
       </div>
@@ -381,6 +234,80 @@
   </div>
 </div>
 
+<!-- ASSET HISTORY POPUP MODAL -->
+<div id="assetHistoryModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/20" style="background: linear-gradient(135deg, #005BAC 0%, #0078D4 100%);">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-white text-2xl">inventory_2</span>
+        <h3 id="assetHistoryModalTitle" class="text-headline-sm font-headline-sm text-white">Asset History</h3>
+      </div>
+      <button onclick="closeAssetHistoryModal()" class="p-2 rounded-lg text-white/80 hover:bg-white/20 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="overflow-y-auto flex-1 p-6">
+      <!-- Asset Info Card -->
+      <div id="assetHistoryInfo" class="mb-6 grid grid-cols-2 md:grid-cols-3 gap-4 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20">
+        <div class="flex flex-col gap-1">
+          <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Asset Name</span>
+          <span id="ahAssetName" class="text-body-sm font-bold text-on-surface">—</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Type</span>
+          <span id="ahAssetType" class="text-body-sm font-medium text-on-surface">—</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Room</span>
+          <span id="ahAssetRoom" class="text-body-sm font-medium text-on-surface">—</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Total Failures</span>
+          <span id="ahTotalFailures" class="text-body-sm font-bold text-error">—</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Failures (3 months)</span>
+          <span id="ahRecentFailures" class="text-body-sm font-bold text-orange-600">—</span>
+        </div>
+      </div>
+
+      <!-- Repair History Table -->
+      <div>
+        <h4 class="text-label-lg font-bold text-on-surface mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base" style="color:#005BAC">build</span>
+          Repair History
+        </h4>
+        <div class="bg-white rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low border-b border-outline-variant/20">
+                <th class="p-3 text-label-md font-bold text-on-surface-variant uppercase text-left">Date</th>
+                <th class="p-3 text-label-md font-bold text-on-surface-variant uppercase text-left">Status</th>
+                <th class="p-3 text-label-md font-bold text-on-surface-variant uppercase text-left">Technician</th>
+                <th class="p-3 text-label-md font-bold text-on-surface-variant uppercase text-left">Fix Description</th>
+                <th class="p-3 text-label-md font-bold text-on-surface-variant uppercase text-left">Parts Used</th>
+              </tr>
+            </thead>
+            <tbody id="assetHistoryTableBody" class="divide-y divide-outline-variant/10">
+              <tr><td colspan="5" class="p-6 text-center text-outline">Loading history...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-surface-container-lowest border-t border-outline-variant/20 flex justify-end">
+      <button onclick="closeAssetHistoryModal()" class="px-6 py-2.5 rounded-lg font-label-lg text-white transition-colors shadow-sm" style="background:#005BAC;" onmouseover="this.style.background='#004A8A'" onmouseout="this.style.background='#005BAC'">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -388,7 +315,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Elina', role: 'Manager' };
+  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn', role: 'Manager', user_id: 5 };
   try {
     user = Auth.guard('Manager');
   } catch (e) {
@@ -433,23 +360,199 @@
     document.getElementById('deleteClassroomModal').classList.add('hidden');
   }
 
+  let allClassrooms = [];
+  let allAssets = [];
+
+  function getFloorFromName(name) {
+    const match = name.match(/\d/);
+    return match ? parseInt(match[0], 10) : 1;
+  }
+
+  function getRoomStatus(roomAssets) {
+    if (!roomAssets || roomAssets.length === 0) return 'Healthy';
+    const statuses = roomAssets.map(a => a.status);
+    if (statuses.includes('Recommended for Replacement')) return 'Critical';
+    if (statuses.includes('Under Repair')) return 'Needs Attention';
+    return 'Healthy';
+  }
+
+  function getRoomStatusText(status) {
+    if (status === 'Critical') return '<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-red-100 text-red-800">Critical</span>';
+    if (status === 'Needs Attention') return '<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-100 text-orange-800">Needs Attention</span>';
+    return '<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Healthy</span>';
+  }
+
+  const STATUS_RANK = { 'Critical': 1, 'Needs Attention': 2, 'Healthy': 3 };
+
+  function renderAccordions() {
+    const container = document.getElementById('floorAccordionsContainer');
+    if (!container) return;
+
+    const searchVal = document.getElementById('searchRoomInput').value.trim().toLowerCase();
+    const floorVal = document.getElementById('floorFilterSelect').value;
+    const sortBy = document.getElementById('sortBySelect').value;
+
+    // Filter rooms
+    let filteredRooms = allClassrooms;
+    if (searchVal) {
+      filteredRooms = filteredRooms.filter(r => r.room_name.toLowerCase().includes(searchVal));
+    }
+    if (floorVal !== 'All') {
+      const targetFloor = parseInt(floorVal.replace(/\D/g, ''), 10);
+      filteredRooms = filteredRooms.filter(r => getFloorFromName(r.room_name) === targetFloor);
+    }
+
+    // Map room status and assets
+    filteredRooms = filteredRooms.map(r => {
+      const roomAssets = allAssets.filter(a => a.room_id === r.room_id);
+      const status = getRoomStatus(roomAssets);
+      return {
+        ...r,
+        assets: roomAssets,
+        status: status
+      };
+    });
+
+    // Sort rooms
+    if (sortBy === 'name') {
+      filteredRooms.sort((a, b) => a.room_name.localeCompare(b.room_name));
+    } else if (sortBy === 'assets') {
+      filteredRooms.sort((a, b) => b.assets.length - a.assets.length);
+    } else if (sortBy === 'status') {
+      filteredRooms.sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
+    }
+
+    // Group by floor
+    const floorsMap = {};
+    filteredRooms.forEach(r => {
+      const fl = getFloorFromName(r.room_name);
+      if (!floorsMap[fl]) floorsMap[fl] = [];
+      floorsMap[fl].push(r);
+    });
+
+    const floorNames = {
+      1: 'Floor 1 - Lecture Rooms & Labs',
+      3: 'Floor 3 - Multimedia & IT Labs',
+      4: 'Floor 4 - Management & Administrative Units',
+      5: 'Floor 5 – Teaching Classrooms',
+      6: 'Floor 6 – Research & Graduate Centers'
+    };
+
+    const floors = Object.keys(floorsMap).map(Number).sort((a, b) => a - b);
+
+    if (floors.length === 0) {
+      container.innerHTML = `<div class="bg-white p-8 text-center text-on-surface-variant font-medium rounded-xl border border-outline-variant/20 shadow-sm">No classrooms match the selected filters.</div>`;
+      return;
+    }
+
+    container.innerHTML = floors.map(fl => {
+      const roomsOnFloor = floorsMap[fl];
+      const accordionId = `floor-${fl}-content`;
+      const chevronId = `floor-${fl}-chevron`;
+      
+      const rowsHtml = roomsOnFloor.map(r => {
+        const lastUpdated = r.created_at ? UiHelpers.formatDate(r.created_at) : 'Jul 29, 2026';
+        const qrBadge = r.qr_code 
+          ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-100 text-green-800">Generated</span>'
+          : '<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-surface-container-high text-outline">Not Generated</span>';
+        
+        return `
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-4 px-6 font-bold text-primary">Room ${UiHelpers.escapeHtml(r.room_name)}</td>
+            <td class="py-4 px-6 text-body-sm">${r.assets.length} Assets</td>
+            <td class="py-4 px-6">${getRoomStatusText(r.status)}</td>
+            <td class="py-4 px-6">${qrBadge}</td>
+            <td class="py-4 px-6 text-body-sm text-outline">${lastUpdated}</td>
+            <td class="py-4 px-6 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <button onclick="location.href='ClassroomsDetail.html?id=${r.room_id}'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                <button onclick="openQrModal('${r.qr_code || 'N/A'}', 'Room ${r.room_name}', 'Floor ${fl}')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                <button onclick="openDeleteModal(${r.room_id}, 'Room ${r.room_name}')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+          <button class="w-full flex items-center justify-between p-5 bg-primary-container text-white transition-colors" onclick="toggleAccordion('${accordionId}', '${chevronId}')">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined">apartment</span>
+              <span class="text-headline-sm font-headline-sm">${floorNames[fl] || `Floor ${fl} - Classrooms`}</span>
+              <span class="bg-white/20 px-3 py-0.5 rounded-full text-label-md font-label-md">${roomsOnFloor.length} Classrooms</span>
+            </div>
+            <span class="material-symbols-outlined transition-transform duration-300" id="${chevronId}">expand_more</span>
+          </button>
+          <div class="overflow-x-auto" id="${accordionId}">
+            <table class="w-full border-collapse">
+              <thead class="bg-surface-container-high text-on-surface">
+                <tr>
+                  <th class="text-left py-4 px-6 text-label-lg font-label-lg">Room</th>
+                  <th class="text-left py-4 px-6 text-label-lg font-label-lg">Assets</th>
+                  <th class="text-left py-4 px-6 text-label-lg font-label-lg">Status</th>
+                  <th class="text-left py-4 px-6 text-label-lg font-label-lg">QR Code</th>
+                  <th class="text-left py-4 px-6 text-label-lg font-label-lg">Last Updated</th>
+                  <th class="text-center py-4 px-6 text-label-lg font-label-lg">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/30">
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateFloorFilterDropdown(rooms) {
+    const floorSelect = document.getElementById('floorFilterSelect');
+    if (!floorSelect) return;
+
+    const currentVal = floorSelect.value;
+    const uniqueFloors = Array.from(new Set(rooms.map(r => getFloorFromName(r.room_name)))).sort((a, b) => a - b);
+
+    let html = `<option value="All">All Floors</option>`;
+    uniqueFloors.forEach(fl => {
+      html += `<option value="Floor ${fl}">Floor ${fl}</option>`;
+    });
+
+    floorSelect.innerHTML = html;
+
+    if (uniqueFloors.map(fl => `Floor ${fl}`).includes(currentVal)) {
+      floorSelect.value = currentVal;
+    } else {
+      floorSelect.value = 'All';
+    }
+  }
+
+  // Bind filter / sort events
+  document.getElementById('searchRoomInput').addEventListener('input', renderAccordions);
+  document.getElementById('floorFilterSelect').addEventListener('change', renderAccordions);
+  document.getElementById('sortBySelect').addEventListener('change', () => {
+    renderAccordions();
+    const select = document.getElementById('sortBySelect');
+    const sortLabel = select.options[select.selectedIndex].text;
+    if (window.showToast) showToast(`Đã sắp xếp danh sách theo: ${sortLabel}`, 'info');
+  });
+
   async function confirmDeleteRoom() {
     const btn = document.getElementById('confirmDeleteBtn');
     btn.disabled = true;
     btn.textContent = 'Deleting...';
 
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        try {
-          await Api.delete(`/classrooms/${deletingRoomId}`);
-        } catch (err) {
-          console.log('Classroom deleted in demo mode');
-        }
+      if (window.Api && deletingRoomId) {
+        await Api.delete(`/classrooms/${deletingRoomId}`);
+        if (window.showToast) showToast('Đã xóa phòng học thành công!', 'success');
+        else alert(`Classroom deleted successfully.`);
+        closeDeleteModal();
+        await loadClassrooms();
       }
-      alert(`Classroom ${deletingRoomId} deleted successfully.`);
-      closeDeleteModal();
     } catch (err) {
-      alert(err.message || `Classroom ${deletingRoomId} deleted successfully.`);
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || `Failed to delete classroom.`);
       closeDeleteModal();
     } finally {
       btn.disabled = false;
@@ -459,18 +562,271 @@
 
   async function loadClassrooms() {
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api) {
         const rooms = await Api.get('/classrooms');
-        if (rooms && Array.isArray(rooms) && rooms.length > 0) {
-          document.getElementById('totalClassroomsCount').textContent = rooms.length;
-        }
+        const assets = await Api.get('/assets');
+        allClassrooms = rooms || [];
+        allAssets = assets || [];
+
+        document.getElementById('totalClassroomsCount').textContent = allClassrooms.length;
+        document.getElementById('totalAssetsCount').textContent = allAssets.length;
+        
+        const uniqueFloors = new Set(allClassrooms.map(r => getFloorFromName(r.room_name)));
+        document.getElementById('floorsCount').textContent = uniqueFloors.size;
+
+        updateFloorFilterDropdown(allClassrooms);
+        renderAccordions();
       }
     } catch (err) {
-      console.log('Using default mock data for ClassroomsManagement view', err);
+      console.log('Failed to load classrooms list data', err);
     }
   }
 
+  // ========== TAB SWITCHING ==========
+  let currentTab = 'classrooms';
+
+  function switchTab(tab) {
+    currentTab = tab;
+    const btnClassrooms = document.getElementById('tabClassrooms');
+    const btnAllAssets = document.getElementById('tabAllAssets');
+    const panelClassrooms = document.getElementById('panelClassrooms');
+    const panelAllAssets = document.getElementById('panelAllAssets');
+
+    if (tab === 'classrooms') {
+      btnClassrooms.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all bg-primary text-white shadow-sm';
+      btnAllAssets.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all text-on-surface-variant hover:bg-surface-container';
+      panelClassrooms.classList.remove('hidden');
+      panelAllAssets.classList.add('hidden');
+    } else {
+      btnAllAssets.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all bg-primary text-white shadow-sm';
+      btnClassrooms.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all text-on-surface-variant hover:bg-surface-container';
+      panelClassrooms.classList.add('hidden');
+      panelAllAssets.classList.remove('hidden');
+      loadAllAssets();
+    }
+  }
+
+  // ========== ALL ASSETS TAB ==========
+  let allAssetsData = [];
+
+  async function loadAllAssets() {
+    const tbody = document.getElementById('allAssetsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-outline">Loading...</td></tr>`;
+    try {
+      if (window.Api) {
+        allAssetsData = await Api.get('/assets/all') || [];
+        populateAssetFilters(allAssetsData);
+        renderAllAssetsTable();
+        updateCriticalBanner(allAssetsData);
+      }
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-error">Failed to load assets: ${UiHelpers.escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+
+  function populateAssetFilters(assets) {
+    const types = [...new Set(assets.map(a => a.asset_type).filter(Boolean))].sort();
+    const rooms = [...new Map(assets.map(a => [a.room_id, a.room_name])).values()].sort();
+    
+    const typeEl = document.getElementById('assetTypeFilter');
+    typeEl.innerHTML = `<option value="">All Types</option>` + types.map(t => `<option value="${UiHelpers.escapeHtml(t)}">${UiHelpers.escapeHtml(t)}</option>`).join('');
+
+    const roomEl = document.getElementById('assetRoomFilter');
+    const roomEntries = [...new Map(assets.map(a => [a.room_id, a.room_name]))];
+    roomEntries.sort((a, b) => String(a[1]).localeCompare(String(b[1])));
+    roomEl.innerHTML = `<option value="">All Rooms</option>` + roomEntries.map(([id, name]) => `<option value="${id}">Room ${UiHelpers.escapeHtml(name)}</option>`).join('');
+  }
+
+  function renderAllAssetsTable() {
+    const tbody = document.getElementById('allAssetsTableBody');
+    if (!tbody) return;
+
+    const search = (document.getElementById('assetSearchInput')?.value || '').trim().toLowerCase();
+    const typeFilter = document.getElementById('assetTypeFilter')?.value || '';
+    const roomFilter = document.getElementById('assetRoomFilter')?.value || '';
+    const statusFilter = document.getElementById('assetStatusFilter')?.value || '';
+
+    let data = allAssetsData;
+    if (search) data = data.filter(a => a.asset_name.toLowerCase().includes(search) || (a.asset_type || '').toLowerCase().includes(search));
+    if (typeFilter) data = data.filter(a => a.asset_type === typeFilter);
+    if (roomFilter) data = data.filter(a => String(a.room_id) === roomFilter);
+    if (statusFilter === 'Critical') data = data.filter(a => Number(a.recent_failures) >= 3);
+    if (statusFilter === 'Normal') data = data.filter(a => Number(a.recent_failures) < 3);
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-outline">No assets match the selected filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map((a, idx) => {
+      const isCritical = Number(a.recent_failures) >= 3;
+      const statusBadge = isCritical
+        ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800"><span class="material-symbols-outlined text-xs">warning</span> Critical</span>`
+        : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800"><span class="material-symbols-outlined text-xs">check_circle</span> Normal</span>`;
+      const failuresCell = isCritical
+        ? `<td class="p-4 text-body-sm font-bold text-error">${a.recent_failures}</td>`
+        : `<td class="p-4 text-body-sm">${a.recent_failures}</td>`;
+
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors${isCritical ? ' bg-red-50/30' : ''}">
+          <td class="p-4 text-body-sm text-outline">${idx + 1}</td>
+          <td class="p-4 text-left">
+            <p class="text-body-sm font-bold text-on-surface">${UiHelpers.escapeHtml(a.asset_name)}</p>
+            <p class="text-xs text-outline">AST-${String(a.asset_id).padStart(3, '0')}</p>
+          </td>
+          <td class="p-4 text-body-sm text-left">${UiHelpers.escapeHtml(a.asset_type || '—')}</td>
+          <td class="p-4 text-body-sm">${UiHelpers.escapeHtml(a.room_name)}</td>
+          <td class="p-4 text-body-sm">${a.failure_count || 0}</td>
+          ${failuresCell}
+          <td class="p-4">${statusBadge}</td>
+          <td class="p-4">
+            <button onclick="showAssetHistoryPopup(${a.asset_id})" class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-[#004A8A] transition-colors">
+              <span class="material-symbols-outlined text-xs">visibility</span> View
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function updateCriticalBanner(assets) {
+    const criticalCount = assets.filter(a => Number(a.recent_failures) >= 3).length;
+    const banner = document.getElementById('criticalBanner');
+    const bannerText = document.getElementById('criticalBannerText');
+    if (criticalCount > 0) {
+      bannerText.textContent = `⚠️ Critical Assets: ${criticalCount} asset${criticalCount > 1 ? 's' : ''} need attention in the last 3 months.`;
+      banner.classList.remove('hidden');
+    } else {
+      banner.classList.add('hidden');
+    }
+  }
+
+  function filterCriticalOnly() {
+    const statusFilter = document.getElementById('assetStatusFilter');
+    if (statusFilter) { statusFilter.value = 'Critical'; renderAllAssetsTable(); }
+  }
+
+  function resetAssetFilters() {
+    const els = ['assetSearchInput', 'assetTypeFilter', 'assetRoomFilter', 'assetStatusFilter'];
+    els.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    renderAllAssetsTable();
+  }
+
+  function exportAssetsCSV() {
+    const search = (document.getElementById('assetSearchInput')?.value || '').trim().toLowerCase();
+    const typeFilter = document.getElementById('assetTypeFilter')?.value || '';
+    const roomFilter = document.getElementById('assetRoomFilter')?.value || '';
+    const statusFilter = document.getElementById('assetStatusFilter')?.value || '';
+
+    let data = allAssetsData;
+    if (search) data = data.filter(a => a.asset_name.toLowerCase().includes(search) || (a.asset_type || '').toLowerCase().includes(search));
+    if (typeFilter) data = data.filter(a => a.asset_type === typeFilter);
+    if (roomFilter) data = data.filter(a => String(a.room_id) === roomFilter);
+    if (statusFilter === 'Critical') data = data.filter(a => Number(a.recent_failures) >= 3);
+    if (statusFilter === 'Normal') data = data.filter(a => Number(a.recent_failures) < 3);
+
+    const headers = ['Asset ID', 'Asset Name', 'Asset Type', 'Room', 'Total Failures', 'Failures (3 months)', 'Status'];
+    const rows = data.map(a => [
+      `AST-${String(a.asset_id).padStart(3, '0')}`,
+      a.asset_name,
+      a.asset_type || '',
+      `Room ${a.room_name}`,
+      a.failure_count || 0,
+      a.recent_failures || 0,
+      Number(a.recent_failures) >= 3 ? 'Critical' : 'Normal'
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `assets_report_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    if (window.showToast) showToast('Đã xuất báo cáo CSV thành công!', 'success');
+  }
+
   loadClassrooms();
+
+  // ========== ASSET HISTORY POPUP ==========
+  async function showAssetHistoryPopup(assetId) {
+    // Find the asset in already-loaded allAssetsData for basic info
+    const assetBasic = allAssetsData.find(a => a.asset_id === assetId);
+
+    // Show modal immediately with basic info
+    document.getElementById('assetHistoryModal').classList.remove('hidden');
+    document.getElementById('assetHistoryModalTitle').textContent = assetBasic
+      ? `Asset History - ${assetBasic.asset_name}`
+      : `Asset History`;
+    document.getElementById('ahAssetName').textContent = assetBasic?.asset_name || '—';
+    document.getElementById('ahAssetType').textContent = assetBasic?.asset_type || '—';
+    document.getElementById('ahAssetRoom').textContent = assetBasic?.room_name || '—';
+    document.getElementById('ahTotalFailures').textContent = assetBasic?.failure_count ?? '—';
+    document.getElementById('ahRecentFailures').textContent = assetBasic?.recent_failures ?? '—';
+    document.getElementById('assetHistoryTableBody').innerHTML =
+      `<tr><td colspan="5" class="p-6 text-center text-outline">Loading repair history...</td></tr>`;
+
+    try {
+      if (window.Api) {
+        const asset = await Api.get(`/assets/${assetId}`);
+
+        // Update title & info with full data from API
+        document.getElementById('assetHistoryModalTitle').textContent = `Asset History - ${asset.asset_name}`;
+        document.getElementById('ahAssetName').textContent = asset.asset_name || '—';
+        document.getElementById('ahAssetType').textContent = asset.asset_type || '—';
+        document.getElementById('ahAssetRoom').textContent = asset.room_name || '—';
+        document.getElementById('ahTotalFailures').textContent = asset.failure_count ?? 0;
+        document.getElementById('ahRecentFailures').textContent = assetBasic?.recent_failures ?? '—';
+
+        const history = (asset.repairHistory || []).filter(wo =>
+          wo.task_status === 'Completed' || wo.task_status === 'Closed'
+        );
+
+        if (history.length === 0) {
+          document.getElementById('assetHistoryTableBody').innerHTML =
+            `<tr><td colspan="5" class="p-6 text-center text-outline">No completed repair records found for this asset.</td></tr>`;
+          return;
+        }
+
+        document.getElementById('assetHistoryTableBody').innerHTML = history.map(wo => {
+          const date = wo.resolved_at || wo.assigned_at
+            ? (UiHelpers.formatDate ? UiHelpers.formatDate(wo.resolved_at || wo.assigned_at) : (wo.resolved_at || wo.assigned_at || '').slice(0, 10))
+            : '—';
+          const statusBadge = wo.task_status === 'Completed' || wo.task_status === 'Closed'
+            ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">${UiHelpers.escapeHtml(wo.task_status)}</span>`
+            : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-surface-container text-outline">${UiHelpers.escapeHtml(wo.task_status)}</span>`;
+          const technician = wo.technician_name || '—';
+          const fixDesc = wo.fix_description || '—';
+          const parts = wo.parts_used || '—';
+          return `
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="p-3 text-body-sm text-outline whitespace-nowrap">${date}</td>
+              <td class="p-3">${statusBadge}</td>
+              <td class="p-3 text-body-sm font-medium text-on-surface">${UiHelpers.escapeHtml(technician)}</td>
+              <td class="p-3 text-body-sm text-on-surface-variant">${UiHelpers.escapeHtml(String(fixDesc))}</td>
+              <td class="p-3 text-body-sm text-on-surface-variant">${UiHelpers.escapeHtml(String(parts))}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    } catch (err) {
+      document.getElementById('assetHistoryTableBody').innerHTML =
+        `<tr><td colspan="5" class="p-6 text-center text-error">Failed to load repair history: ${UiHelpers.escapeHtml(err.message || 'Unknown error')}</td></tr>`;
+    }
+  }
+
+  function closeAssetHistoryModal() {
+    document.getElementById('assetHistoryModal').classList.add('hidden');
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('assetHistoryModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAssetHistoryModal();
+  });
 </script>
 </body>
 </html>

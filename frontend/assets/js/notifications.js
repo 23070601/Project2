@@ -9,7 +9,7 @@ const Notifications = (() => {
     {
       notification_id: 1,
       title: 'New WorkOrder assigned',
-      message: 'WO-2024-001 has been assigned to you.',
+      message: 'WO-1 has been assigned to you.',
       created_at: new Date(Date.now() - 5 * 60000).toISOString(),
       is_read: false,
       order_id: 1,
@@ -18,7 +18,7 @@ const Notifications = (() => {
     {
       notification_id: 2,
       title: 'WorkOrder priority updated',
-      message: 'WO-2024-005 priority changed to High.',
+      message: 'WO-5 priority changed to High.',
       created_at: new Date(Date.now() - 30 * 60000).toISOString(),
       is_read: false,
       order_id: 5,
@@ -27,13 +27,43 @@ const Notifications = (() => {
     {
       notification_id: 3,
       title: 'Repair report submitted',
-      message: 'WO-2024-008 repair report was submitted.',
+      message: 'WO-8 repair report was submitted.',
       created_at: new Date(Date.now() - 120 * 60000).toISOString(),
       is_read: true,
       order_id: 8,
       dotColor: 'bg-green-600'
     }
   ];
+
+  function getLocalReadIds() {
+    try {
+      return JSON.parse(localStorage.getItem('vnuis_read_notif_ids') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function saveLocalReadId(id) {
+    if (!id) return;
+    const readIds = getLocalReadIds();
+    const strId = String(id);
+    if (!readIds.includes(strId)) {
+      readIds.push(strId);
+      localStorage.setItem('vnuis_read_notif_ids', JSON.stringify(readIds));
+    }
+  }
+
+  function setAllLocalRead() {
+    localStorage.setItem('vnuis_all_notifs_read', 'true');
+  }
+
+  function isReadLocally(id) {
+    if (localStorage.getItem('vnuis_all_notifs_read') === 'true') return true;
+    if (!id) return false;
+    const strId = String(id);
+    const readIds = getLocalReadIds();
+    return readIds.includes(strId) || readIds.includes(`notif-${strId}`);
+  }
 
   function timeAgo(isoString) {
     if (!isoString) return 'recently';
@@ -49,6 +79,7 @@ const Notifications = (() => {
   }
 
   function normalizeNotification(item) {
+<<<<<<< HEAD
     return {
       notification_id: item.notification_id || item.id,
       title: item.title || item.message || 'Notification',
@@ -58,6 +89,21 @@ const Notifications = (() => {
       order_id: item.order_id ?? item.orderId ?? null,
       report_id: item.report_id ?? item.reportId ?? null,
       dotColor: item.dotColor || (item.is_read ? 'bg-amber-600' : 'bg-primary')
+=======
+    if (!item) return {};
+    const id = item.notification_id || item.id || Math.random();
+    const isRead = isReadLocally(id) || Boolean(item.is_read || item.isRead);
+
+    return {
+      notification_id: id,
+      title: item.title || 'Notification',
+      message: item.message || item.content || 'System notification',
+      created_at: item.created_at || new Date().toISOString(),
+      is_read: isRead,
+      order_id: item.order_id || item.orderId || null,
+      report_id: item.report_id || item.reportId || null,
+      dotColor: item.dotColor || (isRead ? 'bg-amber-600' : 'bg-primary')
+>>>>>>> Linh
     };
   }
 
@@ -79,6 +125,65 @@ const Notifications = (() => {
       if (item.report_id) return `PendingRequestDetail.html?id=${item.report_id}`;
       if (item.order_id) return `WorkOrderDetails.html?id=${item.order_id}`;
       return 'PendingRequest.html';
+<<<<<<< HEAD
+=======
+    }
+
+    if (isTechnician) {
+      if (item.order_id) return `WorkOrderDetails.html?id=${item.order_id}`;
+      return 'AssignedTasks.html';
+    }
+
+    if (item.report_id) return `ReportDetails.html?id=${item.report_id}`;
+    if (item.order_id) return 'ListReports.html';
+    return 'ListReports.html';
+  }
+
+  let lastChimeTime = 0;
+  function playUrgentAudioChime() {
+    if (Date.now() - lastChimeTime < 10000) return;
+    lastChimeTime = Date.now();
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch (e) {}
+  }
+
+  async function refreshBadge(customItems) {
+    let unreadCount = 0;
+
+    if (localStorage.getItem('vnuis_all_notifs_read') === 'true') {
+      unreadCount = 0;
+    } else {
+      const rawItems = customItems || SAMPLE_ITEMS;
+      const normalizedItems = (rawItems || []).map(normalizeNotification);
+      unreadCount = normalizedItems.filter((n) => !n.is_read).length;
+
+      if (window.Api) {
+        try {
+          const res = await Api.get('/notifications/unread-count');
+          if (res && typeof res.unreadCount === 'number') {
+            unreadCount = res.unreadCount;
+          } else if (typeof res === 'number') {
+            unreadCount = res;
+          }
+        } catch (e) {
+          // fallback to normalized unread count
+        }
+      }
+>>>>>>> Linh
     }
 
     if (isTechnician) {
@@ -95,7 +200,14 @@ const Notifications = (() => {
     const badge = document.getElementById('notificationBadge');
     if (badge) {
       badge.classList.toggle('hidden', unreadCount === 0);
+      if (unreadCount > 0) {
+        badge.classList.add('animate-pulse');
+        playUrgentAudioChime();
+      } else {
+        badge.classList.remove('animate-pulse');
+      }
     }
+
     const countPill = document.getElementById('notificationUnreadCount');
     if (countPill) {
       countPill.textContent = unreadCount;
@@ -103,6 +215,7 @@ const Notifications = (() => {
     }
   }
 
+<<<<<<< HEAD
   async function refreshBadge(customItems) {
     let unreadCount = 0;
     const normalizedItems = (customItems || []).map(normalizeNotification);
@@ -125,12 +238,39 @@ const Notifications = (() => {
     }
 
     markBadgeVisibility(unreadCount);
+=======
+  async function markAllAsRead(items, container, isDropdown = true) {
+    setAllLocalRead();
+
+    const currentItems = Array.isArray(items) ? items : SAMPLE_ITEMS;
+    currentItems.forEach(n => {
+      n.is_read = true;
+      if (n.notification_id) saveLocalReadId(n.notification_id);
+    });
+
+    try {
+      if (window.Api) {
+        await Api.patch('/notifications/read-all');
+      }
+    } catch (e) {}
+
+    if (container) {
+      renderList(currentItems, container, isDropdown);
+    }
+    refreshBadge(currentItems);
+>>>>>>> Linh
   }
 
   async function markNotificationAsRead(id, items, container, isDropdown = true) {
     if (!id) return;
+<<<<<<< HEAD
 
     const currentItems = Array.isArray(items) ? items : [];
+=======
+    saveLocalReadId(id);
+
+    const currentItems = Array.isArray(items) ? items : SAMPLE_ITEMS;
+>>>>>>> Linh
     const target = currentItems.find((n) => String(n.notification_id) === String(id));
     if (target) {
       target.is_read = true;
@@ -149,8 +289,14 @@ const Notifications = (() => {
   }
 
   function renderList(items, container, isDropdown = true) {
+<<<<<<< HEAD
     const latestItems = sortNotifications(items || []).map(normalizeNotification);
     const listToRender = latestItems.slice(0, isDropdown ? 3 : undefined);
+=======
+    const rawItems = (items && items.length > 0) ? items : SAMPLE_ITEMS;
+    const latestItems = sortNotifications(rawItems).map(normalizeNotification);
+    const listToRender = isDropdown ? latestItems.slice(0, 3) : latestItems;
+>>>>>>> Linh
     if (!container) return;
 
     if (listToRender.length === 0) {
@@ -161,9 +307,14 @@ const Notifications = (() => {
     container.innerHTML = listToRender
       .map((n) => `
       <div class="notif-card p-4 ${n.is_read ? 'bg-white' : 'bg-primary-fixed/20'} border-b border-outline-variant/10 flex gap-3 cursor-pointer hover:${n.is_read ? 'bg-surface-container-low' : 'bg-primary-fixed/30'} transition-colors"
+<<<<<<< HEAD
            data-id="${n.notification_id}"
            data-status="${n.is_read ? 'read' : 'unread'}">
         <div class="w-2 h-2 mt-2 rounded-full ${n.dotColor || (n.is_read ? 'bg-amber-600' : 'bg-primary')} shrink-0"></div>
+=======
+           data-id="${n.notification_id}">
+        <div class="w-2 h-2 mt-2 rounded-full ${n.is_read ? 'bg-transparent' : 'bg-primary'} shrink-0"></div>
+>>>>>>> Linh
         <div class="flex flex-col gap-1">
           <p class="text-body-sm ${n.is_read ? 'font-medium' : 'font-bold'} text-on-surface">${n.title || n.message || 'Notification'}</p>
           <p class="text-label-md text-on-surface-variant">${n.message}</p>
@@ -175,9 +326,15 @@ const Notifications = (() => {
     container.querySelectorAll('.notif-card').forEach((el) => {
       el.addEventListener('click', async () => {
         const id = el.dataset.id;
+<<<<<<< HEAD
         const targetItem = (items || []).find((n) => String(n.notification_id || n.id) === String(id));
         if (targetItem && !targetItem.is_read) {
           await markNotificationAsRead(id, items, container, isDropdown);
+=======
+        const targetItem = latestItems.find((n) => String(n.notification_id) === String(id));
+        if (targetItem && !targetItem.is_read) {
+          await markNotificationAsRead(id, latestItems, container, isDropdown);
+>>>>>>> Linh
         }
 
         if (targetItem) {
@@ -194,7 +351,11 @@ const Notifications = (() => {
     const container = document.getElementById('notificationList');
     if (!container) return;
 
+<<<<<<< HEAD
     let items = [];
+=======
+    let items = SAMPLE_ITEMS;
+>>>>>>> Linh
     try {
       if (window.Api) {
         const data = await Api.get('/notifications', { limit: 10 });
@@ -211,12 +372,19 @@ const Notifications = (() => {
     refreshBadge(items);
   }
 
+<<<<<<< HEAD
   // Used by full-page notification screens
+=======
+>>>>>>> Linh
   async function loadFullList(containerSelector) {
     const container = document.querySelector(containerSelector);
     if (!container) return;
 
+<<<<<<< HEAD
     let items = [];
+=======
+    let items = SAMPLE_ITEMS;
+>>>>>>> Linh
     try {
       if (window.Api) {
         const data = await Api.get('/notifications', { limit: 100 });
@@ -236,13 +404,7 @@ const Notifications = (() => {
     const btn = document.getElementById('markAllReadBtn');
     if (!btn) return;
     btn.addEventListener('click', async () => {
-      try {
-        if (window.Api && window.Auth && Auth.isAuthenticated()) {
-          await Api.patch('/notifications/read-all');
-        }
-      } catch (e) {}
-      loadDropdown();
-      refreshBadge();
+      await markAllAsRead(SAMPLE_ITEMS, document.getElementById('notificationList'), true);
     });
   }
 
@@ -266,6 +428,7 @@ const Notifications = (() => {
     }, 30000); // 30s
   }
 
+<<<<<<< HEAD
   document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initializeDropdown, 150);
   });
@@ -275,4 +438,7 @@ const Notifications = (() => {
   });
 
   return { loadDropdown, loadFullList, startPolling, refreshBadge, timeAgo };
+=======
+  return { loadDropdown, loadFullList, startPolling, refreshBadge, markAllAsRead, markNotificationAsRead, timeAgo };
+>>>>>>> Linh
 })();

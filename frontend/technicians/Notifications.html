@@ -57,7 +57,7 @@
             <h4 class="text-body-md font-bold text-on-surface">WorkOrder Assigned</h4>
             <span class="text-label-md text-on-surface-variant">5 minutes ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">New WorkOrder <span class="font-medium text-primary">WO-2024-001</span> (Sony Projector) has been assigned to you.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">New WorkOrder <span class="font-medium text-primary">WO-1</span> (Sony Laser Projector) has been assigned to you.</p>
         </div>
       </div>
 
@@ -69,7 +69,7 @@
             <h4 class="text-body-md font-bold text-on-surface">WorkOrder Reassigned</h4>
             <span class="text-label-md text-on-surface-variant">30 minutes ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1"><span class="font-medium text-primary">WO-2024-005</span> (Air Conditioner) has been reassigned to you.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1"><span class="font-medium text-primary">WO-5</span> (AKG Lavalier Wireless Mic) has been reassigned to you.</p>
         </div>
       </div>
 
@@ -81,7 +81,7 @@
             <h4 class="text-body-md font-bold text-on-surface">Priority Escalation</h4>
             <span class="text-label-md text-on-surface-variant">1 hour ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">WorkOrder <span class="font-medium text-primary">WO-2024-012</span> priority was updated to <span class="text-error font-medium">High Priority</span>.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">WorkOrder <span class="font-medium text-primary">WO-8</span> priority was updated to <span class="text-error font-medium">High Priority</span>.</p>
         </div>
       </div>
 
@@ -93,7 +93,7 @@
             <h4 class="text-body-md font-medium text-on-surface">Repair Completed</h4>
             <span class="text-label-md text-on-surface-variant">2 hours ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">Your repair report for <span class="font-medium">WO-2024-008</span> (Printer Maintenance) was submitted successfully.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">Your repair report for <span class="font-medium">WO-8</span> (Cisco Gigabit Switch) was submitted successfully.</p>
         </div>
       </div>
 
@@ -105,7 +105,7 @@
             <h4 class="text-body-md font-medium text-on-surface">WorkOrder Cancelled</h4>
             <span class="text-label-md text-on-surface-variant">5 hours ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1"><span class="font-medium">WO-2024-010</span> has been cancelled by Manager.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1"><span class="font-medium">WO-10</span> has been cancelled by Manager.</p>
         </div>
       </div>
 
@@ -114,10 +114,10 @@
         <div class="w-2 h-2 bg-transparent mt-2 shrink-0"></div>
         <div class="flex-1">
           <div class="flex justify-between items-start">
-            <h4 class="text-body-md font-medium text-on-surface">Asset Failure Alert</h4>
+            <h4 class="text-body-md font-medium text-on-surface">User Confirmation Received</h4>
             <span class="text-label-md text-on-surface-variant">Yesterday</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">Asset <span class="font-medium">Sony Projector P512</span> has exceeded the failure threshold.</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">User confirmed repair for <span class="font-medium">WO-3</span> with a <span class="text-amber-600 font-bold">5★ rating</span>: "Quick and clean fix!".</p>
         </div>
       </div>
 
@@ -141,7 +141,7 @@
             <h4 class="text-body-md font-medium text-on-surface">User Feedback Received</h4>
             <span class="text-label-md text-on-surface-variant">3 days ago</span>
           </div>
-          <p class="text-body-sm text-on-surface-variant mt-1">User confirmed repair for <span class="font-medium">WO-2024-003</span> with a <span class="text-amber-600 font-bold">5★ rating</span>: "Quick and clean fix!".</p>
+          <p class="text-body-sm text-on-surface-variant mt-1">User confirmed repair for <span class="font-medium">WO-3</span> with a <span class="text-amber-600 font-bold">5★ rating</span>: "Quick and clean fix!".</p>
         </div>
       </div>
     </div>
@@ -177,9 +177,10 @@
 <script src="../assets/js/layout.js"></script>
 <script src="../assets/js/notifications.js"></script>
 <script>
-  let currentUser = { full_name: 'Nguyen Van A' };
+  let currentUser = { full_name: 'Le Van C', role: 'Technician' };
   try {
-    currentUser = Auth.guard('Technician');
+    const user = Auth.guard('Technician');
+    if (user) currentUser = user;
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }

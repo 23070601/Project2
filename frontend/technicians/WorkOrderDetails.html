@@ -33,7 +33,7 @@
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
           Back to Tasks
         </button>
-        <h3 class="text-headline-md font-headline-md mt-2">Task Detail — <span id="detailHeaderOrderId" class="text-primary">WO-2024-001</span></h3>
+        <h3 class="text-headline-md font-headline-md mt-2">Task Detail — <span id="detailHeaderOrderId" class="text-primary">WO-1</span></h3>
       </div>
     </div>
 
@@ -50,8 +50,8 @@
           </div>
           <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
-              <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Order ID</p>
-              <p id="detailOrderId" class="text-body-md font-bold text-on-surface">WO-2024-001</p>
+              <p class="text-label-md text-outline mb-1 uppercase tracking-wider">WorkOrder ID</p>
+              <p id="detailOrderId" class="text-body-md font-bold text-on-surface">WO-1</p>
             </div>
             <div>
               <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Equipment</p>
@@ -80,8 +80,8 @@
             <div>
               <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Reported By</p>
               <div class="flex items-center gap-2">
-                <div id="detailReporterAvatar" class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">JD</div>
-                <p id="detailReporterName" class="text-body-md font-medium text-on-surface">John Doe</p>
+                <div id="detailReporterAvatar" class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">NA</div>
+                <p id="detailReporterName" class="text-body-md font-medium text-on-surface">Nguyen Van A</p>
               </div>
             </div>
             <div>
@@ -128,33 +128,7 @@
                     <th class="px-6 py-3 text-label-md font-bold text-outline uppercase tracking-wider text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody id="detailRepairHistoryBody" class="divide-y divide-outline-variant/10">
-                  <tr class="hover:bg-surface-container-lowest transition-colors">
-                    <td class="px-6 py-4 text-center">
-                      <div class="flex flex-col items-center">
-                        <span class="text-body-sm font-bold">10 Oct 2024</span>
-                        <span class="text-[10px] text-green-600 font-bold uppercase tracking-widest">Completed</span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                      <div class="flex flex-col items-center">
-                        <span class="text-body-sm text-on-surface">Replaced projector lamp</span>
-                        <span class="text-label-md text-outline">Parts: Sony Lamp VPL-X01</span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                      <div class="flex items-center gap-2 justify-center">
-                        <div class="w-6 h-6 rounded-full bg-primary-fixed text-primary text-[10px] flex items-center justify-center font-bold">NV</div>
-                        <span class="text-body-sm">Nguyen Van A</span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                      <button class="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors flex items-center justify-center mx-auto" title="View WorkOrder">
-                        <span class="material-symbols-outlined">visibility</span>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
+                <tbody id="detailRepairHistoryBody" class="divide-y divide-outline-variant/10"></tbody>
               </table>
             </div>
           </div>
@@ -331,16 +305,20 @@
       </button>
     </div>
     <div class="p-8 space-y-6">
-      <div class="border-2 border-dashed border-outline-variant/50 rounded-xl p-10 flex flex-col items-center justify-center gap-4 bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer">
+      <input type="file" id="evidenceFileInput" class="hidden" accept="image/*" onchange="handleEvidenceFileSelected(this)">
+      <div onclick="document.getElementById('evidenceFileInput').click()" class="border-2 border-dashed border-outline-variant/50 rounded-xl p-8 flex flex-col items-center justify-center gap-4 bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer text-center">
+        <div id="evidencePreviewContainer" class="hidden w-full h-32 rounded-lg overflow-hidden mb-2">
+          <img id="evidenceFilePreview" class="w-full h-full object-cover" src="" alt="Preview">
+        </div>
         <span class="material-symbols-outlined text-[48px] text-primary/40">cloud_upload</span>
-        <div class="text-center">
-          <p class="text-body-md font-bold text-on-surface">Click to upload or drag & drop</p>
+        <div>
+          <p id="evidenceUploadLabel" class="text-body-md font-bold text-on-surface">Click to select photo</p>
           <p class="text-label-md text-outline">PNG, JPG or JPEG (Max. 5MB)</p>
         </div>
       </div>
       <div class="space-y-2">
         <label class="text-label-lg font-bold text-on-surface">Photo Category</label>
-        <select class="w-full rounded-lg border-outline-variant focus:ring-primary focus:border-primary text-body-md">
+        <select id="evidenceCategorySelect" class="w-full rounded-lg border-outline-variant focus:ring-primary focus:border-primary text-body-md">
           <option>Before Repair</option>
           <option>During Repair</option>
           <option>After Repair</option>
@@ -368,7 +346,7 @@
       <div class="grid grid-cols-2 gap-4">
         <div class="space-y-2">
           <label class="text-label-lg font-bold text-on-surface">WorkOrder</label>
-          <input id="reportModalWorkOrderId" type="text" value="WO-2024-001" disabled class="w-full bg-surface-container-low border-outline-variant rounded-lg text-outline font-bold">
+          <input id="reportModalWorkOrderId" type="text" value="WO-1" disabled class="w-full bg-surface-container-low border-outline-variant rounded-lg text-outline font-bold">
         </div>
         <div class="space-y-2">
           <label class="text-label-lg font-bold text-on-surface">New Status</label>
@@ -395,6 +373,108 @@
   </div>
 </div>
 
+<!-- 3. View Repair History Record Modal -->
+<div class="fixed inset-0 z-[999] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-xs" id="historyDetailModal" onclick="if(event.target===this) toggleModal('historyDetailModal', false)">
+  <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 relative z-10 animate-in zoom-in duration-200">
+    <!-- Header -->
+    <div class="bg-primary px-6 py-4 flex justify-between items-center text-white">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-white">build_circle</span>
+        </div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm font-bold">Past Repair Audit Log</h3>
+          <p class="text-xs text-white/80">Detailed technical resolution & diagnostic report</p>
+        </div>
+      </div>
+      <button class="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors" onclick="toggleModal('historyDetailModal', false)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-5 bg-white text-slate-800 max-h-[80vh] overflow-y-auto">
+      <!-- Top Meta Badge Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">WorkOrder ID</span>
+          <span id="historyModalOrderId" class="text-body-md font-bold text-primary">WO-010</span>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Fault Report</span>
+          <span id="historyModalReportId" class="text-body-md font-bold text-slate-700">#FR-010</span>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Assigned Date</span>
+          <span id="historyModalDate" class="text-body-sm font-medium text-slate-800">15 May 2026</span>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Final Status</span>
+          <span id="historyModalStatus" class="inline-flex px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-bold uppercase mt-0.5">Closed</span>
+        </div>
+      </div>
+
+      <!-- Section 1: Initial Fault Report -->
+      <div class="space-y-2 border-l-4 border-amber-500 pl-4 py-1">
+        <div class="flex justify-between items-center">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Initial Fault Report & Symptom</h4>
+          <span class="text-xs text-slate-500 font-medium">Reporter: <strong id="historyModalReporter" class="text-slate-800">Nguyen Van A (Lecturer)</strong></span>
+        </div>
+        <p id="historyModalReportedIssue" class="text-body-md font-medium text-slate-700 italic bg-amber-50/50 p-3 rounded-lg border border-amber-100">
+          "Wireless microphone loses signal every 2 minutes during lecture."
+        </p>
+      </div>
+
+      <!-- Section 2: Technical Diagnosis & Root Cause -->
+      <div class="space-y-2 border-l-4 border-blue-500 pl-4 py-1">
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Technician Root Cause Analysis</h4>
+        <p id="historyModalRootCause" class="text-body-md text-slate-800 font-medium bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+          Internal battery spring contact oxidation causing intermittent power disconnection when moved, combined with antenna sleeve fatigue.
+        </p>
+      </div>
+
+      <!-- Section 3: Fix Actions & Parts Replacement -->
+      <div class="space-y-3 border-l-4 border-emerald-500 pl-4 py-1">
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Technical Solution & Spare Parts Used</h4>
+        <div class="space-y-1">
+          <span class="text-xs font-semibold text-slate-500">Action Taken:</span>
+          <p id="historyModalFixDesc" class="p-3 bg-slate-50 rounded-lg text-body-md text-slate-800 font-medium border border-slate-200">
+            Tightened internal battery terminal contacts and replaced antenna sleeve.
+          </p>
+        </div>
+        <div class="space-y-1">
+          <span class="text-xs font-semibold text-slate-500">Parts / Components Replaced:</span>
+          <p id="historyModalParts" class="p-3 bg-slate-50 rounded-lg text-body-md text-slate-800 font-medium border border-slate-200">
+            AKG Battery Terminal Spring (SKU: AKG-SP-202)
+          </p>
+        </div>
+      </div>
+
+      <!-- Section 4: Service Technician & Verification -->
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-body-md shrink-0" id="historyModalTechInitials">
+            PT
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 font-semibold">Service Technician (Kỹ thuật viên thực hiện)</p>
+            <p id="historyModalTech" class="text-body-md font-bold text-slate-800">Pham Thi D</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span id="historyModalVerification" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+            Verified Operational
+          </span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button onclick="toggleModal('historyDetailModal', false)" class="px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-all">Close Details</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -402,9 +482,10 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let currentUser = { full_name: 'Nguyen Van A' };
+  let currentUser = { full_name: 'Le Van C', email: 'tech.c@vnuis.edu.vn', role: 'Technician', user_id: 3 };
   try {
-    currentUser = Auth.guard('Technician');
+    const guarded = Auth.guard('Technician');
+    if (guarded) currentUser = guarded;
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }
@@ -418,22 +499,50 @@
   const displayId = `WO-${cleanId}`;
 
   let currentOrderData = null;
+  let selectedEvidenceBase64 = null;
 
   function toggleModal(modalId, show) {
     const el = document.getElementById(modalId);
     if (!el) return;
-    if (show) el.classList.remove('hidden');
-    else el.classList.add('hidden');
+    if (show) {
+      el.classList.remove('hidden');
+      el.style.setProperty('display', 'flex', 'important');
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+    } else {
+      el.classList.add('hidden');
+      el.style.setProperty('display', 'none', 'important');
+    }
   }
 
-  function formatAssignedDate(dateStr) {
+  window.toggleModal = toggleModal;
+
+  function getStoredWorkOrders() {
+    try {
+      const stored = localStorage.getItem('vnuis_work_orders');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return [];
+  }
+
+  function saveStoredWorkOrders(tasks) {
+    localStorage.setItem('vnuis_work_orders', JSON.stringify(tasks));
+  }
+
+  function formatAssignedDate(dateStr, includeTime = false) {
     if (!dateStr) return '20 Oct 2024';
     try {
-      const d = new Date(dateStr);
+      const d = new Date(String(dateStr).includes('T') ? dateStr : String(dateStr).replace(' ', 'T'));
       if (isNaN(d.getTime())) return dateStr;
       const day = String(d.getDate()).padStart(2, '0');
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${day} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      const formattedDate = `${day} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      if (includeTime) {
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${formattedDate} ${hours}:${minutes}`;
+      }
+      return formattedDate;
     } catch (e) {
       return dateStr;
     }
@@ -446,24 +555,37 @@
     return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-600">Low</span>';
   }
 
+  function getDisplayTaskStatus(order) {
+    if (!order) return '';
+    if (order.technician_response === 'Rejected') return 'Rejected';
+    return order.task_status || '';
+  }
+
   function getStatusBadgeHtml(s) {
-    s = (s || '').toLowerCase();
-    if (s.includes('progress')) return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">In Progress</span>';
-    if (s.includes('received')) return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-fixed text-primary">Received</span>';
-    if (s.includes('completed')) return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-600">Completed</span>';
+    const raw = typeof s === 'object' && s !== null
+      ? (s.technician_response === 'Rejected' ? 'Rejected' : (s.task_status || ''))
+      : (s || '');
+    const normalized = (raw || '').toLowerCase();
+    if (normalized.includes('progress')) return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600">In Progress</span>';
+    if (normalized.includes('received')) return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-fixed text-primary">Received</span>';
+    if (normalized.includes('completed')) return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-600">Completed</span>';
+    if (normalized.includes('rejected')) return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-error-container text-on-error-container">Rejected</span>';
     return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">Assigned</span>';
   }
 
   async function loadWorkOrderDetails() {
     let order = null;
+    let loadedFromApi = false;
     try {
       if (window.Api) {
         order = await Api.get(`/work-orders/${cleanId}`);
+        if (order) loadedFromApi = true;
       }
     } catch (err) {
-      console.log('Error fetching order detail from API', err);
+      console.warn('Error fetching order detail from API:', err);
     }
 
+<<<<<<< HEAD
     if (!order) {
       order = {
         order_id: cleanId,
@@ -480,20 +602,99 @@
         statusHistory: [],
         repairHistory: [],
       };
+=======
+    const WORK_ORDERS_MAP = {
+      '1': { 
+        order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.', failure_count: 3, asset_type: 'Projector',
+        repairHistory: [
+          { order_id: '10', report_id: '18', reporter_name: 'Nguyen Van A', reported_issue: 'HDMI input port loose contact', root_cause: 'Soldering joint cracked due to frequent cable plugging', assigned_at: '2026-05-10 09:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Re-soldered HDMI female socket and secured mainboard casing.', parts_used: 'HDMI Port Socket' }
+        ]
+      },
+      '2': { 
+        order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', assigned_at: '2026-07-20 07:52:24', reporter_name: 'Tran Van B', created_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.', failure_count: 2, asset_type: 'TV',
+        repairHistory: [
+          { order_id: '2', report_id: '3', reporter_name: 'Nguyen Van A', reported_issue: 'Samsung Commercial TV screen sensor unresponsive', root_cause: 'Power supply board capacitor fatigue', assigned_at: '2026-06-12 10:30:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Replaced display panel driver board and updated firmware.', parts_used: 'Display Controller Board' }
+        ]
+      },
+      '3': { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Le Thi C', created_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.', failure_count: 1, asset_type: 'Visualizer', repairHistory: [] },
+      '4': { 
+        order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.', failure_count: 4, asset_type: 'TV',
+        repairHistory: [
+          { order_id: '11', report_id: '20', reporter_name: 'Doan Van G', reported_issue: 'LVDS ribbon cable loose', root_cause: 'Connector latch clip broken', assigned_at: '2026-04-18 14:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced LVDS display ribbon cable.', parts_used: '55in LVDS Cable Harness' }
+        ]
+      },
+      '5': { 
+        order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Pham Van H', created_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.', failure_count: 4, asset_type: 'Microphone',
+        repairHistory: [
+          { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Internal battery spring contact oxidation causing power disconnection.', assigned_at: '2026-06-23 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
+        ]
+      },
+      '6': { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Bui Van K', created_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.', failure_count: 1, asset_type: 'TV', repairHistory: [] },
+      '7': { 
+        order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-15 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.', failure_count: 5, asset_type: 'Microphone',
+        repairHistory: [
+          { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Physical wear on plastic latch clip.', assigned_at: '2026-07-15 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
+        ]
+      },
+      '8': { 
+        order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', assigned_at: '2026-07-23 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.', failure_count: 2, asset_type: 'Network',
+        repairHistory: [
+          { order_id: '8', report_id: '15', reporter_name: 'Doan Van G', reported_issue: 'Gigabit switch power LED off', root_cause: 'Power supply transformer burnt out due to power surge', assigned_at: '2026-07-29 08:45:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Đã kiểm tra và thay thế bộ nguồn switch mạng.', parts_used: 'Bộ nguồn Gigabit Switch 12V' }
+        ]
+      },
+      '10': { 
+        order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', assigned_at: '2026-06-15 09:00:00', reporter_name: 'Nguyen Van A', created_at: '2026-06-15 09:00:00', description: 'Wireless mic battery springs replaced and tested in Room R504.', failure_count: 1, asset_type: 'Microphone',
+        repairHistory: [
+          { order_id: '10', report_id: '17', reporter_name: 'Nguyen Van A', reported_issue: 'Loose battery contact springs causing audio dropout', root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.', assigned_at: '2026-06-15 09:00:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Tightened internal battery terminal contacts and replaced antenna sleeve.', parts_used: 'AKG Battery Terminal Spring' }
+        ]
+      }
+    };
+
+    if (!loadedFromApi || !order) {
+      const storedOrders = getStoredWorkOrders();
+      const localMatch = storedOrders.find(o => String(o.order_id) === String(cleanId));
+      const defaultMapItem = WORK_ORDERS_MAP[cleanId] || WORK_ORDERS_MAP['1'];
+      if (localMatch) {
+        order = { ...defaultMapItem, ...localMatch };
+        if (!order.repairHistory || !Array.isArray(order.repairHistory) || order.repairHistory.length === 0) {
+          order.repairHistory = defaultMapItem.repairHistory || [];
+        }
+      } else {
+        order = defaultMapItem;
+      }
+    } else {
+      const storedOrders = getStoredWorkOrders() || [];
+      const existingIndex = storedOrders.findIndex(o => String(o.order_id) === String(cleanId));
+      if (existingIndex !== -1) {
+        storedOrders[existingIndex] = { ...storedOrders[existingIndex], ...order };
+      } else {
+        storedOrders.push(order);
+      }
+      saveStoredWorkOrders(storedOrders);
+>>>>>>> Linh
     }
 
     currentOrderData = order;
 
+<<<<<<< HEAD
     const orderIdLabel = `WO-${order.order_id}`;
     document.getElementById('detailHeaderOrderId').textContent = orderIdLabel;
     document.getElementById('detailOrderId').textContent = orderIdLabel;
+=======
+    // Render Basic Data from DB
+    const displayWoId = UiHelpers.formatWorkOrderId(order.order_id);
+    document.getElementById('detailHeaderOrderId').textContent = displayWoId;
+    document.getElementById('detailOrderId').textContent = displayWoId;
+>>>>>>> Linh
     document.getElementById('detailEquipment').textContent = order.asset_name || 'Equipment';
     document.getElementById('detailRoom').textContent = order.room_name || 'Room';
 
     const priorityContainer = document.getElementById('detailPriorityBadgeContainer');
     if (priorityContainer) priorityContainer.innerHTML = getPriorityBadgeHtml(order.priority);
 
+    const displayStatus = getDisplayTaskStatus(order);
     const statusContainer = document.getElementById('detailStatusBadgeContainer');
+<<<<<<< HEAD
     if (statusContainer) statusContainer.innerHTML = getStatusBadgeHtml(order.task_status);
     document.getElementById('detailAssignedDate').textContent = formatAssignedDate(order.assigned_at || order.created_at);
     document.getElementById('detailReporterName').textContent = order.reporter_name || currentUser?.full_name || 'Technician';
@@ -501,16 +702,34 @@
     document.getElementById('detailFaultQuote').textContent = order.description ? `"${order.description}"` : 'No fault description provided.';
     document.getElementById('detailFaultSubtext').textContent = order.description ? 'Reported issue from the connected fault report.' : 'The system has no additional description for this work order.';
 
+=======
+    if (statusContainer) statusContainer.innerHTML = getStatusBadgeHtml(displayStatus);
+    document.getElementById('detailAssignedDate').textContent = formatAssignedDate(order.assigned_at);
+    document.getElementById('detailReporterName').textContent = order.reporter_name || 'Nguyen Van A';
+    document.getElementById('detailReportedDate').textContent = formatAssignedDate(order.created_at || order.assigned_at);
+
+    const faultDesc = order.description || (WORK_ORDERS_MAP[cleanId] ? WORK_ORDERS_MAP[cleanId].description : '') || (WORK_ORDERS_MAP['1'] ? WORK_ORDERS_MAP['1'].description : 'Sony Projector has no display signal and blinks red LED indicator.');
+    document.getElementById('detailFaultQuote').textContent = `"${faultDesc}"`;
+    document.getElementById('detailFaultSubtext').textContent = `Reported issue for ${order.asset_name || 'equipment'} in Room ${order.room_name || ''}.`;
+
+    // Asset Info Box
+>>>>>>> Linh
     document.getElementById('detailAssetBoxName').textContent = order.asset_name || 'Equipment';
     document.getElementById('detailAssetBoxSn').textContent = `SN: SN-${order.order_id}928374-X`;
     document.getElementById('detailAssetType').textContent = order.asset_type || 'Equipment';
     document.getElementById('detailAssetRoom').textContent = order.room_name || 'Room';
+<<<<<<< HEAD
     
     const count = order.failure_count || 0;
+=======
+
+    const count = order.failure_count || (WORK_ORDERS_MAP[cleanId] ? WORK_ORDERS_MAP[cleanId].failure_count : 4);
+>>>>>>> Linh
     document.getElementById('detailAssetFailureCount').textContent = `${count} (In last 6 months)`;
     document.getElementById('dss3FailureCountText').textContent = count;
     document.getElementById('updateStatusSelect').value = order.task_status || 'Assigned';
 
+<<<<<<< HEAD
     const timelineContainer = document.getElementById('detailTimelineContainer');
     if (timelineContainer) {
       const history = Array.isArray(order.statusHistory) && order.statusHistory.length > 0
@@ -577,7 +796,207 @@
       } else {
         historyBody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-on-surface-variant">No repair history found for this asset yet.</td></tr>';
       }
+=======
+    // Update Status Select Dropdown to match current status
+    const statusSelect = document.getElementById('updateStatusSelect');
+    if (statusSelect) {
+      if (displayStatus === 'Rejected') {
+        statusSelect.value = 'Assigned';
+      } else {
+        const validOpt = Array.from(statusSelect.options).find(opt => opt.value.toLowerCase() === displayStatus.toLowerCase());
+        if (validOpt) statusSelect.value = validOpt.value;
+        else statusSelect.value = 'In Progress';
+      }
     }
+
+    // Saved Evidence Photo check
+    const savedPhoto = localStorage.getItem(`vnuis_evidence_${cleanId}`);
+    if (savedPhoto) {
+      const photoEl = document.getElementById('detailEvidencePhoto');
+      if (photoEl) photoEl.src = savedPhoto;
+    }
+
+    // Render Timeline & Repair History
+    renderStatusTimeline(order);
+    renderRepairHistory(order);
+  }
+
+  let currentRepairHistory = [];
+
+  function openHistoryDetailModalByIndex(index) {
+    console.log('openHistoryDetailModalByIndex called with index:', index);
+    let item = (currentRepairHistory && currentRepairHistory.length > index) ? currentRepairHistory[index] : null;
+
+    if (!item) {
+      item = {
+        order_id: '7',
+        report_id: '12',
+        reporter_name: 'Nguyen Van A',
+        reported_issue: 'Loose battery contact springs causing audio dropout',
+        root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.',
+        assigned_at: '2026-05-15 09:00:00',
+        technician_name: 'Pham Thi D',
+        task_status: 'Closed',
+        fix_description: 'Tightened internal battery terminal contacts and replaced antenna sleeve.',
+        parts_used: 'AKG Battery Terminal Spring'
+      };
+    }
+
+    const targetWoId = UiHelpers.formatWorkOrderId(item.order_id || '7');
+    const targetReportId = UiHelpers.formatReportId(item.report_id || '12');
+    const reporterName = item.reporter_name || 'Nguyen Van A';
+    const reportedIssue = item.reported_issue || item.description || 'Loose battery contact springs causing audio dropout';
+    const rootCause = item.root_cause || 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.';
+    const dateStr = item.assigned_at ? formatAssignedDate(item.assigned_at) : '15 May 2026';
+    const techName = item.technician_name || 'Pham Thi D';
+    const initials = techName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const statusStr = item.task_status || 'Closed';
+    const fixDesc = item.fix_description || 'Tightened internal battery terminal contacts and replaced antenna sleeve.';
+    const partsUsed = item.parts_used || 'AKG Battery Terminal Spring';
+
+    document.getElementById('historyModalOrderId').textContent = targetWoId;
+    document.getElementById('historyModalReportId').textContent = targetReportId;
+    document.getElementById('historyModalReporter').textContent = reporterName;
+    document.getElementById('historyModalReportedIssue').textContent = `"${reportedIssue}"`;
+    document.getElementById('historyModalRootCause').textContent = rootCause;
+    document.getElementById('historyModalDate').textContent = dateStr;
+    document.getElementById('historyModalTech').textContent = techName;
+    document.getElementById('historyModalTechInitials').textContent = initials;
+    document.getElementById('historyModalStatus').textContent = statusStr;
+    document.getElementById('historyModalFixDesc').textContent = fixDesc;
+    document.getElementById('historyModalParts').textContent = partsUsed;
+
+    window.toggleModal('historyDetailModal', true);
+  }
+
+  window.openHistoryDetailModalByIndex = openHistoryDetailModalByIndex;
+  window.toggleModal = toggleModal;
+
+  function renderRepairHistory(order) {
+    const tbody = document.getElementById('detailRepairHistoryBody');
+    if (!tbody) return;
+
+    let historyList = (order && Array.isArray(order.repairHistory) && order.repairHistory.length > 0) 
+      ? order.repairHistory.filter(r => (r.task_status === 'Completed' || r.task_status === 'Closed') && String(r.order_id) !== String(cleanId)) 
+      : [];
+
+    if (historyList.length === 0 && WORK_ORDERS_MAP[cleanId] && WORK_ORDERS_MAP[cleanId].repairHistory) {
+      historyList = WORK_ORDERS_MAP[cleanId].repairHistory.filter(r => String(r.order_id) !== String(cleanId));
+    }
+
+    if (historyList.length === 0 && (order.failure_count > 1 || (WORK_ORDERS_MAP[cleanId] && WORK_ORDERS_MAP[cleanId].failure_count > 1))) {
+      historyList = [
+        {
+          order_id: 'WO-2024-0007',
+          report_id: '12',
+          reporter_name: 'Doan Van G',
+          reported_issue: `${order.asset_name || 'Equipment'} intermittent signal loss during lecture`,
+          root_cause: 'Internal power terminal oxidation causing intermittent disconnection.',
+          assigned_at: '2026-06-15 09:00:00',
+          technician_name: 'Le Van C',
+          task_status: 'Closed',
+          fix_description: 'Cleaned contacts, re-soldered power leads, and tested operation.',
+          parts_used: 'Power Terminal Clip & Cable Assembly'
+        }
+      ];
+    }
+
+    currentRepairHistory = historyList;
+
+    currentRepairHistory = historyList;
+
+    if (historyList.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="px-6 py-8 text-center text-outline text-body-sm font-medium">
+            <div class="flex flex-col items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-outline/50 text-[32px]">history_toggle_off</span>
+              <span>No completed past repair history recorded in database for this asset.</span>
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = historyList.map((r, idx) => {
+      const initials = (r.technician_name || 'NV').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      const statusText = r.task_status || 'Completed';
+      const assignedDateFormatted = formatAssignedDate(r.assigned_at);
+      const techNameStr = r.technician_name || 'Technician';
+      const fixDescStr = r.fix_description || r.description || 'Maintenance check';
+      const partsUsedStr = r.parts_used || 'None';
+
+      return `
+        <tr onclick="window.openHistoryDetailModalByIndex(${idx})" class="history-item-row hover:bg-surface-container-lowest transition-colors cursor-pointer">
+          <td class="px-6 py-4 text-center">
+            <div class="flex flex-col items-center">
+              <span class="text-body-sm font-bold">${assignedDateFormatted}</span>
+              <span class="text-[10px] text-green-600 font-bold uppercase tracking-widest">${UiHelpers.escapeHtml(statusText)}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <div class="flex flex-col items-center">
+              <span class="text-body-sm text-on-surface">${UiHelpers.escapeHtml(fixDescStr)}</span>
+              <span class="text-label-md text-outline">Parts: ${UiHelpers.escapeHtml(partsUsedStr)}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <div class="flex items-center gap-2 justify-center">
+              <div class="w-6 h-6 rounded-full bg-primary-fixed text-primary text-[10px] flex items-center justify-center font-bold">${initials}</div>
+              <span class="text-body-sm">${UiHelpers.escapeHtml(techNameStr)}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <button onclick="if(window.event && window.event.stopPropagation) window.event.stopPropagation(); window.openHistoryDetailModalByIndex(${idx}); return false;" class="history-item-btn text-primary hover:bg-primary/10 p-2 rounded-full transition-colors flex items-center justify-center mx-auto" title="View Repair Details">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderStatusTimeline(order) {
+    const timelineContainer = document.getElementById('detailTimelineContainer');
+    if (!timelineContainer) return;
+
+    let history = order.statusHistory || [
+      { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
+      { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
+    ];
+
+    const displayStatus = getDisplayTaskStatus(order);
+    if (displayStatus === 'In Progress' && !history.some(h => (h.task_status || '').includes('Progress'))) {
+      history.push({ task_status: 'In Progress', changed_at: new Date().toISOString(), notes: 'Technician started the repair process.' });
+    } else if (displayStatus === 'Completed' && !history.some(h => (h.task_status || '').includes('Completed'))) {
+      history.push({ task_status: 'Completed', changed_at: new Date().toISOString(), notes: 'Repair completed successfully and submitted.' });
+>>>>>>> Linh
+    }
+
+    timelineContainer.innerHTML = history.map((h, index) => {
+      const isLast = index === (history.length - 1);
+      const statusName = h.task_status || h.status_name || 'Assigned';
+      let icon = 'assignment_ind';
+      if (statusName.includes('Progress')) icon = 'play_arrow';
+      if (statusName.includes('Received')) icon = 'task_alt';
+      if (statusName.includes('Completed')) icon = 'check_circle';
+
+      return `
+        <div class="relative flex items-center group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white ${isLast ? 'bg-primary text-white' : 'bg-outline text-white'} shadow shrink-0 z-10">
+            <span class="material-symbols-outlined text-[18px]">${icon}</span>
+          </div>
+          <div class="ml-4 flex-1 ${isLast ? 'bg-surface-container-low p-3 rounded-lg border border-outline-variant/20' : 'p-3 rounded-lg border border-outline-variant/10'}">
+            <div class="flex justify-between items-start">
+              <h5 class="text-body-sm font-bold ${isLast ? 'text-on-surface' : 'text-outline'}">${UiHelpers.escapeHtml(statusName)}</h5>
+              <span class="text-[10px] text-outline font-medium">${formatAssignedDate(h.changed_at, true)}</span>
+            </div>
+            <p class="text-label-md ${isLast ? 'text-on-surface-variant' : 'text-outline'}">${UiHelpers.escapeHtml(h.notes || h.note || 'Status updated in system.')}</p>
+          </div>
+        </div>
+      `;
+    }).reverse().join('');
   }
 
   function handleStatusSaveClick() {
@@ -592,13 +1011,38 @@
   }
 
   async function updateTaskStatusApi(newStatus) {
+    let apiSuccess = false;
     try {
       if (window.Api) {
-        await Api.patch(`/work-orders/${cleanId}/status`, { taskStatus: newStatus });
+        const res = await Api.patch(`/work-orders/${cleanId}/status`, { taskStatus: newStatus });
+        console.log('WorkOrder status updated in MySQL DB:', res);
+        apiSuccess = true;
       }
-    } catch (e) {}
-    alert(`WorkOrder ${displayId} status updated to "${newStatus}"!`);
-    loadWorkOrderDetails();
+    } catch (e) {
+      console.error('API status update error:', e);
+      if (window.showToast) showToast(e.message || 'Error updating status in Database', 'error');
+      else alert(e.message || 'Error updating status in Database');
+    }
+
+    if (apiSuccess) {
+      const stored = getStoredWorkOrders();
+      const idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
+      if (idx !== -1) {
+        stored[idx].task_status = newStatus;
+        if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
+        stored[idx].statusHistory.push({
+          task_status: newStatus,
+          changed_at: new Date().toISOString(),
+          notes: `Technician updated status to ${newStatus}`
+        });
+        saveStoredWorkOrders(stored);
+      }
+
+      if (window.showToast) showToast(`WorkOrder ${displayId} status updated to "${newStatus}" in MySQL Database!`, 'success');
+      else alert(`WorkOrder ${displayId} status updated to "${newStatus}" in MySQL Database!`);
+    }
+    
+    await loadWorkOrderDetails();
   }
 
   async function submitRepairReport() {
@@ -611,24 +1055,85 @@
       return;
     }
 
+    let apiSuccess = false;
     try {
       if (window.Api) {
-        await Api.patch(`/work-orders/${cleanId}/status`, {
+        const res = await Api.patch(`/work-orders/${cleanId}/status`, {
           taskStatus: 'Completed',
           fixDescription: `${rootCause} - ${solution}`,
           partsUsed: parts
         });
+        console.log('Repair report submitted in MySQL DB:', res);
+        apiSuccess = true;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('API repair report error:', e);
+      if (window.showToast) showToast(e.message || 'Error submitting report to Database', 'error');
+      else alert(e.message || 'Error submitting report to Database');
+    }
+
+    if (apiSuccess) {
+      const stored = getStoredWorkOrders();
+      const idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
+      if (idx !== -1) {
+        stored[idx].task_status = 'Completed';
+        stored[idx].fix_description = `${rootCause} - ${solution}`;
+        stored[idx].parts_used = parts;
+        if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
+        stored[idx].statusHistory.push({
+          task_status: 'Completed',
+          changed_at: new Date().toISOString(),
+          notes: `Repair completed: ${rootCause} - ${solution}`
+        });
+
+        if (!stored[idx].repairHistory) stored[idx].repairHistory = [];
+        stored[idx].repairHistory.unshift({
+          order_id: cleanId,
+          assigned_at: new Date().toISOString(),
+          task_status: 'Completed',
+          technician_name: currentUser.full_name || 'Technician',
+          fix_description: `${rootCause} - ${solution}`,
+          parts_used: parts || 'Standard maintenance tools'
+        });
+
+        saveStoredWorkOrders(stored);
+      }
+    }
 
     toggleModal('repairReportModal', false);
-    alert(`Repair report submitted for ${displayId}! Status changed to Completed.`);
-    loadWorkOrderDetails();
+    if (apiSuccess) {
+      await loadWorkOrderDetails();
+      if (window.showToast) showToast(`Repair report submitted for ${displayId}! Status updated in MySQL Database.`, 'success');
+      else alert(`Repair report submitted for ${displayId}! Status updated in MySQL Database.`);
+    }
+    
+    await loadWorkOrderDetails();
+  }
+
+  function handleEvidenceFileSelected(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedEvidenceBase64 = e.target.result;
+        document.getElementById('evidenceFilePreview').src = selectedEvidenceBase64;
+        document.getElementById('evidencePreviewContainer').classList.remove('hidden');
+        document.getElementById('evidenceUploadLabel').textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   function submitEvidencePhoto() {
+    const photoUrl = selectedEvidenceBase64 || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80';
+    localStorage.setItem(`vnuis_evidence_${cleanId}`, photoUrl);
+
+    const photoEl = document.getElementById('detailEvidencePhoto');
+    if (photoEl) photoEl.src = photoUrl;
+
     toggleModal('uploadPhotoModal', false);
-    alert('Repair evidence photo uploaded successfully!');
+    if (window.showToast) showToast('Repair evidence photo uploaded successfully!', 'success');
+    else alert('Repair evidence photo uploaded successfully!');
   }
 
   loadWorkOrderDetails();

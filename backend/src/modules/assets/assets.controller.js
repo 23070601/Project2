@@ -96,4 +96,16 @@ async function replacementAlerts(req, res) {
   ok(res, alerts);
 }
 
-module.exports = { list, getById, create, update, remove, replacementAlerts };
+// Tab "All Assets" - trả về tất cả assets kèm recent_failures count (3 tháng)
+async function listAll(req, res) {
+  const { type, roomId, status, search } = req.query;
+  const assets = await assetsRepository.findAllWithFailures({
+    assetType: type,
+    roomId: roomId ? Number(roomId) : undefined,
+    status,
+    search,
+  });
+  ok(res, assets);
+}
+
+module.exports = { list, listAll, getById, create, update, remove, replacementAlerts };

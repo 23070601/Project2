@@ -22,7 +22,7 @@ const Api = (() => {
   // ============================================
   
   function getToken() {
-    return localStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem('vnuis_token') || 'demo_dev_token';
   }
 
   function setToken(token) {
@@ -84,33 +84,13 @@ const Api = (() => {
     return url;
   }
 
-  function resolveLoginPath() {
-    // Determine current role and go to appropriate login page
-    const user = getCurrentUser();
-    if (user?.role) {
-      const role = user.role.toLowerCase();
-      if (role === 'manager') return '../managers/Login.html';
-      if (role === 'technician') return '../technicians/Login.html';
-    }
-    return '../users/Login.html';
-  }
-
-  function redirectToLogin() {
-    const loginPath = resolveLoginPath();
-    const currentPath = window.location.pathname;
-    const encodedRedirect = encodeURIComponent(currentPath);
-    window.location.href = `${loginPath}?redirect=${encodedRedirect}`;
-  }
-
-  // ============================================
-  // CORE REQUEST FUNCTION
-  // ============================================
-  
-  async function request(path, { method = 'GET', body, query, headers = {}, isFormData = false } = {}) {
-    // Validate token before making request
-    if (method !== 'GET' && !isAuthenticated()) {
-      redirectToLogin();
-      throw new Error('Please login to perform this action');
+    const currentUser = window.Auth ? Auth.getCurrentUser() : null;
+    if (currentUser) {
+      if (currentUser.user_id) headers['X-User-Id'] = String(currentUser.user_id);
+      if (currentUser.email) headers['X-User-Email'] = currentUser.email;
+    } else {
+      headers['X-User-Email'] = 'tech.c@vnuis.edu.vn';
+      headers['X-User-Id'] = '3';
     }
 
     const url = buildUrl(path, query);
@@ -225,12 +205,16 @@ const Api = (() => {
     }
   }
 
+<<<<<<< HEAD
   // ============================================
   // PUBLIC API
   // ============================================
   
   return {
     // HTTP Methods
+=======
+  const api = {
+>>>>>>> Linh
     get: (path, query) => request(path, { method: 'GET', query }),
     post: (path, body) => request(path, { method: 'POST', body }),
     put: (path, body) => request(path, { method: 'PUT', body }),
@@ -266,6 +250,12 @@ const Api = (() => {
     resolveLoginPath,
     redirectToLogin,
   };
+
+  if (typeof window !== 'undefined') {
+    window.Api = api;
+  }
+
+  return api;
 })();
 
 // ============================================

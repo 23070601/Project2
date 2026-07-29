@@ -76,45 +76,48 @@
               </tr>
             </thead>
             <tbody id="pendingTableBody" class="divide-y divide-outline-variant/20">
-              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-042'">
-                <td class="px-6 py-4 font-bold text-primary">REQ-042</td>
-                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">PH</div><span class="font-medium">Prof. Hoang</span></div></td>
-                <td class="px-6 py-4">Projector Sony VPL-FHZ65</td>
-                <td class="px-6 py-4 font-mono text-sm">P512</td>
+              <!-- Row 1: FR-10 -->
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=10'">
+                <td class="px-6 py-4 font-bold text-primary">#FR-10</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NA</div><span class="font-medium">Nguyen Van A</span></div></td>
+                <td class="px-6 py-4">Panasonic 4K Projector PT-VMZ51</td>
+                <td class="px-6 py-4 font-mono text-sm">R102</td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full capitalize">High</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 24, 2026</td>
+                <td class="px-6 py-4 text-body-sm">Jul 29, 2026</td>
                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="openApproveModal('REQ-042', 'Prof. Hoang', 'Sony Projector VPL-FHZ65', 'P512', 'HIGH', 'Projector image is blurry and color is not accurate.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-                    <button onclick="openRejectModal('REP-0021', 'John Doe', 'Sony Projector VPL-FHZ65', 'P512')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                    <button onclick="openApproveModal('#FR-10', 'Nguyen Van A', 'Panasonic 4K Projector PT-VMZ51', 'R102', 'High', 'Panasonic Projector power light turns amber and powers down.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('#FR-10', 'Nguyen Van A', 'Panasonic 4K Projector PT-VMZ51', 'R102')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
                   </div>
                 </td>
               </tr>
-              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-045'">
-                <td class="px-6 py-4 font-bold text-primary">REQ-045</td>
-                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NT</div><span class="font-medium">Nguyen Thu</span></div></td>
-                <td class="px-6 py-4">Air Conditioner Unit B-04</td>
-                <td class="px-6 py-4 font-mono text-sm">Lobby A1</td>
+              <!-- Row 2: FR-2 -->
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=2'">
+                <td class="px-6 py-4 font-bold text-primary">#FR-2</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">TB</div><span class="font-medium">Tran Thi B</span></div></td>
+                <td class="px-6 py-4">Daikin Inverter AC 18000 BTU</td>
+                <td class="px-6 py-4 font-mono text-sm">R401</td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 25, 2026</td>
+                <td class="px-6 py-4 text-body-sm">Jul 28, 2026</td>
                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="openApproveModal('REQ-045', 'Nguyen Thu', 'Air Conditioner Unit B-04', 'Lobby A1', 'MEDIUM', 'AC unit is leaking water.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-                    <button onclick="openRejectModal('REQ-045', 'Nguyen Thu', 'Air Conditioner Unit B-04', 'Lobby A1')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                    <button onclick="openApproveModal('#FR-2', 'Tran Thi B', 'Daikin Inverter AC 18000 BTU', 'R401', 'Medium', 'Air conditioner is running but blowing warm air into the classroom.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('#FR-2', 'Tran Thi B', 'Daikin Inverter AC 18000 BTU', 'R401')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
                   </div>
                 </td>
               </tr>
-              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=REQ-048'">
-                <td class="px-6 py-4 font-bold text-primary">REQ-048</td>
-                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">LV</div><span class="font-medium">Le Van</span></div></td>
-                <td class="px-6 py-4">Flickering Lighting Panel</td>
-                <td class="px-6 py-4 font-mono text-sm">Room 302</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full capitalize">Low</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 26, 2026</td>
+              <!-- Row 3: FR-7 -->
+              <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=7'">
+                <td class="px-6 py-4 font-bold text-primary">#FR-7</td>
+                <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">NA</div><span class="font-medium">Nguyen Van A</span></div></td>
+                <td class="px-6 py-4">Daikin Inverter AC 18000 BTU</td>
+                <td class="px-6 py-4 font-mono text-sm">R301</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 29, 2026</td>
                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-center gap-2">
-                    <button onclick="openApproveModal('REQ-048', 'Le Van', 'Flickering Lighting Panel', 'Room 302', 'LOW', 'Light panel flickers when turned on.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-                    <button onclick="openRejectModal('REQ-048', 'Le Van', 'Flickering Lighting Panel', 'Room 302')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+                    <button onclick="openApproveModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R301', 'Medium', 'Air conditioner leaking water heavily onto student desks.')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+                    <button onclick="openRejectModal('#FR-7', 'Nguyen Van A', 'Daikin Inverter AC 18000 BTU', 'R301')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
                   </div>
                 </td>
               </tr>
@@ -167,47 +170,107 @@
             <tbody id="assignedTableBody" class="divide-y divide-outline-variant/20">
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="px-6 py-4 font-medium">1</td>
-                <td class="px-6 py-4 font-bold text-primary">WO-2024-001</td>
-                <td class="px-6 py-4">Sony Projector VPL-FHZ65</td>
-                <td class="px-6 py-4">Nguyen Van A</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap flex items-center gap-1 w-fit">⚠️ Rejected</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 20, 2026</td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center justify-center gap-2">
-                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-001'" class="px-3 py-1.5 bg-primary text-white rounded font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>
-                  </div>
+                <td class="px-6 py-4 font-bold text-primary">WO-1</td>
+                <td class="px-6 py-4">Sony Laser Projector VPL-PHZ60</td>
+                <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-amber-50 text-amber-700 text-[11px] font-bold rounded-full">In Progress</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 21, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=1'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
                 </td>
               </tr>
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="px-6 py-4 font-medium">2</td>
-                <td class="px-6 py-4 font-bold text-primary">WO-2024-005</td>
-                <td class="px-6 py-4">Air Conditioner</td>
-                <td class="px-6 py-4">Tran Thi B</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed-variant text-[11px] font-bold rounded-full">Assigned</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 21, 2026</td>
-                <td class="px-6 py-4">
-                  <div class="flex justify-center">
-                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-005'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors flex items-center justify-center mx-auto"><span class="material-symbols-outlined">visibility</span></button>
-                  </div>
+                <td class="px-6 py-4 font-bold text-primary">WO-2</td>
+                <td class="px-6 py-4">Samsung 75in Commercial TV</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 20, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=2'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
                 </td>
               </tr>
               <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="px-6 py-4 font-medium">3</td>
-                <td class="px-6 py-4 font-bold text-primary">WO-2024-008</td>
-                <td class="px-6 py-4">Lighting Panel</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-3</td>
+                <td class="px-6 py-4">Epson Visualizer Document Camera</td>
+                <td class="px-6 py-4">Vu Van F</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">⚠️ Rejected</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 21, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=3'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">4</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-4</td>
+                <td class="px-6 py-4">LG Commercial Display 55in</td>
                 <td class="px-6 py-4">Le Van C</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full">Accepted</span></td>
-                <td class="px-6 py-4 text-body-sm">Oct 19, 2026</td>
-                <td class="px-6 py-4">
-                  <div class="flex justify-center">
-                    <button onclick="location.href='WorkOrderDetails.html?id=WO-2024-008'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors flex items-center justify-center mx-auto"><span class="material-symbols-outlined">visibility</span></button>
-                  </div>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-[11px] font-bold rounded-full">Received</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=4'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">5</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-5</td>
+                <td class="px-6 py-4">AKG Lavalier Wireless Mic</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-amber-50 text-amber-700 text-[11px] font-bold rounded-full">In Progress</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=5'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">6</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-6</td>
+                <td class="px-6 py-4">Panasonic Commercial TV 65in</td>
+                <td class="px-6 py-4">Vu Van F</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=6'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">7</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-7</td>
+                <td class="px-6 py-4">Shure Wireless Dual Microphone</td>
+                <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 15, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=7'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">8</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-8</td>
+                <td class="px-6 py-4">Cisco Gigabit Switch R601</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-50 text-brand-blue text-[11px] font-bold rounded-full">Assigned</span></td>
+                <td class="px-6 py-4 text-body-sm">Jul 23, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=8'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 font-medium">9</td>
+                <td class="px-6 py-4 font-bold text-primary">WO-10</td>
+                <td class="px-6 py-4">AKG Lavalier Wireless Mic</td>
+                <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4 text-body-sm">Jun 15, 2026</td>
+                <td class="px-6 py-4 text-center">
+                  <button onclick="location.href='WorkOrderDetails.html?id=10'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
                 </td>
               </tr>
             </tbody>
           </table>
           <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
-            <p id="assignedPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-3 of 12 tasks (10 per page)</p>
+            <p id="assignedPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-9 of 9 tasks (10 per page)</p>
             <div class="flex items-center gap-2">
               <button class="p-2 rounded-lg border border-outline-variant text-outline hover:bg-surface-container transition-colors disabled:opacity-40" disabled><span class="material-symbols-outlined">chevron_left</span></button>
               <button class="w-10 h-10 bg-primary text-white font-bold rounded-lg shadow-sm">1</button>
@@ -269,38 +332,38 @@
       <div>
         <h3 class="text-label-lg font-bold text-on-surface mb-3 uppercase tracking-wider">Suggested Technicians</h3>
         <div class="space-y-2" id="techRadioGroup">
-          <!-- Tech Card 1 -->
+          <!-- Tech Card 1: Le Van C -->
           <label class="flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">NA</div>
-              <div>
-                <p class="text-body-sm font-bold">Nguyen Van A</p>
-                <p class="text-xs text-on-surface-variant">Expertise: Projector • <span class="text-primary font-medium">2 tasks active</span></p>
-              </div>
-            </div>
-            <input checked name="techRadio" value="Nguyen Van A" type="radio" class="text-primary focus:ring-primary">
-          </label>
-          <!-- Tech Card 2 -->
-          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">TB</div>
-              <div>
-                <p class="text-body-sm font-bold">Tran Thi B</p>
-                <p class="text-xs text-on-surface-variant">Expertise: Electronics • <span class="text-on-surface-variant">3 tasks active</span></p>
-              </div>
-            </div>
-            <input name="techRadio" value="Tran Thi B" type="radio" class="text-primary focus:ring-primary">
-          </label>
-          <!-- Tech Card 3 -->
-          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">LC</div>
               <div>
                 <p class="text-body-sm font-bold">Le Van C</p>
-                <p class="text-xs text-on-surface-variant">Expertise: General • <span class="text-primary font-medium">1 task active</span></p>
+                <p class="text-xs text-on-surface-variant">Specialty: Projector / Display • <span class="text-primary font-medium">1 active task</span></p>
               </div>
             </div>
-            <input name="techRadio" value="Le Van C" type="radio" class="text-primary focus:ring-primary">
+            <input checked name="techRadio" value="Le Van C" type="radio" class="text-primary focus:ring-primary">
+          </label>
+          <!-- Tech Card 2: Pham Thi D -->
+          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">PD</div>
+              <div>
+                <p class="text-body-sm font-bold">Pham Thi D</p>
+                <p class="text-xs text-on-surface-variant">Specialty: Audio / TV / Switch • <span class="text-on-surface-variant">1 active task</span></p>
+              </div>
+            </div>
+            <input name="techRadio" value="Pham Thi D" type="radio" class="text-primary focus:ring-primary">
+          </label>
+          <!-- Tech Card 3: Vu Van F -->
+          <label class="flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">VF</div>
+              <div>
+                <p class="text-body-sm font-bold">Vu Van F</p>
+                <p class="text-xs text-on-surface-variant">Specialty: Microphone / Electronics • <span class="text-primary font-medium">0 active tasks</span></p>
+              </div>
+            </div>
+            <input name="techRadio" value="Vu Van F" type="radio" class="text-primary focus:ring-primary">
           </label>
         </div>
       </div>
@@ -310,8 +373,9 @@
         <label class="block text-label-md font-bold text-on-surface-variant mb-1">Or manually select technician</label>
         <select id="manualTechSelect" class="w-full border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary focus:border-primary outline-none">
           <option value="">Select from all technicians...</option>
-          <option value="Pham Van D">Pham Van D (HVAC)</option>
-          <option value="Hoang Thi E">Hoang Thi E (Plumbing)</option>
+          <option value="Le Van C">Le Van C (Projector / Display)</option>
+          <option value="Pham Thi D">Pham Thi D (Audio / TV / Switch)</option>
+          <option value="Vu Van F">Vu Van F (Microphone / Electronics)</option>
         </select>
       </div>
     </div>
@@ -353,7 +417,7 @@
           </div>
           <div>
             <p class="text-[11px] text-on-surface-variant uppercase font-bold">Reporter</p>
-            <p id="rejectModalReporter" class="font-medium text-on-surface">John Doe</p>
+            <p id="rejectModalReporter" class="font-medium text-on-surface">Tran Thi B</p>
           </div>
           <div>
             <p class="text-[11px] text-on-surface-variant uppercase font-bold">Request ID</p>
@@ -384,7 +448,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Elina', role: 'Manager' };
+  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn', role: 'Manager', user_id: 5 };
   try {
     user = Auth.guard('Manager');
   } catch (e) {
@@ -393,7 +457,9 @@
 
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
 
-  let currentActiveReqId = 'REQ-042';
+  let currentActiveReqId = null;
+  let allPendingReports = [];
+  let allAssignedTasks = [];
 
   function switchTab(tabName) {
     const pendingView = document.getElementById('pending-requests-view');
@@ -420,10 +486,138 @@
     }
   }
 
+  function renderPendingTable(reports) {
+    const tbody = document.getElementById('pendingTableBody');
+    if (!tbody) return;
+    if (!reports || reports.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant font-medium">No pending requests found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = reports.map(r => {
+      const initials = r.reporter_name ? r.reporter_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+      const cleanDesc = (r.description || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
+      const priorityClass = r.priority === 'High' ? 'bg-error-container text-on-error-container' : (r.priority === 'Medium' ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-primary-fixed text-on-primary-fixed-variant');
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=pending'">
+          <td class="px-6 py-4 font-bold text-primary">#FR-${r.report_id}</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">${initials}</div>
+              <span class="font-medium">${UiHelpers.escapeHtml(r.reporter_name || 'Anonymous')}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
+          <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
+          <td class="px-6 py-4"><span class="px-3 py-1 ${priorityClass} text-[11px] font-bold rounded-full capitalize">${r.priority}</span></td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(r.reported_at)}</td>
+          <td class="px-6 py-4" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-center gap-2">
+              <button onclick="openApproveModal(${r.report_id}, '${r.reporter_name.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}', '${r.priority}', '${cleanDesc}')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+              <button onclick="openRejectModal(${r.report_id}, '${r.reporter_name.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderAssignedTable(orders) {
+    const tbody = document.getElementById('assignedTableBody');
+    if (!tbody) return;
+    if (!orders || orders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant font-medium">No assigned tasks found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = orders.map((o, index) => {
+      const isRejected = o.technician_response === 'Rejected';
+      let badgeClass = 'bg-surface-container text-on-surface-variant';
+      let statusText = o.task_status;
+      
+      if (isRejected) {
+        badgeClass = 'bg-[#ffdf9e] text-[#5b4300]';
+        statusText = '⚠️ Rejected';
+      } else if (o.task_status === 'Assigned') {
+        badgeClass = 'bg-blue-50 text-brand-blue';
+      } else if (o.task_status === 'Received') {
+        badgeClass = 'bg-indigo-50 text-indigo-700';
+      } else if (o.task_status === 'In Progress') {
+        badgeClass = 'bg-amber-50 text-amber-700';
+      } else if (o.task_status === 'Completed') {
+        badgeClass = 'bg-green-50 text-green-700';
+      } else if (o.task_status === 'Closed') {
+        badgeClass = 'bg-surface-container text-on-surface-variant';
+      }
+      
+      const actionBtn = isRejected 
+        ? `<button onclick="location.href='WorkOrderDetails.html?id=${o.order_id}&tab=assigned'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>`
+        : `<button onclick="location.href='WorkOrderDetails.html?id=${o.order_id}&tab=assigned'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>`;
+        
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors">
+          <td class="px-6 py-4 font-medium">${index + 1}</td>
+          <td class="px-6 py-4 font-bold text-primary">WO-${o.order_id}</td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(o.asset_name || 'General Asset')}</td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(o.technician_name || 'Unassigned')}</td>
+          <td class="px-6 py-4"><span class="px-3 py-1 ${badgeClass} text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">${statusText}</span></td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(o.assigned_at)}</td>
+          <td class="px-6 py-4 text-center">
+            ${actionBtn}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterPending() {
+    const searchVal = document.getElementById('pendingSearch').value.toLowerCase();
+    const prioVal = document.getElementById('pendingPriorityFilter').value;
+    
+    let filtered = allPendingReports;
+    if (searchVal) {
+      filtered = filtered.filter(r => 
+        (r.reporter_name || '').toLowerCase().includes(searchVal) ||
+        (r.asset_name || '').toLowerCase().includes(searchVal) ||
+        (r.room_name || '').toLowerCase().includes(searchVal) ||
+        (r.description || '').toLowerCase().includes(searchVal)
+      );
+    }
+    if (prioVal !== 'All') {
+      filtered = filtered.filter(r => r.priority === prioVal);
+    }
+    renderPendingTable(filtered);
+  }
+
+  function filterAssigned() {
+    const searchVal = document.getElementById('assignedSearch').value.toLowerCase();
+    const statusVal = document.getElementById('assignedStatusFilter').value;
+    
+    let filtered = allAssignedTasks;
+    if (searchVal) {
+      filtered = filtered.filter(o => 
+        (o.technician_name || '').toLowerCase().includes(searchVal) ||
+        (o.asset_name || '').toLowerCase().includes(searchVal) ||
+        (o.room_name || '').toLowerCase().includes(searchVal)
+      );
+    }
+    if (statusVal !== 'All') {
+      filtered = filtered.filter(o => o.task_status === statusVal);
+    }
+    renderAssignedTable(filtered);
+    
+    const start = filtered.length > 0 ? 1 : 0;
+    document.getElementById('assignedPaginationInfo').textContent = `Showing ${start}-${filtered.length} of ${filtered.length} tasks`;
+  }
+
+  // Bind filter events
+  document.getElementById('pendingSearch').addEventListener('input', filterPending);
+  document.getElementById('pendingPriorityFilter').addEventListener('change', filterPending);
+  document.getElementById('assignedSearch').addEventListener('input', filterAssigned);
+  document.getElementById('assignedStatusFilter').addEventListener('change', filterAssigned);
+
   // --- APPROVE MODAL ---
-  function openApproveModal(reqId, reporter, equipment, room, priority, description) {
+  async function openApproveModal(reqId, reporter, equipment, room, priority, description) {
     currentActiveReqId = reqId;
-    document.getElementById('modalReqTitle').textContent = `Approve & Assign — ${reqId}`;
+    document.getElementById('modalReqTitle').textContent = `Approve & Assign — #FR-${reqId}`;
     document.getElementById('modalEquipment').textContent = equipment;
     document.getElementById('modalRoom').textContent = room;
     document.getElementById('modalDescription').textContent = description;
@@ -438,7 +632,60 @@
       prioSpan.className = 'inline-block px-2 py-0.5 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold rounded-full';
     }
 
+    // Clear and show loading state
+    const radioGroup = document.getElementById('techRadioGroup');
+    radioGroup.innerHTML = `<p class="text-body-sm text-outline">Loading suggestions...</p>`;
+
     document.getElementById('approveAssignModal').classList.remove('hidden');
+
+    try {
+      if (window.Api) {
+        const suggestions = await Api.get(`/work-orders/suggestions/${reqId}`);
+        if (suggestions && suggestions.length > 0) {
+          radioGroup.innerHTML = suggestions.map((tech, idx) => {
+            const initials = tech.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const checked = idx === 0 ? 'checked' : '';
+            const borderClass = idx === 0 ? 'border-primary bg-primary/5' : 'border-outline-variant/30 hover:bg-surface-container-low';
+            return `
+              <label class="flex items-center justify-between p-3 border ${borderClass} rounded-lg cursor-pointer transition-colors tech-card-option">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">${initials}</div>
+                  <div>
+                    <p class="text-body-sm font-bold">${UiHelpers.escapeHtml(tech.fullName)}</p>
+                    <p class="text-xs text-on-surface-variant">Specialty: ${tech.specialty || 'General'} • <span class="text-primary font-medium">${tech.activeWorkload} active tasks</span></p>
+                  </div>
+                </div>
+                <input ${checked} name="techRadio" value="${tech.technicianId}" type="radio" class="text-primary focus:ring-primary">
+              </label>
+            `;
+          }).join('');
+
+          // Update manual select
+          const manualSelect = document.getElementById('manualTechSelect');
+          manualSelect.innerHTML = `<option value="">Select from all technicians...</option>` + suggestions.map(tech => `
+            <option value="${tech.technicianId}">${UiHelpers.escapeHtml(tech.fullName)} (${tech.specialty || 'General'})</option>
+          `).join('');
+
+          // Bind radio highlight events
+          document.querySelectorAll('input[name="techRadio"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+              document.querySelectorAll('.tech-card-option').forEach(card => {
+                card.className = 'flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option';
+              });
+              const label = e.target.closest('.tech-card-option');
+              if (label) {
+                label.className = 'flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option';
+              }
+            });
+          });
+        } else {
+          radioGroup.innerHTML = `<p class="text-body-sm text-outline">No active technicians found.</p>`;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load technician suggestions', e);
+      radioGroup.innerHTML = `<p class="text-body-sm text-error">Failed to load suggested technicians.</p>`;
+    }
   }
 
   function closeApproveModal() {
@@ -449,27 +696,29 @@
     const btn = document.getElementById('assignConfirmBtn');
     const selectedRadio = document.querySelector('input[name="techRadio"]:checked');
     const manualSelect = document.getElementById('manualTechSelect').value;
-    const techName = manualSelect || (selectedRadio ? selectedRadio.value : 'Nguyen Van A');
+    const techId = manualSelect || (selectedRadio ? selectedRadio.value : null);
+
+    if (!techId) {
+      if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
+      else alert('Please select a technician.');
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = 'Assigning...';
 
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        try {
-          await Api.post('/work-orders/assign', { report_id: currentActiveReqId, technician_name: techName });
-        } catch (e) {
-          console.log('Work order created in demo mode');
-        }
+      if (window.Api) {
+        await Api.post('/work-orders', { reportId: currentActiveReqId, technicianId: Number(techId) });
+        if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
+        else alert(`Successfully approved report #FR-${currentActiveReqId} and created work order!`);
+        closeApproveModal();
+        loadData();
+        switchTab('assigned');
       }
-
-      alert(`Successfully approved ${currentActiveReqId} and assigned WorkOrder to ${techName}!`);
-      closeApproveModal();
-      switchTab('assigned');
     } catch (err) {
-      alert(err.message || 'Assigned successfully!');
-      closeApproveModal();
-      switchTab('assigned');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to assign work order.');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Assign & Create WorkOrder';
@@ -479,11 +728,11 @@
   // --- REJECT MODAL ---
   function openRejectModal(reqId, reporter, equipment, room) {
     currentActiveReqId = reqId;
-    document.getElementById('rejectModalTitle').textContent = `Reject Report — ${reqId}`;
+    document.getElementById('rejectModalTitle').textContent = `Reject Report — #FR-${reqId}`;
     document.getElementById('rejectModalEquipment').textContent = equipment;
     document.getElementById('rejectModalRoom').textContent = room;
     document.getElementById('rejectModalReporter').textContent = reporter;
-    document.getElementById('rejectModalReqId').textContent = reqId;
+    document.getElementById('rejectModalReqId').textContent = `#FR-${reqId}`;
     document.getElementById('rejectionReasonInput').value = '';
 
     document.getElementById('rejectReportModal').classList.remove('hidden');
@@ -496,7 +745,8 @@
   async function confirmRejectReport() {
     const reason = document.getElementById('rejectionReasonInput').value.trim();
     if (!reason) {
-      alert('Please provide a reason for rejection.');
+      if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
+      else alert('Please provide a reason for rejection.');
       return;
     }
 
@@ -505,52 +755,52 @@
     btn.textContent = 'Rejecting...';
 
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        try {
-          await Api.patch(`/fault-reports/${currentActiveReqId}/reject`, { reason });
-        } catch (e) {
-          console.log('Report rejected in demo mode');
-        }
+      if (window.Api) {
+        await Api.patch(`/fault-reports/${currentActiveReqId}/status`, { status: 'Rejected', rejectionReason: reason });
+        if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
+        else alert(`Report #FR-${currentActiveReqId} rejected successfully.`);
+        closeRejectModal();
+        loadData();
       }
-
-      alert(`Report ${currentActiveReqId} rejected successfully.`);
-      closeRejectModal();
     } catch (err) {
-      alert(err.message || `Report ${currentActiveReqId} rejected successfully.`);
-      closeRejectModal();
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to reject report.');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Confirm Reject';
     }
   }
 
-  // Update card styling on radio selection
-  document.querySelectorAll('input[name="techRadio"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      document.querySelectorAll('.tech-card-option').forEach(card => {
-        card.className = 'flex items-center justify-between p-3 border border-outline-variant/30 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors tech-card-option';
-      });
-      const label = e.target.closest('.tech-card-option');
-      if (label) {
-        label.className = 'flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer tech-card-option';
-      }
-    });
-  });
-
   async function loadData() {
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api) {
+        // Fetch Pending Approval Reports
         const pendingReports = await Api.get('/fault-reports', { status: 'Pending Approval' });
-        if (pendingReports && Array.isArray(pendingReports) && pendingReports.length > 0) {
+        if (pendingReports && Array.isArray(pendingReports)) {
+          allPendingReports = pendingReports;
           document.getElementById('pendingCountBadge').textContent = pendingReports.length;
+          filterPending();
+        }
+
+        // Fetch Work Orders for Assigned Tasks
+        const assignedTasks = await Api.get('/work-orders');
+        if (assignedTasks && Array.isArray(assignedTasks)) {
+          allAssignedTasks = assignedTasks;
+          const activeAssignedCount = assignedTasks.filter(o => ['Assigned', 'Received', 'In Progress'].includes(o.task_status)).length;
+          document.getElementById('assignedCountBadge').textContent = activeAssignedCount;
+          filterAssigned();
         }
       }
     } catch (err) {
-      console.log('Using default mock data for requests & assignments table', err);
+      console.log('Failed to fetch requests & assignments table data', err);
     }
   }
 
-  loadData();
+  loadData().then(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const initialTab = urlParams.get('tab') || 'pending';
+    switchTab(initialTab);
+  });
 </script>
 </body>
 </html>

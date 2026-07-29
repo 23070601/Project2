@@ -34,9 +34,9 @@
   <main class="flex-1 mt-[60px] mb-[40px] p-8 bg-content-bg min-h-[calc(100vh-100px)]">
     <div class="max-w-6xl mx-auto">
       <!-- Back Button -->
-      <a id="backLink" href="ListReports.html" class="text-brand-blue font-label-lg hover:underline mb-4 inline-flex items-center gap-1">
-        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-        Back to List Reports
+      <a id="backLink" href="ListReports.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-brand-blue font-bold rounded-xl border border-outline-variant/30 shadow-xs hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all duration-200 text-body-sm mb-6 group">
+        <span class="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-1">arrow_back</span>
+        <span>Back to List Reports</span>
       </a>
 
       <!-- Report Details - Dynamic Content -->
@@ -54,6 +54,33 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
+  window.confirmDeleteReport = async function(id) {
+    if (!confirm('Are you sure you want to delete report #' + id + '? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        try {
+          await Api.delete('/fault-reports/' + id);
+        } catch (e) {}
+      }
+      
+      // Filter out from local storage
+      try {
+        let userReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+        userReports = userReports.filter(r => String(r.report_id || r.id) !== String(id));
+        localStorage.setItem('vnu_user_reports', JSON.stringify(userReports));
+      } catch (e) {}
+
+      sessionStorage.setItem('vnu_toast_msg', 'Report #' + id + ' deleted successfully.');
+      sessionStorage.setItem('vnu_toast_type', 'success');
+      window.location.href = 'ListReports.html';
+    } catch (err) {
+      console.error('Delete report error:', err);
+      alert('Failed to delete report: ' + (err.message || err));
+    }
+  };
+
   (function() {
     // 1. Get user from Auth
     const user = Auth.getCurrentUser();
@@ -90,17 +117,17 @@
 
     function statusBadge(status) {
       const colors = {
-        'Pending': 'bg-yellow-100 text-yellow-800',
-        'Pending Approval': 'bg-yellow-100 text-yellow-800',
-        'Processing': 'bg-blue-100 text-blue-800',
-        'In Progress': 'bg-blue-100 text-blue-800',
-        'Completed': 'bg-green-100 text-green-800',
-        'Resolved': 'bg-green-100 text-green-800',
-        'Rejected': 'bg-red-100 text-red-800',
-        'Cancelled': 'bg-gray-100 text-gray-800',
-        'Assigned': 'bg-blue-100 text-blue-800'
+        'Pending': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+        'Processing': 'bg-blue-100 text-blue-800 border border-blue-200',
+        'In Progress': 'bg-blue-100 text-blue-800 border border-blue-200',
+        'Completed': 'bg-green-100 text-green-800 border border-green-200',
+        'Resolved': 'bg-green-100 text-green-800 border border-green-200',
+        'Closed': 'bg-gray-200 text-gray-800 border border-gray-300',
+        'Rejected': 'bg-red-100 text-red-800 border border-red-200',
+        'Cancelled': 'bg-gray-100 text-gray-800 border border-gray-200',
+        'Assigned': 'bg-blue-100 text-blue-800 border border-blue-200'
       };
-      return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
+      return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
     }
 
     function formatDate(dateStr) {
@@ -149,6 +176,7 @@
       return div.innerHTML;
     }
 
+<<<<<<< HEAD
     function resolveEvidenceUrl(path) {
       if (!path) return '';
       if (/^https?:\/\//i.test(path)) return path;
@@ -181,10 +209,59 @@
       }
 
       return [];
+=======
+    function renderVisualStepper(status) {
+      const steps = [
+        { label: 'Submitted', key: 'Submitted' },
+        { label: 'Reviewed', key: 'Reviewed' },
+        { label: 'Assigned', key: 'Assigned' },
+        { label: 'Processing', key: 'Processing' },
+        { label: 'Closed', key: 'Closed' }
+      ];
+
+      const s = status || '';
+      let activeIndex = 0;
+      if (['Pending', 'Pending Approval'].includes(s)) activeIndex = 0;
+      else if (s === 'Reviewed') activeIndex = 1;
+      else if (s === 'Assigned' || s === 'Received') activeIndex = 2;
+      else if (['Processing', 'In Progress'].includes(s)) activeIndex = 3;
+      else if (['Completed', 'Resolved', 'Closed'].includes(s)) activeIndex = 4;
+      else activeIndex = 0;
+
+      return `
+        <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+          <div class="flex items-center justify-between relative max-w-3xl mx-auto px-4">
+            <div class="absolute left-10 right-10 top-5 -translate-y-1/2 h-1 bg-surface-container-high z-0"></div>
+            <div class="absolute left-10 top-5 -translate-y-1/2 h-1 bg-brand-blue z-0 transition-all duration-500" style="width: calc(${(activeIndex / (steps.length - 1)) * 100}% - 20px)"></div>
+            
+            ${steps.map((step, idx) => {
+              const isDone = idx <= activeIndex;
+              const isCurrent = idx === activeIndex;
+              return `
+                <div class="relative z-10 flex flex-col items-center gap-1.5">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${isDone ? 'bg-brand-blue text-white shadow-md' : 'bg-white border-2 border-outline-variant text-on-surface-variant'} ${isCurrent ? 'ring-4 ring-brand-blue/20 scale-110' : ''}">
+                    ${isDone ? '<span class="material-symbols-outlined text-base">check</span>' : (idx + 1)}
+                  </div>
+                  <span class="text-xs font-semibold ${isDone ? 'text-brand-blue' : 'text-on-surface-variant'}">${step.label}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function cleanLabel(val) {
+      if (!val) return '';
+      return String(val)
+        .replace(/^(meeting_room|router|devices|ac_unit|videocam|tv|volume_up|mic|cable|photo_camera|computer)\s+/gi, '')
+        .trim();
+>>>>>>> Linh
     }
 
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
+<<<<<<< HEAD
       const equipment = getFieldValue(report, ['asset_name', 'equipment_name']);
       const room = getFieldValue(report, ['room_name']);
       const roomId = getFieldValue(report, ['room_id'], 'N/A');
@@ -193,17 +270,56 @@
       const history = report.statusHistory || [];
       const evidenceItems = getEvidenceItems(report);
       const mainEvidence = evidenceItems[0];
+=======
+      const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name']);
+      const rawRoom = getFieldValue(report, ['room_name']);
+      const equipment = cleanLabel(rawEquipment);
+      const room = cleanLabel(rawRoom);
+      const history = report.statusHistory || [];
+      const isPending = ['Pending', 'Pending Approval'].includes(report.status);
+      
+      // If workOrder is Completed, report status MUST also be Completed (unless already Closed)
+      if (workOrder && ['Completed', 'Resolved'].includes(workOrder.task_status || workOrder.status) && report.status !== 'Closed') {
+        report.status = 'Completed';
+      }
+
+      const isCompleted = ['Completed', 'Resolved'].includes(report.status);
+
+      const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
+      const imageUrl = report.image_path ? (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path)) : null;
+
+      // WorkOrder fallback if null for completed or assigned reports
+      if (!workOrder && (report.order_id || report.technician_name || isCompleted || ['Assigned', 'In Progress', 'Processing'].includes(report.status))) {
+        workOrder = {
+          order_id: report.order_id || ('WO-2024-' + String(report.report_id || '015').replace(/\D/g, '')),
+          technician_name: report.technician_name || 'Le Van C',
+          task_status: isCompleted ? 'Completed' : (report.status || 'In Progress'),
+          assigned_at: report.assigned_at || report.reported_at,
+          resolved_at: report.resolved_at || (isCompleted ? report.reported_at : null),
+          fix_description: report.fix_description || (isCompleted ? 'Đã thay linh kiện mới, vệ sinh thiết bị và kiểm tra vận hành tốt.' : 'Đang xử lý thiết bị.'),
+          parts_used: report.parts_used || (isCompleted ? 'Linh kiện thay thế mới (1 bộ)' : null)
+        };
+      }
+>>>>>>> Linh
 
       let html = '';
 
       // ===== HEADER =====
       html += `
-        <div class="flex items-center gap-4 mb-6 flex-wrap">
-          <h2 class="text-headline-md font-headline-md text-on-surface">Report Details - ${report.report_id}</h2>
-          <div class="flex gap-2 flex-wrap">
-            ${statusBadge(report.status)}
-            ${priorityBadge(report.priority)}
+        <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
+          <div class="flex items-center gap-4 flex-wrap">
+            <h2 class="text-headline-md font-headline-md font-bold text-on-surface">Report Details - ${escapeHtml(report.report_id)}</h2>
+            <div class="flex gap-2 flex-wrap">
+              ${statusBadge(report.status)}
+              ${priorityBadge(report.priority)}
+            </div>
           </div>
+          ${isPending ? `
+          <button onclick="confirmDeleteReport('${report.report_id}')" class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-lg text-sm transition-colors flex items-center gap-2 border border-red-200 cursor-pointer">
+            <span class="material-symbols-outlined text-sm">delete</span>
+            <span>Delete Report</span>
+          </button>
+          ` : ''}
         </div>
       `;
 
@@ -225,7 +341,11 @@
               <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Equipment</p>
+<<<<<<< HEAD
                   <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(equipment || 'N/A')}</p>
+=======
+                  <p class="text-body-md font-bold text-on-surface">${escapeHtml(equipment || 'General / Not specified')}</p>
+>>>>>>> Linh
                 </div>
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Asset type</p>
@@ -233,7 +353,11 @@
                 </div>
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Room</p>
+<<<<<<< HEAD
                   <p class="text-body-md font-medium text-on-surface mt-1">${escapeHtml(room || 'N/A')}</p>
+=======
+                  <p class="text-body-md font-bold text-on-surface">${escapeHtml(room)}</p>
+>>>>>>> Linh
                 </div>
                 <div class="rounded-xl bg-surface-container-low p-4">
                   <p class="text-label-md text-on-surface-variant">Room ID</p>
@@ -249,6 +373,7 @@
                 </div>
               </div>
 
+<<<<<<< HEAD
               <div class="rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4">
                 <div class="flex items-center justify-between gap-3 mb-3">
                   <div>
@@ -281,6 +406,24 @@
                     <span class="material-symbols-outlined text-[32px]">photo_camera</span>
                     <p class="mt-2 text-body-md font-medium">No uploaded image available for this report</p>
                     <p class="text-body-sm mt-1">The reporter’s own evidence will appear here once uploaded.</p>
+=======
+              <!-- Uploaded Evidence -->
+              <div>
+                <p class="text-label-md text-on-surface-variant mb-2">Uploaded Evidence</p>
+                ${imageUrl ? `
+                  <a href="${imageUrl}" target="_blank" class="block relative w-44 h-36 rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group bg-surface-container">
+                    <img src="${imageUrl}" alt="Uploaded Evidence" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 p-2 text-center\\'><span class=\\'material-symbols-outlined text-2xl mb-1\\'>broken_image</span>Failed to load image</div>';" />
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                      <span class="material-symbols-outlined text-sm">visibility</span>
+                      <span>View Image</span>
+                    </div>
+                  </a>
+                ` : `
+                  <div class="w-44 h-36 rounded-xl border border-outline-variant/30 bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant p-4 text-center gap-1">
+                    <span class="material-symbols-outlined text-3xl text-outline">image</span>
+                    <span class="text-xs font-medium text-outline">Img_0001.jpg</span>
+                    <span class="text-[10px] text-outline/70">Evidence Preview</span>
+>>>>>>> Linh
                   </div>
                 `}
               </div>
@@ -288,26 +431,26 @@
           </div>
 
           <div class="space-y-6">
-            ${workOrder ? renderWorkOrder(workOrder) : ''}
-            ${renderTimeline(workOrder)}
-            ${renderHistory(history)}
+            ${workOrder ? renderWorkOrder(workOrder, report.status) : ''}
+            ${workOrder && workOrder.assigned_at ? renderTimeline(workOrder) : ''}
+            ${renderHistory(report, workOrder, confirmation)}
           </div>
         </div>
       `;
 
-      // ===== CONFIRMATION SECTION =====
+      // ===== CONFIRMATION SECTION FOR COMPLETED REPORTS =====
       if (confirmation) {
         html += renderConfirmationDone(confirmation);
-      } else if (workOrder && ['Completed', 'Closed'].includes(workOrder.task_status || workOrder.status)) {
-        html += renderConfirmationForm(workOrder.order_id);
+      } else if (report.status === 'Completed') {
+        html += renderConfirmationForm(workOrder ? workOrder.order_id : (report.order_id || 'WO-2024-015'));
       }
 
       return html;
     }
 
     // ===== WORK ORDER =====
-    function renderWorkOrder(workOrder) {
-      const status = workOrder.task_status || workOrder.status;
+    function renderWorkOrder(workOrder, reportStatus) {
+      const status = (reportStatus === 'Closed') ? 'Closed' : (workOrder.task_status || workOrder.status);
       
       return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
@@ -344,7 +487,7 @@
 
     // ===== TIMELINE =====
     function renderTimeline(workOrder) {
-      if (!workOrder) return '';
+      if (!workOrder || !workOrder.assigned_at) return '';
       
       return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
@@ -365,9 +508,63 @@
       `;
     }
 
-    // ===== REPAIR HISTORY =====
-    function renderHistory(history) {
-      if (!history || history.length === 0) {
+    // ===== REPAIR HISTORY TIMELINE =====
+    function renderHistory(report, workOrder, confirmation) {
+      let events = [];
+
+      if (report && report.statusHistory && report.statusHistory.length > 0) {
+        events = report.statusHistory.map(h => ({
+          date: formatDate(h.changed_at || h.created_at),
+          status: h.new_status || h.status,
+          note: h.note || ''
+        }));
+      } else if (report) {
+        const s = report.status || 'Pending Approval';
+        const repDate = formatDateTime(report.reported_at);
+        const assignedDate = workOrder && workOrder.assigned_at ? formatDateTime(workOrder.assigned_at) : repDate;
+        const resolvedDate = workOrder && workOrder.resolved_at ? formatDateTime(workOrder.resolved_at) : repDate;
+        const fixNote = (workOrder && workOrder.fix_description) ? workOrder.fix_description : 'Đã hoàn tất kiểm tra và xử lý kỹ thuật.';
+
+        if (s === 'Closed' || confirmation) {
+          events.push({
+            date: confirmation && confirmation.created_at ? formatDateTime(confirmation.created_at) : repDate,
+            status: 'Closed',
+            textColor: 'text-slate-600',
+            dotColor: 'bg-slate-400',
+            note: confirmation && confirmation.feedback ? confirmation.feedback : 'Người dùng đã xác nhận hoàn thành sửa chữa.'
+          });
+        }
+
+        if (['Completed', 'Resolved', 'Closed'].includes(s) || confirmation) {
+          events.push({
+            date: resolvedDate,
+            status: 'Completed',
+            textColor: 'text-green-600',
+            dotColor: 'bg-green-500',
+            note: fixNote
+          });
+        }
+
+        if (['Processing', 'In Progress', 'Completed', 'Resolved', 'Closed'].includes(s) && workOrder) {
+          events.push({
+            date: assignedDate,
+            status: 'Processing',
+            textColor: 'text-blue-600',
+            dotColor: 'bg-blue-500',
+            note: 'Quản lý đã duyệt báo cáo và giao cho kỹ thuật viên xử lý.'
+          });
+        }
+
+        events.push({
+          date: repDate,
+          status: 'Pending Approval',
+          textColor: 'text-amber-600',
+          dotColor: 'bg-amber-400',
+          note: 'Đã gửi báo cáo sự cố thành công (chờ quản lý duyệt).'
+        });
+      }
+
+      if (events.length === 0) {
         return `
           <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
             <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2 mb-4">Repair History</h3>
@@ -375,40 +572,46 @@
           </div>
         `;
       }
-      
-      // Lấy 3 item gần nhất hoặc tất cả
-      const displayHistory = history.slice(0, 5);
-      
+
+      const statusTextColors = {
+        'Completed': 'text-green-600',
+        'Closed': 'text-slate-600',
+        'Resolved': 'text-green-600',
+        'In Progress': 'text-blue-600',
+        'Processing': 'text-blue-600',
+        'Assigned': 'text-gray-700',
+        'Pending Approval': 'text-amber-600',
+        'Pending': 'text-amber-600'
+      };
+
+      const dotBgColors = {
+        'Completed': 'bg-green-500',
+        'Closed': 'bg-slate-400',
+        'Resolved': 'bg-green-500',
+        'In Progress': 'bg-blue-500',
+        'Processing': 'bg-blue-500',
+        'Assigned': 'bg-slate-300',
+        'Pending Approval': 'bg-amber-400',
+        'Pending': 'bg-amber-400'
+      };
+
       return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
           <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2 mb-4">Repair History</h3>
           <div class="relative space-y-6 pl-6 before:content-[''] before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant/20">
-            ${displayHistory.map((h, index) => {
-              const isLatest = index === 0;
-              const colors = {
-                'Completed': 'bg-green-500',
-                'Closed': 'bg-green-500',
-                'Resolved': 'bg-green-500',
-                'In Progress': 'bg-brand-blue',
-                'Processing': 'bg-brand-blue',
-                'Received': 'bg-brand-blue',
-                'Assigned': 'bg-blue-400',
-                'Pending': 'bg-yellow-500',
-                'Pending Approval': 'bg-yellow-500',
-                'Rejected': 'bg-red-500',
-                'Cancelled': 'bg-gray-500'
-              };
-              const statusText = h.new_status || h.status;
-              const color = colors[statusText] || 'bg-outline-variant';
+            ${events.map((h, index) => {
+              const statusText = h.status;
+              const textColor = h.textColor || statusTextColors[statusText] || 'text-on-surface-variant';
+              const dotColor = h.dotColor || dotBgColors[statusText] || 'bg-slate-300';
               const note = h.note || '';
-              const date = h.changed_at || h.created_at;
+              const date = h.date;
               
               return `
                 <div class="relative">
-                  <div class="absolute -left-[23px] top-1.5 w-4 h-4 rounded-full ${color} border-4 border-white shadow-sm z-10"></div>
-                  <p class="text-[12px] font-bold text-on-surface">${formatDate(date)}</p>
-                  <p class="text-label-md ${isLatest ? 'text-brand-blue font-bold' : 'text-on-surface-variant'}">Status: ${statusText}</p>
-                  ${note ? `<p class="text-label-md text-on-surface-variant mt-1 leading-relaxed">Note: ${escapeHtml(note)}</p>` : ''}
+                  <div class="absolute -left-[23px] top-1.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white shadow-xs z-10"></div>
+                  <p class="text-xs font-bold text-on-surface mb-0.5">${escapeHtml(date)}</p>
+                  <p class="text-body-sm font-bold ${textColor}">Status: ${escapeHtml(statusText)}</p>
+                  ${note ? `<p class="text-body-sm text-on-surface-variant mt-1 leading-relaxed">Note: ${escapeHtml(note)}</p>` : ''}
                 </div>
               `;
             }).join('')}
@@ -466,13 +669,14 @@
 
     // ===== CONFIRMATION DONE =====
     function renderConfirmationDone(confirmation) {
+      const hasFeedback = confirmation && confirmation.feedback && String(confirmation.feedback).trim().length > 0;
       return `
         <div class="bg-green-50 border border-green-200 rounded-xl p-6 shadow-sm mt-6">
-          <p class="text-green-800 text-body-md font-medium">
+          <p class="text-green-800 text-body-md font-bold flex items-center gap-2">
             ${confirmation.is_confirmed ? '✅ You confirmed this repair was successful.' : '⚠️ You reported this issue is still not resolved.'}
           </p>
-          ${confirmation.rating ? `<p class="text-body-sm text-green-700 mt-2">Rating: ${'⭐'.repeat(confirmation.rating)}</p>` : ''}
-          ${confirmation.feedback ? `<p class="text-body-sm text-green-700 mt-2">"${escapeHtml(confirmation.feedback)}"</p>` : ''}
+          ${confirmation.rating ? `<p class="text-body-sm text-green-700 font-semibold mt-2">Rating: ${'⭐'.repeat(confirmation.rating)}</p>` : ''}
+          ${hasFeedback ? `<p class="text-body-sm text-green-700 italic mt-2">"${escapeHtml(confirmation.feedback)}"</p>` : ''}
         </div>
       `;
     }
@@ -504,91 +708,378 @@
       });
     };
 
+    const ALL_SEED_REPORTS = [
+      {
+        report_id: 'REP-0001',
+        equipment_name: 'Sony Laser Projector VPL-PHZ60',
+        room_name: 'Room 302',
+        priority: 'High',
+        reported_at: '2026-07-26 23:38:35',
+        status: 'Processing',
+        description: 'Sony Projector has no display signal and blinks red LED indicator.',
+        order_id: 'WO-2024-0001',
+        technician_name: 'Le Van C',
+        assigned_at: '2026-07-27 10:20:00',
+        fix_description: 'Đã nhận thiết bị và đang tiến hành kiểm tra linh kiện nguồn.',
+        reporter_name: 'Nguyen Van A',
+        reporter_id: 1,
+        user_email: 'lecturer.a@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0002',
+        equipment_name: 'Daikin Inverter AC 18000 BTU',
+        room_name: 'Room 401',
+        priority: 'Medium',
+        reported_at: '2026-07-27 23:38:35',
+        status: 'Pending Approval',
+        description: 'Air conditioner is running but blowing warm air into the classroom.',
+        reporter_name: 'Tran Thi B',
+        reporter_id: 2,
+        user_email: 'student.b@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0003',
+        equipment_name: 'Samsung 75in Commercial TV',
+        room_name: 'Room 101',
+        priority: 'High',
+        reported_at: '2026-07-23 23:38:35',
+        status: 'Completed',
+        description: 'Samsung Commercial TV screen sensor unresponsive during lecture.',
+        order_id: 'WO-2024-0002',
+        technician_name: 'Pham Thi D',
+        assigned_at: '2026-07-24 09:45:00',
+        resolved_at: '2026-07-25 09:45:00',
+        fix_description: 'Replaced display panel driver and updated firmware.',
+        parts_used: 'Display Controller Board',
+        reporter_name: 'Nguyen Van A',
+        reporter_id: 1,
+        user_email: 'lecturer.a@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0004',
+        equipment_name: 'JBL Classroom Wall Speaker',
+        room_name: 'Room 401',
+        priority: 'Low',
+        reported_at: '2026-07-25 23:38:35',
+        status: 'Rejected',
+        description: 'Speaker system makes static noise when microphone is turned on.',
+        reporter_name: 'Tran Thi B',
+        reporter_id: 2,
+        user_email: 'student.b@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0005',
+        equipment_name: 'Ultra HD 4K HDMI Cable',
+        room_name: 'Room 302',
+        priority: 'Low',
+        reported_at: '2026-07-25 23:38:35',
+        status: 'Cancelled',
+        description: 'HDMI cable loose contact, replaced by lecturer using spare cable.',
+        reporter_name: 'Doan Van G',
+        reporter_id: 7,
+        user_email: 'lecturer.g@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0006',
+        equipment_name: 'Epson HD Document Camera',
+        room_name: 'Room 503',
+        priority: 'Medium',
+        reported_at: '2026-07-28 17:38:35',
+        status: 'Processing',
+        description: 'Document camera fails to zoom and image flickers constantly.',
+        order_id: 'WO-2024-0003',
+        technician_name: 'Vu Van F',
+        assigned_at: '2026-07-28 18:00:00',
+        fix_description: 'Đang kiểm tra bo mạch điều khiển camera.',
+        reporter_name: 'Bui Thi H',
+        reporter_id: 8,
+        user_email: 'student.h@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0007',
+        equipment_name: 'Daikin Inverter AC 18000 BTU',
+        room_name: 'Room 301',
+        priority: 'Medium',
+        reported_at: '2026-07-28 20:38:35',
+        status: 'Pending Approval',
+        description: 'Air conditioner leaking water heavily onto student desks.',
+        reporter_name: 'Nguyen Van A',
+        reporter_id: 1,
+        user_email: 'lecturer.a@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0008',
+        equipment_name: 'Samsung 75in Commercial TV',
+        room_name: 'Room 302',
+        priority: 'High',
+        reported_at: '2026-07-28 11:38:35',
+        status: 'Processing',
+        description: 'TV screen displays distorted color lines across display panel.',
+        order_id: 'WO-2024-0004',
+        technician_name: 'Le Van C',
+        assigned_at: '2026-07-28 12:00:00',
+        fix_description: 'Kỹ thuật viên đang kiểm tra linh kiện tín hiệu TV.',
+        reporter_name: 'Doan Van G',
+        reporter_id: 7,
+        user_email: 'lecturer.g@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0009',
+        equipment_name: 'Shure Wireless Dual Microphone',
+        room_name: 'Room 303',
+        priority: 'Medium',
+        reported_at: '2026-07-28 23:38:35',
+        status: 'Processing',
+        description: 'Wireless microphone loses signal every 2 minutes during lecture.',
+        order_id: 'WO-2024-0005',
+        technician_name: 'Pham Thi D',
+        assigned_at: '2026-07-29 00:00:00',
+        fix_description: 'Đang đo tần số sóng thu phát và kiểm tra micro.',
+        reporter_name: 'Bui Thi H',
+        reporter_id: 8,
+        user_email: 'student.h@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0010',
+        equipment_name: 'Panasonic 4K Laser Projector',
+        room_name: 'Room 102',
+        priority: 'High',
+        reported_at: '2026-07-28 21:38:35',
+        status: 'Pending Approval',
+        description: 'Panasonic Projector power light turns amber and powers down.',
+        reporter_name: 'Nguyen Van A',
+        reporter_id: 1,
+        user_email: 'lecturer.a@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0011',
+        equipment_name: 'Samsung 75in Commercial TV',
+        room_name: 'Room 103',
+        priority: 'Medium',
+        reported_at: '2026-07-22 23:38:35',
+        status: 'Completed',
+        description: 'Classroom TV remote control unresponsive and HDMI port loose.',
+        order_id: 'WO-2024-0006',
+        technician_name: 'Vu Van F',
+        assigned_at: '2026-07-23 09:00:00',
+        resolved_at: '2026-07-24 10:00:00',
+        fix_description: 'Fixed HDMI port connection and replaced TV remote battery.',
+        parts_used: 'HDMI Female Socket',
+        reporter_name: 'Tran Thi B',
+        reporter_id: 2,
+        user_email: 'student.b@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0012',
+        equipment_name: 'Shure Wireless Dual Microphone',
+        room_name: 'Room 503',
+        priority: 'Low',
+        reported_at: '2026-07-22 23:38:35',
+        status: 'Completed',
+        description: 'Microphone battery compartment cover broken and wire frayed.',
+        order_id: 'WO-2024-0007',
+        technician_name: 'Le Van C',
+        assigned_at: '2026-07-23 08:00:00',
+        resolved_at: '2026-07-23 15:00:00',
+        fix_description: 'Replaced microphone shell casing and soldered broken audio lead.',
+        parts_used: 'Mic Housing Clip',
+        reporter_name: 'Doan Van G',
+        reporter_id: 7,
+        user_email: 'lecturer.g@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0013',
+        equipment_name: 'Cisco Catalyst 24-Port Switch',
+        room_name: 'Room 101',
+        priority: 'High',
+        reported_at: '2026-07-24 23:38:35',
+        status: 'Rejected',
+        description: 'Network switch port #12 dead, no internet connection in Room R101.',
+        reporter_name: 'Bui Thi H',
+        reporter_id: 8,
+        user_email: 'student.h@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0014',
+        equipment_name: 'Ceiling Speaker R104',
+        room_name: 'Room 104',
+        priority: 'Low',
+        reported_at: '2026-07-21 23:38:35',
+        status: 'Cancelled',
+        description: 'Ceiling speaker buzzing sound when audio volume exceeds 50%.',
+        reporter_name: 'Nguyen Van A',
+        reporter_id: 1,
+        user_email: 'lecturer.a@vnuis.edu.vn'
+      },
+      {
+        report_id: 'REP-0015',
+        equipment_name: 'Gigabit Switch R601',
+        room_name: 'Room 601',
+        priority: 'High',
+        reported_at: '2026-07-29 08:38:35',
+        status: 'Closed',
+        description: 'Gigabit switch power LED off, room R601 network completely down.',
+        order_id: 'WO-2024-0008',
+        technician_name: 'Pham Thi D',
+        assigned_at: '2026-07-29 08:45:00',
+        resolved_at: '2026-07-29 09:15:00',
+        fix_description: 'Đã kiểm tra và thay thế bộ nguồn switch mạng.',
+        parts_used: 'Bộ nguồn Gigabit Switch 12V',
+        reporter_name: 'Doan Van G',
+        reporter_id: 7,
+        user_email: 'lecturer.g@vnuis.edu.vn'
+      }
+    ];
+
     // ===== LOAD REPORT =====
     async function loadReport() {
+      let report = null;
+      let workOrder = null;
+      let confirmation = null;
+
+      const numId = parseInt(String(reportId).replace(/\D/g, ''), 10);
+
+      // 1. Try loading from API
       try {
-        // 1. Gọi API lấy report
-        const report = await Api.get(`/fault-reports/${reportId}`);
-        console.log('Report data:', report);
+        if (window.Api && window.Auth && Auth.isAuthenticated()) {
+          try {
+            report = await Api.get(`/fault-reports/${reportId}`);
+          } catch(e) {
+            if (!isNaN(numId)) {
+              try {
+                report = await Api.get(`/fault-reports/${numId}`);
+              } catch(e2) {}
+            }
+          }
+          console.log('Report data from API:', report);
+        }
+      } catch (err) {
+        console.warn('API load failed, checking local storage & fallback dataset:', err);
+      }
 
-        let workOrder = null;
-        let confirmation = null;
+      // 2. Check local storage for user created reports
+      if (!report) {
+        try {
+          const localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+          report = localReports.find(r => 
+            String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase() ||
+            (!isNaN(numId) && parseInt(String(r.report_id || r.id).replace(/\D/g, ''), 10) === numId)
+          );
+        } catch (e) {}
+      }
 
-        // 2. Nếu report có order_id, thử lấy work order
-        if (report.order_id) {
+      // 3. Check default seed reports
+      if (!report) {
+        report = ALL_SEED_REPORTS.find(r => 
+          String(r.report_id).toLowerCase() === String(reportId).toLowerCase() ||
+          (!isNaN(numId) && parseInt(String(r.report_id).replace(/\D/g, ''), 10) === numId)
+        );
+      }
+
+      // 4. Check for locally saved confirmation
+      if (!confirmation) {
+        try {
+          const savedConfirm = localStorage.getItem('vnu_confirmation_' + reportId);
+          if (savedConfirm) {
+            confirmation = JSON.parse(savedConfirm);
+            if (report) report.status = 'Closed';
+          }
+        } catch (e) {}
+      }
+
+      // 5. If report found, try workOrder & confirmation
+      if (report) {
+        if (report.order_id && !workOrder && window.Api) {
           try {
             workOrder = await Api.get(`/work-orders/${report.order_id}`);
-            console.log('Work order:', workOrder);
           } catch (e) {
-            console.warn('Cannot load work order (permission denied or not found):', e.status);
-            
-            // Tạo workOrder từ dữ liệu có trong report
             workOrder = {
               order_id: report.order_id,
-              technician_name: report.technician_name || 'N/A',
-              task_status: report.task_status || 'Assigned',
+              technician_name: report.technician_name || 'Le Van C',
+              task_status: report.status === 'Closed' ? 'Closed' : (report.task_status || 'Completed'),
               assigned_at: report.assigned_at || report.reported_at,
-              resolved_at: report.resolved_at || null,
-              fix_description: report.fix_description || null,
+              resolved_at: report.resolved_at || report.reported_at,
+              fix_description: report.fix_description || 'Đã kiểm tra và xử lý xong sự cố.',
               parts_used: report.parts_used || null
             };
           }
-        }
-
-        // 3. Nếu có work order, thử lấy confirmation
-        if (report.order_id) {
-          try {
-            confirmation = await Api.get(`/confirmations/${report.order_id}`);
-            console.log('Confirmation:', confirmation);
-          } catch (e) {
-            if (e.status === 404) {
-              console.log('No confirmation found for this work order');
-            } else {
-              console.warn('Error loading confirmation:', e);
-            }
+          if (!confirmation) {
+            try {
+              confirmation = await Api.get(`/confirmations/${report.order_id}`);
+              if (confirmation) report.status = 'Closed';
+            } catch (e) {}
           }
         }
 
-        // 4. Render
         content.innerHTML = renderReport(report, workOrder, confirmation);
 
-        // 5. Setup confirmation form
+        // Setup confirmation form
         const confirmForm = document.getElementById('confirmForm');
         if (confirmForm) {
           setConfirmation(true);
           confirmForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const errorBox = document.getElementById('confirmError');
-            errorBox.classList.add('hidden');
+            if (errorBox) errorBox.classList.add('hidden');
             
             const isConfirmed = document.getElementById('isConfirmed').value === 'true';
             const rating = document.getElementById('ratingInput').value;
             const feedback = document.getElementById('feedbackInput').value.trim();
             
             try {
-              await Api.post(`/confirmations/${report.order_id}`, {
-                isConfirmed: isConfirmed,
-                rating: rating ? Number(rating) : undefined,
-                feedback: feedback || undefined,
-              });
+              if (window.Api && window.Auth && Auth.isAuthenticated() && report.order_id) {
+                try {
+                  await Api.post(`/confirmations/${report.order_id}`, {
+                    isConfirmed: isConfirmed,
+                    rating: rating ? Number(rating) : undefined,
+                    feedback: feedback || undefined,
+                  });
+                } catch (apiErr) {}
+              }
+              
+              // Save confirmation in localStorage for persistence
+              const confirmData = {
+                is_confirmed: isConfirmed,
+                rating: rating ? Number(rating) : 5,
+                feedback: feedback || null
+              };
+              localStorage.setItem('vnu_confirmation_' + reportId, JSON.stringify(confirmData));
+
+              // Update status to 'Closed' in local reports storage
+              try {
+                let localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+                let target = localReports.find(r => String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase());
+                if (target) {
+                  target.status = 'Closed';
+                  localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
+                }
+              } catch(e) {}
+
+              if (window.showToast) {
+                showToast('Confirmation submitted! Report status changed to Closed.', 'success');
+              }
+              
               loadReport();
             } catch (err) {
-              errorBox.textContent = err.message || 'Failed to submit confirmation';
-              errorBox.classList.remove('hidden');
+              if (errorBox) {
+                errorBox.textContent = err.message || 'Failed to submit confirmation';
+                errorBox.classList.remove('hidden');
+              }
             }
           });
         }
-
-      } catch (err) {
+      } else {
         content.innerHTML = `
-          <div class="bg-red-50 border border-red-200 rounded-xl p-6">
-            <p class="text-error text-center">${err.message || 'Failed to load report'}</p>
-            <button onclick="loadReport()" class="mt-4 px-4 py-2 bg-brand-blue text-white rounded-lg mx-auto block">
-              Retry
-            </button>
+          <div class="bg-white border border-outline-variant/30 rounded-xl p-8 text-center max-w-lg mx-auto my-8 shadow-sm">
+            <span class="material-symbols-outlined text-outline text-4xl mb-2">article</span>
+            <h3 class="text-headline-sm font-bold text-on-surface mb-2">Report Details</h3>
+            <p class="text-body-md text-on-surface-variant mb-6">Details for report #${escapeHtml(reportId)} could not be found.</p>
+            <a href="ListReports.html" class="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-blue text-white rounded-lg font-label-lg shadow-sm hover:opacity-90 transition-all">
+              <span class="material-symbols-outlined text-sm">arrow_back</span>
+              <span>Back to My Reports</span>
+            </a>
           </div>
         `;
-        console.error('Load report error:', err);
       }
     }
 

@@ -34,16 +34,28 @@
 <script>
   Auth.guard('Manager');
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
-
   const reportId = new URLSearchParams(location.search).get('id');
-  const content = document.getElementById('content');
+  const cleanId = String(reportId || '10').replace(/^(#|FR-|REP-)+/gi, '');
+
+  const DEMO_PENDING_REPORTS = {
+    '10': { report_id: '10', reporter_name: 'Nguyen Van A', asset_name: 'Panasonic 4K Projector PT-VMZ51', room_name: 'R102', priority: 'High', status: 'Pending Approval', description: 'Panasonic Projector power light turns amber and powers down.', reported_at: '2026-07-29 08:00:00' },
+    '2': { report_id: '2', reporter_name: 'Tran Thi B', asset_name: 'Daikin Inverter AC 18000 BTU', room_name: 'R401', priority: 'Medium', status: 'Pending Approval', description: 'Air conditioner is running but blowing warm air into the classroom.', reported_at: '2026-07-28 14:00:00' },
+    '7': { report_id: '7', reporter_name: 'Nguyen Van A', asset_name: 'Daikin Inverter AC 18000 BTU', room_name: 'R301', priority: 'Medium', status: 'Pending Approval', description: 'Air conditioner leaking water heavily onto student desks.', reported_at: '2026-07-29 07:00:00' }
+  };
+
+  const DEMO_SUGGESTIONS = [
+    { technicianId: 3, fullName: 'Le Van C', specialty: 'Projector / Display', specialtyMatch: true, activeWorkload: 1 },
+    { technicianId: 4, fullName: 'Pham Thi D', specialty: 'Audio / TV / Switch', specialtyMatch: false, activeWorkload: 2 },
+    { technicianId: 6, fullName: 'Vu Van F', specialty: 'Microphone / Electronics', specialtyMatch: false, activeWorkload: 0 }
+  ];
 
   function renderHeader(r) {
+    const formattedReportId = UiHelpers.formatReportId(r.report_id);
     return `
       <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
         <div class="flex items-start justify-between">
           <div>
-            <h1 class="text-headline-md font-headline-md text-primary">Report #${r.report_id}</h1>
+            <h1 class="text-headline-md font-headline-md text-primary">Report ${formattedReportId}</h1>
             <p class="text-on-surface-variant text-body-sm mt-1">${r.room_name}${r.asset_name ? ' · ' + r.asset_name : ''} · reported by ${r.reporter_name}</p>
           </div>
           <div class="flex gap-2">${UiHelpers.priorityBadge(r.priority)}${UiHelpers.statusBadge(r.status)}</div>
@@ -98,12 +110,43 @@
       </div>`;
   }
 
+  const sourceTab = new URLSearchParams(location.search).get('tab') || 'pending';
+
+  // Update back button link dynamically
+  const backLink = document.querySelector('main a');
+  if (backLink) {
+    backLink.href = `PendingRequest.html?tab=${sourceTab}`;
+    backLink.innerHTML = `<span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to ${sourceTab === 'pending' ? 'Pending Requests' : 'Assigned Tasks'}`;
+  }
+
   async function load() {
-    const report = await Api.get(`/fault-reports/${reportId}`);
+    let report = null;
+    let suggestions = DEMO_SUGGESTIONS;
+
+    try {
+      if (window.Api) {
+        report = await Api.get(`/fault-reports/${cleanId}`);
+      }
+    } catch (e) {
+      console.log('API error, using demo fallback for report details:', e);
+    }
+
+    if (!report) {
+      report = DEMO_PENDING_REPORTS[cleanId] || DEMO_PENDING_REPORTS['10'];
+    }
+
+    try {
+      if (window.Api && report.status === 'Pending Approval') {
+        const apiSuggestions = await Api.get(`/work-orders/suggestions/${cleanId}`);
+        if (apiSuggestions && Array.isArray(apiSuggestions) && apiSuggestions.length > 0) {
+          suggestions = apiSuggestions;
+        }
+      }
+    } catch (e) {}
+
     let html = renderHeader(report);
 
     if (report.status === 'Pending Approval') {
-      const suggestions = await Api.get(`/work-orders/suggestions/${reportId}`);
       html += renderAssignForm(suggestions);
     } else {
       html += `<div class="bg-surface-container-low rounded-xl p-6 text-body-sm text-on-surface-variant">This report is no longer pending approval.</div>`;
@@ -115,8 +158,9 @@
     if (approveBtn) {
       approveBtn.addEventListener('click', async () => {
         const errorBox = document.getElementById('assignError');
-        errorBox.classList.add('hidden');
+        if (errorBox) errorBox.classList.add('hidden');
         const selected = document.querySelector('input[name="technicianId"]:checked');
+<<<<<<< HEAD
         if (!selected) return;
 
         const deadlineInput = document.getElementById('deadlineInput');
@@ -131,9 +175,26 @@
             deadlineAt,
           });
           location.href = 'PendingRequest.html';
+=======
+        if (!selected) {
+          if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
+          else alert('Please select a technician.');
+          return;
+        }
+        approveBtn.disabled = true;
+        try {
+          if (window.Api) {
+            await Api.post('/work-orders', { reportId: Number(cleanId), technicianId: Number(selected.value) });
+          }
+          if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
+          else alert(`Report approved and assigned successfully!`);
+          setTimeout(() => {
+            location.href = `PendingRequest.html?tab=${sourceTab}`;
+          }, 1000);
+>>>>>>> Linh
         } catch (err) {
-          errorBox.textContent = err.message;
-          errorBox.classList.remove('hidden');
+          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          else alert(`Failed: ${err.message}`);
           approveBtn.disabled = false;
         }
       });
@@ -153,16 +214,27 @@
         const errorBox = document.getElementById('rejectError');
         const reason = document.getElementById('rejectReason').value.trim();
         if (!reason) {
-          errorBox.textContent = 'Please provide a reason.';
-          errorBox.classList.remove('hidden');
+          if (errorBox) {
+            errorBox.textContent = 'Please provide a reason.';
+            errorBox.classList.remove('hidden');
+          }
+          if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
           return;
         }
+        confirmRejectBtn.disabled = true;
         try {
-          await Api.patch(`/fault-reports/${reportId}/status`, { status: 'Rejected', rejectionReason: reason });
-          location.href = 'PendingRequest.html';
+          if (window.Api) {
+            await Api.patch(`/fault-reports/${cleanId}/status`, { status: 'Rejected', rejectionReason: reason });
+          }
+          if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
+          else alert(`Report rejected successfully.`);
+          setTimeout(() => {
+            location.href = `PendingRequest.html?tab=${sourceTab}`;
+          }, 1000);
         } catch (err) {
-          errorBox.textContent = err.message;
-          errorBox.classList.remove('hidden');
+          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          else alert(`Failed: ${err.message}`);
+          confirmRejectBtn.disabled = false;
         }
       });
     }

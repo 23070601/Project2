@@ -269,6 +269,17 @@
 
   // ===== LOGIC LOGIN =====
   (function() {
+    // Check if user is already logged in
+    try {
+      const existingUser = Auth.getCurrentUser();
+      if (Auth.isAuthenticated() && existingUser && existingUser.role) {
+        location.href = Auth.homePageForRole(existingUser.role);
+        return;
+      }
+    } catch (e) {
+      console.warn('Auth check on login page:', e);
+    }
+
     const form = document.getElementById('loginForm');
     const errorBox = document.getElementById('loginError');
     const submitBtn = document.getElementById('loginSubmit');

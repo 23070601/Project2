@@ -97,10 +97,10 @@
           <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
             <div class="flex justify-between items-start">
               <div>
-                <h4 class="text-body-md font-bold text-on-surface">WO-2024-001 - Sony Projector</h4>
+                <h4 class="text-body-md font-bold text-on-surface">WO-1 - Sony Laser Projector VPL-PHZ60</h4>
                 <div class="flex items-center gap-4 mt-1">
                   <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room P512
+                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room R302
                   </span>
                   <span class="px-2 py-0.5 rounded-full bg-error-container/40 text-error text-[10px] font-bold">High Priority</span>
                 </div>
@@ -115,15 +115,15 @@
           <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
             <div class="flex justify-between items-start">
               <div>
-                <h4 class="text-body-md font-bold text-on-surface">WO-2024-005 - Air Conditioner</h4>
+                <h4 class="text-body-md font-bold text-on-surface">WO-5 - AKG Lavalier Wireless Mic</h4>
                 <div class="flex items-center gap-4 mt-1">
                   <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room A101
+                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room R402
                   </span>
                   <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">Medium Priority</span>
                 </div>
               </div>
-              <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">In Progress</span>
             </div>
           </div>
         </div>
@@ -133,12 +133,12 @@
           <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
             <div class="flex justify-between items-start">
               <div>
-                <h4 class="text-body-md font-bold text-on-surface">WO-2024-008 - Printer Maintenance</h4>
+                <h4 class="text-body-md font-bold text-on-surface">WO-8 - Cisco Gigabit Switch R601</h4>
                 <div class="flex items-center gap-4 mt-1">
                   <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room B203
+                    <span class="material-symbols-outlined text-[16px]">location_on</span>Room R601
                   </span>
-                  <span class="px-2 py-0.5 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold">Low Priority</span>
+                  <span class="px-2 py-0.5 rounded-full bg-error-container/40 text-error text-[10px] font-bold">High Priority</span>
                 </div>
               </div>
               <span class="px-3 py-1 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>
@@ -160,15 +160,16 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let currentUser = { full_name: 'Nguyen Van A' };
+  let currentUser = { full_name: 'Le Van C', role: 'Technician' };
   try {
-    currentUser = Auth.guard('Technician');
+    const user = Auth.guard('Technician');
+    if (user) currentUser = user;
   } catch (e) {
     console.log('Running in demo mode without auth session');
   }
 
   Layout.init({ role: 'Technician', activePage: 'TechnicianDashboard' });
-  document.getElementById('welcomeHeading').textContent = `Welcome back, ${currentUser.full_name || 'Nguyen Van A'}!`;
+  document.getElementById('welcomeHeading').textContent = `Welcome back, ${currentUser.full_name || 'Technician'}!`;
 
   function getPriorityBadgeHtml(priority) {
     const p = (priority || '').toLowerCase();
@@ -181,19 +182,49 @@
     }
   }
 
-  function getStatusBadgeHtml(status) {
-    const s = (status || '').toLowerCase();
+  function getDisplayTaskStatus(task) {
+    if (!task) return '';
+    if (task.technician_response === 'Rejected') return 'Rejected';
+    return task.task_status || '';
+  }
+
+  function getStatusBadgeHtml(task) {
+    const raw = typeof task === 'object' && task !== null ? getDisplayTaskStatus(task) : (task || '');
+    const s = (raw || '').toLowerCase();
     if (s.includes('progress')) {
       return '<span class="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold">In Progress</span>';
     } else if (s.includes('received')) {
       return '<span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-[10px] font-bold">Received</span>';
     } else if (s.includes('completed')) {
       return '<span class="px-3 py-1 rounded-full bg-green-50 text-green-600 text-[10px] font-bold">Completed</span>';
+    } else if (s.includes('rejected')) {
+      return '<span class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-[10px] font-bold">Rejected</span>';
     } else {
       return '<span class="px-3 py-1 rounded-full bg-secondary-fixed/40 text-on-secondary-container text-[10px] font-bold">Assigned</span>';
     }
   }
 
+<<<<<<< HEAD
+=======
+  const TASKS_BY_EMAIL = {
+    'tech.c@vnuis.edu.vn': [
+      { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R302', priority: 'High', task_status: 'Received', technician_response: 'Accepted' },
+      { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R302', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted' },
+      { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
+    ],
+    'tech.d@vnuis.edu.vn': [
+      { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted' },
+      { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted' },
+      { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending' },
+      { order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
+    ],
+    'tech.f@vnuis.edu.vn': [
+      { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected' },
+      { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
+    ]
+  };
+
+>>>>>>> Linh
   async function loadDashboardData() {
     const upcomingContainer = document.getElementById('upcomingTasksContainer');
     if (upcomingContainer) {
@@ -201,15 +232,22 @@
     }
 
     let orders = [];
+    let loadedFromApi = false;
     try {
       if (window.Api) {
         const data = await Api.get('/work-orders');
+<<<<<<< HEAD
         if (Array.isArray(data)) {
+=======
+        if (data && Array.isArray(data)) {
+>>>>>>> Linh
           orders = data;
+          loadedFromApi = true;
         }
       }
     } catch (err) {
       console.log('API fetch error', err);
+<<<<<<< HEAD
       orders = [];
     }
 
@@ -217,11 +255,37 @@
     const completed = orders.filter(o => ['Completed', 'Closed'].includes(o.task_status)).length;
     const overdue = orders.filter(o => String(o.task_status || '').toLowerCase() === 'overdue').length;
     
+=======
+    }
+
+    if (loadedFromApi) {
+      localStorage.setItem('vnuis_work_orders', JSON.stringify(orders));
+    } else if (!orders || orders.length === 0) {
+      const stored = localStorage.getItem('vnuis_work_orders');
+      if (stored) {
+        try {
+          orders = JSON.parse(stored);
+        } catch (e) {}
+      }
+      if (!orders || orders.length === 0) {
+        const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
+        orders = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+      }
+    }
+
+    const activeOrders = orders.filter(o => getDisplayTaskStatus(o) !== 'Rejected');
+
+    const inProgress = activeOrders.filter(o => ['Received', 'In Progress'].includes(getDisplayTaskStatus(o))).length;
+    const completed = activeOrders.filter(o => ['Completed', 'Closed'].includes(getDisplayTaskStatus(o))).length;
+    const overdue = activeOrders.filter(o => getDisplayTaskStatus(o) === 'Overdue' || (o.priority === 'High' && !['Completed', 'Closed'].includes(getDisplayTaskStatus(o)))).length;
+
+>>>>>>> Linh
     document.getElementById('kpiInProgress').textContent = inProgress;
     document.getElementById('kpiCompleted').textContent = completed;
     document.getElementById('kpiOverdue').textContent = overdue;
-    document.getElementById('kpiTotal').textContent = orders.length;
+    document.getElementById('kpiTotal').textContent = activeOrders.length;
 
+<<<<<<< HEAD
     if (!orders.length) {
       upcomingContainer.innerHTML = '<div class="text-center text-on-surface-variant py-6">No assigned work orders found.</div>';
       return;
@@ -238,13 +302,33 @@
                   <span class="material-symbols-outlined text-[16px]">location_on</span>${UiHelpers.escapeHtml(o.room_name || 'Classroom')}
                 </span>
                 ${getPriorityBadgeHtml(o.priority)}
+=======
+    const upcomingContainer = document.getElementById('upcomingTasksContainer');
+    if (upcomingContainer) {
+      if (activeOrders.length === 0) {
+        upcomingContainer.innerHTML = `<p class="text-on-surface-variant text-body-sm py-4 text-center">No assigned work orders found.</p>`;
+      } else {
+        upcomingContainer.innerHTML = activeOrders.slice(0, 5).map(o => `
+          <div class="flex gap-6 group cursor-pointer" onclick="location.href='WorkOrderDetails.html?id=${o.order_id}'">
+            <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h4 class="text-body-md font-bold text-on-surface">WO-${o.order_id} - ${UiHelpers.escapeHtml(o.asset_name || o.description || 'Maintenance Task')}</h4>
+                  <div class="flex items-center gap-4 mt-1">
+                    <span class="flex items-center gap-1 text-label-md text-on-surface-variant">
+                      <span class="material-symbols-outlined text-[16px]">location_on</span>${UiHelpers.escapeHtml(o.room_name || 'Classroom')}
+                    </span>
+                    ${getPriorityBadgeHtml(o.priority)}
+                  </div>
+                </div>
+                ${getStatusBadgeHtml(o)}
+>>>>>>> Linh
               </div>
             </div>
-            ${getStatusBadgeHtml(o.task_status)}
           </div>
-        </div>
-      </div>
-    `).join('');
+        `).join('');
+      }
+    }
   }
 
   loadDashboardData();

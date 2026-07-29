@@ -37,7 +37,7 @@
           <span class="text-on-surface font-medium">WorkOrder Details</span>
         </nav>
         <div class="flex items-center justify-between">
-          <h1 id="pageTitle" class="text-headline-md font-headline-md text-on-surface">WorkOrder Details — WO-2024-001</h1>
+          <h1 id="pageTitle" class="text-headline-md font-headline-md text-on-surface">WorkOrder Details — WO-1</h1>
           <a href="PendingRequest.html" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-lg">
             <span class="material-symbols-outlined">arrow_back</span>
             Back to Assigned Tasks
@@ -55,7 +55,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
               <div>
                 <p class="text-label-md text-on-surface-variant mb-1">WorkOrder ID</p>
-                <p id="woIdText" class="text-body-md font-bold text-primary">WO-2024-001</p>
+                <p id="woIdText" class="text-body-md font-bold text-primary">WO-1</p>
               </div>
               <div>
                 <p class="text-label-md text-on-surface-variant mb-1">Equipment</p>
@@ -93,7 +93,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p class="text-label-md text-on-surface-variant mb-1">Reporter</p>
-                  <p id="reportReporter" class="text-body-md font-medium">John Doe</p>
+                  <p id="reportReporter" class="text-body-md font-medium">Nguyen Van A</p>
                 </div>
                 <div>
                   <p class="text-label-md text-on-surface-variant mb-1">Reported Date</p>
@@ -142,20 +142,6 @@
           <div class="bg-white rounded-xl border border-outline-variant/20 shadow-sm p-6">
             <h3 class="text-headline-sm font-headline-sm mb-6">Repair History</h3>
             <div id="repairTimelineList" class="relative space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-outline-variant/30">
-              <!-- Timeline Item 1: Rejected -->
-              <div class="relative pl-8">
-                <div class="absolute left-0 top-1.5 w-6 h-6 rounded-full bg-tertiary-fixed border-4 border-white shadow-sm"></div>
-                <p class="text-label-md font-bold text-on-surface">22 Oct 2024</p>
-                <p class="text-body-sm font-medium text-on-tertiary-fixed-variant">Status: Rejected | Changed By: Nguyen Van A</p>
-                <p class="text-body-sm text-on-surface-variant mt-1">"Technician rejected the WorkOrder."</p>
-              </div>
-              <!-- Timeline Item 2: Assigned -->
-              <div class="relative pl-8">
-                <div class="absolute left-0 top-1.5 w-6 h-6 rounded-full bg-secondary-fixed border-4 border-white shadow-sm"></div>
-                <p class="text-label-md font-bold text-on-surface">20 Oct 2024</p>
-                <p class="text-body-sm font-medium text-on-surface-variant">Assigned (Manager)</p>
-                <p class="text-body-sm text-on-surface-variant mt-1">"Assigned to technician."</p>
-              </div>
             </div>
           </div>
 
@@ -167,7 +153,7 @@
                 <span class="material-symbols-outlined">person_add</span>
                 Reassign Technician
               </button>
-              <button onclick="alert('WorkOrder WO-2024-001 cancelled successfully.')" class="w-full py-3 border border-error text-error rounded-lg font-bold hover:bg-error-container/20 transition-all flex items-center justify-center gap-2">
+              <button onclick="cancelWorkOrder()" class="w-full py-3 border border-error text-error rounded-lg font-bold hover:bg-error-container/20 transition-all flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">cancel</span>
                 Cancel WorkOrder
               </button>
@@ -188,7 +174,7 @@
     <div class="px-6 py-4 border-b border-outline-variant/20 flex justify-between items-center">
       <div>
         <h2 class="text-headline-sm font-headline-sm text-on-surface">Reassign Technician</h2>
-        <p class="text-body-sm text-on-surface-variant">Select a new technician for WorkOrder <span id="reassignWoIdTitle">WO-2024-001</span>.</p>
+        <p class="text-body-sm text-on-surface-variant">Select a new technician for WorkOrder <span id="reassignWoIdTitle">WO-1</span>.</p>
       </div>
       <button onclick="closeReassignModal()" class="text-on-surface-variant hover:bg-surface-container rounded-full p-1 transition-colors">
         <span class="material-symbols-outlined">close</span>
@@ -198,15 +184,15 @@
       <div>
         <label class="block text-label-md font-bold text-on-surface-variant mb-1">Select Technician *</label>
         <select id="reassignTechSelect" class="w-full border border-outline-variant/30 rounded-lg p-3 text-body-md focus:ring-primary focus:border-primary outline-none">
-          <option value="Tran Thi B">Tran Thi B (Electronics)</option>
-          <option value="Le Van C">Le Van C (General)</option>
-          <option value="Pham Van D">Pham Van D (HVAC)</option>
+          <option value="Le Van C">Le Van C (Technician)</option>
+          <option value="Pham Thi D">Pham Thi D (Technician)</option>
+          <option value="Vu Van F">Vu Van F (Technician)</option>
         </select>
       </div>
     </div>
     <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant/20 flex justify-end gap-3">
-      <button onclick="closeReassignModal()" class="px-6 py-2 text-on-surface-variant font-bold text-sm hover:bg-surface-container-high rounded-lg transition-colors">Cancel</button>
-      <button onclick="confirmReassign()" class="px-6 py-2 bg-primary text-white font-bold text-sm rounded-lg shadow-sm hover:opacity-90 transition-opacity">Confirm Reassign</button>
+      <button onclick="closeReassignModal()" class="px-4 py-2 text-body-sm font-bold text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">Cancel</button>
+      <button onclick="confirmReassign()" class="px-4 py-2 bg-primary text-white text-body-sm font-bold rounded-lg hover:opacity-90 transition-all">Confirm Reassign</button>
     </div>
   </div>
 </div>
@@ -217,22 +203,25 @@
 <script src="../assets/js/layout.js"></script>
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
-<script>
-  let user = { full_name: 'Elina', role: 'Manager' };
-  try {
-    user = Auth.guard('Manager');
-  } catch (e) {
-    console.log('Running in demo mode without auth session');
-  }
 
+<script>
+  Auth.guard('Manager');
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
 
-  const params = new URLSearchParams(window.location.search);
-  const woId = params.get('id') || 'WO-2024-001';
+  const rawWoIdParam = new URLSearchParams(location.search).get('id') || '1';
+  const cleanId = String(rawWoIdParam).replace(/^(WO-)+/gi, '');
+  let activeReportId = null;
 
-  document.getElementById('pageTitle').textContent = `WorkOrder Details — ${woId}`;
-  document.getElementById('woIdText').textContent = woId;
-  document.getElementById('reassignWoIdTitle').textContent = woId;
+  const sourceTab = new URLSearchParams(location.search).get('tab') || 'assigned';
+  const backLinks = document.querySelectorAll('a[href="PendingRequest.html"]');
+  backLinks.forEach(link => {
+    link.href = `PendingRequest.html?tab=${sourceTab}`;
+    if (link.textContent.includes('Back to')) {
+      link.innerHTML = `<span class="material-symbols-outlined">arrow_back</span> Back to ${sourceTab === 'pending' ? 'Pending Requests' : 'Assigned Tasks'}`;
+    } else if (link.textContent.includes('Assigned Tasks')) {
+      link.textContent = sourceTab === 'pending' ? 'Pending Requests' : 'Assigned Tasks';
+    }
+  });
 
   function openReassignModal() {
     document.getElementById('reassignModal').classList.remove('hidden');
@@ -242,21 +231,86 @@
     document.getElementById('reassignModal').classList.add('hidden');
   }
 
-  function confirmReassign() {
-    const tech = document.getElementById('reassignTechSelect').value;
-    alert(`WorkOrder ${woId} reassigned to ${tech} successfully!`);
-    closeReassignModal();
-    window.location.href = 'PendingRequest.html';
+  async function confirmReassign() {
+    const selectedTechId = document.getElementById('reassignTechSelect').value;
+    if (!selectedTechId) {
+      if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
+      else alert('Please select a technician.');
+      return;
+    }
+
+    try {
+      if (window.Api) {
+        await Api.patch(`/work-orders/${cleanId}/reassign`, { technicianId: Number(selectedTechId) });
+        if (window.showToast) showToast('Giao lại công việc thành công!', 'success');
+        else alert(`WorkOrder WO-${cleanId} reassigned successfully!`);
+        closeReassignModal();
+        setTimeout(() => {
+          window.location.href = `PendingRequest.html?tab=${sourceTab}`;
+        }, 1000);
+      }
+    } catch (err) {
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to reassign WorkOrder.');
+    }
+  }
+
+  async function cancelWorkOrder() {
+    if (!activeReportId) {
+      if (window.showToast) showToast('Không thể hủy: Không tìm thấy ID báo cáo.', 'error');
+      else alert('Cannot cancel: Report ID not loaded.');
+      return;
+    }
+    if (!confirm(`Are you sure you want to cancel this WorkOrder?`)) {
+      return;
+    }
+
+    try {
+      if (window.Api) {
+        await Api.patch(`/fault-reports/${activeReportId}/status`, { status: 'Cancelled' });
+        if (window.showToast) showToast('Hủy công việc thành công!', 'success');
+        else alert(`WorkOrder WO-${cleanId} and its report have been cancelled successfully!`);
+        setTimeout(() => {
+          window.location.href = `PendingRequest.html?tab=${sourceTab}`;
+        }, 1000);
+      }
+    } catch (err) {
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to cancel WorkOrder.');
+    }
   }
 
   async function loadWorkOrderData() {
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        const rawId = woId.replace('WO-2024-', '').replace('WO-', '');
-        const data = await Api.get(`/work-orders/${rawId}`);
+      if (window.Api) {
+        const data = await Api.get(`/work-orders/${cleanId}`);
         if (data) {
+          activeReportId = data.report_id;
+          
+          // Header titles
+          document.getElementById('pageTitle').textContent = `WorkOrder Details — WO-${data.order_id}`;
+          document.getElementById('woIdText').textContent = `WO-${data.order_id}`;
+          const titleSpan = document.getElementById('reassignWoIdTitle');
+          if (titleSpan) titleSpan.textContent = `WO-${data.order_id}`;
+
+          // Asset and room
           if (data.asset_name) document.getElementById('woEquipment').textContent = data.asset_name;
           if (data.room_name) document.getElementById('woRoom').textContent = data.room_name;
+          
+          // Priority
+          const prioBadge = document.getElementById('woPriorityBadge');
+          if (prioBadge) {
+            prioBadge.textContent = `${data.priority === 'High' ? '🔴' : (data.priority === 'Medium' ? '🟡' : '🟢')} ${data.priority}`;
+            if (data.priority === 'High') {
+              prioBadge.className = 'inline-block px-3 py-1 bg-[#ffdad6] text-[#93000a] text-[11px] font-bold rounded-full';
+            } else if (data.priority === 'Medium') {
+              prioBadge.className = 'inline-block px-3 py-1 bg-[#ffe082] text-[#5d4037] text-[11px] font-bold rounded-full';
+            } else {
+              prioBadge.className = 'inline-block px-3 py-1 bg-[#c8e6c9] text-[#2e7d32] text-[11px] font-bold rounded-full';
+            }
+          }
+
+          // Technician and reporter
           if (data.technician_name) {
             document.getElementById('woTechnician').textContent = data.technician_name;
             document.getElementById('rejectedByText').textContent = data.technician_name;
@@ -264,11 +318,74 @@
           if (data.reporter_name) document.getElementById('reportReporter').textContent = data.reporter_name;
           if (data.description) document.getElementById('reportDescription').textContent = `"${data.description}"`;
           if (data.assigned_at) document.getElementById('woAssignedDate').textContent = UiHelpers.formatDate(data.assigned_at);
-          if (data.rejection_reason) document.getElementById('rejectionReasonText').textContent = `"${data.rejection_reason}"`;
+          
+          // Rejection info card
+          const isRejected = data.technician_response === 'Rejected';
+          const rejectionCard = document.getElementById('rejectionInfoCard');
+          if (rejectionCard) {
+            if (isRejected) {
+              rejectionCard.classList.remove('hidden');
+              if (data.rejection_reason) document.getElementById('rejectionReasonText').textContent = `"${data.rejection_reason}"`;
+            } else {
+              rejectionCard.classList.add('hidden');
+            }
+          }
+
+          // Status Badge
+          const statusBadge = document.getElementById('woStatusBadge');
+          if (statusBadge) {
+            let badgeClass = 'bg-surface-container text-on-surface-variant';
+            let statusText = data.task_status;
+            
+            if (isRejected) {
+              badgeClass = 'bg-[#ffdf9e] text-[#5b4300]';
+              statusText = '⚠️ Rejected';
+            } else if (data.task_status === 'Assigned') {
+              badgeClass = 'bg-blue-50 text-brand-blue';
+            } else if (data.task_status === 'Received') {
+              badgeClass = 'bg-indigo-50 text-indigo-700';
+            } else if (data.task_status === 'In Progress') {
+              badgeClass = 'bg-amber-50 text-amber-700';
+            } else if (data.task_status === 'Completed') {
+              badgeClass = 'bg-green-50 text-green-700';
+            } else if (data.task_status === 'Closed') {
+              badgeClass = 'bg-surface-container text-on-surface-variant';
+            }
+            statusBadge.className = `px-3 py-1 ${badgeClass} text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1`;
+            statusBadge.textContent = statusText;
+          }
+
+          // Timeline
+          const timeline = document.getElementById('repairTimelineList');
+          if (timeline && data.statusHistory && data.statusHistory.length > 0) {
+            timeline.innerHTML = data.statusHistory.map(h => {
+              let circleColor = 'bg-secondary-fixed';
+              if (h.new_status === 'Completed' || h.new_status === 'Closed') circleColor = 'bg-green-500';
+              if (h.new_status === 'In Progress') circleColor = 'bg-amber-500';
+              if (h.new_status === 'Assigned') circleColor = 'bg-blue-500';
+              return `
+                <div class="relative pl-8">
+                  <div class="absolute left-0 top-1.5 w-6 h-6 rounded-full ${circleColor} border-4 border-white shadow-sm"></div>
+                  <p class="text-label-md font-bold text-on-surface">${UiHelpers.formatDate(h.changed_at)}</p>
+                  <p class="text-body-sm font-medium text-on-surface-variant">${h.new_status}</p>
+                  <p class="text-body-sm text-on-surface-variant mt-1">"${h.note || ''}"</p>
+                </div>
+              `;
+            }).join('');
+          }
+
+          // Load technician suggestions for reassigning
+          const suggestions = await Api.get(`/work-orders/suggestions/${data.report_id}`);
+          const reassignSelect = document.getElementById('reassignTechSelect');
+          if (reassignSelect && suggestions) {
+            reassignSelect.innerHTML = suggestions.map(t => `
+              <option value="${t.technicianId}">${UiHelpers.escapeHtml(t.fullName)} (${t.specialty || 'General'})</option>
+            `).join('');
+          }
         }
       }
     } catch (err) {
-      console.log('Using default mock data for Rejected WorkOrderDetails view', err);
+      console.log('Failed to load WorkOrder details', err);
     }
   }
 

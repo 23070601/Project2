@@ -213,6 +213,9 @@
         document.getElementById('phoneInput').value = phone;
         
         // Hiển thị thành công
+        if (window.showToast) {
+          showToast('Profile updated successfully!', 'success');
+        }
         btn.textContent = '✓ Saved';
         btn.classList.remove('bg-brand-blue');
         btn.classList.add('bg-green-600');

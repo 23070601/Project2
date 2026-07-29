@@ -61,4 +61,8 @@ async function getStatusHistory(reportId) {
   return rows;
 }
 
-module.exports = { findAll, findById, create, updateStatus, getStatusHistory };
+async function remove(reportId) {
+  await pool.execute('DELETE FROM FaultReports WHERE report_id = ?', [reportId]);
+}
+
+module.exports = { findAll, findById, create, updateStatus, getStatusHistory, remove };
