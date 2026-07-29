@@ -783,7 +783,7 @@
         document.getElementById('ahRecentFailures').textContent = assetBasic?.recent_failures ?? '—';
 
         const history = (asset.repairHistory || []).filter(wo =>
-          wo.status === 'Completed' || wo.status === 'Closed'
+          wo.task_status === 'Completed' || wo.task_status === 'Closed'
         );
 
         if (history.length === 0) {
@@ -793,14 +793,14 @@
         }
 
         document.getElementById('assetHistoryTableBody').innerHTML = history.map(wo => {
-          const date = wo.completed_at || wo.assigned_at
-            ? (UiHelpers.formatDate ? UiHelpers.formatDate(wo.completed_at || wo.assigned_at) : (wo.completed_at || wo.assigned_at || '').slice(0, 10))
+          const date = wo.resolved_at || wo.assigned_at
+            ? (UiHelpers.formatDate ? UiHelpers.formatDate(wo.resolved_at || wo.assigned_at) : (wo.resolved_at || wo.assigned_at || '').slice(0, 10))
             : '—';
-          const statusBadge = wo.status === 'Completed'
-            ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">${UiHelpers.escapeHtml(wo.status)}</span>`
-            : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-surface-container text-outline">${UiHelpers.escapeHtml(wo.status)}</span>`;
+          const statusBadge = wo.task_status === 'Completed' || wo.task_status === 'Closed'
+            ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">${UiHelpers.escapeHtml(wo.task_status)}</span>`
+            : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-surface-container text-outline">${UiHelpers.escapeHtml(wo.task_status)}</span>`;
           const technician = wo.technician_name || '—';
-          const fixDesc = wo.resolution_note || wo.reported_issue || '—';
+          const fixDesc = wo.fix_description || '—';
           const parts = wo.parts_used || '—';
           return `
             <tr class="hover:bg-surface-container-low transition-colors">

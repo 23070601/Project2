@@ -447,12 +447,22 @@ SELECT
     a.asset_name,
     a.asset_type,
     c.room_name,
-    a.failure_count,
+    COALESCE(recent_counts.recent_failures, 0) AS recent_failures,
     a.last_fault_at,
     a.status
 FROM Assets a
 JOIN Classrooms c ON c.room_id = a.room_id
-WHERE a.failure_count >= 3 OR a.status = 'Recommended for Replacement';
+LEFT JOIN (
+    SELECT
+        fr.asset_id,
+        COUNT(*) AS recent_failures
+    FROM FaultReports fr
+    WHERE fr.asset_id IS NOT NULL
+      AND fr.status NOT IN ('Rejected', 'Cancelled')
+      AND fr.reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+    GROUP BY fr.asset_id
+) recent_counts ON recent_counts.asset_id = a.asset_id
+WHERE COALESCE(recent_counts.recent_failures, 0) >= 3;
 
 CREATE OR REPLACE VIEW v_dss2_technician_workload AS
 SELECT
@@ -546,19 +556,76 @@ BEGIN
     END IF;
 END$$
 
+DROP TRIGGER IF EXISTS trg_faultreports_after_insert_dss3$$
+
 CREATE TRIGGER trg_faultreports_after_insert_dss3
 AFTER INSERT ON FaultReports
 FOR EACH ROW
 BEGIN
-    IF NEW.asset_id IS NOT NULL THEN
+    IF NEW.asset_id IS NOT NULL AND NEW.status NOT IN ('Rejected', 'Cancelled') THEN
         UPDATE Assets
         SET failure_count = failure_count + 1,
             last_fault_at = NEW.reported_at,
             status = CASE
                 WHEN failure_count + 1 >= 3 THEN 'Recommended for Replacement'
-                ELSE 'Under Repair'
+                WHEN failure_count + 1 > 0 THEN 'Under Repair'
+                ELSE 'Operational'
             END
         WHERE asset_id = NEW.asset_id;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_faultreports_after_update_dss3
+AFTER UPDATE ON FaultReports
+FOR EACH ROW
+BEGIN
+    IF OLD.status <> NEW.status THEN
+        IF OLD.asset_id IS NOT NULL AND OLD.status NOT IN ('Rejected', 'Cancelled') THEN
+            UPDATE Assets
+            SET failure_count = GREATEST(failure_count - 1, 0),
+                status = CASE
+                    WHEN GREATEST(failure_count - 1, 0) >= 3 THEN 'Recommended for Replacement'
+                    WHEN GREATEST(failure_count - 1, 0) > 0 THEN 'Under Repair'
+                    ELSE 'Operational'
+                END,
+                last_fault_at = CASE
+                    WHEN GREATEST(failure_count - 1, 0) > 0 THEN last_fault_at
+                    ELSE NULL
+                END
+            WHERE asset_id = OLD.asset_id;
+        END IF;
+
+        IF NEW.asset_id IS NOT NULL AND NEW.status NOT IN ('Rejected', 'Cancelled') THEN
+            UPDATE Assets
+            SET failure_count = failure_count + 1,
+                last_fault_at = NEW.reported_at,
+                status = CASE
+                    WHEN failure_count + 1 >= 3 THEN 'Recommended for Replacement'
+                    WHEN failure_count + 1 > 0 THEN 'Under Repair'
+                    ELSE 'Operational'
+                END
+            WHERE asset_id = NEW.asset_id;
+        END IF;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_faultreports_after_delete_dss3
+AFTER DELETE ON FaultReports
+FOR EACH ROW
+BEGIN
+    IF OLD.asset_id IS NOT NULL AND OLD.status NOT IN ('Rejected', 'Cancelled') THEN
+        UPDATE Assets
+        SET failure_count = GREATEST(failure_count - 1, 0),
+            status = CASE
+                WHEN GREATEST(failure_count - 1, 0) >= 3 THEN 'Recommended for Replacement'
+                WHEN GREATEST(failure_count - 1, 0) > 0 THEN 'Under Repair'
+                ELSE 'Operational'
+            END,
+            last_fault_at = CASE
+                WHEN GREATEST(failure_count - 1, 0) > 0 THEN last_fault_at
+                ELSE NULL
+            END
+        WHERE asset_id = OLD.asset_id;
     END IF;
 END$$
 
