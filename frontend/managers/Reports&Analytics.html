@@ -38,13 +38,23 @@
       <div class="flex flex-wrap items-center gap-4">
         <div class="flex flex-col gap-1">
           <label class="text-[10px] font-bold uppercase text-outline tracking-wider">Date Range</label>
-          <select id="dateRangeSelect" class="bg-surface-container-low border border-outline-variant/30 rounded-lg pl-4 pr-10 py-2 text-body-sm focus:ring-primary outline-none cursor-pointer">
-            <option value="This Month">This Month</option>
+          <select id="dateRangeSelect" onchange="handleMainDateRangeChange(this.value)" class="bg-surface-container-low border border-outline-variant/30 rounded-lg pl-4 pr-10 py-2 text-body-sm focus:ring-primary outline-none cursor-pointer">
+            <option value="This Month" selected>This Month</option>
             <option value="Today">Today</option>
             <option value="This Week">This Week</option>
             <option value="This Year">This Year</option>
             <option value="Custom Range">Custom Range</option>
           </select>
+        </div>
+        <div id="mainCustomDateContainer" class="hidden flex items-center gap-2 pt-4 sm:pt-0">
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold uppercase text-outline tracking-wider">From</label>
+            <input type="date" id="mainStartDate" onchange="loadReportsData()" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-1.5 text-body-sm focus:ring-primary outline-none">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold uppercase text-outline tracking-wider">To</label>
+            <input type="date" id="mainEndDate" onchange="loadReportsData()" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-1.5 text-body-sm focus:ring-primary outline-none">
+          </div>
         </div>
       </div>
       <button onclick="openExportModal()" class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-label-lg flex items-center gap-2 hover:bg-primary-container transition-all shadow-sm">
@@ -464,85 +474,159 @@
     }, 800);
   }
 
-  // Initialize Chart.js charts
-  document.addEventListener('DOMContentLoaded', function() {
-    // 1. Maintenance Overview Line Chart
+  let maintenanceChartInstance = null;
+  let failureChartInstance = null;
+
+  function handleMainDateRangeChange(val) {
+    const customContainer = document.getElementById('mainCustomDateContainer');
+    if (val === 'Custom Range') {
+      customContainer.classList.remove('hidden');
+    } else {
+      customContainer.classList.add('hidden');
+      loadReportsData();
+    }
+  }
+
+  async function loadReportsData() {
+    const filter = document.getElementById('dateRangeSelect').value;
+    const startDate = document.getElementById('mainStartDate').value;
+    const endDate = document.getElementById('mainEndDate').value;
+
+    const params = new URLSearchParams();
+    if (filter) params.append('filter', filter);
+    if (filter === 'Custom Range') {
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+    }
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+
+    try {
+      if (window.Api) {
+        // 1. Load Overview Stats KPI
+        const stats = await Api.get(`/reports/overview-stats${queryString}`);
+        if (stats) {
+          if (stats.totalAssets !== undefined) document.getElementById('statTotalAssets').textContent = stats.totalAssets;
+          if (stats.maintenanceRequests !== undefined) document.getElementById('statMaintenanceRequests').textContent = stats.maintenanceRequests;
+          if (stats.completedRepairs !== undefined) document.getElementById('statCompletedRepairs').textContent = stats.completedRepairs;
+          if (stats.failureRate !== undefined) document.getElementById('statFailureRate').textContent = stats.failureRate;
+        }
+
+        // 2. Load Maintenance Overview Chart Data
+        const overviewData = await Api.get(`/reports/maintenance-overview${queryString}`);
+        if (overviewData && Array.isArray(overviewData)) {
+          renderMaintenanceChart(overviewData);
+        }
+
+        // 3. Load Asset Failure Analysis Chart Data
+        const failureData = await Api.get(`/reports/asset-failure-analysis${queryString}`);
+        if (failureData && Array.isArray(failureData)) {
+          renderFailureChart(failureData);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load reports data:', err);
+      if (window.showToast) showToast(`Không thể tải dữ liệu báo cáo: ${err.message}`, 'error');
+    }
+  }
+
+  function renderMaintenanceChart(data) {
     const ctxLineEl = document.getElementById('maintenanceChart');
-    if (ctxLineEl) {
-      const ctxLine = ctxLineEl.getContext('2d');
-      const gradient = ctxLine.createLinearGradient(0, 0, 0, 256);
-      gradient.addColorStop(0, 'rgba(0, 91, 172, 0.25)');
-      gradient.addColorStop(1, 'rgba(0, 91, 172, 0)');
+    if (!ctxLineEl) return;
+    const ctxLine = ctxLineEl.getContext('2d');
 
-      new Chart(ctxLine, {
-        type: 'line',
-        data: {
-          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-          datasets: [{
-            label: 'Maintenance Requests',
-            data: [12, 19, 15, 25, 22, 30],
-            borderColor: '#005bac',
-            backgroundColor: gradient,
-            fill: true,
-            tension: 0.4,
-            borderWidth: 3,
-            pointRadius: 4,
-            pointBackgroundColor: '#005bac'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(0,0,0,0.05)' }
-            },
-            x: {
-              grid: { display: false }
-            }
-          }
-        }
-      });
+    const labels = data.map(d => d.month);
+    const counts = data.map(d => d.count);
+
+    if (maintenanceChartInstance) {
+      maintenanceChartInstance.destroy();
     }
 
-    // 2. Asset Failure Analysis Bar Chart
+    const gradient = ctxLine.createLinearGradient(0, 0, 0, 256);
+    gradient.addColorStop(0, 'rgba(0, 91, 172, 0.25)');
+    gradient.addColorStop(1, 'rgba(0, 91, 172, 0)');
+
+    maintenanceChartInstance = new Chart(ctxLine, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Maintenance Requests',
+          data: counts,
+          borderColor: '#005BAC',
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointBackgroundColor: '#005BAC'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            grid: { color: 'rgba(0,0,0,0.05)' }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  function renderFailureChart(data) {
     const ctxBarEl = document.getElementById('failureChart');
-    if (ctxBarEl) {
-      const ctxBar = ctxBarEl.getContext('2d');
-      new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-          labels: ["Projector", "Computer", "AC", "Speaker", "Printer"],
-          datasets: [{
-            label: 'Failures',
-            data: [8, 12, 5, 3, 7],
-            backgroundColor: '#005bac',
-            borderRadius: 4,
-            maxBarThickness: 40
-          }]
+    if (!ctxBarEl) return;
+    const ctxBar = ctxBarEl.getContext('2d');
+
+    const labels = data.map(d => d.asset_type || 'Unknown');
+    const counts = data.map(d => d.failure_count || 0);
+
+    if (failureChartInstance) {
+      failureChartInstance.destroy();
+    }
+
+    failureChartInstance = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: labels.length > 0 ? labels : ['No Data'],
+        datasets: [{
+          label: 'Failures',
+          data: counts.length > 0 ? counts : [0],
+          backgroundColor: '#005BAC',
+          borderRadius: 4,
+          maxBarThickness: 40
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            grid: { color: 'rgba(0,0,0,0.05)' }
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(0,0,0,0.05)' }
-            },
-            x: {
-              grid: { display: false }
-            }
+          x: {
+            grid: { display: false }
           }
         }
-      });
-    }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadReportsData();
   });
 </script>
 </body>

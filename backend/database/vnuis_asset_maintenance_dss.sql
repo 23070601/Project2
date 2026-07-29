@@ -5,7 +5,7 @@
 -- =====================================================================
 
 DROP DATABASE IF EXISTS vnuis_asset_maintenance_dss;
-CREATE DATABASE vnuis_asset_maintenance_dss
+CREATE DATABASE IF NOT EXISTS vnuis_asset_maintenance_dss
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 USE vnuis_asset_maintenance_dss;
@@ -91,6 +91,7 @@ CREATE TABLE WorkOrders (
     manager_id           INT             NOT NULL,
     technician_id        INT             NOT NULL,
     assigned_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deadline_at          TIMESTAMP       NULL,
     technician_response  VARCHAR(20)     NOT NULL DEFAULT 'Pending',
     rejection_reason     VARCHAR(255)    NULL,
     task_status          VARCHAR(30)     NOT NULL DEFAULT 'Assigned',
@@ -363,18 +364,18 @@ INSERT INTO FaultReports (report_id, reporter_id, asset_id, room_id, description
 (12, 7, 48, 20, 'Microphone battery compartment cover broken and wire frayed.', 'Low',    'Completed',        NOW() - INTERVAL 7 DAY),
 (13, 8, 1,  1,  'Network switch port #12 dead, no internet connection in Room R101.', 'High',   'Rejected',         NOW() - INTERVAL 5 DAY),
 (14, 1, 12, 4,  'Ceiling speaker buzzing sound when audio volume exceeds 50%.', 'Low',    'Cancelled',        NOW() - INTERVAL 8 DAY),
-(15, 7, 52, 21, 'Gigabit switch power LED off, room R601 network completely down.', 'High',   'Closed',           NOW() - INTERVAL 1 HOUR);
+(15, 7, 52, 21, 'Gigabit switch power LED off, room R601 network completely down.', 'High',   'Completed',        NOW() - INTERVAL 1 HOUR);
 
 -- 5. WORK ORDERS (8 UNIQUE REPORT_ID VALUES: 1, 3, 6, 8, 9, 11, 12, 15)
-INSERT INTO WorkOrders (order_id, report_id, manager_id, technician_id, assigned_at, technician_response, rejection_reason, task_status, fix_description, parts_used, resolved_at, closed_at) VALUES
-(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, 'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
-(2,  3,  5, 4, NOW() - INTERVAL 5 DAY,  'Accepted', NULL,            'Closed',      'Replaced display panel driver and updated firmware.', 'Display Controller Board', NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
-(3,  6,  5, 6, NOW() - INTERVAL 10 HOUR, 'Rejected', 'overloaded',   'Assigned',    NULL, NULL, NULL, NULL),
-(4,  8,  5, 3, NOW() - INTERVAL 16 HOUR, 'Accepted', NULL,            'Received',    NULL, NULL, NULL, NULL),
-(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
-(6,  11, 5, 6, NOW() - INTERVAL 6 DAY,  'Accepted', NULL,            'Closed',      'Fixed HDMI port connection and replaced TV remote battery.', 'HDMI Female Socket', NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
-(7,  12, 5, 3, NOW() - INTERVAL 7 DAY,  'Accepted', NULL,            'Closed',      'Replaced microphone shell casing and soldered broken audio lead.', 'Mic Housing Clip', NOW() - INTERVAL 6 DAY, NOW() - INTERVAL 6 DAY),
-(8,  15, 5, 4, NOW() - INTERVAL 1 HOUR,  'Accepted', NULL,            'Closed',      'Đã kiểm tra và thay thế bộ nguồn switch mạng.', 'Bộ nguồn Gigabit Switch 12V', NOW() - INTERVAL 30 MINUTE, NOW() - INTERVAL 5 MINUTE);
+INSERT INTO WorkOrders (order_id, report_id, manager_id, technician_id, assigned_at, deadline_at, technician_response, rejection_reason, task_status, fix_description, parts_used, resolved_at, closed_at) VALUES
+(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, NOW() - INTERVAL 16 HOUR, 'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
+(2,  3,  5, 4, NOW() - INTERVAL 5 DAY,  NOW() - INTERVAL 4 DAY,  'Accepted', NULL,            'Closed',      'Replaced display panel driver and updated firmware.', 'Display Controller Board', NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
+(3,  6,  5, 6, NOW() - INTERVAL 10 HOUR, NOW() - INTERVAL 2 HOUR,  'Rejected', 'overloaded',   'Assigned',    NULL, NULL, NULL, NULL),
+(4,  8,  5, 3, NOW() - INTERVAL 16 HOUR, NOW() - INTERVAL 4 HOUR,  'Accepted', NULL,            'Received',    NULL, NULL, NULL, NULL),
+(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  NOW() - INTERVAL 1 HOUR,  'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
+(6,  11, 5, 6, NOW() - INTERVAL 6 DAY,  NOW() - INTERVAL 5 DAY,  'Accepted', NULL,            'Closed',      'Fixed HDMI port connection and replaced TV remote battery.', 'HDMI Female Socket', NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
+(7,  12, 5, 3, NOW() - INTERVAL 7 DAY,  NOW() - INTERVAL 6 DAY,  'Accepted', NULL,            'Closed',      'Replaced microphone shell casing and soldered broken audio lead.', 'Mic Housing Clip', NOW() - INTERVAL 6 DAY, NOW() - INTERVAL 6 DAY),
+(8,  15, 5, 4, NOW() - INTERVAL 1 HOUR,  NOW() + INTERVAL 2 HOUR,  'Accepted', NULL,            'Closed',      'Đã kiểm tra và thay thế bộ nguồn switch mạng.', 'Bộ nguồn Gigabit Switch 12V', NOW() - INTERVAL 30 MINUTE, NOW() - INTERVAL 5 MINUTE);
 
 -- 6. USER CONFIRMATIONS
 INSERT INTO UserConfirmations (confirmation_id, order_id, reporter_id, is_confirmed, rating, feedback, confirmed_at) VALUES
@@ -504,6 +505,8 @@ LEFT JOIN WorkOrders wo ON wo.report_id = fr.report_id;
 
 DELIMITER $$
 
+DROP TRIGGER IF EXISTS trg_workorders_after_insert$$
+
 CREATE TRIGGER trg_workorders_after_insert
 AFTER INSERT ON WorkOrders
 FOR EACH ROW
@@ -524,6 +527,8 @@ BEGIN
     VALUES (NEW.technician_id, NEW.report_id, NEW.order_id,
             CONCAT('New task assigned: Work Order #', NEW.order_id));
 END$$
+
+DROP TRIGGER IF EXISTS trg_workorders_after_update$$
 
 CREATE TRIGGER trg_workorders_after_update
 AFTER UPDATE ON WorkOrders
@@ -575,6 +580,8 @@ BEGIN
     END IF;
 END$$
 
+DROP TRIGGER IF EXISTS trg_faultreports_after_update_dss3$$
+
 CREATE TRIGGER trg_faultreports_after_update_dss3
 AFTER UPDATE ON FaultReports
 FOR EACH ROW
@@ -608,6 +615,8 @@ BEGIN
         END IF;
     END IF;
 END$$
+
+DROP TRIGGER IF EXISTS trg_faultreports_after_delete_dss3$$
 
 CREATE TRIGGER trg_faultreports_after_delete_dss3
 AFTER DELETE ON FaultReports

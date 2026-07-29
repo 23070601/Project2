@@ -109,6 +109,7 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
        FROM FaultReports
        WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
          AND asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
        GROUP BY asset_id
      ) f3 ON f3.asset_id = a.asset_id
      ${where}

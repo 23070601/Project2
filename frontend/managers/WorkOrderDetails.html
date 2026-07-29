@@ -80,6 +80,10 @@
                 <p id="woAssignedDate" class="text-body-md">20 Oct 2024</p>
               </div>
               <div>
+                <p class="text-label-md text-on-surface-variant mb-1">Deadline Date</p>
+                <p id="woDeadlineDate" class="text-body-md font-medium text-[#DC3545]">--</p>
+              </div>
+              <div>
                 <p class="text-label-md text-on-surface-variant mb-1">Task Status</p>
                 <span id="woStatusBadge" class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">⚠️ Rejected</span>
               </div>
@@ -318,6 +322,10 @@
           if (data.reporter_name) document.getElementById('reportReporter').textContent = data.reporter_name;
           if (data.description) document.getElementById('reportDescription').textContent = `"${data.description}"`;
           if (data.assigned_at) document.getElementById('woAssignedDate').textContent = UiHelpers.formatDate(data.assigned_at);
+          const deadlineEl = document.getElementById('woDeadlineDate');
+          if (deadlineEl) {
+            deadlineEl.textContent = data.deadline_at ? UiHelpers.formatDate(data.deadline_at) : 'N/A';
+          }
           
           // Rejection info card
           const isRejected = data.technician_response === 'Rejected';

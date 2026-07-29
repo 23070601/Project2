@@ -19,8 +19,8 @@ const { ROLES } = require('../../shared/constants/roles');
  * GET /api/work-orders
  */
 async function list(req, res) {
-  const { taskStatus, technicianResponse, mine } = req.query;
-  const filters = { taskStatus, technicianResponse };
+  const { taskStatus, technicianResponse, priority, deadline, mine } = req.query;
+  const filters = { taskStatus, technicianResponse, priority, deadline };
 
   // Apply role-based filters
   if (req.user.role === ROLES.TECHNICIAN) {

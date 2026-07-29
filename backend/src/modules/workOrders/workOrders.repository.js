@@ -16,14 +16,25 @@ const BASE_SELECT = `
   JOIN Users mgr ON mgr.user_id = wo.manager_id
 `;
 
-async function findAll({ technicianId, managerId, taskStatus, technicianResponse } = {}) {
+async function findAll({ technicianId, managerId, taskStatus, technicianResponse, priority, deadline } = {}) {
   const clauses = [];
   const params = [];
 
   if (technicianId) { clauses.push('wo.technician_id = ?'); params.push(technicianId); }
   if (managerId) { clauses.push('wo.manager_id = ?'); params.push(managerId); }
-  if (taskStatus) { clauses.push('wo.task_status = ?'); params.push(taskStatus); }
-  if (technicianResponse) { clauses.push('wo.technician_response = ?'); params.push(technicianResponse); }
+  if (taskStatus && taskStatus !== 'All') { clauses.push('wo.task_status = ?'); params.push(taskStatus); }
+  if (technicianResponse && technicianResponse !== 'All') { clauses.push('wo.technician_response = ?'); params.push(technicianResponse); }
+  if (priority && priority !== 'All') { clauses.push('fr.priority = ?'); params.push(priority); }
+
+  if (deadline && deadline !== 'All' && deadline !== 'all') {
+    if (deadline === 'overdue') {
+      clauses.push("wo.deadline_at IS NOT NULL AND wo.deadline_at < NOW() AND wo.task_status NOT IN ('Closed', 'Completed')");
+    } else if (deadline === 'due_soon') {
+      clauses.push("wo.deadline_at IS NOT NULL AND wo.deadline_at BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 2 DAY) AND wo.task_status NOT IN ('Closed', 'Completed')");
+    } else if (deadline === 'on_time') {
+      clauses.push("(wo.deadline_at IS NULL OR wo.deadline_at > NOW() OR wo.task_status IN ('Closed', 'Completed'))");
+    }
+  }
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const [rows] = await pool.query(`${BASE_SELECT} ${where} ORDER BY wo.assigned_at DESC`, params);

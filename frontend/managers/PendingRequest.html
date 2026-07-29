@@ -51,13 +51,13 @@
             <span class="material-symbols-outlined text-outline">search</span>
             <input id="pendingSearch" class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline-variant/60 outline-none" placeholder="Search requests..." type="text">
           </div>
-          <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-outline-variant/30 shadow-sm">
-            <span class="text-body-sm text-on-surface-variant font-medium">FILTER BY:</span>
-            <select id="pendingPriorityFilter" class="border-none p-0 pr-8 focus:ring-0 bg-transparent text-body-sm font-bold text-on-surface cursor-pointer outline-none">
-              <option value="All">All Priority</option>
-              <option value="High">High Priority</option>
-              <option value="Medium">Medium Priority</option>
-              <option value="Low">Low Priority</option>
+          <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
+            <span class="text-body-sm text-on-surface-variant font-medium">Priority:</span>
+            <select id="pendingPriorityFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
+              <option value="All">All</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
             </select>
           </div>
         </div>
@@ -136,21 +136,44 @@
 
       <!-- ASSIGNED TASKS VIEW -->
       <div id="assigned-tasks-view" class="hidden">
-        <div class="w-full flex justify-between items-center mb-6">
-          <div class="flex items-center bg-white px-4 py-2 rounded-lg border border-outline-variant/30 w-[350px] shadow-sm">
+        <div class="w-full flex flex-wrap justify-between items-center gap-4 mb-6">
+          <div class="flex items-center bg-white px-4 py-2 rounded-lg border border-outline-variant/30 w-[260px] shadow-sm">
             <span class="material-symbols-outlined text-outline">search</span>
             <input id="assignedSearch" class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline-variant/60 outline-none" placeholder="Search tasks..." type="text">
           </div>
-          <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-outline-variant/30 shadow-sm">
-            <span class="text-body-sm text-on-surface-variant font-medium">STATUS:</span>
-            <select id="assignedStatusFilter" class="border-none p-0 pr-8 focus:ring-0 bg-transparent text-body-sm font-bold text-on-surface cursor-pointer outline-none">
-              <option value="All">All</option>
-              <option value="Assigned">Assigned</option>
-              <option value="Received">Received</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-              <option value="Closed">Closed</option>
-            </select>
+          <div class="flex items-center gap-3 flex-wrap">
+            <!-- Priority Filter -->
+            <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
+              <span class="text-body-sm text-on-surface-variant font-medium whitespace-nowrap">Priority:</span>
+              <select id="assignedPriorityFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
+                <option value="All">All</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <!-- Status Filter -->
+            <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
+              <span class="text-body-sm text-on-surface-variant font-medium whitespace-nowrap">Status:</span>
+              <select id="assignedStatusFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
+                <option value="All">All</option>
+                <option value="Assigned">Assigned</option>
+                <option value="Received">Received</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <!-- Deadline Filter -->
+            <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
+              <span class="text-body-sm text-on-surface-variant font-medium whitespace-nowrap flex items-center gap-1">⏰ Deadline:</span>
+              <select id="assignedDeadlineFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
+                <option value="All">All</option>
+                <option value="overdue">Overdue</option>
+                <option value="due_soon">Due Soon</option>
+                <option value="on_time">On Time</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -162,7 +185,9 @@
                 <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Work Order ID</th>
                 <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Equipment</th>
                 <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Technician</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Priority</th>
                 <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Status</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Deadline</th>
                 <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Assigned Date</th>
                 <th class="px-6 py-4 text-label-lg uppercase tracking-wider text-center">Action</th>
               </tr>
@@ -173,7 +198,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-1</td>
                 <td class="px-6 py-4">Sony Laser Projector VPL-PHZ60</td>
                 <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full capitalize">High</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-amber-50 text-amber-700 text-[11px] font-bold rounded-full">In Progress</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #FF8C00;">🟠 Due Soon</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 21, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=1'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -184,7 +211,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-2</td>
                 <td class="px-6 py-4">Samsung 75in Commercial TV</td>
                 <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 20, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=2'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -195,7 +224,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-3</td>
                 <td class="px-6 py-4">Epson Visualizer Document Camera</td>
                 <td class="px-6 py-4">Vu Van F</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full capitalize">High</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">⚠️ Rejected</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #DC3545;">🔴 Overdue</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 21, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=3'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>
@@ -206,7 +237,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-4</td>
                 <td class="px-6 py-4">LG Commercial Display 55in</td>
                 <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full capitalize">Low</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-[11px] font-bold rounded-full">Received</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=4'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -217,7 +250,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-5</td>
                 <td class="px-6 py-4">AKG Lavalier Wireless Mic</td>
                 <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-amber-50 text-amber-700 text-[11px] font-bold rounded-full">In Progress</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #FF8C00;">🟠 Due Soon</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=5'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -228,7 +263,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-6</td>
                 <td class="px-6 py-4">Panasonic Commercial TV 65in</td>
                 <td class="px-6 py-4">Vu Van F</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 22, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=6'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -239,7 +276,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-7</td>
                 <td class="px-6 py-4">Shure Wireless Dual Microphone</td>
                 <td class="px-6 py-4">Le Van C</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold rounded-full capitalize">Low</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 15, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=7'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -250,7 +289,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-8</td>
                 <td class="px-6 py-4">Cisco Gigabit Switch R601</td>
                 <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full capitalize">High</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-50 text-brand-blue text-[11px] font-bold rounded-full">Assigned</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #DC3545;">🔴 Overdue</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 23, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=8'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -261,7 +302,9 @@
                 <td class="px-6 py-4 font-bold text-primary">WO-10</td>
                 <td class="px-6 py-4">AKG Lavalier Wireless Mic</td>
                 <td class="px-6 py-4">Pham Thi D</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold rounded-full capitalize">Medium</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full">Closed</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span></td>
                 <td class="px-6 py-4 text-body-sm">Jun 15, 2026</td>
                 <td class="px-6 py-4 text-center">
                   <button onclick="location.href='WorkOrderDetails.html?id=10'" class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors"><span class="material-symbols-outlined">visibility</span></button>
@@ -521,11 +564,32 @@
     }).join('');
   }
 
+  function getDeadlineBadgeHtml(deadlineAt, taskStatus) {
+    if (['Closed', 'Completed'].includes(taskStatus)) {
+      return `<span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span>`;
+    }
+    if (!deadlineAt) {
+      return `<span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span>`;
+    }
+    
+    const d = new Date(deadlineAt);
+    const now = new Date();
+    const twoDaysLater = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+    
+    if (d < now) {
+      return `<span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #DC3545;">🔴 Overdue</span>`;
+    } else if (d <= twoDaysLater) {
+      return `<span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #FF8C00;">🟠 Due Soon</span>`;
+    } else {
+      return `<span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #28A745;">🟢 On Time</span>`;
+    }
+  }
+
   function renderAssignedTable(orders) {
     const tbody = document.getElementById('assignedTableBody');
     if (!tbody) return;
     if (!orders || orders.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant font-medium">No assigned tasks found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-on-surface-variant font-medium">No assigned tasks found.</td></tr>`;
       return;
     }
     tbody.innerHTML = orders.map((o, index) => {
@@ -547,6 +611,9 @@
       } else if (o.task_status === 'Closed') {
         badgeClass = 'bg-surface-container text-on-surface-variant';
       }
+
+      const priorityVal = o.priority || 'Medium';
+      const prioClass = priorityVal === 'High' ? 'bg-error-container text-on-error-container' : (priorityVal === 'Medium' ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-primary-fixed text-on-primary-fixed-variant');
       
       const actionBtn = isRejected 
         ? `<button onclick="location.href='WorkOrderDetails.html?id=${o.order_id}&tab=assigned'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">refresh</span> Reassign</button>`
@@ -558,7 +625,9 @@
           <td class="px-6 py-4 font-bold text-primary">WO-${o.order_id}</td>
           <td class="px-6 py-4">${UiHelpers.escapeHtml(o.asset_name || 'General Asset')}</td>
           <td class="px-6 py-4">${UiHelpers.escapeHtml(o.technician_name || 'Unassigned')}</td>
+          <td class="px-6 py-4"><span class="px-3 py-1 ${prioClass} text-[11px] font-bold rounded-full capitalize">${priorityVal}</span></td>
           <td class="px-6 py-4"><span class="px-3 py-1 ${badgeClass} text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">${statusText}</span></td>
+          <td class="px-6 py-4">${getDeadlineBadgeHtml(o.deadline_at, o.task_status)}</td>
           <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(o.assigned_at)}</td>
           <td class="px-6 py-4 text-center">
             ${actionBtn}
@@ -587,32 +656,81 @@
     renderPendingTable(filtered);
   }
 
-  function filterAssigned() {
+  async function filterAssigned() {
     const searchVal = document.getElementById('assignedSearch').value.toLowerCase();
+    const priorityVal = document.getElementById('assignedPriorityFilter') ? document.getElementById('assignedPriorityFilter').value : 'All';
     const statusVal = document.getElementById('assignedStatusFilter').value;
+    const deadlineVal = document.getElementById('assignedDeadlineFilter') ? document.getElementById('assignedDeadlineFilter').value : 'All';
     
+    try {
+      if (window.Api) {
+        const params = {};
+        if (priorityVal !== 'All') params.priority = priorityVal;
+        if (statusVal !== 'All') params.taskStatus = statusVal;
+        if (deadlineVal !== 'All') params.deadline = deadlineVal;
+        
+        const fetchedOrders = await Api.get('/work-orders', params);
+        if (fetchedOrders && Array.isArray(fetchedOrders)) {
+          allAssignedTasks = fetchedOrders;
+        }
+      }
+    } catch (err) {
+      console.warn('API filter fetch error:', err);
+    }
+
     let filtered = allAssignedTasks;
     if (searchVal) {
       filtered = filtered.filter(o => 
         (o.technician_name || '').toLowerCase().includes(searchVal) ||
         (o.asset_name || '').toLowerCase().includes(searchVal) ||
-        (o.room_name || '').toLowerCase().includes(searchVal)
+        (o.room_name || '').toLowerCase().includes(searchVal) ||
+        (`wo-${o.order_id}`).toLowerCase().includes(searchVal)
       );
+    }
+    if (priorityVal !== 'All') {
+      filtered = filtered.filter(o => o.priority === priorityVal);
     }
     if (statusVal !== 'All') {
       filtered = filtered.filter(o => o.task_status === statusVal);
     }
+    if (deadlineVal !== 'All') {
+      const now = new Date();
+      const twoDaysLater = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(o => {
+        const isClosedOrCompleted = ['Closed', 'Completed'].includes(o.task_status);
+        if (deadlineVal === 'overdue') {
+          if (isClosedOrCompleted || !o.deadline_at) return false;
+          return new Date(o.deadline_at) < now;
+        } else if (deadlineVal === 'due_soon') {
+          if (isClosedOrCompleted || !o.deadline_at) return false;
+          const d = new Date(o.deadline_at);
+          return d >= now && d <= twoDaysLater;
+        } else if (deadlineVal === 'on_time') {
+          if (isClosedOrCompleted || !o.deadline_at) return true;
+          return new Date(o.deadline_at) > now;
+        }
+        return true;
+      });
+    }
+
     renderAssignedTable(filtered);
     
     const start = filtered.length > 0 ? 1 : 0;
-    document.getElementById('assignedPaginationInfo').textContent = `Showing ${start}-${filtered.length} of ${filtered.length} tasks`;
+    const pagInfo = document.getElementById('assignedPaginationInfo');
+    if (pagInfo) pagInfo.textContent = `Showing ${start}-${filtered.length} of ${filtered.length} tasks`;
   }
 
   // Bind filter events
   document.getElementById('pendingSearch').addEventListener('input', filterPending);
   document.getElementById('pendingPriorityFilter').addEventListener('change', filterPending);
   document.getElementById('assignedSearch').addEventListener('input', filterAssigned);
+  if (document.getElementById('assignedPriorityFilter')) {
+    document.getElementById('assignedPriorityFilter').addEventListener('change', filterAssigned);
+  }
   document.getElementById('assignedStatusFilter').addEventListener('change', filterAssigned);
+  if (document.getElementById('assignedDeadlineFilter')) {
+    document.getElementById('assignedDeadlineFilter').addEventListener('change', filterAssigned);
+  }
 
   // --- APPROVE MODAL ---
   async function openApproveModal(reqId, reporter, equipment, room, priority, description) {

@@ -78,6 +78,10 @@
               <p id="detailAssignedDate" class="text-body-md font-medium text-on-surface">20 Oct 2024</p>
             </div>
             <div>
+              <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Deadline Date</p>
+              <p id="detailDeadlineDate" class="text-body-md font-medium text-[#DC3545]">--</p>
+            </div>
+            <div>
               <p class="text-label-md text-outline mb-1 uppercase tracking-wider">Reported By</p>
               <div class="flex items-center gap-2">
                 <div id="detailReporterAvatar" class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">NA</div>
@@ -671,6 +675,10 @@
     const statusContainer = document.getElementById('detailStatusBadgeContainer');
     if (statusContainer) statusContainer.innerHTML = getStatusBadgeHtml(displayStatus);
     document.getElementById('detailAssignedDate').textContent = formatAssignedDate(order.assigned_at);
+    const deadlineElem = document.getElementById('detailDeadlineDate');
+    if (deadlineElem) {
+      deadlineElem.textContent = order.deadline_at ? formatAssignedDate(order.deadline_at) : 'N/A';
+    }
     document.getElementById('detailReporterName').textContent = order.reporter_name || 'Nguyen Van A';
     document.getElementById('detailReportedDate').textContent = formatAssignedDate(order.created_at || order.assigned_at);
 
