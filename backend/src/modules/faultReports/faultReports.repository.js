@@ -2,6 +2,7 @@ const { pool } = require('../../config/db');
 
 const BASE_SELECT = `
   SELECT fr.*,
+         CASE WHEN wo.task_status = 'Closed' THEN 'Closed' ELSE fr.status END AS display_status,
          u.full_name AS reporter_name,
          c.room_name,
          a.asset_name, a.asset_type,

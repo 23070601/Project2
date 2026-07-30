@@ -34,7 +34,9 @@ async function kpis(req, res) {
     SELECT COUNT(*) AS replacementAlerts FROM (
       SELECT asset_id 
       FROM FaultReports 
-      WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH) AND asset_id IS NOT NULL
+      WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+        AND asset_id IS NOT NULL
+        AND status NOT IN ('Rejected', 'Cancelled')
       GROUP BY asset_id 
       HAVING COUNT(report_id) >= 3
     ) t
@@ -46,8 +48,7 @@ async function kpis(req, res) {
 
   const [[{ overdueTasks }]] = await pool.query(`
     SELECT COUNT(*) AS overdueTasks FROM WorkOrders 
-    WHERE task_status NOT IN ('Completed', 'Closed') 
-      AND assigned_at < DATE_SUB(NOW(), INTERVAL 3 DAY)
+    WHERE deadline_at < NOW() AND task_status NOT IN ('Closed', 'Completed')
   `);
 
   const [[{ mttr }]] = await pool.query(`
@@ -162,4 +163,46 @@ async function assetHistory(req, res) {
   ok(res, rows);
 }
 
-module.exports = { kpis, criticalAssets, assetHistory, mttr, downtime, technicianWorkload, reportTrend };
+async function monthlyReports(req, res) {
+  const currentYear = new Date().getFullYear();
+  const [rows] = await pool.query(
+    `SELECT 
+        DATE_FORMAT(reported_at, '%Y-%m') AS month,
+        MONTH(reported_at) AS month_num,
+        COUNT(*) AS count
+     FROM FaultReports
+     WHERE YEAR(reported_at) = ?
+     GROUP BY DATE_FORMAT(reported_at, '%Y-%m'), MONTH(reported_at)
+     ORDER BY month_num ASC`,
+    [currentYear]
+  );
+
+  const monthsMap = {};
+  rows.forEach((r) => {
+    monthsMap[r.month_num] = r.count;
+  });
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const fullYearData = monthNames.map((name, index) => {
+    const monthNum = index + 1;
+    const monthStr = `${currentYear}-${String(monthNum).padStart(2, '0')}`;
+    return {
+      month: monthStr,
+      monthName: name,
+      monthNum,
+      count: monthsMap[monthNum] || 0,
+    };
+  });
+
+  ok(res, fullYearData);
+}
+
+async function overdueTasks(req, res) {
+  const [[{ count }]] = await pool.query(`
+    SELECT COUNT(*) AS count FROM WorkOrders 
+    WHERE deadline_at < NOW() AND task_status NOT IN ('Closed', 'Completed')
+  `);
+  ok(res, { count, overdueTasks: count });
+}
+
+module.exports = { kpis, criticalAssets, assetHistory, mttr, downtime, technicianWorkload, reportTrend, monthlyReports, overdueTasks };

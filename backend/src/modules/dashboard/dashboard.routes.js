@@ -17,5 +17,7 @@ router.get('/mttr', asyncHandler(controller.mttr));
 router.get('/downtime', asyncHandler(controller.downtime));
 router.get('/technician-workload', asyncHandler(controller.technicianWorkload));
 router.get('/report-trend', asyncHandler(controller.reportTrend));
+router.get('/monthly-reports', asyncHandler(controller.monthlyReports));
+router.get('/overdue-tasks', asyncHandler(controller.overdueTasks));
 
 module.exports = router;

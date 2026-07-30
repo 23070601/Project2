@@ -17,7 +17,7 @@ router.get('/:id', asyncHandler(controller.getById));
 
 // ✅ POST route - QUAN TRỌNG: PHẢI CÓ DÒNG NÀY
 router.post('/', 
-  requireRole(ROLES.USER), 
+  requireRole(ROLES.USER, ROLES.TECHNICIAN, ROLES.MANAGER), 
   upload.single('evidence'),
   asyncHandler(controller.create)
 );

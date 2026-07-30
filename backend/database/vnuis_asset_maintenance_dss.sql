@@ -5,7 +5,7 @@
 -- =====================================================================
 
 DROP DATABASE IF EXISTS vnuis_asset_maintenance_dss;
-CREATE DATABASE vnuis_asset_maintenance_dss
+CREATE DATABASE IF NOT EXISTS vnuis_asset_maintenance_dss
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 USE vnuis_asset_maintenance_dss;
@@ -91,7 +91,7 @@ CREATE TABLE WorkOrders (
     manager_id           INT             NOT NULL,
     technician_id        INT             NOT NULL,
     assigned_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deadline_at          DATETIME        NULL,
+    deadline_at          TIMESTAMP       NULL,
     technician_response  VARCHAR(20)     NOT NULL DEFAULT 'Pending',
     rejection_reason     VARCHAR(255)    NULL,
     task_status          VARCHAR(30)     NOT NULL DEFAULT 'Assigned',
@@ -210,11 +210,6 @@ INSERT INTO Classrooms (room_id, room_name, qr_code) VALUES
 (3,  'R103', 'QR-R103'),
 (4,  'R106', 'QR-R106'),
 (5,  'R107', 'QR-R107'),
-(6,  'R301', 'QR-R301'),
-(7,  'R302', 'QR-R302'),
-(8,  'R303', 'QR-R303'),
-(9,  'R304', 'QR-R304'),
-(10, 'R305', 'QR-R305'),
 (11, 'R401', 'QR-R401'),
 (12, 'R402', 'QR-R402'),
 (13, 'R403', 'QR-R403'),
@@ -258,29 +253,6 @@ INSERT INTO Assets (asset_id, asset_name, asset_type, room_id, status, failure_c
 -- Room 5 (R107)
 (14, 'LG Commercial TV 65in',            'TV',               5,  'Operational',                  0, NULL),
 (15, 'AKG Wireless Microphone',          'Microphone',       5,  'Operational',                  0, NULL),
-
--- Room 6 (R301)
-(16, 'Mitsubishi Heavy AC Unit',          'Aircon',           6,  'Recommended for Replacement', 3, NOW() - INTERVAL 2 DAY),
-(17, 'Sony Laser Projector 4K',           'Projector',        6,  'Operational',                  0, NULL),
-(18, 'Cisco Gigabit Switch 24-Port',      'NetworkSwitch',    6,  'Operational',                  0, NULL),
-
--- Room 7 (R302)
-(19, 'Sony Laser Projector VPL-PHZ60',   'Projector',        7,  'Operational',                  0, NULL),
-(20, 'LG Commercial Display 55in TV',     'TV',               7,  'Under Repair',                 1, NOW() - INTERVAL 2 DAY),
-(21, 'Ultra HD 4K HDMI Cable 15m',        'Cable',            7,  'Retired',                      4, NOW() - INTERVAL 30 DAY),
-(22, 'JBL Speaker System R302',          'Speaker',          7,  'Operational',                  0, NULL),
-
--- Room 8 (R303)
-(23, 'Panasonic Laser Projector',         'Projector',        8,  'Operational',                  0, NULL),
-(24, 'Daikin AC Unit R303',               'Aircon',           8,  'Operational',                  0, NULL),
-
--- Room 9 (R304)
-(25, 'Samsung 65in TV R304',             'TV',               9,  'Operational',                  0, NULL),
-(26, 'Shure Mic System R304',            'Microphone',       9,  'Operational',                  0, NULL),
-
--- Room 10 (R305)
-(27, 'Epson Document Camera R305',        'DocumentCamera',   10, 'Operational',                  0, NULL),
-(28, 'JBL Ceiling Speaker R305',          'Speaker',          10, 'Operational',                  0, NULL),
 
 -- Room 11 (R401)
 (29, 'Daikin Inverter AC 24000 BTU',      'Aircon',           11, 'Operational',                  1, NOW() - INTERVAL 10 DAY),
@@ -364,18 +336,18 @@ INSERT INTO FaultReports (report_id, reporter_id, asset_id, room_id, description
 (12, 7, 48, 20, 'Microphone battery compartment cover broken and wire frayed.', 'Low',    'Completed',        NOW() - INTERVAL 7 DAY),
 (13, 8, 1,  1,  'Network switch port #12 dead, no internet connection in Room R101.', 'High',   'Rejected',         NOW() - INTERVAL 5 DAY),
 (14, 1, 12, 4,  'Ceiling speaker buzzing sound when audio volume exceeds 50%.', 'Low',    'Cancelled',        NOW() - INTERVAL 8 DAY),
-(15, 7, 52, 21, 'Gigabit switch power LED off, room R601 network completely down.', 'High',   'Closed',           NOW() - INTERVAL 1 HOUR);
+(15, 7, 52, 21, 'Gigabit switch power LED off, room R601 network completely down.', 'High',   'Completed',        NOW() - INTERVAL 1 HOUR);
 
 -- 5. WORK ORDERS (8 UNIQUE REPORT_ID VALUES: 1, 3, 6, 8, 9, 11, 12, 15)
-INSERT INTO WorkOrders (order_id, report_id, manager_id, technician_id, assigned_at, technician_response, rejection_reason, task_status, fix_description, parts_used, resolved_at, closed_at) VALUES
-(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, 'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
-(2,  3,  5, 4, NOW() - INTERVAL 5 DAY,  'Accepted', NULL,            'Closed',      'Replaced display panel driver and updated firmware.', 'Display Controller Board', NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
-(3,  6,  5, 6, NOW() - INTERVAL 10 HOUR, 'Rejected', 'overloaded',   'Assigned',    NULL, NULL, NULL, NULL),
-(4,  8,  5, 3, NOW() - INTERVAL 16 HOUR, 'Accepted', NULL,            'Received',    NULL, NULL, NULL, NULL),
-(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
-(6,  11, 5, 6, NOW() - INTERVAL 6 DAY,  'Accepted', NULL,            'Closed',      'Fixed HDMI port connection and replaced TV remote battery.', 'HDMI Female Socket', NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
-(7,  12, 5, 3, NOW() - INTERVAL 7 DAY,  'Accepted', NULL,            'Closed',      'Replaced microphone shell casing and soldered broken audio lead.', 'Mic Housing Clip', NOW() - INTERVAL 6 DAY, NOW() - INTERVAL 6 DAY),
-(8,  15, 5, 4, NOW() - INTERVAL 1 HOUR,  'Accepted', NULL,            'Closed',      'Đã kiểm tra và thay thế bộ nguồn switch mạng.', 'Bộ nguồn Gigabit Switch 12V', NOW() - INTERVAL 30 MINUTE, NOW() - INTERVAL 5 MINUTE);
+INSERT INTO WorkOrders (order_id, report_id, manager_id, technician_id, assigned_at, deadline_at, technician_response, rejection_reason, task_status, fix_description, parts_used, resolved_at, closed_at) VALUES
+(1,  1,  5, 3, NOW() - INTERVAL 40 HOUR, NOW() - INTERVAL 16 HOUR, 'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
+(2,  3,  5, 4, NOW() - INTERVAL 5 DAY,  NOW() - INTERVAL 4 DAY,  'Accepted', NULL,            'Closed',      'Replaced display panel driver and updated firmware.', 'Display Controller Board', NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
+(3,  6,  5, 6, NOW() - INTERVAL 10 HOUR, NOW() - INTERVAL 2 HOUR,  'Rejected', 'overloaded',   'Assigned',    NULL, NULL, NULL, NULL),
+(4,  8,  5, 3, NOW() - INTERVAL 16 HOUR, NOW() - INTERVAL 4 HOUR,  'Accepted', NULL,            'Received',    NULL, NULL, NULL, NULL),
+(5,  9,  5, 4, NOW() - INTERVAL 5 HOUR,  NOW() - INTERVAL 1 HOUR,  'Accepted', NULL,            'In Progress', NULL, NULL, NULL, NULL),
+(6,  11, 5, 6, NOW() - INTERVAL 6 DAY,  NOW() - INTERVAL 5 DAY,  'Accepted', NULL,            'Closed',      'Fixed HDMI port connection and replaced TV remote battery.', 'HDMI Female Socket', NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
+(7,  12, 5, 3, NOW() - INTERVAL 7 DAY,  NOW() - INTERVAL 6 DAY,  'Accepted', NULL,            'Closed',      'Replaced microphone shell casing and soldered broken audio lead.', 'Mic Housing Clip', NOW() - INTERVAL 6 DAY, NOW() - INTERVAL 6 DAY),
+(8,  15, 5, 4, NOW() - INTERVAL 1 HOUR,  NOW() + INTERVAL 2 HOUR,  'Accepted', NULL,            'Closed',      'Đã kiểm tra và thay thế bộ nguồn switch mạng.', 'Bộ nguồn Gigabit Switch 12V', NOW() - INTERVAL 30 MINUTE, NOW() - INTERVAL 5 MINUTE);
 
 -- 6. USER CONFIRMATIONS
 INSERT INTO UserConfirmations (confirmation_id, order_id, reporter_id, is_confirmed, rating, feedback, confirmed_at) VALUES
@@ -407,7 +379,7 @@ INSERT INTO WorkOrderStatusHistory (history_id, order_id, old_status, new_status
 -- 8. AUDIT LOG
 INSERT INTO AuditLog (log_id, user_id, action_type, entity_table, entity_id, room_id, asset_id, description, action_at) VALUES
 (1,  5, 'LOGIN',  'Users', 5, NULL, NULL, 'User manager.e@vnuis.edu.vn logged into the system', NOW() - INTERVAL 2 DAY),
-(2,  1, 'CREATE', 'FaultReports', 1, 7, 19, 'Fault report #1 created for Sony Projector in Room R302', NOW() - INTERVAL 2 DAY),
+(2,  1, 'CREATE', 'FaultReports', 1, 1, 1, 'Fault report #1 created for Sony Projector in Room R101', NOW() - INTERVAL 2 DAY),
 (3,  5, 'CREATE', 'WorkOrders', 1, 7, 19, 'Work order #1 generated and assigned to Technician Le Van C', NOW() - INTERVAL 40 HOUR),
 (4,  3, 'UPDATE', 'WorkOrders', 1, 7, 19, 'Technician Le Van C updated task status to In Progress', NOW() - INTERVAL 35 HOUR),
 (5,  5, 'UPDATE', 'Assets', 21, 7, 21, 'Asset #21 status updated to Retired due to repeated failures', NOW() - INTERVAL 30 DAY),
@@ -424,10 +396,10 @@ INSERT INTO AuditLog (log_id, user_id, action_type, entity_table, entity_id, roo
 INSERT INTO Notifications (notification_id, user_id, report_id, order_id, message, is_read, created_at) VALUES
 (1,  5, NULL, NULL, 'User manager.e@vnuis.edu.vn logged into the system successfully.', TRUE, NOW() - INTERVAL 2 DAY),
 (2,  5, 2, NULL, 'New fault report #2 submitted by Tran Thi B requires your approval.', FALSE, NOW() - INTERVAL 1 DAY),
-(3,  5, 7, NULL, 'New fault report #7 submitted by Nguyen Van A for Room R301.', FALSE, NOW() - INTERVAL 3 HOUR),
+(3,  5, 7, NULL, 'New fault report #7 submitted by Nguyen Van A for Room R201.', FALSE, NOW() - INTERVAL 3 HOUR),
 (4,  5, 10, NULL, 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', FALSE, NOW() - INTERVAL 2 HOUR),
 (5,  5, 15, NULL, 'Critical report #15 submitted by Doan Van G: Network switch down in Room R601.', FALSE, NOW() - INTERVAL 1 HOUR),
-(6,  3, 1, 1, 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', TRUE, NOW() - INTERVAL 40 HOUR),
+(6,  3, 1, 1, 'You have been assigned to Work Order #1 (Sony Projector in Room R101).', TRUE, NOW() - INTERVAL 40 HOUR),
 (7,  1, 1, 1, 'Your fault report #1 has been approved and assigned to Technician Le Van C.', TRUE, NOW() - INTERVAL 40 HOUR),
 (8,  3, 1, 1, 'Status updated: Work Order #1 is now In Progress.', TRUE, NOW() - INTERVAL 35 HOUR),
 (9,  4, 9, 5, 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', FALSE, NOW() - INTERVAL 5 HOUR),
@@ -505,6 +477,19 @@ LEFT JOIN WorkOrders wo ON wo.report_id = fr.report_id;
 
 DELIMITER $$
 
+DROP TRIGGER IF EXISTS trg_workorders_before_insert$$
+
+CREATE TRIGGER trg_workorders_before_insert
+BEFORE INSERT ON WorkOrders
+FOR EACH ROW
+BEGIN
+    IF NEW.deadline_at IS NULL THEN
+        SET NEW.deadline_at = DATE_ADD(IFNULL(NEW.assigned_at, CURRENT_TIMESTAMP), INTERVAL 48 HOUR);
+    END IF;
+END$$
+
+DROP TRIGGER IF EXISTS trg_workorders_after_insert$$
+
 CREATE TRIGGER trg_workorders_after_insert
 AFTER INSERT ON WorkOrders
 FOR EACH ROW
@@ -518,13 +503,15 @@ BEGIN
 
     INSERT INTO Notifications (user_id, report_id, order_id, message)
     SELECT reporter_id, NEW.report_id, NEW.order_id,
-           CONCAT('Your report #', NEW.report_id, ' has been assigned to a technician.')
+           CONCAT('Your report #', NEW.report_id, ' has been assigned. Deadline: ', NEW.deadline_at)
     FROM FaultReports WHERE report_id = NEW.report_id;
 
     INSERT INTO Notifications (user_id, report_id, order_id, message)
     VALUES (NEW.technician_id, NEW.report_id, NEW.order_id,
-            CONCAT('New task assigned: Work Order #', NEW.order_id));
+            CONCAT('New task assigned: Work Order #', NEW.order_id, '. Deadline: ', NEW.deadline_at));
 END$$
+
+DROP TRIGGER IF EXISTS trg_workorders_after_update$$
 
 CREATE TRIGGER trg_workorders_after_update
 AFTER UPDATE ON WorkOrders
@@ -576,6 +563,8 @@ BEGIN
     END IF;
 END$$
 
+DROP TRIGGER IF EXISTS trg_faultreports_after_update_dss3$$
+
 CREATE TRIGGER trg_faultreports_after_update_dss3
 AFTER UPDATE ON FaultReports
 FOR EACH ROW
@@ -609,6 +598,8 @@ BEGIN
         END IF;
     END IF;
 END$$
+
+DROP TRIGGER IF EXISTS trg_faultreports_after_delete_dss3$$
 
 CREATE TRIGGER trg_faultreports_after_delete_dss3
 AFTER DELETE ON FaultReports

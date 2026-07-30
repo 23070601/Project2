@@ -236,24 +236,17 @@ const Notifications = (() => {
 
     if (!items || items.length === 0) {
       const user = window.Auth?.getCurrentUser?.();
-      let role = (user?.role || '').toLowerCase();
-      
-      if (!role && window.location?.pathname) {
-        if (window.location.pathname.includes('/technicians/')) role = 'technician';
-        else if (window.location.pathname.includes('/managers/')) role = 'manager';
-        else role = 'user';
-      }
-
+      const role = (user?.role || '').toLowerCase();
       if (role === 'technician') {
         items = [
-          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R101).', is_read: false, created_at: new Date().toISOString() },
           { notification_id: 102, order_id: 5, report_id: 9, message: 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
           { notification_id: 103, order_id: 2, report_id: 3, message: 'Work Order #2 for Samsung Commercial TV in Room R101 completed successfully.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
         ];
       } else if (role === 'manager') {
         items = [
           { notification_id: 201, report_id: 2, message: 'New fault report #2 submitted by Tran Thi B requires your approval.', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R301.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
+          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R201.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
           { notification_id: 203, report_id: 10, message: 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
         ];
       } else {
@@ -270,6 +263,9 @@ const Notifications = (() => {
   }
 
   async function loadFullList(containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return [];
+
     let items = [];
     try {
       if (window.Api) {
@@ -281,20 +277,12 @@ const Notifications = (() => {
       items = [];
     }
 
-    // Demo fallback when API is unavailable or returns no data
     if (!items || items.length === 0) {
       const user = window.Auth?.getCurrentUser?.();
-      let role = (user?.role || '').toLowerCase();
-      
-      if (!role && window.location?.pathname) {
-        if (window.location.pathname.includes('/technicians/')) role = 'technician';
-        else if (window.location.pathname.includes('/managers/')) role = 'manager';
-        else role = 'user';
-      }
-
+      const role = (user?.role || '').toLowerCase();
       if (role === 'technician') {
         items = [
-          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R302).', is_read: false, created_at: new Date().toISOString() },
+          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R101).', is_read: false, created_at: new Date().toISOString() },
           { notification_id: 102, order_id: 5, report_id: 9, message: 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
           { notification_id: 103, order_id: 8, report_id: 15, message: 'You have been assigned to Work Order #8 (Gigabit Switch in Room R601).', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
           { notification_id: 104, order_id: 2, report_id: 3, message: 'Work Order #2 for Samsung Commercial TV in Room R101 completed successfully.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
@@ -302,7 +290,7 @@ const Notifications = (() => {
       } else if (role === 'manager') {
         items = [
           { notification_id: 201, report_id: 2, message: 'New fault report #2 submitted by Tran Thi B requires your approval.', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R301.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
+          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R201.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
           { notification_id: 203, report_id: 10, message: 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', is_read: false, created_at: new Date(Date.now() - 10800000).toISOString() },
           { notification_id: 204, report_id: 15, message: 'Critical report #15 submitted by Doan Van G: Network switch down in Room R601.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
         ];
@@ -316,6 +304,7 @@ const Notifications = (() => {
     }
 
     const normalized = sortNotifications(items).map(normalizeNotification);
+    renderList(items, container, false);
     return normalized;
   }
 
@@ -328,13 +317,7 @@ const Notifications = (() => {
       if (dropdown && !dropdown.classList.contains('hidden')) {
         loadDropdown();
       }
-      // Reload full list if we are on the Notifications page
-      if (window.location.pathname.includes('Notifications.html')) {
-        if (typeof window.loadPageNotifications === 'function') {
-          window.loadPageNotifications();
-        }
-      }
-    }, 10000); // reduced to 10 seconds for more real-time feel
+    }, 30000);
   }
 
   return {

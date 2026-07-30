@@ -72,6 +72,17 @@
         localStorage.setItem('vnu_user_reports', JSON.stringify(userReports));
       } catch (e) {}
 
+      // Add to deleted reports list
+      try {
+        let deletedReports = JSON.parse(localStorage.getItem('vnu_deleted_reports') || '[]');
+        const formattedId = window.UiHelpers ? UiHelpers.formatReportId(id) : String(id);
+        const rawId = String(id).replace(/\D/g, '');
+        if (!deletedReports.includes(formattedId)) deletedReports.push(formattedId);
+        if (rawId && !deletedReports.includes(rawId)) deletedReports.push(rawId);
+        if (!deletedReports.includes(String(id))) deletedReports.push(String(id));
+        localStorage.setItem('vnu_deleted_reports', JSON.stringify(deletedReports));
+      } catch (e) {}
+
       sessionStorage.setItem('vnu_toast_msg', 'Report #' + id + ' deleted successfully.');
       sessionStorage.setItem('vnu_toast_type', 'success');
       window.location.href = 'ListReports.html';
@@ -118,11 +129,12 @@
     function statusBadge(status) {
       const colors = {
         'Pending': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+        'Pending Approval': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
         'Processing': 'bg-blue-100 text-blue-800 border border-blue-200',
         'In Progress': 'bg-blue-100 text-blue-800 border border-blue-200',
         'Completed': 'bg-green-100 text-green-800 border border-green-200',
         'Resolved': 'bg-green-100 text-green-800 border border-green-200',
-        'Closed': 'bg-gray-200 text-gray-800 border border-gray-300',
+        'Closed': 'bg-gray-600 text-white border border-gray-700 font-bold',
         'Rejected': 'bg-red-100 text-red-800 border border-red-200',
         'Cancelled': 'bg-gray-100 text-gray-800 border border-gray-200',
         'Assigned': 'bg-blue-100 text-blue-800 border border-blue-200'
@@ -231,14 +243,17 @@
       const equipment = cleanLabel(rawEquipment);
       const room = cleanLabel(rawRoom);
       const history = report.statusHistory || [];
-      const assetType = getFieldValue(report, ['asset_type', 'category', 'type']);
-      const roomId = getFieldValue(report, ['room_id', 'classroom_id']);
-      const reporter = getFieldValue(report, ['reporter_name', 'reported_by', 'user_name', 'user_email']);
-      const isPending = ['Pending', 'Pending Approval'].includes(report.status);
+      const currentStatus = report.display_status || report.status || '';
+      const isPending = ['Pending', 'Pending Approval'].includes(report.status) && ['Pending', 'Pending Approval'].includes(currentStatus);
       
-      // If workOrder is Completed, report status MUST also be Completed (unless already Closed)
-      if (workOrder && ['Completed', 'Resolved'].includes(workOrder.task_status || workOrder.status) && report.status !== 'Closed') {
-        report.status = 'Completed';
+      const isUserConfirmed = confirmation && (confirmation.confirmed_at !== null || confirmation.is_confirmed === true || confirmation.is_confirmed === false || confirmation.is_confirmed === 1 || confirmation.is_confirmed === 0);
+      
+      // If workOrder is Completed or Closed in DB but user HAS NOT confirmed yet, report & workOrder status MUST be Completed
+      if (workOrder && ['Completed', 'Resolved', 'Closed'].includes(workOrder.task_status || workOrder.status)) {
+        if (!isUserConfirmed) {
+          report.status = 'Completed';
+          workOrder.task_status = 'Completed';
+        }
       }
 
       const isCompleted = ['Completed', 'Resolved'].includes(report.status);
@@ -265,9 +280,9 @@
       html += `
         <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
           <div class="flex items-center gap-4 flex-wrap">
-            <h2 class="text-headline-md font-headline-md font-bold text-on-surface">Report Details - ${escapeHtml(report.report_id)}</h2>
+            <h2 class="text-headline-md font-headline-md font-bold text-on-surface">Report Details - ${escapeHtml(UiHelpers.formatReportId(report.report_id))}</h2>
             <div class="flex gap-2 flex-wrap">
-              ${statusBadge(report.status)}
+              ${statusBadge(report.display_status || report.status)}
               ${priorityBadge(report.priority)}
             </div>
           </div>
@@ -345,17 +360,17 @@
           </div>
 
           <div class="space-y-6">
-            ${workOrder ? renderWorkOrder(workOrder, report.status) : ''}
+            ${workOrder ? renderWorkOrder(workOrder, report.status, isUserConfirmed) : ''}
             ${workOrder && workOrder.assigned_at ? renderTimeline(workOrder) : ''}
-            ${renderHistory(report, workOrder, confirmation)}
+            ${renderHistory(report, workOrder, isUserConfirmed ? confirmation : null)}
           </div>
         </div>
       `;
 
       // ===== CONFIRMATION SECTION FOR COMPLETED REPORTS =====
-      if (confirmation) {
+      if (isUserConfirmed) {
         html += renderConfirmationDone(confirmation);
-      } else if (report.status === 'Completed') {
+      } else if (['Completed', 'Resolved'].includes(report.status) || (workOrder && ['Completed', 'Resolved'].includes(workOrder.task_status))) {
         html += renderConfirmationForm(workOrder ? workOrder.order_id : (report.order_id || 'WO-2024-015'));
       }
 
@@ -363,8 +378,8 @@
     }
 
     // ===== WORK ORDER =====
-    function renderWorkOrder(workOrder, reportStatus) {
-      const status = (reportStatus === 'Closed') ? 'Closed' : (workOrder.task_status || workOrder.status);
+    function renderWorkOrder(workOrder, reportStatus, isUserConfirmed) {
+      const status = (reportStatus === 'Closed' && isUserConfirmed) ? 'Closed' : (workOrder.task_status || workOrder.status || 'Completed');
       
       return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
@@ -439,6 +454,30 @@
         const resolvedDate = workOrder && workOrder.resolved_at ? formatDateTime(workOrder.resolved_at) : repDate;
         const fixNote = (workOrder && workOrder.fix_description) ? workOrder.fix_description : 'Đã hoàn tất kiểm tra và xử lý kỹ thuật.';
 
+        if (s === 'Rejected') {
+          const rejectedDate = formatDateTime(report.rejected_at || report.updated_at || report.reported_at);
+          const reason = report.rejection_reason || report.rejectionReason || report.reject_reason || report.note || 'Báo cáo bị quản lý từ chối duyệt (Thông tin sự cố không phù hợp hoặc bị trùng lặp).';
+          events.push({
+            date: rejectedDate,
+            status: 'Rejected',
+            textColor: 'text-red-600',
+            dotColor: 'bg-red-500',
+            note: reason
+          });
+        }
+
+        if (s === 'Cancelled') {
+          const cancelledDate = formatDateTime(report.cancelled_at || report.updated_at || report.reported_at);
+          const reason = report.cancel_reason || report.cancelReason || report.note || 'Báo cáo sự cố đã được người dùng chủ động hủy.';
+          events.push({
+            date: cancelledDate,
+            status: 'Cancelled',
+            textColor: 'text-slate-600',
+            dotColor: 'bg-slate-400',
+            note: reason
+          });
+        }
+
         if (s === 'Closed' || confirmation) {
           events.push({
             date: confirmation && confirmation.created_at ? formatDateTime(confirmation.created_at) : repDate,
@@ -495,7 +534,9 @@
         'Processing': 'text-blue-600',
         'Assigned': 'text-gray-700',
         'Pending Approval': 'text-amber-600',
-        'Pending': 'text-amber-600'
+        'Pending': 'text-amber-600',
+        'Rejected': 'text-red-600',
+        'Cancelled': 'text-slate-500'
       };
 
       const dotBgColors = {
@@ -506,7 +547,9 @@
         'Processing': 'bg-blue-500',
         'Assigned': 'bg-slate-300',
         'Pending Approval': 'bg-amber-400',
-        'Pending': 'bg-amber-400'
+        'Pending': 'bg-amber-400',
+        'Rejected': 'bg-red-500',
+        'Cancelled': 'bg-slate-400'
       };
 
       return `
@@ -543,16 +586,16 @@
           </p>
           <form id="confirmForm" class="space-y-4">
             <div class="flex gap-3 flex-wrap">
-              <button type="button" onclick="setConfirmation(true)" class="px-6 py-2 bg-brand-blue text-white rounded-lg font-bold text-label-lg hover:bg-primary-container transition-all ring-2 ring-offset-2 ring-brand-blue">
+              <button type="button" onclick="setConfirmation(true)" class="px-6 py-2 bg-[#28A745] text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all cursor-pointer ring-2 ring-offset-2 ring-[#28A745]">
                 ✅ Yes, it's fixed
               </button>
-              <button type="button" onclick="setConfirmation(false)" class="px-6 py-2 bg-error text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all">
+              <button type="button" onclick="setConfirmation(false)" class="px-6 py-2 bg-[#DC3545] text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all cursor-pointer">
                 ❌ No, it's not fixed
               </button>
             </div>
             <input type="hidden" id="isConfirmed" value="true">
             
-            <div class="pt-4 border-t border-emerald-200/50 space-y-4">
+            <div id="ratingSection" class="pt-4 border-t border-emerald-200/50 space-y-4">
               <div>
                 <p class="text-label-md font-bold text-emerald-900 mb-2">Your Rating:</p>
                 <div class="flex gap-1" id="ratingStars">
@@ -571,9 +614,16 @@
                 <textarea id="feedbackInput" class="w-full bg-white border border-emerald-200 rounded-lg p-3 text-body-sm focus:ring-1 focus:ring-brand-blue outline-none resize-none" rows="3" placeholder="Share your feedback..."></textarea>
               </div>
             </div>
+
+            <div id="reopenSection" class="pt-4 border-t border-red-200/50 space-y-4 hidden">
+              <div>
+                <p class="text-label-md font-bold text-red-900 mb-2">Reason (Issue persists): <span class="text-red-600">*</span></p>
+                <textarea id="reopenReasonInput" class="w-full bg-white border border-red-300 rounded-lg p-3 text-body-sm focus:ring-1 focus:ring-red-500 outline-none resize-none" rows="3" placeholder="Mô tả lỗi vẫn còn..."></textarea>
+              </div>
+            </div>
             
             <p id="confirmError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
-            <button type="submit" class="px-8 py-3 bg-brand-blue text-white rounded-lg font-bold text-body-md shadow-lg shadow-brand-blue/20 hover:bg-primary-container transition-all">
+            <button id="confirmSubmitBtn" type="submit" class="px-8 py-3 bg-[#005BAC] text-white rounded-lg font-bold text-body-md shadow-lg shadow-brand-blue/20 hover:opacity-90 transition-all cursor-pointer">
               Confirm & Close
             </button>
           </form>
@@ -596,16 +646,88 @@
     }
 
     // ===== GLOBAL FUNCTIONS =====
+    window.reportIssuePersists = async function(orderId, reason) {
+      if (!reason || !reason.trim()) {
+        alert('Please enter the reason why the issue persists.');
+        return;
+      }
+
+      const numOrderId = parseInt(String(orderId).replace(/\D/g, ''), 10) || orderId;
+
+      let apiSuccess = false;
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        try {
+          await Api.post(`/workOrders/${numOrderId}/reopen`, { reason: reason.trim() });
+          apiSuccess = true;
+        } catch (e1) {
+          try {
+            await Api.post(`/work-orders/${numOrderId}/reopen`, { reason: reason.trim() });
+            apiSuccess = true;
+          } catch (e2) {
+            console.error('API reopen call failed:', e2);
+          }
+        }
+      }
+
+      // Update local storage fallback for user reports
+      try {
+        const reportId = new URLSearchParams(location.search).get('id');
+        if (reportId) {
+          let localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+          let target = localReports.find(r => String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase());
+          if (target) {
+            target.status = 'Processing';
+            localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
+          }
+          localStorage.removeItem('vnu_confirmation_' + reportId);
+        }
+      } catch (e) {}
+
+      const msg = "✅ Your report has been sent back to the technician.";
+      if (window.showToast) {
+        showToast(msg, 'success');
+      } else if (window.UiHelpers && window.UiHelpers.showToast) {
+        window.UiHelpers.showToast(msg, 'success');
+      } else {
+        sessionStorage.setItem('vnu_toast_msg', msg);
+        sessionStorage.setItem('vnu_toast_type', 'success');
+      }
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
+    };
+
     window.setConfirmation = function(value) {
       const input = document.getElementById('isConfirmed');
       if (input) input.value = value;
       const buttons = document.querySelectorAll('#confirmForm .flex.gap-3 button');
       buttons.forEach(btn => {
-        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-brand-blue');
+        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#28A745]', 'ring-[#DC3545]');
       });
       const selectedBtn = value ? buttons[0] : buttons[1];
       if (selectedBtn) {
-        selectedBtn.classList.add('ring-2', 'ring-offset-2', 'ring-brand-blue');
+        selectedBtn.classList.add('ring-2', 'ring-offset-2', value ? 'ring-[#28A745]' : 'ring-[#DC3545]');
+      }
+
+      const ratingSection = document.getElementById('ratingSection');
+      const reopenSection = document.getElementById('reopenSection');
+      const submitBtn = document.getElementById('confirmSubmitBtn');
+
+      if (value) {
+        if (ratingSection) ratingSection.classList.remove('hidden');
+        if (reopenSection) reopenSection.classList.add('hidden');
+        if (submitBtn) {
+          submitBtn.textContent = 'Confirm & Close';
+          submitBtn.className = 'px-8 py-3 bg-[#005BAC] text-white rounded-lg font-bold text-body-md shadow-lg shadow-brand-blue/20 hover:opacity-90 transition-all cursor-pointer';
+        }
+      } else {
+        if (ratingSection) ratingSection.classList.add('hidden');
+        if (reopenSection) reopenSection.classList.remove('hidden');
+        if (submitBtn) {
+          submitBtn.textContent = 'Reopen Work Order';
+          submitBtn.className = 'px-8 py-3 bg-[#DC3545] text-white rounded-lg font-bold text-body-md shadow-lg shadow-red-500/20 hover:opacity-90 transition-all cursor-pointer';
+        }
       }
     };
 
@@ -919,8 +1041,11 @@
           }
           if (!confirmation) {
             try {
-              confirmation = await Api.get(`/confirmations/${report.order_id}`);
-              if (confirmation) report.status = 'Closed';
+              const res = await Api.get(`/confirmations/${report.order_id}`);
+              if (res && res.confirmed_at !== null && res.is_confirmed !== null && res.is_confirmed !== undefined) {
+                confirmation = res;
+                if (report && confirmation.is_confirmed) report.status = 'Closed';
+              }
             } catch (e) {}
           }
         }
@@ -937,6 +1062,21 @@
             if (errorBox) errorBox.classList.add('hidden');
             
             const isConfirmed = document.getElementById('isConfirmed').value === 'true';
+            
+            if (!isConfirmed) {
+              const reopenReason = (document.getElementById('reopenReasonInput')?.value || '').trim();
+              if (!reopenReason) {
+                if (errorBox) {
+                  errorBox.textContent = 'Please describe why the issue is not fixed.';
+                  errorBox.classList.remove('hidden');
+                }
+                return;
+              }
+              const targetOrderId = (workOrder && workOrder.order_id) ? workOrder.order_id : (report.order_id || reportId);
+              await window.reportIssuePersists(targetOrderId, reopenReason);
+              return;
+            }
+
             const rating = document.getElementById('ratingInput').value;
             const feedback = document.getElementById('feedbackInput').value.trim();
             
