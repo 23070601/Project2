@@ -42,10 +42,14 @@ app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/users`, usersRoutes);
 app.use(`${API_PREFIX}/classrooms`, classroomsRoutes);
 app.use(`${API_PREFIX}/assets`, assetsRoutes);
-app.use(`${API_PREFIX}/fault-reports`, faultReportsRoutes);
+
+app.use('/api/v1/fault-reports', faultReportsRoutes);
+
 app.use(`${API_PREFIX}/work-orders`, workOrdersRoutes);
+app.use(`${API_PREFIX}/workOrders`, workOrdersRoutes);
 app.use('/api/work-orders', workOrdersRoutes);
 app.use('/api/workOrders', workOrdersRoutes);
+
 app.use(`${API_PREFIX}/confirmations`, confirmationsRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationsRoutes);
 app.use(`${API_PREFIX}/qrcodes`, qrcodesRoutes);
