@@ -78,13 +78,10 @@ async function create(req, res) {
   // Validate fault report exists and is in pending approval status
   const report = await faultReportsRepository.findById(reportId);
   if (!report) throw new ApiError(404, `Fault report #${reportId} not found`);
-  if (report.status !== FAULT_REPORT_STATUS.PENDING_APPROVAL) {
+  const pendingStatuses = [FAULT_REPORT_STATUS.PENDING_APPROVAL, 'Pending'];
+  if (!pendingStatuses.includes(report.status)) {
     throw new ApiError(400, `Fault report #${reportId} is not pending approval (current: ${report.status})`);
   }
-
-  // Check if work order already exists for this report
-  const existingOrder = await workOrdersRepository.findByReportId(reportId);
-  if (existingOrder) throw new ApiError(409, `Fault report #${reportId} already has a work order`);
 
   // Validate technician exists and has correct role
   const technician = await usersRepository.findById(technicianId);
@@ -92,13 +89,36 @@ async function create(req, res) {
     throw new ApiError(404, `Technician #${technicianId} not found`);
   }
 
+  // Calculate default deadline (+48 hours) if not provided
+  let finalDeadline = deadlineAt;
+  if (!finalDeadline) {
+    const d = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    finalDeadline = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  // If work order already exists for this report, update/reassign it instead of throwing 409 Conflict
+  const existingOrder = await workOrdersRepository.findByReportId(reportId);
+  if (existingOrder) {
+    await workOrdersRepository.reassign(existingOrder.order_id, technicianId);
+    if (finalDeadline) {
+      await workOrdersRepository.updateDeadline(existingOrder.order_id, finalDeadline);
+    }
+    await faultReportsRepository.updateStatus(reportId, FAULT_REPORT_STATUS.PROCESSING);
+    const updatedOrder = await workOrdersRepository.findById(existingOrder.order_id);
+    return ok(res, updatedOrder);
+  }
+
   // Create work order
   const order = await workOrdersRepository.create({
     reportId,
     managerId: req.user.userId,
     technicianId,
-    deadlineAt: deadlineAt || null,
+    deadlineAt: finalDeadline,
   });
+
+  // Explicitly update fault report status to Processing
+  await faultReportsRepository.updateStatus(reportId, FAULT_REPORT_STATUS.PROCESSING);
 
   // Log audit trail
   await auditLogRepository.log({
@@ -263,6 +283,15 @@ async function updateStatus(req, res) {
 
   // Update task status
   const updated = await workOrdersRepository.updateTaskStatus(orderId, req.body.taskStatus);
+
+  // Synchronize FaultReport status
+  if (order.report_id) {
+    if ([TASK_STATUS.COMPLETED, TASK_STATUS.CLOSED].includes(req.body.taskStatus)) {
+      await faultReportsRepository.updateStatus(order.report_id, FAULT_REPORT_STATUS.COMPLETED);
+    } else if ([TASK_STATUS.IN_PROGRESS, TASK_STATUS.RECEIVED, TASK_STATUS.ASSIGNED].includes(req.body.taskStatus)) {
+      await faultReportsRepository.updateStatus(order.report_id, FAULT_REPORT_STATUS.PROCESSING);
+    }
+  }
 
   // Gửi Notification cho Reporter & Manager khi cập nhật trạng thái
   try {

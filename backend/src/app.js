@@ -34,6 +34,9 @@ app.use(morgan(env.nodeEnv === 'development' ? 'dev' : 'combined'));
 // THÊM DÒNG NÀY ĐỂ SERVE FILE UPLOADS
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Serve frontend static files (cho QR code scan)
+app.use('/frontend', express.static(path.join(__dirname, '../../frontend')));
+
 app.get('/health', (req, res) => res.json({ success: true, data: { status: 'ok' } }));
 
 // Toàn bộ API prefix bằng /api/v1 để tách bạch version cho sau này

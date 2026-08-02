@@ -577,6 +577,53 @@
     return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">Assigned</span>';
   }
 
+  const WORK_ORDERS_MAP = {
+    '1': { 
+      order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R101', priority: 'High', task_status: 'In Progress', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.', failure_count: 3, asset_type: 'Projector',
+      repairHistory: [
+        { order_id: '10', report_id: '18', reporter_name: 'Nguyen Van A', reported_issue: 'HDMI input port loose contact', root_cause: 'Soldering joint cracked due to frequent cable plugging', assigned_at: '2026-05-10 09:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Re-soldered HDMI female socket and secured mainboard casing.', parts_used: 'HDMI Port Socket' }
+      ]
+    },
+    '2': { 
+      order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', assigned_at: '2026-07-20 07:52:24', reporter_name: 'Tran Van B', created_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.', failure_count: 2, asset_type: 'TV',
+      repairHistory: [
+        { order_id: '2', report_id: '3', reporter_name: 'Nguyen Van A', reported_issue: 'Samsung Commercial TV screen sensor unresponsive', root_cause: 'Power supply board capacitor fatigue', assigned_at: '2026-06-12 10:30:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Replaced display panel driver board and updated firmware.', parts_used: 'Display Controller Board' }
+      ]
+    },
+    '3': { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Le Thi C', created_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.', failure_count: 1, asset_type: 'Visualizer', repairHistory: [] },
+    '4': { 
+      order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R102', priority: 'High', task_status: 'Received', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.', failure_count: 4, asset_type: 'TV',
+      repairHistory: [
+        { order_id: '11', report_id: '20', reporter_name: 'Doan Van G', reported_issue: 'LVDS ribbon cable loose', root_cause: 'Connector latch clip broken', assigned_at: '2026-04-18 14:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced LVDS display ribbon cable.', parts_used: '55in LVDS Cable Harness' }
+      ]
+    },
+    '5': { 
+      order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Pham Van H', created_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.', failure_count: 4, asset_type: 'Microphone',
+      repairHistory: [
+        { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Internal battery spring contact oxidation causing power disconnection.', assigned_at: '2026-06-23 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
+      ]
+    },
+    '6': { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Bui Van K', created_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.', failure_count: 1, asset_type: 'TV', repairHistory: [] },
+    '7': { 
+      order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-15 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.', failure_count: 5, asset_type: 'Microphone',
+      repairHistory: [
+        { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Physical wear on plastic latch clip.', assigned_at: '2026-07-15 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
+      ]
+    },
+    '8': { 
+      order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', assigned_at: '2026-07-23 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.', failure_count: 2, asset_type: 'Network',
+      repairHistory: [
+        { order_id: '8', report_id: '15', reporter_name: 'Doan Van G', reported_issue: 'Gigabit switch power LED off', root_cause: 'Power supply transformer burnt out due to power surge', assigned_at: '2026-07-29 08:45:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Đã kiểm tra và thay thế bộ nguồn switch mạng.', parts_used: 'Bộ nguồn Gigabit Switch 12V' }
+      ]
+    },
+    '10': { 
+      order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', assigned_at: '2026-06-15 09:00:00', reporter_name: 'Nguyen Van A', created_at: '2026-06-15 09:00:00', description: 'Wireless mic battery springs replaced and tested in Room R504.', failure_count: 1, asset_type: 'Microphone',
+      repairHistory: [
+        { order_id: '10', report_id: '17', reporter_name: 'Nguyen Van A', reported_issue: 'Loose battery contact springs causing audio dropout', root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.', assigned_at: '2026-06-15 09:00:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Tightened internal battery terminal contacts and replaced antenna sleeve.', parts_used: 'AKG Battery Terminal Spring' }
+      ]
+    }
+  };
+
   async function loadWorkOrderDetails() {
     let order = null;
     let loadedFromApi = false;
@@ -588,53 +635,6 @@
     } catch (err) {
       console.warn('Error fetching order detail from API:', err);
     }
-
-    const WORK_ORDERS_MAP = {
-      '1': { 
-        order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R101', priority: 'High', task_status: 'In Progress', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.', failure_count: 3, asset_type: 'Projector',
-        repairHistory: [
-          { order_id: '10', report_id: '18', reporter_name: 'Nguyen Van A', reported_issue: 'HDMI input port loose contact', root_cause: 'Soldering joint cracked due to frequent cable plugging', assigned_at: '2026-05-10 09:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Re-soldered HDMI female socket and secured mainboard casing.', parts_used: 'HDMI Port Socket' }
-        ]
-      },
-      '2': { 
-        order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', assigned_at: '2026-07-20 07:52:24', reporter_name: 'Tran Van B', created_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.', failure_count: 2, asset_type: 'TV',
-        repairHistory: [
-          { order_id: '2', report_id: '3', reporter_name: 'Nguyen Van A', reported_issue: 'Samsung Commercial TV screen sensor unresponsive', root_cause: 'Power supply board capacitor fatigue', assigned_at: '2026-06-12 10:30:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Replaced display panel driver board and updated firmware.', parts_used: 'Display Controller Board' }
-        ]
-      },
-      '3': { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', assigned_at: '2026-07-21 07:52:24', reporter_name: 'Le Thi C', created_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.', failure_count: 1, asset_type: 'Visualizer', repairHistory: [] },
-      '4': { 
-        order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R102', priority: 'High', task_status: 'Received', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.', failure_count: 4, asset_type: 'TV',
-        repairHistory: [
-          { order_id: '11', report_id: '20', reporter_name: 'Doan Van G', reported_issue: 'LVDS ribbon cable loose', root_cause: 'Connector latch clip broken', assigned_at: '2026-04-18 14:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced LVDS display ribbon cable.', parts_used: '55in LVDS Cable Harness' }
-        ]
-      },
-      '5': { 
-        order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Pham Van H', created_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.', failure_count: 4, asset_type: 'Microphone',
-        repairHistory: [
-          { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Internal battery spring contact oxidation causing power disconnection.', assigned_at: '2026-06-23 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
-        ]
-      },
-      '6': { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-22 07:52:24', reporter_name: 'Bui Van K', created_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.', failure_count: 1, asset_type: 'TV', repairHistory: [] },
-      '7': { 
-        order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', assigned_at: '2026-07-15 07:52:24', reporter_name: 'Doan Van G', created_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.', failure_count: 5, asset_type: 'Microphone',
-        repairHistory: [
-          { order_id: '7', report_id: '12', reporter_name: 'Doan Van G', reported_issue: 'Microphone battery compartment cover broken and wire frayed.', root_cause: 'Physical wear on plastic latch clip.', assigned_at: '2026-07-15 08:00:00', technician_name: 'Le Van C', task_status: 'Closed', fix_description: 'Replaced microphone shell casing and soldered broken audio lead.', parts_used: 'Mic Housing Clip' }
-        ]
-      },
-      '8': { 
-        order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', assigned_at: '2026-07-23 07:52:24', reporter_name: 'Nguyen Van A', created_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.', failure_count: 2, asset_type: 'Network',
-        repairHistory: [
-          { order_id: '8', report_id: '15', reporter_name: 'Doan Van G', reported_issue: 'Gigabit switch power LED off', root_cause: 'Power supply transformer burnt out due to power surge', assigned_at: '2026-07-29 08:45:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Đã kiểm tra và thay thế bộ nguồn switch mạng.', parts_used: 'Bộ nguồn Gigabit Switch 12V' }
-        ]
-      },
-      '10': { 
-        order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', assigned_at: '2026-06-15 09:00:00', reporter_name: 'Nguyen Van A', created_at: '2026-06-15 09:00:00', description: 'Wireless mic battery springs replaced and tested in Room R504.', failure_count: 1, asset_type: 'Microphone',
-        repairHistory: [
-          { order_id: '10', report_id: '17', reporter_name: 'Nguyen Van A', reported_issue: 'Loose battery contact springs causing audio dropout', root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.', assigned_at: '2026-06-15 09:00:00', technician_name: 'Pham Thi D', task_status: 'Closed', fix_description: 'Tightened internal battery terminal contacts and replaced antenna sleeve.', parts_used: 'AKG Battery Terminal Spring' }
-        ]
-      }
-    };
 
     if (!loadedFromApi || !order) {
       const storedOrders = getStoredWorkOrders();
@@ -803,8 +803,6 @@
 
     currentRepairHistory = historyList;
 
-    currentRepairHistory = historyList;
-
     if (historyList.length === 0) {
       tbody.innerHTML = `
         <tr>
@@ -861,10 +859,16 @@
     const timelineContainer = document.getElementById('detailTimelineContainer');
     if (!timelineContainer) return;
 
-    let history = order.statusHistory || [
-      { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
-      { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
-    ];
+    let history = (order.statusHistory && order.statusHistory.length > 0)
+      ? order.statusHistory.map(h => ({
+          task_status: h.task_status || h.new_status || 'Assigned',
+          changed_at: h.changed_at,
+          notes: h.notes || h.note || 'Status updated in system.'
+        }))
+      : [
+          { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
+          { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
+        ];
 
     const displayStatus = getDisplayTaskStatus(order);
     if (displayStatus === 'In Progress' && !history.some(h => (h.task_status || '').includes('Progress'))) {
@@ -875,7 +879,7 @@
 
     timelineContainer.innerHTML = history.map((h, index) => {
       const isLast = index === (history.length - 1);
-      const statusName = h.task_status || h.status_name || 'Assigned';
+      const statusName = h.task_status || 'Assigned';
       let icon = 'assignment_ind';
       if (statusName.includes('Progress')) icon = 'play_arrow';
       if (statusName.includes('Received')) icon = 'task_alt';

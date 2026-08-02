@@ -89,7 +89,7 @@
         <div class="mb-4">
           <label class="text-label-md font-label-md text-on-surface-variant">Deadline</label>
           <input id="deadlineInput" type="datetime-local" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-3 py-2 text-body-sm" />
-          <p class="text-[11px] text-on-surface-variant mt-1">Optional. Leave blank if no deadline is required.</p>
+          <p class="text-[11px] text-on-surface-variant mt-1">Automatically defaults to 48 hours from now if left blank.</p>
         </div>
 
         <p id="assignError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2 mb-3"></p>
@@ -153,6 +153,13 @@
     }
 
     content.innerHTML = html;
+
+    const deadlineEl = document.getElementById('deadlineInput');
+    if (deadlineEl && !deadlineEl.value) {
+      const nowPlus48 = new Date(Date.now() + 48 * 60 * 60 * 1000);
+      const pad = (n) => String(n).padStart(2, '0');
+      deadlineEl.value = `${nowPlus48.getFullYear()}-${pad(nowPlus48.getMonth() + 1)}-${pad(nowPlus48.getDate())}T${pad(nowPlus48.getHours())}:${pad(nowPlus48.getMinutes())}`;
+    }
 
     const approveBtn = document.getElementById('approveBtn');
     if (approveBtn) {

@@ -641,7 +641,7 @@
     const searchVal = document.getElementById('pendingSearch').value.toLowerCase();
     const prioVal = document.getElementById('pendingPriorityFilter').value;
     
-    let filtered = allPendingReports;
+    let filtered = allPendingReports.filter(r => !r.order_id && ['Pending Approval', 'Pending'].includes(r.status || 'Pending Approval'));
     if (searchVal) {
       filtered = filtered.filter(r => 
         (r.reporter_name || '').toLowerCase().includes(searchVal) ||
@@ -895,8 +895,8 @@
         // Fetch Pending Approval Reports
         const pendingReports = await Api.get('/fault-reports', { status: 'Pending Approval' });
         if (pendingReports && Array.isArray(pendingReports)) {
-          allPendingReports = pendingReports;
-          document.getElementById('pendingCountBadge').textContent = pendingReports.length;
+          allPendingReports = pendingReports.filter(r => !r.order_id);
+          document.getElementById('pendingCountBadge').textContent = allPendingReports.length;
           filterPending();
         }
 

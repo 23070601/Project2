@@ -242,6 +242,9 @@
       const rawRoom = getFieldValue(report, ['room_name']);
       const equipment = cleanLabel(rawEquipment);
       const room = cleanLabel(rawRoom);
+      const assetType = getFieldValue(report, ['asset_type'], 'N/A');
+      const roomId = getFieldValue(report, ['room_id'], 'N/A');
+      const reporter = getFieldValue(report, ['reporter_name', 'user_email'], 'N/A');
       const history = report.statusHistory || [];
       const currentStatus = report.display_status || report.status || '';
       const isPending = ['Pending', 'Pending Approval'].includes(report.status) && ['Pending', 'Pending Approval'].includes(currentStatus);
@@ -256,7 +259,7 @@
         }
       }
 
-      const isCompleted = ['Completed', 'Resolved'].includes(report.status);
+      const isCompleted = ['Completed', 'Resolved'].includes(report.status) || ['Completed', 'Resolved'].includes(report.display_status);
 
       const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
       const imageUrl = report.image_path ? (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path)) : null;
@@ -978,14 +981,13 @@
       // 1. Try loading from API
       try {
         if (window.Api && window.Auth && Auth.isAuthenticated()) {
-          try {
-            report = await Api.get(`/fault-reports/${reportId}`);
-          } catch(e) {
-            if (!isNaN(numId)) {
-              try {
-                report = await Api.get(`/fault-reports/${numId}`);
-              } catch(e2) {}
-            }
+          const isNumeric = /^\d+$/.test(String(reportId));
+          const tryIds = isNumeric ? [reportId] : (!isNaN(numId) ? [numId] : []);
+          for (const tryId of tryIds) {
+            try {
+              report = await Api.get(`/fault-reports/${tryId}`);
+              break;
+            } catch(e) {}
           }
           console.log('Report data from API:', report);
         }
@@ -1025,10 +1027,15 @@
 
       // 5. If report found, try workOrder & confirmation
       if (report) {
-        if (report.order_id && !workOrder && window.Api) {
-          try {
-            workOrder = await Api.get(`/work-orders/${report.order_id}`);
-          } catch (e) {
+        if (report.order_id && !workOrder) {
+          const userRole = (window.Auth && Auth.getUser && Auth.getUser()) ? Auth.getUser().role : null;
+          const canFetchWO = window.Api && userRole && ['Manager', 'Technician'].includes(userRole);
+          if (canFetchWO) {
+            try {
+              workOrder = await Api.get(`/work-orders/${report.order_id}`);
+            } catch (e) {}
+          }
+          if (!workOrder) {
             workOrder = {
               order_id: report.order_id,
               technician_name: report.technician_name || 'Le Van C',
