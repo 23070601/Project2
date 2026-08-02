@@ -134,23 +134,7 @@
       </div>
 
       <h1 class="font-headline-md text-headline-md text-primary mb-8 tracking-tight">WELCOME BACK</h1>
-      <p class="text-body-sm text-on-surface-variant text-center -mt-6 mb-8 italic">Please select your role to login</p>
-
-      <!-- Role Selector Tabs -->
-      <div class="w-full grid grid-cols-3 gap-2 p-1 bg-surface-container rounded-lg mb-8">
-        <button id="tab-user" onclick="switchTab('user')" class="flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all duration-300 bg-primary-container text-white shadow-sm font-label-md text-label-md">
-          <span class="material-symbols-outlined text-[20px] mb-1">person</span>
-          User
-        </button>
-        <button id="tab-technician" onclick="switchTab('technician')" class="flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all duration-300 text-on-surface-variant hover:bg-surface-container-highest font-label-md text-label-md">
-          <span class="material-symbols-outlined text-[20px] mb-1">engineering</span>
-          Technician
-        </button>
-        <button id="tab-manager" onclick="switchTab('manager')" class="flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all duration-300 text-on-surface-variant hover:bg-surface-container-highest font-label-md text-label-md">
-          <span class="material-symbols-outlined text-[20px] mb-1">admin_panel_settings</span>
-          Manager
-        </button>
-      </div>
+      <p class="text-body-sm text-on-surface-variant text-center -mt-6 mb-8 italic">Sign in with your account credentials</p>
 
       <!-- Login Form - GIỮ NGUYÊN ID VÀ CHỨC NĂNG -->
       <form id="loginForm" class="w-full space-y-5">
@@ -208,52 +192,8 @@
 <script src="../assets/js/auth.js"></script>
 
 <script>
-  // ===== Tab switching (chỉ UI) =====
-  function switchTab(role) {
-    const tabs = ['user', 'technician', 'manager'];
-    tabs.forEach(t => {
-      const btn = document.getElementById(`tab-${t}`);
-      if (t === role) {
-        btn.classList.add('bg-primary-container', 'text-white', 'shadow-sm');
-        btn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-highest');
-      } else {
-        btn.classList.remove('bg-primary-container', 'text-white', 'shadow-sm');
-        btn.classList.add('text-on-surface-variant', 'hover:bg-surface-container-highest');
-      }
-    });
-    
-    // Animation nhẹ cho form
-    const form = document.querySelector('form');
-    if (form) {
-      form.style.opacity = '0.5';
-      form.style.transform = 'translateY(4px)';
-      setTimeout(() => {
-        form.style.opacity = '1';
-        form.style.transform = 'translateY(0)';
-      }, 100);
-    }
-    // Lưu role đã chọn
-    document.body.dataset.selectedRole = role;
-  }
-
   // ===== Khởi tạo trang =====
   document.addEventListener('DOMContentLoaded', function() {
-    // Set User tab active mặc định
-    const userTab = document.getElementById('tab-user');
-    if (userTab) {
-      ['user', 'technician', 'manager'].forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        if (t === 'user') {
-          btn.classList.add('bg-primary-container', 'text-white', 'shadow-sm');
-          btn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-highest');
-        } else {
-          btn.classList.remove('bg-primary-container', 'text-white', 'shadow-sm');
-          btn.classList.add('text-on-surface-variant', 'hover:bg-surface-container-highest');
-        }
-      });
-      document.body.dataset.selectedRole = 'user';
-    }
-
     // Toggle password visibility
     const toggleBtn = document.getElementById('togglePassword');
     const pwField = document.getElementById('password');
@@ -294,8 +234,7 @@
         try {
           const email = document.getElementById('email').value.trim();
           const password = document.getElementById('password').value;
-          const selectedRole = document.body.dataset.selectedRole || 'user';
-          const user = await Auth.login(email, password, selectedRole);
+          const user = await Auth.login(email, password);
           location.href = Auth.homePageForRole(user.role);
         } catch (err) {
           errorBox.textContent = err.message || 'Login failed. Please check your email and password.';
