@@ -2,6 +2,7 @@ const app = require('./app');
 const env = require('./config/env');
 const { pool, checkConnection } = require('./config/db');
 const bcrypt = require('bcryptjs');
+const { sendOverdueAlerts } = require('./modules/notifications/overdueAlerts.service');
 
 async function ensureSeedPasswords() {
   try {
@@ -18,6 +19,30 @@ async function ensureSeedPasswords() {
   }
 }
 
+function startOverdueAlertsCron() {
+  const intervalMs = Number(process.env.OVERDUE_ALERT_CRON_MS || 60 * 60 * 1000);
+  let isRunning = false;
+
+  const run = async () => {
+    if (isRunning) return;
+    isRunning = true;
+
+    try {
+      const result = await sendOverdueAlerts({ hours: Number(process.env.OVERDUE_ALERT_HOURS || 48) });
+      if (result.reportCount || result.workOrderCount) {
+        console.log(`[Alerts] Sent ${result.sent.length} overdue alert(s): ${result.reportCount} report(s), ${result.workOrderCount} work order(s).`);
+      }
+    } catch (error) {
+      console.error('[Alerts] Failed to send overdue alerts:', error.message);
+    } finally {
+      isRunning = false;
+    }
+  };
+
+  run();
+  setInterval(run, intervalMs);
+}
+
 async function start() {
   try {
     await checkConnection();
@@ -27,6 +52,7 @@ async function start() {
       console.log(`[Server] Environment: ${env.nodeEnv}`);
       console.log(`[Server] Health check: http://localhost:${env.port}/health`);
     });
+    startOverdueAlertsCron();
   } catch (err) {
     console.error('[Server] Failed to start:', err.message);
     console.error('[Server] Make sure MySQL is running and .env is configured correctly (see .env.example).');

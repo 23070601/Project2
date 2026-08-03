@@ -49,14 +49,29 @@
     { technicianId: 6, fullName: 'Vu Van F', specialty: 'Microphone / Electronics', specialtyMatch: false, activeWorkload: 0 }
   ];
 
+  function resolveReporterName(report) {
+    if (!report) return 'Anonymous';
+    return report.reporter_name || report.reporter_full_name || report.full_name || report.user_name ||
+      (report.reporter_email ? report.reporter_email.replace(/@.*/, '') : '') ||
+      (report.reporter_id === 1 ? 'Nguyen Van A' :
+       report.reporter_id === 2 ? 'Tran Thi B' :
+       report.reporter_id === 3 ? 'Le Van C' :
+       report.reporter_id === 4 ? 'Pham Thi D' :
+       report.reporter_id === 5 ? 'Hoang Van E' :
+       report.reporter_id === 6 ? 'Vu Van F' :
+       report.reporter_id === 7 ? 'Doan Van G' :
+       report.reporter_id === 8 ? 'Bui Thi H' : 'Anonymous');
+  }
+
   function renderHeader(r) {
     const formattedReportId = UiHelpers.formatReportId(r.report_id);
+    const reporterName = resolveReporterName(r);
     return `
       <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
         <div class="flex items-start justify-between">
           <div>
             <h1 class="text-headline-md font-headline-md text-primary">Report ${formattedReportId}</h1>
-            <p class="text-on-surface-variant text-body-sm mt-1">${r.room_name}${r.asset_name ? ' · ' + r.asset_name : ''} · reported by ${r.reporter_name}</p>
+            <p class="text-on-surface-variant text-body-sm mt-1">${r.room_name}${r.asset_name ? ' · ' + r.asset_name : ''} · reported by ${UiHelpers.escapeHtml(reporterName)}</p>
           </div>
           <div class="flex gap-2">${UiHelpers.priorityBadge(r.priority)}${UiHelpers.statusBadge(r.status)}</div>
         </div>
@@ -116,7 +131,12 @@
   const backLink = document.querySelector('main a');
   if (backLink) {
     backLink.href = `PendingRequest.html?tab=${sourceTab}`;
-    backLink.innerHTML = `<span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to ${sourceTab === 'pending' ? 'Pending Requests' : 'Assigned Tasks'}`;
+    const backLabel = sourceTab === 'pending'
+      ? 'Pending Requests'
+      : sourceTab === 'rejected'
+        ? 'Rejected Reports'
+        : 'Assigned Tasks';
+    backLink.innerHTML = `<span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to ${backLabel}`;
   }
 
   async function load() {
@@ -149,7 +169,7 @@
     if (report.status === 'Pending Approval') {
       html += renderAssignForm(suggestions);
     } else {
-      html += `<div class="bg-surface-container-low rounded-xl p-6 text-body-sm text-on-surface-variant">This report is no longer pending approval.</div>`;
+      html += `<div class="bg-surface-container-low rounded-xl p-6 text-body-sm text-on-surface-variant">${report.status === 'Rejected' ? 'This report has been rejected and is available in the rejected reports history.' : 'This report is no longer pending approval.'}</div>`;
     }
 
     content.innerHTML = html;

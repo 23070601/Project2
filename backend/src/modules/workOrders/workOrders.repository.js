@@ -4,7 +4,7 @@ const BASE_SELECT = `
   SELECT wo.*,
          fr.description, fr.priority, fr.status AS report_status, fr.room_id, fr.asset_id,
          c.room_name, a.asset_name, a.asset_type,
-         reporter.user_id AS reporter_id, reporter.full_name AS reporter_name,
+         reporter.user_id AS reporter_id, reporter.full_name AS reporter_name, reporter.email AS reporter_email,
          tech.full_name AS technician_name, tech.technician_specialty,
          mgr.full_name AS manager_name
   FROM WorkOrders wo

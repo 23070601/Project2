@@ -9,6 +9,8 @@ const BASE_SELECT = `
            ELSE fr.status
          END AS display_status,
          u.full_name AS reporter_name,
+         u.full_name AS reporter_full_name,
+         u.email AS reporter_email,
          c.room_name,
          a.asset_name, a.asset_type,
          wo.order_id, wo.task_status, wo.technician_id, t.full_name AS technician_name,

@@ -807,6 +807,7 @@
             image_path: report.image_path || imageBase64,
             reported_at: new Date().toISOString(),
             reporter_id: currentUser.user_id || currentUser.id || 1,
+            reporter_name: currentUser.full_name || currentUser.fullName || '',
             user_email: currentUser.email || ''
           };
 
@@ -856,6 +857,7 @@
               image_path: fallbackBase64,
               reported_at: new Date().toISOString(),
               reporter_id: currentUser.user_id || currentUser.id || 1,
+              reporter_name: currentUser.full_name || currentUser.fullName || '',
               user_email: currentUser.email || ''
             };
 

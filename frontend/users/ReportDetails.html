@@ -236,6 +236,17 @@
         .trim();
     }
 
+    function resolveReporterName(report) {
+      if (report.reporter_name) return report.reporter_name;
+      const user = window.Auth && Auth.getUser ? Auth.getUser() : null;
+      const reportReporterId = report.reporter_id;
+      const currentUserId = user?.user_id || user?.id;
+      if (user && reportReporterId && String(reportReporterId) === String(currentUserId)) {
+        return user.full_name || user.fullName || user.email || 'N/A';
+      }
+      return report.reporter_email || report.user_email || 'N/A';
+    }
+
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
       const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name']);
@@ -244,7 +255,7 @@
       const room = cleanLabel(rawRoom);
       const assetType = getFieldValue(report, ['asset_type'], 'N/A');
       const roomId = getFieldValue(report, ['room_id'], 'N/A');
-      const reporter = getFieldValue(report, ['reporter_name', 'user_email'], 'N/A');
+      const reporter = resolveReporterName(report);
       const history = report.statusHistory || [];
       const currentStatus = report.display_status || report.status || '';
       const isPending = ['Pending', 'Pending Approval'].includes(report.status) && ['Pending', 'Pending Approval'].includes(currentStatus);

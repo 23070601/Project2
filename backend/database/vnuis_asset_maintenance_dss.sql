@@ -116,6 +116,14 @@ CREATE TABLE WorkOrders (
 -- ---------------------------------------------------------------------
 -- TABLE 6: UserConfirmations
 -- ---------------------------------------------------------------------
+CREATE TABLE OverdueAlertDelivery (
+    alert_type      VARCHAR(30)     NOT NULL,
+    entity_id       INT             NOT NULL,
+    recipient       VARCHAR(255)    NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (alert_type, entity_id, recipient)
+) ENGINE=InnoDB;
+
 CREATE TABLE UserConfirmations (
     confirmation_id     INT AUTO_INCREMENT PRIMARY KEY,
     order_id            INT             NOT NULL UNIQUE,

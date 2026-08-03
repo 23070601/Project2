@@ -3,6 +3,7 @@ const faultReportsRepository = require('../faultReports/faultReports.repository'
 const usersRepository = require('../users/users.repository');
 const auditLogRepository = require('../auditLog/auditLog.repository');
 const notificationsRepository = require('../notifications/notifications.repository');
+const links = require('../notifications/notificationLinks');
 const { suggestTechnicians } = require('./assignment.service');
 const { ok, created, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, requireOneOf, toPositiveInt } = require('../../shared/utils/validators');
@@ -106,6 +107,20 @@ async function create(req, res) {
     }
     await faultReportsRepository.updateStatus(reportId, FAULT_REPORT_STATUS.PROCESSING);
     const updatedOrder = await workOrdersRepository.findById(existingOrder.order_id);
+    try {
+      const assetName = report.asset_name || `Asset #${report.asset_id}`;
+      const roomName = report.room_name || `Room #${report.room_id}`;
+      await notificationsRepository.createNotification({
+        userId: technicianId,
+        reportId: reportId,
+        orderId: updatedOrder.order_id,
+        message: `You have been assigned to Work Order #${updatedOrder.order_id} (${assetName} in ${roomName}).`,
+        title: 'Work Order Reassigned',
+        actionUrl: links.technicianTasks,
+      });
+    } catch (e) {
+      console.log('Failed to send technician notification on reassign existing:', e.message);
+    }
     return ok(res, updatedOrder);
   }
 
@@ -140,6 +155,8 @@ async function create(req, res) {
       reportId: reportId,
       orderId: order.order_id,
       message: `You have been assigned to Work Order #${order.order_id} (${assetName} in ${roomName}).`,
+      title: 'New Work Order Assigned',
+      actionUrl: links.technicianTasks,
     });
   } catch (e) {
     console.log('Failed to send technician notification on assign:', e.message);
@@ -183,6 +200,8 @@ async function respond(req, res) {
           reportId: order.report_id,
           orderId: order.order_id,
           message: `Technician ${technicianName} rejected WorkOrder WO-${orderId}. Reason: ${req.body.rejectionReason}`,
+          title: 'Work Order Rejected',
+          actionUrl: links.managerPending,
         });
       } catch (e) {
         console.log('Failed to send manager notification on reject:', e.message);
@@ -208,6 +227,8 @@ async function respond(req, res) {
         message: `Technician has ${responseText} Work Order #${orderId}.${
           req.body.rejectionReason ? ` Reason: ${req.body.rejectionReason}` : ''
         }`,
+        title: 'Work Order Response Update',
+        actionUrl: links.managerPending,
       });
     } catch (e) {
       console.log('Failed to send manager notification on response:', e.message);
@@ -241,6 +262,8 @@ async function reject(req, res) {
         reportId: order.report_id,
         orderId: order.order_id,
         message: `Technician ${technicianName} rejected WorkOrder WO-${orderId}. Reason: ${req.body.rejectionReason}`,
+        title: 'Work Order Rejected',
+        actionUrl: links.managerPending,
       });
     } catch (e) {
       console.log('Failed to send manager notification on reject:', e.message);
@@ -301,6 +324,8 @@ async function updateStatus(req, res) {
         reportId: order.report_id,
         orderId: order.order_id,
         message: `Work Order #${orderId} for report #${order.report_id} updated to status: ${req.body.taskStatus}.`,
+        title: 'Work Order Status Updated',
+        actionUrl: links.userReports,
       });
     }
     if (order.manager_id && order.manager_id !== req.user.userId) {
@@ -309,6 +334,8 @@ async function updateStatus(req, res) {
         reportId: order.report_id,
         orderId: order.order_id,
         message: `Work Order #${orderId} progress update: ${req.body.taskStatus}.`,
+        title: 'Work Order Status Updated',
+        actionUrl: links.managerPending,
       });
     }
   } catch (e) {
@@ -349,6 +376,8 @@ async function reassign(req, res) {
       reportId: order.report_id,
       orderId: order.order_id,
       message: `New task assigned: Work Order #${orderId}`,
+      title: 'Work Order Reassigned',
+      actionUrl: links.technicianTasks,
     });
   } catch (e) {
     console.log('Failed to send technician notification on reassign:', e.message);
@@ -404,6 +433,8 @@ async function updateDeadline(req, res) {
         reportId: order.report_id,
         orderId: orderId,
         message: `Deadline for WorkOrder WO-${orderId} has been updated to ${deadlineDate.toLocaleString()}`,
+        title: 'Work Order Deadline Updated',
+        actionUrl: links.technicianTasks,
       });
     } catch (e) {
       console.log('Failed to send notification on deadline update:', e.message);
@@ -452,11 +483,13 @@ async function reopen(req, res) {
   // Notify Technician & Manager
   if (order.technician_id) {
     try {
-      await notificationsRepository.create({
+      await notificationsRepository.createNotification({
         userId: order.technician_id,
         reportId: order.report_id,
         orderId: orderId,
         message: `WorkOrder WO-${orderId} has been reopened. User reported issue persists.`,
+        title: 'Work Order Reopened',
+        actionUrl: links.technicianTasks,
       });
     } catch (e) {
       console.log('Failed to send technician notification on reopen:', e.message);
@@ -465,11 +498,13 @@ async function reopen(req, res) {
 
   if (order.manager_id) {
     try {
-      await notificationsRepository.create({
+      await notificationsRepository.createNotification({
         userId: order.manager_id,
         reportId: order.report_id,
         orderId: orderId,
         message: `WorkOrder WO-${orderId} was reopened by User. Please review.`,
+        title: 'Work Order Reopened',
+        actionUrl: links.managerPending,
       });
     } catch (e) {
       console.log('Failed to send manager notification on reopen:', e.message);

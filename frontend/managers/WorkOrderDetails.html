@@ -389,7 +389,9 @@
             document.getElementById('woTechnician').textContent = data.technician_name;
             document.getElementById('rejectedByText').textContent = data.technician_name;
           }
-          if (data.reporter_name) document.getElementById('reportReporter').textContent = data.reporter_name;
+          if (data.reporter_name || data.reporter_email) {
+            document.getElementById('reportReporter').textContent = data.reporter_name || data.reporter_email;
+          }
           if (data.description) document.getElementById('reportDescription').textContent = `"${data.description}"`;
           if (data.assigned_at) document.getElementById('woAssignedDate').textContent = UiHelpers.formatDate(data.assigned_at);
           const deadlineEl = document.getElementById('woDeadlineDate');

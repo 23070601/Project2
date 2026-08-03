@@ -457,24 +457,6 @@
   </div>
 </div>
 
-<!-- DELETE USER MODAL OVERLAY -->
-<div id="deleteUserModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-    <div class="p-6 border-b border-outline-variant/20">
-      <h3 class="text-headline-sm font-headline-sm text-on-surface">Confirm Delete User</h3>
-      <p class="text-body-sm text-on-surface-variant mt-1">Are you sure you want to delete user account <span id="deleteModalUserName" class="font-bold text-on-surface"></span>? This action cannot be undone.</p>
-    </div>
-    <div class="p-6 flex justify-end items-center gap-3 border-t border-outline-variant/10">
-      <button type="button" onclick="closeDeleteUserModal()" class="px-6 py-2.5 rounded-lg text-on-surface-variant font-bold text-label-lg hover:bg-surface-container transition-colors">
-        Cancel
-      </button>
-      <button type="button" id="confirmDeleteUserBtn" onclick="confirmDeleteUser()" class="px-6 py-2.5 bg-error text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all shadow-md">
-        Delete User
-      </button>
-    </div>
-  </div>
-</div>
-
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -493,7 +475,6 @@
   Layout.init({ role: 'Manager', activePage: 'UsersManagement' });
 
   let allUsers = [];
-  let pendingDeleteUserId = null;
 
   const DEFAULT_USERS = [
     { user_id: 'USR001', full_name: 'Nguyen Van A', email: 'lecturer.a@vnuis.edu.vn', role: 'User', is_active: true, created_at: 'Jul 01, 2026' },
@@ -561,9 +542,6 @@
           <td class="px-6 flex items-center gap-3 py-6">
             <button onclick="openEditUserModal('${u.user_id}', '${UiHelpers.escapeJsString(u.full_name)}', '${UiHelpers.escapeJsString(u.email)}', '${u.role}', '${isActive ? 'Active' : 'Inactive'}', '${u.created_at || ''}')" class="p-1.5 hover:bg-surface-container-high rounded transition-colors text-outline" title="Edit User">
               <span class="material-symbols-outlined text-lg">edit</span>
-            </button>
-            <button onclick="openDeleteUserModal('${u.user_id}', '${UiHelpers.escapeJsString(u.full_name)}')" class="p-1.5 hover:bg-error-container/40 rounded transition-colors text-error" title="Delete User">
-              <span class="material-symbols-outlined text-lg">delete</span>
             </button>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" ${isActive ? 'checked' : ''} class="sr-only peer" onchange="toggleUserStatus('${u.user_id}', this.checked)">
@@ -746,57 +724,6 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Save Changes';
-    }
-  }
-
-  // Delete User Modal
-  function openDeleteUserModal(id, name) {
-    pendingDeleteUserId = id;
-    document.getElementById('deleteModalUserName').textContent = name;
-    document.getElementById('deleteUserModal').classList.remove('hidden');
-  }
-
-  function closeDeleteUserModal() {
-    pendingDeleteUserId = null;
-    document.getElementById('deleteUserModal').classList.add('hidden');
-  }
-
-  async function confirmDeleteUser() {
-    if (!pendingDeleteUserId) return;
-
-    const btn = document.getElementById('confirmDeleteUserBtn');
-    btn.disabled = true;
-    btn.textContent = 'Deleting...';
-
-    const targetId = pendingDeleteUserId;
-    const cleanNumId = parseInt(String(targetId).replace(/\D/g, ''), 10);
-
-    try {
-      if (window.Api && cleanNumId) {
-        try {
-          await Api.delete(`/users/${cleanNumId}`);
-        } catch (e) {
-          console.warn('API delete user error:', e);
-        }
-      }
-
-      const targetUser = allUsers.find(u => String(u.user_id) === String(targetId));
-      const userName = targetUser ? targetUser.full_name : targetId;
-
-      allUsers = allUsers.filter(u => String(u.user_id) !== String(targetId));
-      saveUsersState();
-      await loadUsers();
-
-      closeDeleteUserModal();
-      if (window.showToast) showToast(`User "${userName}" deleted/deactivated in Database!`, 'success');
-      else alert(`User "${userName}" deleted/deactivated in Database!`);
-    } catch (err) {
-      closeDeleteUserModal();
-      if (window.showToast) showToast(err.message || `Failed to delete user`, 'error');
-      else alert(err.message || `Failed to delete user`);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Delete User';
     }
   }
 
