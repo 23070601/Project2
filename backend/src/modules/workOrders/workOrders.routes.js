@@ -13,7 +13,7 @@ router.use(authenticate);
 
 // Technicians/AssignedTasks.html | Managers/AssignedTasks.html
 router.get('/', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.list));
-router.get('/:id', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.getById));
+router.get('/:id', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN, ROLES.USER), asyncHandler(controller.getById));
 
 // DSS2 - Managers/PendingRequestDetail.html gọi trước khi Approve & Assign
 router.get('/suggestions/:reportId', requireRole(ROLES.MANAGER), asyncHandler(controller.suggestions));
@@ -35,6 +35,11 @@ router.post(
   upload.fields([{ name: 'images', maxCount: 5 }, { name: 'evidence', maxCount: 5 }]),
   asyncHandler(controller.uploadImages)
 );
+router.delete(
+  '/:id/images',
+  requireRole(ROLES.TECHNICIAN, ROLES.MANAGER),
+  asyncHandler(controller.deleteImage)
+);
 
 // Technicians/WorkOrderDetails.html cập nhật tiến độ
 router.patch(
@@ -44,12 +49,12 @@ router.patch(
   asyncHandler(controller.updateStatus)
 );
 
-// Managers reassign technician
-router.patch('/:id/reassign', requireRole(ROLES.MANAGER), asyncHandler(controller.reassign));
-
 // Comments timeline for Manager - Technician communication
 router.get('/:id/comments', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.getComments));
 router.post('/:id/comments', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.addComment));
+
+// User/ReportDetails.html reopen work order when issue persists
+router.post('/:id/reopen', requireRole(ROLES.USER, ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.reopen));
 
 module.exports = router;
 

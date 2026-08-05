@@ -118,6 +118,20 @@ async function findById(reportId) {
   } else {
     report.images = [];
   }
+  if (report.order_id) {
+    try {
+      const [shRows] = await pool.execute(
+        `SELECT history_id, order_id, old_status, new_status, changed_by, note AS note, changed_at
+         FROM WorkOrderStatusHistory
+         WHERE order_id = ?
+         ORDER BY changed_at ASC`,
+        [report.order_id]
+      );
+      report.statusHistory = shRows;
+    } catch (e) {
+      report.statusHistory = [];
+    }
+  }
   return report;
 }
 

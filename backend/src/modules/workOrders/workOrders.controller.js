@@ -44,8 +44,7 @@ async function getById(req, res) {
   
   // Fallback: get first order if not found
   if (!order) {
-    const list = await workOrdersRepository.findAll({ technicianId: req.user.userId });
-    order = list[0] || await workOrdersRepository.findById(1);
+    order = await workOrdersRepository.findById(1);
   }
   
   if (!order) throw new ApiError(404, 'Work order not found');
@@ -282,6 +281,10 @@ async function uploadImages(req, res) {
   const order = await workOrdersRepository.findById(orderId);
   if (!order) throw new ApiError(404, 'Work order not found');
 
+  if (order.task_status !== TASK_STATUS.IN_PROGRESS && order.task_status !== 'In Progress') {
+    throw new ApiError(400, 'Images can only be uploaded when the work order is In Progress');
+  }
+
   let uploadedFiles = [];
   if (req.files) {
     if (Array.isArray(req.files)) {
@@ -322,6 +325,32 @@ async function uploadImages(req, res) {
   if (imagePaths.length > 0) {
     await workOrdersRepository.addImages(orderId, imagePaths);
   }
+
+  const updated = await workOrdersRepository.findById(orderId);
+  ok(res, updated);
+}
+
+/**
+ * Technician or Manager deletes an evidence image for a work order
+ * DELETE /api/work-orders/:id/images
+ */
+async function deleteImage(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) throw new ApiError(404, 'Work order not found');
+
+  if (req.user.role === ROLES.TECHNICIAN && order.technician_id !== req.user.userId) {
+    throw new ApiError(403, 'You can only manage images for your own work orders');
+  }
+
+  if (order.task_status !== TASK_STATUS.IN_PROGRESS && order.task_status !== 'In Progress') {
+    throw new ApiError(400, 'Images can only be deleted when the work order is In Progress');
+  }
+
+  const imagePath = req.body.imagePath;
+  if (!imagePath) throw new ApiError(400, 'imagePath is required');
+
+  await workOrdersRepository.removeImage(orderId, imagePath);
 
   const updated = await workOrdersRepository.findById(orderId);
   ok(res, updated);
@@ -543,14 +572,17 @@ async function reopen(req, res) {
     await faultReportsRepository.updateStatus(order.report_id, FAULT_REPORT_STATUS.PROCESSING);
   }
 
-  // Record status history log
-  await workOrdersRepository.addStatusHistory({
-    orderId,
-    oldStatus: 'Completed',
-    newStatus: 'In Progress',
-    note: `User reported issue persists: ${reason}`,
-    changedBy: req.user ? req.user.userId : null,
-  });
+  // Update note in status history created by MySQL trigger so user reason is attached
+  try {
+    const { pool } = require('../../config/db');
+    await pool.execute(
+      `UPDATE WorkOrderStatusHistory
+       SET note = ?
+       WHERE order_id = ? AND new_status = 'In Progress'
+       ORDER BY history_id DESC LIMIT 1`,
+      [`User reported issue persists: ${reason}`, orderId]
+    );
+  } catch (e) {}
 
   // Notify Technician & Manager
   if (order.technician_id) {
@@ -628,6 +660,6 @@ async function addComment(req, res) {
   created(res, newComment);
 }
 
-module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign, updateDeadline, reopen, uploadImages, getComments, addComment };
+module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign, updateDeadline, reopen, uploadImages, deleteImage, getComments, addComment };
 
 

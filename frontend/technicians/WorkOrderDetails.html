@@ -901,16 +901,28 @@
     const timelineContainer = document.getElementById('detailTimelineContainer');
     if (!timelineContainer) return;
 
-    let history = (order.statusHistory && order.statusHistory.length > 0)
-      ? order.statusHistory.map(h => ({
-          task_status: h.task_status || h.new_status || 'Assigned',
-          changed_at: h.changed_at,
-          notes: h.notes || h.note || 'Status updated in system.'
-        }))
-      : [
-          { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
-          { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
-        ];
+    let history = [];
+    if (order.statusHistory && order.statusHistory.length > 0) {
+      history = order.statusHistory.map(h => ({
+        task_status: h.task_status || h.new_status || 'Assigned',
+        changed_at: h.changed_at,
+        notes: h.notes || h.note || 'Status updated in system.'
+      }));
+
+      // Ensure initial milestones Assigned and Received are present at beginning
+      const assignedDate = order.assigned_at || (history[0] ? history[0].changed_at : '2026-07-20 10:00:00');
+      if (!history.some(h => (h.task_status || '').includes('Received'))) {
+        history.unshift({ task_status: 'Received', changed_at: assignedDate, notes: 'Work order accepted by technician.' });
+      }
+      if (!history.some(h => (h.task_status || '').includes('Assigned'))) {
+        history.unshift({ task_status: 'Assigned', changed_at: assignedDate, notes: 'System assigned task to Technician Portal.' });
+      }
+    } else {
+      history = [
+        { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
+        { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
+      ];
+    }
 
     const displayStatus = getDisplayTaskStatus(order);
     if (displayStatus === 'In Progress' && !history.some(h => (h.task_status || '').includes('Progress'))) {

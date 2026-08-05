@@ -22,24 +22,26 @@ async function create({ orderId, reporterId, isConfirmed, rating, feedback }) {
     );
   }
 
-  // Update WorkOrder task_status to Closed
-  await pool.execute(
-    `UPDATE WorkOrders SET task_status = 'Closed', closed_at = CURRENT_TIMESTAMP WHERE order_id = ?`,
-    [orderId]
-  );
+  if (isConfirmed) {
+    // Update WorkOrder task_status to Closed
+    await pool.execute(
+      `UPDATE WorkOrders SET task_status = 'Closed', closed_at = CURRENT_TIMESTAMP WHERE order_id = ?`,
+      [orderId]
+    );
 
-  // Log to WorkOrderStatusHistory: system auto-close
-  await pool.execute(
-    `INSERT INTO WorkOrderStatusHistory (order_id, old_status, new_status, changed_by, note)
-     VALUES (?, 'Completed', 'Closed', NULL, 'System auto-closed after user confirmation')`,
-    [orderId]
-  );
+    // Log to WorkOrderStatusHistory: system auto-close
+    await pool.execute(
+      `INSERT INTO WorkOrderStatusHistory (order_id, old_status, new_status, changed_by, note)
+       VALUES (?, 'Completed', 'Closed', NULL, 'System auto-closed after user confirmation')`,
+      [orderId]
+    );
 
-  // Update FaultReport status to Completed
-  await pool.execute(
-    `UPDATE FaultReports fr JOIN WorkOrders wo ON fr.report_id = wo.report_id SET fr.status = 'Completed' WHERE wo.order_id = ?`,
-    [orderId]
-  );
+    // Update FaultReport status to Closed
+    await pool.execute(
+      `UPDATE FaultReports fr JOIN WorkOrders wo ON fr.report_id = wo.report_id SET fr.status = 'Closed' WHERE wo.order_id = ?`,
+      [orderId]
+    );
+  }
 
   // Fetch details to send notifications
   const [woRows] = await pool.execute(

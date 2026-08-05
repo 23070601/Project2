@@ -317,6 +317,24 @@
         }
       });
 
+      // Check all reports in reportMap for local confirmation or reopen state overrides
+      reportMap.forEach((rep, rId) => {
+        try {
+          const savedReopen = localStorage.getItem('vnu_reopened_' + rId) || localStorage.getItem('vnu_reopened_' + rep.report_id);
+          if (savedReopen) {
+            rep.status = 'Processing';
+          } else {
+            const savedConfirm = localStorage.getItem('vnu_confirmation_' + rId) || localStorage.getItem('vnu_confirmation_' + rep.report_id);
+            if (savedConfirm) {
+              const c = JSON.parse(savedConfirm);
+              if (c && c.is_confirmed) {
+                rep.status = 'Closed';
+              }
+            }
+          }
+        } catch(e) {}
+      });
+
       allReports = Array.from(reportMap.values()).sort((a, b) => {
         return new Date(b.reported_at || 0) - new Date(a.reported_at || 0);
       });
@@ -372,10 +390,17 @@
 
         // Status tab filter
         if (currentStatus) {
-          if (currentStatus === 'Pending' && !['Pending', 'Pending Approval'].includes(s)) return false;
-          if (currentStatus === 'In Progress' && !['In Progress', 'Processing'].includes(s)) return false;
-          if (currentStatus === 'Completed' && !['Completed', 'Resolved', 'Closed'].includes(s)) return false;
-          if (currentStatus === 'Rejected' && !['Rejected', 'Cancelled'].includes(s)) return false;
+          if (['Pending', 'Pending Approval'].includes(currentStatus)) {
+            if (!['Pending', 'Pending Approval'].includes(s)) return false;
+          } else if (['In Progress', 'Processing'].includes(currentStatus)) {
+            if (!['In Progress', 'Processing', 'Assigned', 'Received'].includes(s)) return false;
+          } else if (['Completed', 'Resolved', 'Closed'].includes(currentStatus)) {
+            if (!['Completed', 'Resolved', 'Closed'].includes(s)) return false;
+          } else if (['Rejected', 'Cancelled'].includes(currentStatus)) {
+            if (!['Rejected', 'Cancelled'].includes(s)) return false;
+          } else if (s !== currentStatus) {
+            return false;
+          }
         }
 
         // Priority filter
@@ -551,10 +576,10 @@
             if (badge) {
               const statusVal = b.dataset.status || '';
               let badgeColor = 'bg-gray-100 text-gray-800';
-              if (statusVal === 'Pending') badgeColor = 'bg-amber-100 text-amber-800';
-              else if (statusVal === 'In Progress') badgeColor = 'bg-blue-100 text-blue-800';
-              else if (statusVal === 'Completed') badgeColor = 'bg-green-100 text-green-800';
-              else if (statusVal === 'Rejected') badgeColor = 'bg-red-100 text-red-800';
+              if (['Pending', 'Pending Approval'].includes(statusVal)) badgeColor = 'bg-amber-100 text-amber-800';
+              else if (['In Progress', 'Processing'].includes(statusVal)) badgeColor = 'bg-blue-100 text-blue-800';
+              else if (['Completed', 'Resolved', 'Closed'].includes(statusVal)) badgeColor = 'bg-green-100 text-green-800';
+              else if (['Rejected', 'Cancelled'].includes(statusVal)) badgeColor = 'bg-red-100 text-red-800';
               badge.className = `ml-1 text-xs px-2 py-0.5 rounded-full ${badgeColor} font-bold`;
             }
           }
