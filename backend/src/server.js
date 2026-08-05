@@ -43,10 +43,20 @@ function startOverdueAlertsCron() {
   setInterval(run, intervalMs);
 }
 
+async function ensureFaultReportsColumns() {
+  try {
+    await pool.execute(`ALTER TABLE FaultReports ADD COLUMN rejection_reason VARCHAR(255) NULL`);
+  } catch (e) {}
+  try {
+    await pool.execute(`ALTER TABLE FaultReports ADD COLUMN rejected_at TIMESTAMP NULL`);
+  } catch (e) {}
+}
+
 async function start() {
   try {
     await checkConnection();
     await ensureSeedPasswords();
+    await ensureFaultReportsColumns();
     app.listen(env.port, () => {
       console.log(`[Server] VNUIS Asset Maintenance DSS API running on http://localhost:${env.port}`);
       console.log(`[Server] Environment: ${env.nodeEnv}`);

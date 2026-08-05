@@ -533,7 +533,7 @@
     renderAccordions();
     const select = document.getElementById('sortBySelect');
     const sortLabel = select.options[select.selectedIndex].text;
-    if (window.showToast) showToast(`Đã sắp xếp danh sách theo: ${sortLabel}`, 'info');
+    if (window.showToast) showToast(`Sorted list by: ${sortLabel}`, 'info');
   });
 
   async function confirmDeleteRoom() {
@@ -544,13 +544,13 @@
     try {
       if (window.Api && deletingRoomId) {
         await Api.delete(`/classrooms/${deletingRoomId}`);
-        if (window.showToast) showToast('Đã xóa phòng học thành công!', 'success');
+        if (window.showToast) showToast('Classroom deleted successfully!', 'success');
         else alert(`Classroom deleted successfully.`);
         closeDeleteModal();
         await loadClassrooms();
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || `Failed to delete classroom.`);
       closeDeleteModal();
     } finally {
@@ -746,7 +746,7 @@
     a.download = `assets_report_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    if (window.showToast) showToast('Đã xuất báo cáo CSV thành công!', 'success');
+    if (window.showToast) showToast('CSV report exported successfully!', 'success');
   }
 
   loadClassrooms();

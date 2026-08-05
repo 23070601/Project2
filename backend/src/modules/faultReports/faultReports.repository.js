@@ -23,7 +23,32 @@ const BASE_SELECT = `
   LEFT JOIN Users t ON t.user_id = wo.technician_id
 `;
 
-async function findAll({ status, priority, reporterId, roomId } = {}) {
+async function getImages(reportId) {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT image_path FROM ReportImages WHERE report_id = ? ORDER BY image_id ASC`,
+      [reportId]
+    );
+    return rows.map(r => r.image_path);
+  } catch (e) {
+    return [];
+  }
+}
+
+async function addImages(reportId, imagePaths) {
+  if (!imagePaths || !imagePaths.length) return;
+  try {
+    const values = imagePaths.map(path => [reportId, path]);
+    await pool.query(
+      `INSERT INTO ReportImages (report_id, image_path) VALUES ?`,
+      [values]
+    );
+  } catch (e) {
+    console.warn('Failed to insert into ReportImages:', e.message);
+  }
+}
+
+async function findAll({ status, priority, reporterId, roomId, sort } = {}) {
   const clauses = [];
   const params = [];
 
@@ -43,30 +68,87 @@ async function findAll({ status, priority, reporterId, roomId } = {}) {
   if (reporterId) { clauses.push('fr.reporter_id = ?'); params.push(reporterId); }
   if (roomId) { clauses.push('fr.room_id = ?'); params.push(roomId); }
 
+  const orderSql = sort === 'oldest' ? 'ORDER BY fr.reported_at ASC' : 'ORDER BY fr.reported_at DESC';
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const [rows] = await pool.query(
-    `${BASE_SELECT} ${where} ORDER BY fr.reported_at DESC`,
+    `${BASE_SELECT} ${where} ${orderSql}`,
     params
   );
+
+  const reportIds = rows.map(r => r.report_id);
+  if (reportIds.length > 0) {
+    try {
+      const [imgRows] = await pool.query(
+        `SELECT report_id, image_path FROM ReportImages WHERE report_id IN (?) ORDER BY image_id ASC`,
+        [reportIds]
+      );
+      const imgMap = {};
+      imgRows.forEach(r => {
+        if (!imgMap[r.report_id]) imgMap[r.report_id] = [];
+        imgMap[r.report_id].push(r.image_path);
+      });
+      rows.forEach(r => {
+        if (imgMap[r.report_id] && imgMap[r.report_id].length > 0) {
+          r.images = imgMap[r.report_id];
+        } else if (r.image_path) {
+          r.images = [r.image_path];
+        } else {
+          r.images = [];
+        }
+      });
+    } catch (e) {
+      rows.forEach(r => {
+        r.images = r.image_path ? [r.image_path] : [];
+      });
+    }
+  }
+
   return rows;
 }
 
 async function findById(reportId) {
   const [rows] = await pool.execute(`${BASE_SELECT} WHERE fr.report_id = ?`, [reportId]);
-  return rows[0] || null;
+  if (!rows[0]) return null;
+  const report = rows[0];
+  const images = await getImages(reportId);
+  if (images.length > 0) {
+    report.images = images;
+  } else if (report.image_path) {
+    report.images = [report.image_path];
+  } else {
+    report.images = [];
+  }
+  return report;
 }
 
-async function create({ reporterId, assetId, roomId, description, imagePath, priority }) {
+async function create({ reporterId, assetId, roomId, description, imagePath, priority, images }) {
+  const primaryImagePath = imagePath || (images && images.length > 0 ? images[0] : null);
   const [result] = await pool.execute(
     `INSERT INTO FaultReports (reporter_id, asset_id, room_id, description, image_path, priority)
      VALUES (?, ?, ?, ?, ?, ?)`,
-    [reporterId, assetId, roomId, description, imagePath, priority]
+    [reporterId, assetId, roomId, description, primaryImagePath, priority]
   );
-  return findById(result.insertId);
+  const reportId = result.insertId;
+  if (images && images.length > 0) {
+    await addImages(reportId, images);
+  }
+  return findById(reportId);
 }
 
-async function updateStatus(reportId, status) {
-  await pool.execute('UPDATE FaultReports SET status = ? WHERE report_id = ?', [status, reportId]);
+async function updateStatus(reportId, status, rejectionReason = null) {
+  if (status === 'Rejected') {
+    try {
+      await pool.execute(
+        `UPDATE FaultReports SET status = ?, rejection_reason = ?, rejected_at = NOW() WHERE report_id = ?`,
+        [status, rejectionReason, reportId]
+      );
+    } catch (e) {
+      // Fallback if column doesn't exist yet
+      await pool.execute('UPDATE FaultReports SET status = ? WHERE report_id = ?', [status, reportId]);
+    }
+  } else {
+    await pool.execute('UPDATE FaultReports SET status = ? WHERE report_id = ?', [status, reportId]);
+  }
   return findById(reportId);
 }
 
@@ -85,4 +167,4 @@ async function remove(reportId) {
   await pool.execute('DELETE FROM FaultReports WHERE report_id = ?', [reportId]);
 }
 
-module.exports = { findAll, findById, create, updateStatus, getStatusHistory, remove };
+module.exports = { findAll, findById, create, updateStatus, getStatusHistory, remove, addImages, getImages };

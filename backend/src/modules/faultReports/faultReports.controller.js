@@ -15,9 +15,9 @@ const { ROLES } = require('../../shared/constants/roles');
  * GET /api/fault-reports
  */
 async function list(req, res) {
-  const { status, priority, roomId, mine } = req.query;
+  const { status, priority, roomId, mine, sort } = req.query;
 
-  const filters = { status, priority, roomId: roomId ? Number(roomId) : undefined };
+  const filters = { status, priority, roomId: roomId ? Number(roomId) : undefined, sort };
   
   // Regular users can only see their own reports
   if (req.user.role === ROLES.USER || mine === 'true') {
@@ -54,12 +54,45 @@ async function create(req, res) {
   requireFields(req.body, ['roomId', 'description']);
   const { roomId, assetId, description, urgencyHint } = req.body;
 
-  // Get image path from uploaded file if present
-  let imagePath = null;
-  if (req.file) {
-    imagePath = '/uploads/' + req.file.filename;
-    console.log('File uploaded:', imagePath);
+  // Get image paths from uploaded files if present
+  let uploadedFiles = [];
+  if (req.files) {
+    if (Array.isArray(req.files)) {
+      uploadedFiles = req.files;
+    } else if (req.files.images && req.files.images.length > 0) {
+      uploadedFiles = req.files.images;
+    } else if (req.files.evidence && req.files.evidence.length > 0) {
+      uploadedFiles = req.files.evidence;
+    } else {
+      Object.values(req.files).forEach(fileArray => {
+        if (Array.isArray(fileArray)) {
+          uploadedFiles = uploadedFiles.concat(fileArray);
+        }
+      });
+    }
+  } else if (req.file) {
+    uploadedFiles.push(req.file);
   }
+
+  const seen = new Set();
+  uploadedFiles = uploadedFiles.filter(f => {
+    if (!f || !f.filename) return false;
+    if (seen.has(f.filename)) return false;
+    seen.add(f.filename);
+    return true;
+  });
+
+  if (uploadedFiles.length > 5) {
+    throw new ApiError(400, 'Maximum 5 images allowed per report');
+  }
+  for (const f of uploadedFiles) {
+    if (f.size > 5 * 1024 * 1024) {
+      throw new ApiError(400, `File ${f.originalname || 'uploaded'} exceeds maximum limit of 5MB`);
+    }
+  }
+
+  const imagePaths = uploadedFiles.map(f => '/uploads/' + f.filename);
+  const imagePath = imagePaths.length > 0 ? imagePaths[0] : null;
 
   // Validate classroom exists
   let room = await classroomsRepository.findById(roomId);
@@ -96,6 +129,7 @@ async function create(req, res) {
     roomId: room.room_id,
     description: description,
     imagePath: imagePath,
+    images: imagePaths,
     priority: priority,
   });
 
@@ -135,7 +169,7 @@ async function updateStatus(req, res) {
   if (!existing) throw new ApiError(404, 'Fault report not found');
 
   // Update status
-  const updated = await faultReportsRepository.updateStatus(reportId, req.body.status);
+  const updated = await faultReportsRepository.updateStatus(reportId, req.body.status, req.body.rejectionReason);
 
   // Log audit trail
   await auditLogRepository.log({

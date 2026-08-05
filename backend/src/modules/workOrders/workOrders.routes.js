@@ -5,6 +5,8 @@ const { requireRole } = require('../../middlewares/role.middleware');
 const { ROLES } = require('../../shared/constants/roles');
 const asyncHandler = require('../../shared/utils/asyncHandler');
 
+const upload = require('../../middlewares/upload.middleware');
+
 const router = express.Router();
 
 router.use(authenticate);
@@ -26,14 +28,28 @@ router.patch('/:id/reject', requireRole(ROLES.TECHNICIAN), asyncHandler(controll
 // Managers/WorkOrderDetails.html cập nhật deadline
 router.patch('/:id/deadline', requireRole(ROLES.MANAGER), asyncHandler(controller.updateDeadline));
 
+// Technicians/WorkOrderDetails.html upload minh chứng sửa chữa (multi-file)
+router.post(
+  '/:id/images',
+  requireRole(ROLES.TECHNICIAN, ROLES.MANAGER),
+  upload.fields([{ name: 'images', maxCount: 5 }, { name: 'evidence', maxCount: 5 }]),
+  asyncHandler(controller.uploadImages)
+);
+
 // Technicians/WorkOrderDetails.html cập nhật tiến độ
-router.patch('/:id/status', requireRole(ROLES.TECHNICIAN, ROLES.MANAGER), asyncHandler(controller.updateStatus));
+router.patch(
+  '/:id/status',
+  requireRole(ROLES.TECHNICIAN, ROLES.MANAGER),
+  upload.fields([{ name: 'images', maxCount: 5 }, { name: 'evidence', maxCount: 5 }]),
+  asyncHandler(controller.updateStatus)
+);
 
 // Managers reassign technician
 router.patch('/:id/reassign', requireRole(ROLES.MANAGER), asyncHandler(controller.reassign));
 
-// User reopens WorkOrder when issue persists
-router.post('/:orderId/reopen', asyncHandler(controller.reopen));
-router.post('/:id/reopen', asyncHandler(controller.reopen));
+// Comments timeline for Manager - Technician communication
+router.get('/:id/comments', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.getComments));
+router.post('/:id/comments', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.addComment));
 
 module.exports = router;
+

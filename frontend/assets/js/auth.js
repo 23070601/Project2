@@ -23,6 +23,9 @@ const Auth = (() => {
         realToken = result.token;
       }
     } catch (err) {
+      if (err.status && err.status >= 400 && err.status < 500) {
+        throw err;
+      }
       console.warn('Backend login API unavailable/error, fallback to frontend demo auth:', err.message);
     }
 
