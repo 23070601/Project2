@@ -3,6 +3,7 @@ const classroomsRepository = require('../classrooms/classrooms.repository');
 const assetsRepository = require('../assets/assets.repository');
 const auditLogRepository = require('../auditLog/auditLog.repository');
 const notificationsRepository = require('../notifications/notifications.repository');
+const links = require('../notifications/notificationLinks');
 const { calculatePriority } = require('./priority.service');
 const { ok, created, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, requireOneOf, toPositiveInt } = require('../../shared/utils/validators');
@@ -105,12 +106,16 @@ async function create(req, res) {
     userId: req.user.userId,
     reportId: report.report_id,
     message: `Fault report #${report.report_id} (${assetOrRoom}) has been created successfully.`,
+    title: 'Fault Report Submitted',
+    actionUrl: links.userReports,
   });
 
   // Send notification to all Managers
   await notificationsRepository.notifyRole('Manager', {
     reportId: report.report_id,
     message: `New fault report #${report.report_id} (${assetOrRoom}) requires manager review and assignment.`,
+    title: 'New Fault Report Pending Review',
+    actionUrl: links.managerPending,
   });
 
   created(res, { ...report, dss1Score: score });
@@ -152,6 +157,8 @@ async function updateStatus(req, res) {
     message: `Fault report #${reportId} status has been updated to: ${req.body.status}${
       req.body.rejectionReason ? ` (Reason: ${req.body.rejectionReason})` : ''
     }.`,
+    title: 'Fault Report Status Updated',
+    actionUrl: links.userReports,
   });
 
   ok(res, updated);

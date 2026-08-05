@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const env = require('../../config/env');
 const usersRepository = require('./users.repository');
 const auditLogRepository = require('../auditLog/auditLog.repository');
+const { ensureUserCanBeDeactivated } = require('./userStatus.service');
 const { ok, created, noContent, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, requireOneOf, isValidEmail, toPositiveInt } = require('../../shared/utils/validators');
 const { ALL_ROLES, ROLES } = require('../../shared/constants/roles');
@@ -130,6 +131,9 @@ async function toggleActive(req, res) {
   if (newActive === undefined) {
     newActive = !existing.is_active;
   }
+
+  const { pool } = require('../../config/db');
+  await ensureUserCanBeDeactivated({ pool, user: existing, newActive });
 
   const updated = await usersRepository.update(userId, { isActive: newActive });
 

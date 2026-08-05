@@ -145,23 +145,12 @@
           </div>
         </div>
 
-        <!-- Right Column: Evidence, History, Actions (4 cols) -->
+        <!-- Right Column: Timeline & Actions (4 cols) -->
         <div class="col-span-12 lg:col-span-4 space-y-6">
-          <!-- Repair Evidence Card -->
-          <div class="bg-white rounded-xl border border-outline-variant/20 shadow-sm p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-headline-sm font-headline-sm">Repair Evidence</h3>
-              <span id="managerEvidenceCount" class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">0/5</span>
-            </div>
-            <div id="managerEvidenceGallery" class="grid grid-cols-2 gap-3">
-              <p class="text-body-sm text-on-surface-variant col-span-2 italic">No repair evidence uploaded yet.</p>
-            </div>
-          </div>
-
           <!-- Repair History Timeline -->
           <div class="bg-white rounded-xl border border-outline-variant/20 shadow-sm p-6">
-            <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2 mb-4">Repair History</h3>
-            <div id="repairTimelineList" class="relative space-y-6 pl-6 before:content-[''] before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant/20">
+            <h3 class="text-headline-sm font-headline-sm mb-6">Repair History</h3>
+            <div id="repairTimelineList" class="relative space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-outline-variant/30">
             </div>
           </div>
 
@@ -279,7 +268,7 @@
   async function confirmReassign() {
     const selectedTechId = document.getElementById('reassignTechSelect').value;
     if (!selectedTechId) {
-      if (window.showToast) showToast('Please select a technician!', 'warning');
+      if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
       else alert('Please select a technician.');
       return;
     }
@@ -287,7 +276,7 @@
     try {
       if (window.Api) {
         await Api.patch(`/work-orders/${cleanId}/reassign`, { technicianId: Number(selectedTechId) });
-        if (window.showToast) showToast('Work order reassigned successfully!', 'success');
+        if (window.showToast) showToast('Giao lại công việc thành công!', 'success');
         else alert(`WorkOrder WO-${cleanId} reassigned successfully!`);
         closeReassignModal();
         setTimeout(() => {
@@ -295,14 +284,14 @@
         }, 1000);
       }
     } catch (err) {
-      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
       else alert(err.message || 'Failed to reassign WorkOrder.');
     }
   }
 
   async function cancelWorkOrder() {
     if (!activeReportId) {
-      if (window.showToast) showToast('Cannot cancel: Report ID not found.', 'error');
+      if (window.showToast) showToast('Không thể hủy: Không tìm thấy ID báo cáo.', 'error');
       else alert('Cannot cancel: Report ID not loaded.');
       return;
     }
@@ -313,14 +302,14 @@
     try {
       if (window.Api) {
         await Api.patch(`/fault-reports/${activeReportId}/status`, { status: 'Cancelled' });
-        if (window.showToast) showToast('Work order cancelled successfully!', 'success');
+        if (window.showToast) showToast('Hủy công việc thành công!', 'success');
         else alert(`WorkOrder WO-${cleanId} and its report have been cancelled successfully!`);
         setTimeout(() => {
           window.location.href = `PendingRequest.html?tab=${sourceTab}`;
         }, 1000);
       }
     } catch (err) {
-      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
       else alert(err.message || 'Failed to cancel WorkOrder.');
     }
   }
@@ -400,7 +389,9 @@
             document.getElementById('woTechnician').textContent = data.technician_name;
             document.getElementById('rejectedByText').textContent = data.technician_name;
           }
-          if (data.reporter_name) document.getElementById('reportReporter').textContent = data.reporter_name;
+          if (data.reporter_name || data.reporter_email) {
+            document.getElementById('reportReporter').textContent = data.reporter_name || data.reporter_email;
+          }
           if (data.description) document.getElementById('reportDescription').textContent = `"${data.description}"`;
           if (data.assigned_at) document.getElementById('woAssignedDate').textContent = UiHelpers.formatDate(data.assigned_at);
           const deadlineEl = document.getElementById('woDeadlineDate');
@@ -455,161 +446,21 @@
 
           // Timeline
           const timeline = document.getElementById('repairTimelineList');
-          if (timeline) {
-            let history = (data.statusHistory && Array.isArray(data.statusHistory) && data.statusHistory.length > 0)
-              ? [...data.statusHistory]
-              : [];
-
-            const currentStatus = data.task_status || 'Assigned';
-            const isRejected = data.technician_response === 'Rejected';
-            const assignedTime = data.assigned_at || '2026-07-21 07:52:24';
-            const statusOrder = ['Assigned', 'Received', 'In Progress', 'Completed', 'Closed'];
-            const currentIdx = statusOrder.indexOf(currentStatus);
-
-            if (history.length === 0) {
-              if (isRejected) {
-                history = [
-                  { old_status: null, new_status: 'Assigned', changed_at: assignedTime, note: 'System assigned task to Technician Portal.' },
-                  { old_status: 'Assigned', new_status: 'Assigned', changed_at: assignedTime, note: `Technician rejected the WorkOrder: ${data.rejection_reason || 'No reason specified'}` }
-                ];
-              } else {
-                const defaultNotes = {
-                  'Assigned': 'System assigned task to Technician Portal.',
-                  'Received': 'Work order accepted by technician.',
-                  'In Progress': 'Technician started the repair process.',
-                  'Completed': 'Repair completed successfully.',
-                  'Closed': 'Work order closed officially.'
-                };
-                const baseDate = new Date(String(assignedTime).includes('T') ? assignedTime : String(assignedTime).replace(' ', 'T'));
-                const isValidBase = !isNaN(baseDate.getTime());
-                for (let i = 0; i <= (currentIdx >= 0 ? currentIdx : 0); i++) {
-                  const stepStatus = statusOrder[i];
-                  const prevStatus = i > 0 ? statusOrder[i - 1] : null;
-                  const stepTime = isValidBase
-                    ? new Date(baseDate.getTime() + i * 15 * 60000).toISOString()
-                    : assignedTime;
-                  history.push({
-                    old_status: prevStatus,
-                    new_status: stepStatus,
-                    changed_at: stepTime,
-                    note: defaultNotes[stepStatus] || 'Status updated.'
-                  });
-                }
-              }
-            } else {
-              const hasCurrent = history.some(h => (h.new_status || h.task_status) === currentStatus);
-              if (!hasCurrent && currentIdx > 0) {
-                const lastEntry = history[history.length - 1];
-                history.push({
-                  old_status: lastEntry.new_status || lastEntry.task_status || 'Assigned',
-                  new_status: currentStatus,
-                  changed_at: data.resolved_at || new Date().toISOString(),
-                  note: `Status updated to ${currentStatus}.`
-                });
-              }
-            }
-
-            const statusOrderMap = { 'Assigned': 1, 'Received': 2, 'In Progress': 3, 'Completed': 4, 'Closed': 5 };
-            const historySorted = [...history].sort((a, b) => {
-              const timeDiff = new Date(b.changed_at || 0) - new Date(a.changed_at || 0);
-              if (timeDiff !== 0) return timeDiff;
-              const stepA = statusOrderMap[a.new_status || a.task_status] || 0;
-              const stepB = statusOrderMap[b.new_status || b.task_status] || 0;
-              return stepB - stepA;
-            });
-
-            const statusTextColors = {
-              'Completed': 'text-green-600',
-              'Closed': 'text-slate-600',
-              'Resolved': 'text-green-600',
-              'In Progress': 'text-blue-600',
-              'Processing': 'text-blue-600',
-              'Assigned': 'text-blue-600',
-              'Received': 'text-indigo-600',
-              'Pending Approval': 'text-amber-600',
-              'Pending': 'text-amber-600',
-              'Rejected': 'text-red-600',
-              'Cancelled': 'text-slate-500'
-            };
-
-            const dotBgColors = {
-              'Completed': 'bg-green-500',
-              'Closed': 'bg-slate-400',
-              'Resolved': 'bg-green-500',
-              'In Progress': 'bg-blue-500',
-              'Processing': 'bg-blue-500',
-              'Assigned': 'bg-blue-500',
-              'Received': 'bg-indigo-500',
-              'Pending Approval': 'bg-amber-400',
-              'Pending': 'bg-amber-400',
-              'Rejected': 'bg-red-500',
-              'Cancelled': 'bg-slate-400'
-            };
-
-            timeline.innerHTML = historySorted.map((h) => {
-              const statusText = h.new_status || h.task_status || h.status || 'Assigned';
-              const textColor = statusTextColors[statusText] || 'text-on-surface-variant';
-              const dotColor = dotBgColors[statusText] || 'bg-slate-300';
-              const note = h.note || '';
-              const rawDate = h.changed_at || h.created_at;
-              let dateStr = rawDate;
-              if (rawDate) {
-                try {
-                  const d = new Date(String(rawDate).includes('T') ? rawDate : String(rawDate).replace(' ', 'T'));
-                  if (!isNaN(d.getTime())) {
-                    dateStr = d.toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    });
-                  }
-                } catch (e) {}
-              }
-
+          if (timeline && data.statusHistory && data.statusHistory.length > 0) {
+            timeline.innerHTML = data.statusHistory.map(h => {
+              let circleColor = 'bg-secondary-fixed';
+              if (h.new_status === 'Completed' || h.new_status === 'Closed') circleColor = 'bg-green-500';
+              if (h.new_status === 'In Progress') circleColor = 'bg-amber-500';
+              if (h.new_status === 'Assigned') circleColor = 'bg-blue-500';
               return `
-                <div class="relative">
-                  <div class="absolute -left-[23px] top-1.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white shadow-xs z-10"></div>
-                  <p class="text-xs font-bold text-on-surface mb-0.5">${UiHelpers.escapeHtml(dateStr)}</p>
-                  <p class="text-body-sm font-bold ${textColor}">Status: ${UiHelpers.escapeHtml(statusText)}</p>
-                  ${note ? `<p class="text-body-sm text-on-surface-variant mt-1 leading-relaxed">Note: ${UiHelpers.escapeHtml(note)}</p>` : ''}
+                <div class="relative pl-8">
+                  <div class="absolute left-0 top-1.5 w-6 h-6 rounded-full ${circleColor} border-4 border-white shadow-sm"></div>
+                  <p class="text-label-md font-bold text-on-surface">${UiHelpers.formatDate(h.changed_at)}</p>
+                  <p class="text-body-sm font-medium text-on-surface-variant">${h.new_status}</p>
+                  <p class="text-body-sm text-on-surface-variant mt-1">"${h.note || ''}"</p>
                 </div>
               `;
             }).join('');
-          }
-
-          // Evidence rendering for Manager
-          const mgrGallery = document.getElementById('managerEvidenceGallery');
-          const mgrBadge = document.getElementById('managerEvidenceCount');
-          let images = (data.images && Array.isArray(data.images)) ? [...data.images] : [];
-          
-          if (images.length === 0) {
-            try {
-              const storedLocal = localStorage.getItem(`vnuis_evidence_list_${cleanId}`);
-              if (storedLocal) images = JSON.parse(storedLocal);
-            } catch (e) {}
-          }
-
-          if (mgrBadge) mgrBadge.textContent = `${images.length}/5`;
-          if (mgrGallery) {
-            if (images.length === 0) {
-              mgrGallery.innerHTML = `<p class="text-body-sm text-on-surface-variant col-span-2 italic">No repair evidence uploaded yet.</p>`;
-            } else {
-              mgrGallery.innerHTML = images.map(img => {
-                let src = img.image_path || img.src;
-                if (src && src.startsWith('/uploads')) {
-                  const apiBase = (window.Config && window.Config.API_BASE_URL) || (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) || 'http://localhost:4000/api/v1';
-                  src = `${apiBase.replace('/api/v1', '')}${src}`;
-                }
-
-                return `
-                  <div class="h-28 rounded-lg overflow-hidden border border-outline-variant/30 relative group shadow-xs">
-                    <img src="${UiHelpers.escapeHtml(src)}" class="w-full h-full object-cover" alt="Evidence photo">
-                  </div>
-                `;
-              }).join('');
-            }
           }
 
           // Load technician suggestions for reassigning
@@ -629,6 +480,5 @@
 
   loadWorkOrderData();
 </script>
-
 </body>
 </html>

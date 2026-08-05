@@ -13,7 +13,7 @@ const Auth = (() => {
     Manager: '../managers/ManagerDashboard.html',
   };
 
-  async function login(email, password, selectedRole) {
+  async function login(email, password) {
     let user = null;
     let realToken = null;
     try {
@@ -34,8 +34,6 @@ const Auth = (() => {
       const expectedPassword = savedPw ? savedPw : '123456';
 
       if (password === expectedPassword) {
-        const selRoleNorm = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1).toLowerCase()) : null;
-
         // Catalog các tài khoản seed khớp dữ liệu vnuis_asset_maintenance_dss.sql
         const DEMO_USERS = {
           'lecturer.a@vnuis.edu.vn': { user_id: 1, full_name: 'Nguyen Van A', role: 'User' },
@@ -62,7 +60,7 @@ const Auth = (() => {
             role: seedUser.role
           };
         } else {
-          let role = selRoleNorm || 'User';
+          let role = 'User';
           if (cleanEmail.includes('tech')) role = 'Technician';
           else if (cleanEmail.includes('manager') || cleanEmail.includes('admin')) role = 'Manager';
 
@@ -77,15 +75,6 @@ const Auth = (() => {
           };
         }
       } else {
-        throw new Error('Invalid email or password. Please check your credentials.');
-      }
-    }
-
-    // Check if account role matches the selected role tab
-    if (selectedRole) {
-      const normSelected = selectedRole.toLowerCase();
-      const normUserRole = (user.role || '').toLowerCase();
-      if (normSelected !== normUserRole) {
         throw new Error('Invalid email or password. Please check your credentials.');
       }
     }
@@ -134,16 +123,11 @@ const Auth = (() => {
     return user;
   }
 
-  function getToken() {
-    return localStorage.getItem(TOKEN_KEY) || '';
-  }
-
-  const auth = { login, logout, getCurrentUser, isAuthenticated, homePageForRole, guard, getToken };
+  const auth = { login, logout, getCurrentUser, isAuthenticated, homePageForRole, guard };
 
   if (typeof window !== 'undefined') {
     window.Auth = auth;
   }
 
   return auth;
-
 })();

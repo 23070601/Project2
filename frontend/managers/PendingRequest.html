@@ -38,6 +38,10 @@
           <span class="font-label-lg">Pending Requests</span>
           <span id="pendingCountBadge" class="px-2 py-0.5 bg-primary-fixed text-primary text-xs rounded-full font-semibold">5</span>
         </button>
+        <button id="tab-rejected" onclick="switchTab('rejected')" class="px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg">
+          <span class="font-label-lg">Rejected Reports</span>
+          <span id="rejectedCountBadge" class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-xs rounded-full font-semibold">0</span>
+        </button>
         <button id="tab-assigned" onclick="switchTab('assigned')" class="px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg">
           <span class="font-label-lg">Assigned Tasks</span>
           <span id="assignedCountBadge" class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-xs rounded-full font-semibold">12</span>
@@ -130,6 +134,36 @@
               <button class="w-10 h-10 bg-primary text-white font-bold rounded-lg shadow-sm">1</button>
               <button class="p-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REJECTED REPORTS VIEW -->
+      <div id="rejected-reports-view" class="hidden">
+        <div class="w-full flex justify-between items-center mb-6">
+          <div class="flex items-center bg-white px-4 py-2 rounded-lg border border-outline-variant/30 w-[350px] shadow-sm">
+            <span class="material-symbols-outlined text-outline">search</span>
+            <input id="rejectedSearch" class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline-variant/60 outline-none" placeholder="Search rejected reports..." type="text">
+          </div>
+          <div class="text-body-sm text-on-surface-variant">Rejected reports are kept here for reference.</div>
+        </div>
+
+        <div class="w-full bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden mb-6">
+          <table class="w-full text-left border-collapse table-auto">
+            <thead>
+              <tr class="bg-primary text-white font-bold">
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">#</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Reporter</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Equipment</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Room</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider">Rejected Date</th>
+                <th class="px-6 py-4 text-label-lg uppercase tracking-wider text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="rejectedTableBody" class="divide-y divide-outline-variant/20"></tbody>
+          </table>
+          <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
+            <p id="rejectedPaginationInfo" class="text-body-sm text-on-surface-variant">No rejected reports yet.</p>
           </div>
         </div>
       </div>
@@ -502,31 +536,50 @@
 
   let currentActiveReqId = null;
   let allPendingReports = [];
+  let allRejectedReports = [];
   let allAssignedTasks = [];
 
   function switchTab(tabName) {
     const pendingView = document.getElementById('pending-requests-view');
+    const rejectedView = document.getElementById('rejected-reports-view');
     const assignedView = document.getElementById('assigned-tasks-view');
     const tabPendingBtn = document.getElementById('tab-pending');
+    const tabRejectedBtn = document.getElementById('tab-rejected');
     const tabAssignedBtn = document.getElementById('tab-assigned');
+
+    const activeClass = 'relative px-6 py-3 flex items-center gap-2 text-primary font-bold border-b-2 border-primary transition-all';
+    const inactiveClass = 'px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg';
+
+    pendingView.classList.add('hidden');
+    pendingView.classList.remove('block');
+    rejectedView.classList.add('hidden');
+    rejectedView.classList.remove('block');
+    assignedView.classList.add('hidden');
+    assignedView.classList.remove('block');
 
     if (tabName === 'pending') {
       pendingView.classList.remove('hidden');
       pendingView.classList.add('block');
-      assignedView.classList.add('hidden');
-      assignedView.classList.remove('block');
-
-      tabPendingBtn.className = 'relative px-6 py-3 flex items-center gap-2 text-primary font-bold border-b-2 border-primary transition-all';
-      tabAssignedBtn.className = 'px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg';
+      tabPendingBtn.className = activeClass;
+      tabRejectedBtn.className = inactiveClass;
+      tabAssignedBtn.className = inactiveClass;
+    } else if (tabName === 'rejected') {
+      rejectedView.classList.remove('hidden');
+      rejectedView.classList.add('block');
+      tabPendingBtn.className = inactiveClass;
+      tabRejectedBtn.className = activeClass;
+      tabAssignedBtn.className = inactiveClass;
     } else {
       assignedView.classList.remove('hidden');
       assignedView.classList.add('block');
-      pendingView.classList.add('hidden');
-      pendingView.classList.remove('block');
-
-      tabAssignedBtn.className = 'relative px-6 py-3 flex items-center gap-2 text-primary font-bold border-b-2 border-primary transition-all';
-      tabPendingBtn.className = 'px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg';
+      tabPendingBtn.className = inactiveClass;
+      tabRejectedBtn.className = inactiveClass;
+      tabAssignedBtn.className = activeClass;
     }
+  }
+
+  function getReporterDisplayName(report) {
+    return report?.reporter_name || report?.reporter_full_name || report?.full_name || report?.user_name || 'Anonymous';
   }
 
   function renderPendingTable(reports) {
@@ -537,7 +590,8 @@
       return;
     }
     tbody.innerHTML = reports.map(r => {
-      const initials = r.reporter_name ? r.reporter_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+      const reporterName = getReporterDisplayName(r);
+      const initials = reporterName ? reporterName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
       const cleanDesc = (r.description || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
       const priorityClass = r.priority === 'High' ? 'bg-error-container text-on-error-container' : (r.priority === 'Medium' ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-primary-fixed text-on-primary-fixed-variant');
       return `
@@ -546,7 +600,7 @@
           <td class="px-6 py-4">
             <div class="flex items-center gap-2">
               <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">${initials}</div>
-              <span class="font-medium">${UiHelpers.escapeHtml(r.reporter_name || 'Anonymous')}</span>
+              <span class="font-medium">${UiHelpers.escapeHtml(reporterName)}</span>
             </div>
           </td>
           <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
@@ -555,13 +609,61 @@
           <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(r.reported_at)}</td>
           <td class="px-6 py-4" onclick="event.stopPropagation()">
             <div class="flex items-center justify-center gap-2">
-              <button onclick="openApproveModal(${r.report_id}, '${r.reporter_name.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}', '${r.priority}', '${cleanDesc}')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-              <button onclick="openRejectModal(${r.report_id}, '${r.reporter_name.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+              <button onclick="openApproveModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}', '${r.priority}', '${cleanDesc}')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+              <button onclick="openRejectModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
             </div>
           </td>
         </tr>
       `;
     }).join('');
+  }
+
+  function renderRejectedTable(reports) {
+    const tbody = document.getElementById('rejectedTableBody');
+    if (!tbody) return;
+    if (!reports || reports.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant font-medium">No rejected reports found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = reports.map((r, index) => {
+      const reporterName = getReporterDisplayName(r);
+      const initials = reporterName ? reporterName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+      return `
+        <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'">
+          <td class="px-6 py-4 font-bold text-primary">${UiHelpers.formatReportId(r.report_id)}</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">${initials}</div>
+              <span class="font-medium">${UiHelpers.escapeHtml(reporterName)}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
+          <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(r.updated_at || r.reported_at)}</td>
+          <td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
+            <button onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">visibility</span> View</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    const pagInfo = document.getElementById('rejectedPaginationInfo');
+    if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} rejected reports`;
+  }
+
+  function filterRejected() {
+    const searchVal = document.getElementById('rejectedSearch').value.toLowerCase();
+    let filtered = allRejectedReports;
+    if (searchVal) {
+      filtered = filtered.filter(r => {
+        const reporterName = getReporterDisplayName(r).toLowerCase();
+        return reporterName.includes(searchVal) ||
+          (r.asset_name || '').toLowerCase().includes(searchVal) ||
+          (r.room_name || '').toLowerCase().includes(searchVal) ||
+          (r.description || '').toLowerCase().includes(searchVal);
+      });
+    }
+    renderRejectedTable(filtered);
   }
 
   function getDeadlineBadgeHtml(deadlineAt, taskStatus) {
@@ -641,14 +743,15 @@
     const searchVal = document.getElementById('pendingSearch').value.toLowerCase();
     const prioVal = document.getElementById('pendingPriorityFilter').value;
     
-    let filtered = allPendingReports;
+    let filtered = allPendingReports.filter(r => !r.order_id && ['Pending Approval', 'Pending'].includes(r.status || 'Pending Approval'));
     if (searchVal) {
-      filtered = filtered.filter(r => 
-        (r.reporter_name || '').toLowerCase().includes(searchVal) ||
-        (r.asset_name || '').toLowerCase().includes(searchVal) ||
-        (r.room_name || '').toLowerCase().includes(searchVal) ||
-        (r.description || '').toLowerCase().includes(searchVal)
-      );
+      filtered = filtered.filter(r => {
+        const reporterName = getReporterDisplayName(r).toLowerCase();
+        return reporterName.includes(searchVal) ||
+          (r.asset_name || '').toLowerCase().includes(searchVal) ||
+          (r.room_name || '').toLowerCase().includes(searchVal) ||
+          (r.description || '').toLowerCase().includes(searchVal);
+      });
     }
     if (prioVal !== 'All') {
       filtered = filtered.filter(r => r.priority === prioVal);
@@ -723,6 +826,7 @@
   // Bind filter events
   document.getElementById('pendingSearch').addEventListener('input', filterPending);
   document.getElementById('pendingPriorityFilter').addEventListener('change', filterPending);
+  document.getElementById('rejectedSearch').addEventListener('input', filterRejected);
   document.getElementById('assignedSearch').addEventListener('input', filterAssigned);
   if (document.getElementById('assignedPriorityFilter')) {
     document.getElementById('assignedPriorityFilter').addEventListener('change', filterAssigned);
@@ -817,7 +921,7 @@
     const techId = manualSelect || (selectedRadio ? selectedRadio.value : null);
 
     if (!techId) {
-      if (window.showToast) showToast('Please select a technician!', 'warning');
+      if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
       else alert('Please select a technician.');
       return;
     }
@@ -828,14 +932,14 @@
     try {
       if (window.Api) {
         await Api.post('/work-orders', { reportId: currentActiveReqId, technicianId: Number(techId) });
-        if (window.showToast) showToast('Report approved and work order assigned successfully!', 'success');
+        if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
         else alert(`Successfully approved report #FR-${currentActiveReqId} and created work order!`);
         closeApproveModal();
         loadData();
         switchTab('assigned');
       }
     } catch (err) {
-      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
       else alert(err.message || 'Failed to assign work order.');
     } finally {
       btn.disabled = false;
@@ -863,7 +967,7 @@
   async function confirmRejectReport() {
     const reason = document.getElementById('rejectionReasonInput').value.trim();
     if (!reason) {
-      if (window.showToast) showToast('Please provide a reason for rejection!', 'warning');
+      if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
       else alert('Please provide a reason for rejection.');
       return;
     }
@@ -875,13 +979,13 @@
     try {
       if (window.Api) {
         await Api.patch(`/fault-reports/${currentActiveReqId}/status`, { status: 'Rejected', rejectionReason: reason });
-        if (window.showToast) showToast('Report rejected successfully!', 'success');
+        if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
         else alert(`Report #FR-${currentActiveReqId} rejected successfully.`);
         closeRejectModal();
         loadData();
       }
     } catch (err) {
-      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
       else alert(err.message || 'Failed to reject report.');
     } finally {
       btn.disabled = false;
@@ -895,9 +999,17 @@
         // Fetch Pending Approval Reports
         const pendingReports = await Api.get('/fault-reports', { status: 'Pending Approval' });
         if (pendingReports && Array.isArray(pendingReports)) {
-          allPendingReports = pendingReports;
-          document.getElementById('pendingCountBadge').textContent = pendingReports.length;
+          allPendingReports = pendingReports.filter(r => !r.order_id);
+          document.getElementById('pendingCountBadge').textContent = allPendingReports.length;
           filterPending();
+        }
+
+        // Fetch Rejected Reports
+        const rejectedReports = await Api.get('/fault-reports', { status: 'Rejected' });
+        if (rejectedReports && Array.isArray(rejectedReports)) {
+          allRejectedReports = rejectedReports.filter(r => !r.order_id || r.status === 'Rejected');
+          document.getElementById('rejectedCountBadge').textContent = allRejectedReports.length;
+          filterRejected();
         }
 
         // Fetch Work Orders for Assigned Tasks

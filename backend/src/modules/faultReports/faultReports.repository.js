@@ -2,11 +2,19 @@ const { pool } = require('../../config/db');
 
 const BASE_SELECT = `
   SELECT fr.*,
-         CASE WHEN wo.task_status = 'Closed' THEN 'Closed' ELSE fr.status END AS display_status,
+         CASE 
+           WHEN wo.task_status = 'Closed' THEN 'Closed'
+           WHEN wo.task_status = 'Completed' THEN 'Completed'
+           WHEN wo.task_status IN ('Assigned', 'Received', 'In Progress') THEN 'Processing'
+           ELSE fr.status
+         END AS display_status,
          u.full_name AS reporter_name,
+         u.full_name AS reporter_full_name,
+         u.email AS reporter_email,
          c.room_name,
          a.asset_name, a.asset_type,
-         wo.order_id, wo.task_status, wo.technician_id, t.full_name AS technician_name
+         wo.order_id, wo.task_status, wo.technician_id, t.full_name AS technician_name,
+         wo.assigned_at, wo.resolved_at, wo.fix_description, wo.parts_used
   FROM FaultReports fr
   JOIN Users u ON u.user_id = fr.reporter_id
   JOIN Classrooms c ON c.room_id = fr.room_id
@@ -19,7 +27,18 @@ async function findAll({ status, priority, reporterId, roomId } = {}) {
   const clauses = [];
   const params = [];
 
-  if (status) { clauses.push('fr.status = ?'); params.push(status); }
+  if (status) {
+    if (['Pending Approval', 'Pending'].includes(status)) {
+      clauses.push("(fr.status IN ('Pending Approval', 'Pending') AND wo.order_id IS NULL)");
+    } else if (status === 'Processing') {
+      clauses.push("(fr.status = 'Processing' OR (wo.order_id IS NOT NULL AND wo.task_status IN ('Assigned', 'Received', 'In Progress')))");
+    } else if (status === 'Completed') {
+      clauses.push("(fr.status = 'Completed' OR wo.task_status IN ('Completed', 'Closed'))");
+    } else {
+      clauses.push('fr.status = ?');
+      params.push(status);
+    }
+  }
   if (priority) { clauses.push('fr.priority = ?'); params.push(priority); }
   if (reporterId) { clauses.push('fr.reporter_id = ?'); params.push(reporterId); }
   if (roomId) { clauses.push('fr.room_id = ?'); params.push(roomId); }

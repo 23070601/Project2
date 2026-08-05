@@ -1,0 +1,2210 @@
+{
+  "info": {
+    "_postman_id": "63330df0-9139-44d6-9031-1f2bcbf8a361",
+    "name": "VNUIS Asset Maintenance DSS API",
+    "description": "Complete API collection for VNUIS Asset Maintenance Decision Support System.\n\n## Roles\n- **Manager** (manager.e@vnuis.edu.vn) - Full admin access\n- **Technician** (tech.c@vnuis.edu.vn) - Work order management\n- **User** (lecturer.a@vnuis.edu.vn) - Fault reporting\n\n## Getting Started\n1. Login with one of the accounts above (password: 123456)\n2. Copy the token from login response\n3. Set the `token` variable in collection variables\n4. Or use role-specific tokens: `manager_token`, `technician_token`, `user_token`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54921934",
+    "_collection_link": "https://go.postman.co/collection/54921934-63330df0-9139-44d6-9031-1f2bcbf8a361?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Login (Manager)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    pm.collectionVariables.set('manager_token', res.data.token);",
+                  "    console.log('✅ Manager token saved');",
+                  "}",
+                  "",
+                  "pm.test('Login successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(res.success).to.be.true;",
+                  "    pm.expect(res.data.token).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager.e@vnuis.edu.vn\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Technician)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    pm.collectionVariables.set('technician_token', res.data.token);",
+                  "    console.log('✅ Technician token saved');",
+                  "}",
+                  "",
+                  "pm.test('Login successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(res.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tech.c@vnuis.edu.vn\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    pm.collectionVariables.set('user_token', res.data.token);",
+                  "    console.log('✅ User token saved');",
+                  "}",
+                  "",
+                  "pm.test('Login successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(res.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lecturer.a@vnuis.edu.vn\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"123456\",\n  \"newPassword\": \"newpass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/me/password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me",
+                "password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Nguyen Van A Updated\",\n  \"phone\": \"0901234567\",\n  \"department\": \"IT Department\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints - Login, get current user info, change password, update profile"
+    },
+    {
+      "name": "👥 Users (Manager only)",
+      "item": [
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Users (with filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users?role=Technician&isActive=true&search=Le",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "Technician",
+                  "description": "Filter by role: User | Technician | Manager"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "description": "Filter by active status: true | false"
+                },
+                {
+                  "key": "search",
+                  "value": "Le",
+                  "description": "Search by name or email"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Technicians",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/technicians",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "technicians"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Tran Van Test\",\n  \"email\": \"test.user@vnuis.edu.vn\",\n  \"password\": \"123456\",\n  \"role\": \"User\",\n  \"phone\": \"0987654321\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Technician",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyen Tech Test\",\n  \"email\": \"test.tech@vnuis.edu.vn\",\n  \"password\": \"123456\",\n  \"role\": \"Technician\",\n  \"phone\": \"0912345678\",\n  \"technicianSpecialty\": \"Projector\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"phone\": \"0909090909\",\n  \"role\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle User Active Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1/toggle",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "toggle"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset User Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1/password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate (Delete) User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "User management endpoints - CRUD operations, only accessible by Manager role"
+    },
+    {
+      "name": "🏫 Classrooms",
+      "item": [
+        {
+          "name": "List All Classrooms",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/classrooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classrooms"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Classrooms (search)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/classrooms?search=101",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classrooms"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "101",
+                  "description": "Search by room name"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Classroom by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/classrooms/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classrooms",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Classroom (Manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomName\": \"G2-301\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/classrooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classrooms"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Classroom (Manager)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomName\": \"G2-301-Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/classrooms/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classrooms",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Classroom (Manager)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/classrooms/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classrooms",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Classroom management - Read access for all roles, write access for Manager only"
+    },
+    {
+      "name": "🖥️ Assets",
+      "item": [
+        {
+          "name": "List Assets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Assets (with filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets?roomId=1&assetType=Projector&status=Operational&search=proj",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "roomId",
+                  "value": "1",
+                  "description": "Filter by classroom ID"
+                },
+                {
+                  "key": "assetType",
+                  "value": "Projector",
+                  "description": "Projector | TV | Aircon | Speaker | Microphone | DocumentCamera | Cable | NetworkSwitch"
+                },
+                {
+                  "key": "status",
+                  "value": "Operational",
+                  "description": "Operational | Under Repair | Recommended for Replacement | Retired"
+                },
+                {
+                  "key": "search",
+                  "value": "proj",
+                  "description": "Search by asset name"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Assets with Failures (Manager)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Replacement Alerts - DSS3 (Manager)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/replacement-alerts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "replacement-alerts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Asset by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Asset (Manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetName\": \"Epson Projector EB-X51\",\n  \"assetType\": \"Projector\",\n  \"roomId\": 1,\n  \"status\": \"Operational\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/assets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Asset (Manager/Technician)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetName\": \"Epson Projector EB-X51 Updated\",\n  \"status\": \"Under Repair\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/assets/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Asset (Manager)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Asset management - Read for all, write for Manager. Asset types: Projector, TV, Aircon, Speaker, Microphone, DocumentCamera, Cable, NetworkSwitch"
+    },
+    {
+      "name": "📋 Fault Reports",
+      "item": [
+        {
+          "name": "List Fault Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fault-reports",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Fault Reports (with filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fault-reports?status=Pending Approval&priority=High&roomId=1&mine=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Pending Approval",
+                  "description": "Pending Approval | Processing | Completed | Rejected | Cancelled"
+                },
+                {
+                  "key": "priority",
+                  "value": "High",
+                  "description": "High | Medium | Low"
+                },
+                {
+                  "key": "roomId",
+                  "value": "1",
+                  "description": "Filter by classroom ID"
+                },
+                {
+                  "key": "mine",
+                  "value": "true",
+                  "description": "Only show current user's reports"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Fault Report by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fault-reports/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Fault Report (JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": 1,\n  \"assetId\": 1,\n  \"description\": \"Projector is not displaying properly, flickering screen\",\n  \"urgencyHint\": \"High\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fault-reports",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Fault Report (with Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "roomId",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "assetId",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Projector lens is cracked and image is blurry",
+                  "type": "text"
+                },
+                {
+                  "key": "urgencyHint",
+                  "value": "High",
+                  "type": "text"
+                },
+                {
+                  "key": "evidence",
+                  "value": "",
+                  "type": "file",
+                  "description": "Upload evidence image (jpg/png)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/fault-reports",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Report Status (Manager) - Approve",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Processing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fault-reports/1/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports",
+                "1",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Report Status (Manager) - Reject",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Rejected\",\n  \"rejectionReason\": \"Duplicate report - already being handled\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fault-reports/1/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports",
+                "1",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Fault Report (Owner/Pending only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fault-reports/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fault-reports",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Fault report management - Create by User/Technician/Manager, status update by Manager. DSS1 auto-calculates priority."
+    },
+    {
+      "name": "🔧 Work Orders",
+      "item": [
+        {
+          "name": "List Work Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Work Orders (with filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-orders?taskStatus=In Progress&technicianResponse=Accepted&priority=High&mine=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders"
+              ],
+              "query": [
+                {
+                  "key": "taskStatus",
+                  "value": "In Progress",
+                  "description": "Assigned | Received | In Progress | Completed | Closed"
+                },
+                {
+                  "key": "technicianResponse",
+                  "value": "Accepted",
+                  "description": "Pending | Accepted | Rejected"
+                },
+                {
+                  "key": "priority",
+                  "value": "High",
+                  "description": "High | Medium | Low"
+                },
+                {
+                  "key": "mine",
+                  "value": "true",
+                  "description": "Manager: only assigned by me"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Work Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-orders/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Technician Suggestions - DSS2",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-orders/suggestions/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "suggestions",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Work Order (Approve & Assign)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reportId\": 1,\n  \"technicianId\": 3,\n  \"deadlineAt\": \"2026-08-05 17:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Technician Accept Work Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicianResponse\": \"Accepted\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/response",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "response"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Technician Reject Work Order (via /response)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicianResponse\": \"Rejected\",\n  \"rejectionReason\": \"No matching technical specialty\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/response",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "response"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Technician Reject Work Order (via /reject)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rejectionReason\": \"Currently overloaded with tasks\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task Status (In Progress)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"taskStatus\": \"In Progress\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task Status (Completed + Fix Details)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"taskStatus\": \"Completed\",\n  \"fixDescription\": \"Replaced projector lamp and cleaned lens filter\",\n  \"partsUsed\": \"Epson ELPLP96 lamp unit\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Deadline (Manager)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deadlineAt\": \"2026-08-10 17:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/deadline",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "deadline"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reassign Technician (Manager)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicianId\": 4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/reassign",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "reassign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reopen Work Order (User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"The projector is still flickering after the repair\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-orders/1/reopen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "work-orders",
+                "1",
+                "reopen"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Work order management - Manager creates & assigns, Technician responds & updates status. DSS2 suggests technicians."
+    },
+    {
+      "name": "✅ Confirmations",
+      "item": [
+        {
+          "name": "Create Confirmation (User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isConfirmed\": true,\n  \"rating\": 5,\n  \"feedback\": \"Repair was done quickly and professionally. Thank you!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/confirmations/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "confirmations",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Confirmation by Order ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/confirmations/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "confirmations",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "User confirms work order completion and provides rating/feedback (FR-11)"
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "List My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/unread-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "unread-count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark One as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/1/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "1",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/read-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Notification management - auto-created by system events, read/mark operations"
+    },
+    {
+      "name": "📱 QR Codes (Manager only)",
+      "item": [
+        {
+          "name": "List QR Codes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/qrcodes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "qrcodes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate QR Code for Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/qrcodes/1/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "qrcodes",
+                "1",
+                "generate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View QR Code for Room",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/qrcodes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "qrcodes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "QR code generation and management for classrooms"
+    },
+    {
+      "name": "📊 Dashboard (Manager only)",
+      "item": [
+        {
+          "name": "Get KPIs / Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/kpis",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "kpis"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Critical Assets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/critical-assets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "critical-assets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Asset Repair History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/asset-history/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "asset-history",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get MTTR (Mean Time To Repair)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/mttr",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "mttr"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Downtime Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/downtime",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "downtime"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Technician Workload",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/technician-workload",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "technician-workload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report Trend",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/report-trend",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "report-trend"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Monthly Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/monthly-reports",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "monthly-reports"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Overdue Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/overdue-tasks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "overdue-tasks"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Manager dashboard with KPIs, analytics, and monitoring data"
+    },
+    {
+      "name": "📈 Reports (Manager only)",
+      "item": [
+        {
+          "name": "Overview Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reports/overview-stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reports",
+                "overview-stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Maintenance Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reports/maintenance-overview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reports",
+                "maintenance-overview"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Asset Failure Analysis",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reports/asset-failure-analysis",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reports",
+                "asset-failure-analysis"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Reporting & analytics - overview stats, maintenance overview, asset failure analysis"
+    },
+    {
+      "name": "❤️ Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:4000/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Server health check - no authentication required"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-set Authorization header if token exists",
+          "const token = pm.collectionVariables.get('token');",
+          "if (token) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + token",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "manager_token",
+      "value": ""
+    },
+    {
+      "key": "technician_token",
+      "value": ""
+    },
+    {
+      "key": "user_token",
+      "value": ""
+    }
+  ]
+}

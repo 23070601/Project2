@@ -27,4 +27,14 @@ module.exports = {
   },
 
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
+
+  frontendBaseUrl: process.env.FRONTEND_BASE_URL || 'http://127.0.0.1:5500',
+
+  smtp: {
+    host: String(process.env.SMTP_HOST || '').trim(),
+    port: Number(process.env.SMTP_PORT || 587),
+    user: String(process.env.SMTP_USER || '').trim(),
+    pass: String(process.env.SMTP_PASS || '').trim().replace(/\s+/g, ''),
+    from: String(process.env.SMTP_FROM || 'noreply@vnuis.edu.vn').trim(),
+  },
 };

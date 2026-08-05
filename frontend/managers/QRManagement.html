@@ -119,8 +119,12 @@
         <div class="space-y-5">
           <div>
             <label class="block text-label-md font-bold text-on-surface mb-1">Floor *</label>
-            <select id="genFloorSelect" onchange="onGenFloorChange(this.value)" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none cursor-pointer pl-4 pr-10 transition-all">
-              <option value="All" selected>All Floors</option>
+            <select id="genFloorSelect" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none cursor-pointer pl-4 pr-10 transition-all">
+              <option value="" disabled selected>Select Floor</option>
+              <option value="Floor 1">Floor 1</option>
+              <option value="Floor 4" selected>Floor 4</option>
+              <option value="Floor 5">Floor 5</option>
+              <option value="Floor 6">Floor 6</option>
             </select>
           </div>
 
@@ -255,73 +259,39 @@
     return match ? parseInt(match[0], 10) : 1;
   }
 
-  let allClassroomsList = [];
-
-  async function loadClassrooms() {
-    try {
-      if (window.Api) {
-        allClassroomsList = await Api.get('/classrooms');
-      } else {
-        const res = await fetch('/api/classrooms');
-        const json = await res.json();
-        allClassroomsList = json.data || json;
-      }
-    } catch (err) {
-      console.error('Failed to load classrooms:', err);
-      if (window.showToast) showToast('Failed to load classrooms', 'error');
-    }
-  }
-
-  function renderGenClassroomDropdown(floorFilter = 'All') {
-    const select = document.getElementById('genClassroomSelect') || document.getElementById('classroomSelect');
+  function openGenerateQrModal() {
+    const genSelect = document.getElementById('genClassroomSelect');
     const btn = document.getElementById('submitGenQrBtn');
-    if (!select) return;
-
-    let filtered = allClassroomsList || [];
-    if (floorFilter && floorFilter !== 'All') {
-      const targetFloor = parseInt(floorFilter.replace(/\D/g, ''), 10);
-      filtered = filtered.filter(r => getFloorFromName(r.room_name) === targetFloor);
-    }
-
-    if (filtered.length === 0) {
-      select.innerHTML = '<option value="" disabled selected>No classrooms available</option>';
-      if (btn) btn.disabled = true;
+    
+    // Filter rooms without QR Code
+    const noQrRooms = allQrs.filter(q => !q.hasQrCode);
+    
+    if (noQrRooms.length === 0) {
+      genSelect.innerHTML = `<option value="" disabled selected>No classrooms available</option>`;
+      btn.disabled = true;
       document.getElementById('previewRoomName').textContent = 'N/A';
       document.getElementById('previewCodeId').textContent = 'N/A';
       document.getElementById('previewFloor').textContent = 'N/A';
     } else {
-      if (btn) btn.disabled = false;
-      select.innerHTML = '<option value="">-- Select Classroom --</option>' + filtered.map(r => {
-        const fl = getFloorFromName(r.room_name);
-        return `<option value="${r.room_id}|${UiHelpers.escapeHtml(r.room_name)}|Floor ${fl}">${UiHelpers.escapeHtml(r.room_name)}</option>`;
+      btn.disabled = false;
+      genSelect.innerHTML = noQrRooms.map((r, idx) => {
+        const floor = getFloorFromName(r.roomName);
+        const selected = idx === 0 ? 'selected' : '';
+        return `<option value="${r.roomId}|${r.roomName}|Floor ${floor}" ${selected}>${UiHelpers.escapeHtml(r.roomName)}</option>`;
       }).join('');
-
-      const first = filtered[0];
-      const fl = getFloorFromName(first.room_name);
-      select.value = `${first.room_id}|${first.room_name}|Floor ${fl}`;
-      onGenClassroomChange(select.value);
+      
+      // Select the first room by default and update preview
+      if (noQrRooms.length > 0) {
+        const first = noQrRooms[0];
+        const fl = getFloorFromName(first.roomName);
+        document.getElementById('previewRoomName').textContent = first.roomName;
+        document.getElementById('previewCodeId').textContent = `Room ${first.roomName}`;
+        document.getElementById('previewFloor').textContent = `Floor ${fl}`;
+        document.getElementById('genFloorSelect').value = `Floor ${fl}`;
+        genSelect.value = `${first.roomId}|${first.roomName}|Floor ${fl}`;
+      }
     }
-  }
-
-  function onGenFloorChange(floorVal) {
-    renderGenClassroomDropdown(floorVal);
-  }
-
-  async function openGenerateQrModal() {
-    await loadClassrooms();
-
-    const floorSelect = document.getElementById('genFloorSelect');
-    if (floorSelect) {
-      const uniqueFloors = Array.from(new Set((allClassroomsList || []).map(r => getFloorFromName(r.room_name)))).sort((a, b) => a - b);
-      let floorHtml = `<option value="All">All Floors</option>`;
-      uniqueFloors.forEach(fl => {
-        floorHtml += `<option value="Floor ${fl}">Floor ${fl}</option>`;
-      });
-      floorSelect.innerHTML = floorHtml;
-      floorSelect.value = 'All';
-    }
-
-    renderGenClassroomDropdown('All');
+    
     document.getElementById('generateQrModal').classList.remove('hidden');
   }
 
@@ -336,20 +306,17 @@
       document.getElementById('previewRoomName').textContent = parts[1];
       document.getElementById('previewCodeId').textContent = `Room ${parts[1]}`;
       document.getElementById('previewFloor').textContent = parts[2];
+      document.getElementById('genFloorSelect').value = parts[2];
     }
   }
 
   async function submitGenerateQr() {
     const btn = document.getElementById('submitGenQrBtn');
-    const select = document.getElementById('genClassroomSelect') || document.getElementById('classroomSelect');
-    const selectVal = select ? select.value : '';
-    if (!selectVal) {
-      if (window.showToast) showToast('Please select a classroom', 'warning');
-      else alert('Please select a classroom');
-      return;
-    }
+    const selectVal = document.getElementById('genClassroomSelect').value;
+    if (!selectVal) return;
     const parts = selectVal.split('|');
     const roomId = parts[0];
+    const roomName = parts[1];
     
     btn.disabled = true;
     btn.textContent = 'Generating...';
@@ -357,27 +324,19 @@
     try {
       if (window.Api) {
         await Api.post(`/qrcodes/${roomId}/generate`);
-      } else {
-        const res = await fetch(`/api/qrcodes/${roomId}/generate`, { method: 'POST' });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.message || 'Failed to generate QR code');
+        if (window.showToast) showToast('Đã tạo mã QR thành công!', 'success');
+        else alert(`QR Code generated successfully!`);
+        closeGenerateQrModal();
+        loadQrCodes();
       }
-      if (window.showToast) showToast('QR Code generated successfully!', 'success');
-      else alert('QR Code generated successfully!');
-      closeGenerateQrModal();
-      await loadQrCodes();
     } catch (err) {
-      console.error('Failed to generate QR:', err);
-      if (window.showToast) showToast(`Failed to generate QR code: ${err.message}`, 'error');
-      else alert(err.message || 'Failed to generate QR code');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      else alert(err.message || 'Failed to generate QR Code.');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Generate QR Code';
     }
   }
-
-  window.loadClassrooms = loadClassrooms;
-  window.generateQR = submitGenerateQr;
 
   // View QR Modal
   async function openViewQrModal(roomId, roomName, floor) {
@@ -398,7 +357,7 @@
         }
       }
     } catch (err) {
-      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
       else alert(err.message || 'Failed to load QR Code details.');
     }
   }
@@ -410,7 +369,7 @@
   function downloadQr(qrId) {
     const img = document.getElementById('qrModalImage');
     if (!img || !img.src) {
-      if (window.showToast) showToast('No QR image found to download!', 'error');
+      if (window.showToast) showToast('Không tìm thấy ảnh QR để tải!', 'error');
       else alert('No QR image found to download.');
       return;
     }
@@ -420,7 +379,7 @@
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    if (window.showToast) showToast('QR Code image downloaded successfully!', 'success');
+    if (window.showToast) showToast('Đã tải ảnh mã QR thành công!', 'success');
   }
 
   function renderQrTable(qrs) {

@@ -180,42 +180,30 @@
 <!-- CLASSROOM QR CODE MODAL -->
 <div id="classroomQrModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
   <div class="bg-white rounded-xl shadow-md w-full max-w-md overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-    <div class="p-6 border-b border-outline-variant/20 flex justify-between items-center">
-      <div>
-        <h3 id="qrRoomName" class="text-headline-sm font-headline-sm text-on-surface">Classroom QR Code</h3>
-        <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Scan this QR code to report an issue for this classroom.</p>
-      </div>
-      <button onclick="closeQrModal()" class="text-on-surface-variant hover:text-on-surface p-1">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+    <div class="p-6 border-b border-outline-variant/20">
+      <h3 class="text-headline-sm font-headline-sm text-on-surface">Classroom QR Code</h3>
+      <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Scan this QR code to report an issue for this classroom.</p>
     </div>
     <div class="p-8 flex flex-col items-center">
-      <div class="w-[200px] h-[200px] bg-surface-container-high rounded-lg flex items-center justify-center mb-8 border border-outline-variant/30 shadow-inner overflow-hidden relative">
-        <img id="qrImage" src="" alt="QR Code" class="w-full h-full object-contain p-2 hidden">
-        <div id="qrLoading" class="flex flex-col items-center justify-center text-outline">
-          <span class="material-symbols-outlined text-4xl animate-spin">progress_activity</span>
-          <span class="text-body-xs mt-2">Loading QR...</span>
-        </div>
+      <div class="w-[200px] h-[200px] bg-surface-container-high rounded-lg flex items-center justify-center mb-8 border border-outline-variant/30 shadow-inner">
+        <span class="material-symbols-outlined text-[100px] text-primary">qr_code_2</span>
       </div>
       <div class="w-full space-y-3 bg-surface-container-low p-4 rounded-lg border border-outline-variant/20">
         <div class="flex justify-between">
           <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Room ID</span>
-          <span id="qrRoomId" class="text-body-sm font-bold text-primary">--</span>
+          <span id="qrModalRoomId" class="text-body-sm font-bold text-primary">CR-401</span>
         </div>
         <div class="flex justify-between">
           <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Room Name</span>
-          <span id="qrModalRoomName" class="text-body-sm font-medium text-on-surface">--</span>
+          <span id="qrModalRoomName" class="text-body-sm font-medium text-on-surface">Classroom 401</span>
         </div>
         <div class="flex justify-between">
           <span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Floor</span>
-          <span id="qrFloor" class="text-body-sm font-medium text-on-surface">--</span>
+          <span id="qrModalLocation" class="text-body-sm font-medium text-on-surface">Floor 4</span>
         </div>
       </div>
     </div>
-    <div class="p-4 bg-surface-container-lowest border-t border-outline-variant/20 flex justify-end gap-2">
-      <button onclick="downloadQR()" class="px-4 py-2 bg-primary text-white rounded-lg font-label-lg hover:bg-primary-container transition-colors flex items-center gap-2">
-        <span class="material-symbols-outlined text-lg">download</span> Download QR
-      </button>
+    <div class="p-4 bg-surface-container-lowest border-t border-outline-variant/20 flex justify-end">
       <button onclick="closeQrModal()" class="px-6 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-lg hover:bg-surface-container transition-colors">
         Close
       </button>
@@ -351,96 +339,16 @@
     }
   }
 
-  async function viewQR(roomId, roomName, floor) {
-    const roomIdEl = document.getElementById('qrRoomId') || document.getElementById('qrModalRoomId');
-    const roomNameEl = document.getElementById('qrRoomName') || document.getElementById('qrModalRoomName');
-    const floorEl = document.getElementById('qrFloor') || document.getElementById('qrModalLocation');
-    const imgEl = document.getElementById('qrImage');
-    const loadingEl = document.getElementById('qrLoading');
-
-    const formattedRoomName = roomName ? (roomName.startsWith('Room') ? roomName : `Room ${roomName}`) : 'Room';
-    const formattedFloor = floor ? (floor.startsWith('Floor') ? floor : `Floor ${floor}`) : 'Floor';
-
-    if (roomIdEl) roomIdEl.textContent = `Room ID: ${roomId}`;
-    if (roomNameEl) roomNameEl.textContent = formattedRoomName;
-    if (floorEl) floorEl.textContent = formattedFloor;
-    
-    if (document.getElementById('qrModalRoomId')) document.getElementById('qrModalRoomId').textContent = `${roomId}`;
-    if (document.getElementById('qrModalRoomName')) document.getElementById('qrModalRoomName').textContent = roomName;
-    if (document.getElementById('qrModalLocation')) document.getElementById('qrModalLocation').textContent = floor;
-
-    if (imgEl) {
-      imgEl.src = '';
-      imgEl.classList.add('hidden');
-    }
-    if (loadingEl) {
-      loadingEl.classList.remove('hidden');
-    }
-
-    document.getElementById('classroomQrModal').classList.remove('hidden');
-
-    try {
-      let data;
-      if (window.Api) {
-        data = await Api.get(`/qrcodes/${roomId}`);
-      } else {
-        const res = await fetch(`/api/qrcodes/${roomId}`);
-        const json = await res.json();
-        data = json.data || json;
-      }
-      
-      const qrSrc = data.qrImageDataUrl || data.qr_url || '';
-      if (imgEl) {
-        imgEl.src = qrSrc;
-        imgEl.classList.remove('hidden');
-      }
-      if (loadingEl) {
-        loadingEl.classList.add('hidden');
-      }
-    } catch (error) {
-      console.error('Failed to load QR:', error);
-      if (loadingEl) loadingEl.classList.add('hidden');
-      if (window.showToast) showToast('Failed to load QR code', 'error');
-      else alert('Failed to load QR code');
-    }
-  }
-
   function openQrModal(roomId, roomName, location) {
-    return viewQR(roomId, roomName, location);
+    document.getElementById('qrModalRoomId').textContent = roomId;
+    document.getElementById('qrModalRoomName').textContent = roomName;
+    document.getElementById('qrModalLocation').textContent = location;
+    document.getElementById('classroomQrModal').classList.remove('hidden');
   }
 
   function closeQrModal() {
     document.getElementById('classroomQrModal').classList.add('hidden');
   }
-
-  function closeQRModal() {
-    closeQrModal();
-  }
-
-  function downloadQR() {
-    const img = document.getElementById('qrImage');
-    if (!img || !img.src || img.classList.contains('hidden')) {
-      if (window.showToast) showToast('No QR image found to download!', 'error');
-      else alert('No QR image found to download.');
-      return;
-    }
-    const roomNameEl = document.getElementById('qrRoomName') || document.getElementById('qrModalRoomName');
-    const roomName = roomNameEl ? roomNameEl.textContent.trim() : 'Room';
-    
-    const a = document.createElement('a');
-    a.href = img.src;
-    a.download = `QR_${roomName.replace(/[^a-zA-Z0-9_-]/g, '_')}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    if (window.showToast) showToast('QR Code image downloaded successfully!', 'success');
-  }
-
-  window.viewQR = viewQR;
-  window.openQrModal = openQrModal;
-  window.closeQrModal = closeQrModal;
-  window.closeQRModal = closeQRModal;
-  window.downloadQR = downloadQR;
 
   function openDeleteModal(roomId, roomName) {
     deletingRoomId = roomId;
@@ -557,7 +465,7 @@
             <td class="py-4 px-6 text-center">
               <div class="flex items-center justify-center gap-2">
                 <button onclick="location.href='ClassroomsDetail.html?id=${r.room_id}'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                <button onclick="openQrModal(${r.room_id}, 'Room ${UiHelpers.escapeHtml(r.room_name)}', 'Floor ${fl}')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="View QR Code"><span class="material-symbols-outlined">qr_code_2</span></button>
+                <button onclick="openQrModal('${r.qr_code || 'N/A'}', 'Room ${r.room_name}', 'Floor ${fl}')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
                 <button onclick="openDeleteModal(${r.room_id}, 'Room ${r.room_name}')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
               </div>
             </td>
@@ -625,7 +533,7 @@
     renderAccordions();
     const select = document.getElementById('sortBySelect');
     const sortLabel = select.options[select.selectedIndex].text;
-    if (window.showToast) showToast(`List sorted by: ${sortLabel}`, 'info');
+    if (window.showToast) showToast(`Đã sắp xếp danh sách theo: ${sortLabel}`, 'info');
   });
 
   async function confirmDeleteRoom() {
@@ -636,13 +544,13 @@
     try {
       if (window.Api && deletingRoomId) {
         await Api.delete(`/classrooms/${deletingRoomId}`);
-        if (window.showToast) showToast('Classroom deleted successfully!', 'success');
+        if (window.showToast) showToast('Đã xóa phòng học thành công!', 'success');
         else alert(`Classroom deleted successfully.`);
         closeDeleteModal();
         await loadClassrooms();
       }
     } catch (err) {
-      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
+      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
       else alert(err.message || `Failed to delete classroom.`);
       closeDeleteModal();
     } finally {
@@ -838,7 +746,7 @@
     a.download = `assets_report_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    if (window.showToast) showToast('CSV report exported successfully!', 'success');
+    if (window.showToast) showToast('Đã xuất báo cáo CSV thành công!', 'success');
   }
 
   loadClassrooms();

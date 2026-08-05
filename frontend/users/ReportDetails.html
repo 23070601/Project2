@@ -236,15 +236,26 @@
         .trim();
     }
 
+    function resolveReporterName(report) {
+      if (report.reporter_name) return report.reporter_name;
+      const user = window.Auth && Auth.getUser ? Auth.getUser() : null;
+      const reportReporterId = report.reporter_id;
+      const currentUserId = user?.user_id || user?.id;
+      if (user && reportReporterId && String(reportReporterId) === String(currentUserId)) {
+        return user.full_name || user.fullName || user.email || 'N/A';
+      }
+      return report.reporter_email || report.user_email || 'N/A';
+    }
+
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
       const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name']);
       const rawRoom = getFieldValue(report, ['room_name']);
       const equipment = cleanLabel(rawEquipment);
       const room = cleanLabel(rawRoom);
-      const assetType = getFieldValue(report, ['asset_type', 'equipment_type', 'assetType'], 'N/A');
-      const roomId = getFieldValue(report, ['room_id', 'roomId'], 'N/A');
-      const reporter = getFieldValue(report, ['reporter_name', 'user_name', 'created_by', 'reporter'], 'N/A');
+      const assetType = getFieldValue(report, ['asset_type'], 'N/A');
+      const roomId = getFieldValue(report, ['room_id'], 'N/A');
+      const reporter = resolveReporterName(report);
       const history = report.statusHistory || [];
       const currentStatus = report.display_status || report.status || '';
       const isPending = ['Pending', 'Pending Approval'].includes(report.status) && ['Pending', 'Pending Approval'].includes(currentStatus);
@@ -259,7 +270,7 @@
         }
       }
 
-      const isCompleted = ['Completed', 'Resolved'].includes(report.status);
+      const isCompleted = ['Completed', 'Resolved'].includes(report.status) || ['Completed', 'Resolved'].includes(report.display_status);
 
       const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
       const imageUrl = report.image_path ? (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path)) : null;
@@ -442,24 +453,14 @@
 
     // ===== REPAIR HISTORY TIMELINE =====
     function renderHistory(report, workOrder, confirmation) {
-      let rawEvents = [];
+      let events = [];
 
       if (report && report.statusHistory && report.statusHistory.length > 0) {
-        rawEvents = report.statusHistory.map(h => ({
-          date: formatDateTime(h.changed_at || h.created_at),
+        events = report.statusHistory.map(h => ({
+          date: formatDate(h.changed_at || h.created_at),
           status: h.new_status || h.status,
           note: h.note || ''
         }));
-        
-        // Ensure initial 'Pending Approval' event exists if DB history starts from WorkOrders (Assigned/Processing)
-        const hasPending = rawEvents.some(e => ['Pending', 'Pending Approval'].includes(e.status));
-        if (!hasPending && report.reported_at) {
-          rawEvents.unshift({
-            date: formatDateTime(report.reported_at),
-            status: 'Pending Approval',
-            note: 'Đã gửi báo cáo sự cố thành công (chờ quản lý duyệt).'
-          });
-        }
       } else if (report) {
         const s = report.status || 'Pending Approval';
         const repDate = formatDateTime(report.reported_at);
@@ -470,9 +471,11 @@
         if (s === 'Rejected') {
           const rejectedDate = formatDateTime(report.rejected_at || report.updated_at || report.reported_at);
           const reason = report.rejection_reason || report.rejectionReason || report.reject_reason || report.note || 'Báo cáo bị quản lý từ chối duyệt (Thông tin sự cố không phù hợp hoặc bị trùng lặp).';
-          rawEvents.push({
+          events.push({
             date: rejectedDate,
             status: 'Rejected',
+            textColor: 'text-red-600',
+            dotColor: 'bg-red-500',
             note: reason
           });
         }
@@ -480,92 +483,53 @@
         if (s === 'Cancelled') {
           const cancelledDate = formatDateTime(report.cancelled_at || report.updated_at || report.reported_at);
           const reason = report.cancel_reason || report.cancelReason || report.note || 'Báo cáo sự cố đã được người dùng chủ động hủy.';
-          rawEvents.push({
+          events.push({
             date: cancelledDate,
             status: 'Cancelled',
+            textColor: 'text-slate-600',
+            dotColor: 'bg-slate-400',
             note: reason
           });
         }
 
         if (s === 'Closed' || confirmation) {
-          rawEvents.push({
+          events.push({
             date: confirmation && confirmation.created_at ? formatDateTime(confirmation.created_at) : repDate,
             status: 'Closed',
+            textColor: 'text-slate-600',
+            dotColor: 'bg-slate-400',
             note: confirmation && confirmation.feedback ? confirmation.feedback : 'Người dùng đã xác nhận hoàn thành sửa chữa.'
           });
         }
 
         if (['Completed', 'Resolved', 'Closed'].includes(s) || confirmation) {
-          rawEvents.push({
+          events.push({
             date: resolvedDate,
             status: 'Completed',
+            textColor: 'text-green-600',
+            dotColor: 'bg-green-500',
             note: fixNote
           });
         }
 
-        if (['Processing', 'In Progress', 'Assigned', 'Received', 'Completed', 'Resolved', 'Closed'].includes(s) && workOrder) {
-          rawEvents.push({
+        if (['Processing', 'In Progress', 'Completed', 'Resolved', 'Closed'].includes(s) && workOrder) {
+          events.push({
             date: assignedDate,
             status: 'Processing',
+            textColor: 'text-blue-600',
+            dotColor: 'bg-blue-500',
             note: 'Quản lý đã duyệt báo cáo và giao cho kỹ thuật viên xử lý.'
           });
         }
 
-        rawEvents.push({
+        events.push({
           date: repDate,
           status: 'Pending Approval',
+          textColor: 'text-amber-600',
+          dotColor: 'bg-amber-400',
           note: 'Đã gửi báo cáo sự cố thành công (chờ quản lý duyệt).'
         });
       }
-
-      // Map raw statuses to allowed User statuses
-      const statusMap = {
-        'Assigned': 'Processing',
-        'Received': 'Processing',
-        'In Progress': 'Processing',
-        'Resolved': 'Completed',
-        'Pending Approval': 'Pending Approval',
-        'Pending': 'Pending Approval',
-        'Processing': 'Processing',
-        'Completed': 'Completed',
-        'Closed': 'Closed',
-        'Rejected': 'Rejected',
-        'Cancelled': 'Cancelled'
-      };
-
-      const mapped = rawEvents.map(item => ({
-        ...item,
-        displayStatus: statusMap[item.status] || item.status,
-        status: statusMap[item.status] || item.status
-      }));
-
-      // Gộp trùng liên tiếp
-      const merged = [];
-      let lastStatus = null;
-
-      for (const item of mapped) {
-        if (item.displayStatus === lastStatus) {
-          // Gộp vào item trước (giữ lại note nếu item trước chưa có)
-          if (item.note && merged.length > 0 && !merged[merged.length - 1].note) {
-            merged[merged.length - 1].note = item.note;
-          }
-          continue;
-        }
-        merged.push(item);
-        lastStatus = item.displayStatus;
-      }
-
-      // Đảm bảo Closed chỉ xuất hiện 1 lần duy nhất ở cuối cùng (và chỉ khi User đã confirm)
-      const closedItems = merged.filter(i => i.displayStatus === 'Closed');
-      const nonClosedItems = merged.filter(i => i.displayStatus !== 'Closed');
-
-      if (closedItems.length > 0) {
-        // Chỉ lấy Closed cuối cùng
-        const lastClosed = closedItems[closedItems.length - 1];
-        nonClosedItems.push(lastClosed);
-      }
-
-      const events = nonClosedItems;
 
       if (events.length === 0) {
         return `
@@ -579,8 +543,12 @@
       const statusTextColors = {
         'Completed': 'text-green-600',
         'Closed': 'text-slate-600',
+        'Resolved': 'text-green-600',
+        'In Progress': 'text-blue-600',
         'Processing': 'text-blue-600',
+        'Assigned': 'text-gray-700',
         'Pending Approval': 'text-amber-600',
+        'Pending': 'text-amber-600',
         'Rejected': 'text-red-600',
         'Cancelled': 'text-slate-500'
       };
@@ -588,8 +556,12 @@
       const dotBgColors = {
         'Completed': 'bg-green-500',
         'Closed': 'bg-slate-400',
+        'Resolved': 'bg-green-500',
+        'In Progress': 'bg-blue-500',
         'Processing': 'bg-blue-500',
+        'Assigned': 'bg-slate-300',
         'Pending Approval': 'bg-amber-400',
+        'Pending': 'bg-amber-400',
         'Rejected': 'bg-red-500',
         'Cancelled': 'bg-slate-400'
       };
@@ -602,15 +574,7 @@
               const statusText = h.status;
               const textColor = h.textColor || statusTextColors[statusText] || 'text-on-surface-variant';
               const dotColor = h.dotColor || dotBgColors[statusText] || 'bg-slate-300';
-              let note = h.note || '';
-              
-              if (note.includes('User reported issue persists:') || note.includes('User confirmed issue not fixed:')) {
-                const reasonStr = note.split(':').slice(1).join(':').trim();
-                note = `User confirmed issue not fixed${reasonStr ? `: ${reasonStr}` : ''}`;
-              } else if (note.includes('Task status changed from')) {
-                note = ''; // Clean technical internal DB note for user display
-              }
-
+              const note = h.note || '';
               const date = h.date;
               
               return `
@@ -1028,10 +992,14 @@
       // 1. Try loading from API
       try {
         if (window.Api && window.Auth && Auth.isAuthenticated()) {
-          const primaryId = (!isNaN(numId) && numId > 0) ? numId : reportId;
-          try {
-            report = await Api.get(`/fault-reports/${primaryId}`);
-          } catch(e) {}
+          const isNumeric = /^\d+$/.test(String(reportId));
+          const tryIds = isNumeric ? [reportId] : (!isNaN(numId) ? [numId] : []);
+          for (const tryId of tryIds) {
+            try {
+              report = await Api.get(`/fault-reports/${tryId}`);
+              break;
+            } catch(e) {}
+          }
           console.log('Report data from API:', report);
         }
       } catch (err) {
@@ -1053,7 +1021,7 @@
       if (!report) {
         report = ALL_SEED_REPORTS.find(r => 
           String(r.report_id).toLowerCase() === String(reportId).toLowerCase() ||
-          (!isNaN(numId) && parseInt(String(r.report_id || r.id).replace(/\D/g, ''), 10) === numId)
+          (!isNaN(numId) && parseInt(String(r.report_id).replace(/\D/g, ''), 10) === numId)
         );
       }
 
@@ -1071,8 +1039,9 @@
       // 5. If report found, try workOrder & confirmation
       if (report) {
         if (report.order_id && !workOrder) {
-          const isNumericOrder = /^\d+$/.test(String(report.order_id));
-          if (window.Api && isNumericOrder) {
+          const userRole = (window.Auth && Auth.getUser && Auth.getUser()) ? Auth.getUser().role : null;
+          const canFetchWO = window.Api && userRole && ['Manager', 'Technician'].includes(userRole);
+          if (canFetchWO) {
             try {
               workOrder = await Api.get(`/work-orders/${report.order_id}`);
             } catch (e) {}
@@ -1088,7 +1057,7 @@
               parts_used: report.parts_used || null
             };
           }
-          if (!confirmation && window.Api && isNumericOrder) {
+          if (!confirmation) {
             try {
               const res = await Api.get(`/confirmations/${report.order_id}`);
               if (res && res.confirmed_at !== null && res.is_confirmed !== null && res.is_confirmed !== undefined) {
