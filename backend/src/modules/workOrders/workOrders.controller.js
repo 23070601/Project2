@@ -1,3 +1,4 @@
+const { pool } = require('../../config/db');
 const workOrdersRepository = require('./workOrders.repository');
 const faultReportsRepository = require('../faultReports/faultReports.repository');
 const usersRepository = require('../users/users.repository');
@@ -38,19 +39,27 @@ async function list(req, res) {
  * GET /api/work-orders/:id
  */
 async function getById(req, res) {
-  let orderId = parseInt(String(req.params.id || '').replace(/\D/g, ''), 10);
-  let order = orderId ? await workOrdersRepository.findById(orderId) : null;
-  
-  // Fallback: get first order if not found
-  if (!order) {
-    const list = await workOrdersRepository.findAll({ technicianId: req.user.userId });
-    order = list[0] || await workOrdersRepository.findById(1);
-  }
+  const orderId = toPositiveInt(req.params.id, 'id');
+  const order = await workOrdersRepository.findById(orderId);
   
   if (!order) throw new ApiError(404, 'Work order not found');
 
+  if (req.user.role === ROLES.USER && order.reporter_id !== req.user.userId) {
+    throw new ApiError(403, 'You can only view work orders associated with your own reports');
+  }
+
   const history = await workOrdersRepository.getStatusHistory(order.order_id);
   ok(res, { ...order, statusHistory: history });
+}
+
+/**
+ * Get work order status history
+ * GET /api/work-orders/:id/history
+ */
+async function getHistory(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  const history = await workOrdersRepository.getStatusHistory(orderId);
+  ok(res, history);
 }
 
 /**
@@ -231,9 +240,17 @@ async function reject(req, res) {
 }
 
 async function updateStatus(req, res) {
-  const orderId = toPositiveInt(req.params.id, 'id');
-  requireFields(req.body, ['taskStatus']);
-  requireOneOf(req.body.taskStatus, Object.values(TASK_STATUS), 'taskStatus');
+  const rawId = req.params.orderId || req.params.id;
+  const orderId = toPositiveInt(rawId, 'id');
+
+  const taskStatus = req.body.task_status || req.body.taskStatus;
+  console.log('Updating status for order:', orderId, 'to:', taskStatus);
+  console.log('Request body:', req.body);
+
+  if (!taskStatus) {
+    throw new ApiError(400, 'Missing required field: task_status or taskStatus');
+  }
+  requireOneOf(taskStatus, Object.values(TASK_STATUS), 'taskStatus');
 
   // Validate work order exists
   const order = await workOrdersRepository.findById(orderId);
@@ -245,12 +262,14 @@ async function updateStatus(req, res) {
   }
 
   // Validate status transition
-  const allowedNext = TASK_STATUS_FLOW[order.task_status] || [];
-  if (!allowedNext.includes(req.body.taskStatus)) {
-    throw new ApiError(
-      400,
-      `Cannot change status from "${order.task_status}" to "${req.body.taskStatus}". Allowed next: ${allowedNext.join(', ') || 'none'}`
-    );
+  if (order.task_status !== taskStatus) {
+    const allowedNext = TASK_STATUS_FLOW[order.task_status] || [];
+    if (!allowedNext.includes(taskStatus)) {
+      throw new ApiError(
+        400,
+        `Cannot change status from "${order.task_status}" to "${taskStatus}". Allowed next: ${allowedNext.join(', ') || 'none'}`
+      );
+    }
   }
 
   // Update fix details if provided
@@ -262,29 +281,32 @@ async function updateStatus(req, res) {
   }
 
   // Update task status
-  const updated = await workOrdersRepository.updateTaskStatus(orderId, req.body.taskStatus);
+  const updated = await workOrdersRepository.updateTaskStatus(orderId, taskStatus);
+  console.log('Update result:', updated);
 
-  // Gửi Notification cho Reporter & Manager khi cập nhật trạng thái
-  try {
-    if (order.reporter_id) {
-      await notificationsRepository.createNotification({
-        userId: order.reporter_id,
-        reportId: order.report_id,
-        orderId: order.order_id,
-        message: `Work Order #${orderId} for report #${order.report_id} updated to status: ${req.body.taskStatus}.`,
-      });
+  // Gửi Notification cho Reporter & Manager khi cập nhật trạng thái (non-blocking async)
+  (async () => {
+    try {
+      if (order.reporter_id) {
+        await notificationsRepository.createNotification({
+          userId: order.reporter_id,
+          reportId: order.report_id,
+          orderId: order.order_id,
+          message: `Work Order #${orderId} for report #${order.report_id} updated to status: ${taskStatus}.`,
+        });
+      }
+      if (order.manager_id && order.manager_id !== req.user.userId) {
+        await notificationsRepository.createNotification({
+          userId: order.manager_id,
+          reportId: order.report_id,
+          orderId: order.order_id,
+          message: `Work Order #${orderId} progress update: ${taskStatus}.`,
+        });
+      }
+    } catch (e) {
+      console.log('Failed to send status update notification:', e.message);
     }
-    if (order.manager_id && order.manager_id !== req.user.userId) {
-      await notificationsRepository.createNotification({
-        userId: order.manager_id,
-        reportId: order.report_id,
-        orderId: order.order_id,
-        message: `Work Order #${orderId} progress update: ${req.body.taskStatus}.`,
-      });
-    }
-  } catch (e) {
-    console.log('Failed to send status update notification:', e.message);
-  }
+  })();
 
   ok(res, updated);
 }
@@ -416,7 +438,7 @@ async function reopen(req, res) {
     orderId,
     oldStatus: 'Completed',
     newStatus: 'In Progress',
-    note: `User reported issue persists: ${reason}`,
+    note: `User confirmed issue not fixed: ${reason}`,
     changedBy: req.user ? req.user.userId : null,
   });
 
@@ -451,5 +473,60 @@ async function reopen(req, res) {
   return ok(res, updatedOrder);
 }
 
-module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign, updateDeadline, reopen };
+/**
+ * Upload work order evidence images (max 5 images per work order, <= 5MB each)
+ * POST /api/workOrders/:orderId/images
+ */
+async function uploadImages(req, res) {
+  const rawId = req.params.orderId || req.params.id;
+  const orderId = toPositiveInt(rawId, 'orderId');
+
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) throw new ApiError(404, 'Work order not found');
+
+  const currentImages = await workOrdersRepository.findImagesByOrderId(orderId);
+  const files = req.files || (req.file ? [req.file] : []);
+
+  if (files.length === 0) {
+    throw new ApiError(400, 'No image file uploaded');
+  }
+
+  if (currentImages.length + files.length > 5) {
+    throw new ApiError(400, `Maximum 5 images allowed per work order. Currently uploaded: ${currentImages.length}`);
+  }
+
+  const addedImages = [];
+  for (const file of files) {
+    const imagePath = `/uploads/${file.filename}`;
+    const added = await workOrdersRepository.addImage(orderId, imagePath);
+    addedImages.push(added);
+  }
+
+  const updatedImages = await workOrdersRepository.findImagesByOrderId(orderId);
+  created(res, { added: addedImages, images: updatedImages });
+}
+
+/**
+ * Delete work order evidence image
+ * DELETE /api/workOrders/:orderId/images/:imageId
+ */
+async function deleteImage(req, res) {
+  const rawId = req.params.orderId || req.params.id;
+  const orderId = toPositiveInt(rawId, 'orderId');
+  const imageId = toPositiveInt(req.params.imageId, 'imageId');
+
+  const image = await workOrdersRepository.findImageById(imageId);
+  if (!image) throw new ApiError(404, 'Image not found');
+
+  if (image.order_id !== orderId) {
+    throw new ApiError(400, 'Image does not belong to this work order');
+  }
+
+  await workOrdersRepository.deleteImage(imageId);
+  const remainingImages = await workOrdersRepository.findImagesByOrderId(orderId);
+  ok(res, { message: 'Image deleted successfully', images: remainingImages });
+}
+
+module.exports = { list, getById, getHistory, suggestions, create, respond, reject, updateStatus, reassign, updateDeadline, reopen, uploadImages, deleteImage };
+
 

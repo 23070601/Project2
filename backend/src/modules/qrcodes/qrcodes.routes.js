@@ -11,6 +11,7 @@ router.use(authenticate, requireRole(ROLES.MANAGER));
 
 router.get('/', asyncHandler(controller.list));
 router.post('/:roomId/generate', asyncHandler(controller.generate));
+router.post('/generate/:roomId', asyncHandler(controller.generate));
 router.get('/:roomId', asyncHandler(controller.view));
 
 module.exports = router;

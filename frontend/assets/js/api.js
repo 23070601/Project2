@@ -12,7 +12,7 @@ const Api = (() => {
   // ============================================
   
   // Get base URL from config or use default
-  const BASE_URL = window.APP_CONFIG?.API_BASE_URL || '/api/v1';
+  const BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:4000/api/v1';
   const TOKEN_KEY = window.APP_CONFIG?.TOKEN_KEY || 'vnuis_token';
   const USER_KEY = window.APP_CONFIG?.USER_KEY || 'vnuis_user';
   const DEMO_TOKEN_PREFIX = 'demo_';
@@ -156,11 +156,16 @@ const Api = (() => {
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
         body: requestBody !== undefined ? requestBody : undefined,
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       if (response.status === 204) {
         return null;

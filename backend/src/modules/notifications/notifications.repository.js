@@ -1,13 +1,16 @@
 const { pool } = require('../../config/db');
 
-async function findAllForUser(userId, { unreadOnly = false, limit = 50 } = {}) {
+async function findAllForUser(userId, { unreadOnly = false, limit = 50, offset = 0 } = {}) {
   const clauses = ['user_id = ?'];
   const params = [userId];
   if (unreadOnly) clauses.push('is_read = FALSE');
 
+  const parsedLimit = Number.isInteger(Number(limit)) && Number(limit) > 0 ? Number(limit) : 50;
+  const parsedOffset = Number.isInteger(Number(offset)) && Number(offset) >= 0 ? Number(offset) : 0;
+
   const [rows] = await pool.query(
-    `SELECT * FROM Notifications WHERE ${clauses.join(' AND ')} ORDER BY created_at DESC LIMIT ?`,
-    [...params, Number(limit)]
+    `SELECT * FROM Notifications WHERE ${clauses.join(' AND ')} ORDER BY created_at DESC, notification_id DESC LIMIT ? OFFSET ?`,
+    [...params, parsedLimit, parsedOffset]
   );
   return rows;
 }

@@ -20,7 +20,17 @@ function isValidEmail(email) {
 }
 
 function toPositiveInt(value, fieldName) {
-  const n = Number(value);
+  if (value === undefined || value === null || value === '') {
+    throw new ApiError(400, `"${fieldName}" must be a positive integer`);
+  }
+  let strVal = String(value).trim();
+  if (/\D/.test(strVal)) {
+    const matches = strVal.match(/\d+/g);
+    if (matches && matches.length > 0) {
+      strVal = matches[matches.length - 1];
+    }
+  }
+  const n = Number(strVal);
   if (!Number.isInteger(n) || n <= 0) {
     throw new ApiError(400, `"${fieldName}" must be a positive integer`);
   }

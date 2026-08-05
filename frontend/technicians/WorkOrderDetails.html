@@ -245,24 +245,17 @@
 
         <!-- Repair Evidence Card -->
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-          <div class="bg-primary px-6 py-3">
+          <div class="bg-primary px-6 py-3 flex items-center justify-between">
             <h4 class="text-white font-bold text-label-lg">Repair Evidence</h4>
+            <span id="evidenceCountBadge" class="text-xs bg-white/20 text-white font-bold px-2 py-0.5 rounded-full">0/5</span>
           </div>
           <div class="p-6">
-            <div class="flex gap-3">
-              <div class="flex-1 h-[120px] rounded-lg overflow-hidden border border-outline-variant/30 relative group">
-                <img id="detailEvidencePhoto" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Evidence">
-                <div class="absolute bottom-0 left-0 right-0 p-1.5 bg-black/40 backdrop-blur-sm">
-                  <p class="text-white text-[8px] font-bold uppercase tracking-wider">Sample: Before Repair</p>
-                </div>
-              </div>
-              <div class="flex-1 h-[120px] rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer" onclick="toggleModal('uploadPhotoModal', true)">
-                <span class="material-symbols-outlined text-primary text-2xl">add_a_photo</span>
-                <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Evidence</p>
-              </div>
+            <div id="evidenceGalleryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <!-- Dynamically populated images -->
             </div>
           </div>
         </div>
+
 
         <!-- Update WorkOrder Status Card -->
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
@@ -709,309 +702,77 @@
       }
     }
 
-    // Saved Evidence Photo check
-    const savedPhoto = localStorage.getItem(`vnuis_evidence_${cleanId}`);
-    if (savedPhoto) {
-      const photoEl = document.getElementById('detailEvidencePhoto');
-      if (photoEl) photoEl.src = savedPhoto;
-    }
-
-    // Render Timeline & Repair History
+    // Render Evidence Gallery, Timeline & Repair History
+    renderEvidenceGallery(order);
     renderStatusTimeline(order);
     renderRepairHistory(order);
   }
 
-  let currentRepairHistory = [];
 
-  function openHistoryDetailModalByIndex(index) {
-    console.log('openHistoryDetailModalByIndex called with index:', index);
-    let item = (currentRepairHistory && currentRepairHistory.length > index) ? currentRepairHistory[index] : null;
 
-    if (!item) {
-      item = {
-        order_id: '7',
-        report_id: '12',
-        reporter_name: 'Nguyen Van A',
-        reported_issue: 'Loose battery contact springs causing audio dropout',
-        root_cause: 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.',
-        assigned_at: '2026-05-15 09:00:00',
-        technician_name: 'Pham Thi D',
-        task_status: 'Closed',
-        fix_description: 'Tightened internal battery terminal contacts and replaced antenna sleeve.',
-        parts_used: 'AKG Battery Terminal Spring'
-      };
-    }
+  function renderEvidenceGallery(order) {
+    const grid = document.getElementById('evidenceGalleryGrid');
+    const badge = document.getElementById('evidenceCountBadge');
+    if (!grid) return;
 
-    const targetWoId = UiHelpers.formatWorkOrderId(item.order_id || '7');
-    const targetReportId = UiHelpers.formatReportId(item.report_id || '12');
-    const reporterName = item.reporter_name || 'Nguyen Van A';
-    const reportedIssue = item.reported_issue || item.description || 'Loose battery contact springs causing audio dropout';
-    const rootCause = item.root_cause || 'Internal battery spring contact oxidation causing intermittent power disconnection when moved.';
-    const dateStr = item.assigned_at ? formatAssignedDate(item.assigned_at) : '15 May 2026';
-    const techName = item.technician_name || 'Pham Thi D';
-    const initials = techName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    const statusStr = item.task_status || 'Closed';
-    const fixDesc = item.fix_description || 'Tightened internal battery terminal contacts and replaced antenna sleeve.';
-    const partsUsed = item.parts_used || 'AKG Battery Terminal Spring';
-
-    document.getElementById('historyModalOrderId').textContent = targetWoId;
-    document.getElementById('historyModalReportId').textContent = targetReportId;
-    document.getElementById('historyModalReporter').textContent = reporterName;
-    document.getElementById('historyModalReportedIssue').textContent = `"${reportedIssue}"`;
-    document.getElementById('historyModalRootCause').textContent = rootCause;
-    document.getElementById('historyModalDate').textContent = dateStr;
-    document.getElementById('historyModalTech').textContent = techName;
-    document.getElementById('historyModalTechInitials').textContent = initials;
-    document.getElementById('historyModalStatus').textContent = statusStr;
-    document.getElementById('historyModalFixDesc').textContent = fixDesc;
-    document.getElementById('historyModalParts').textContent = partsUsed;
-
-    window.toggleModal('historyDetailModal', true);
-  }
-
-  window.openHistoryDetailModalByIndex = openHistoryDetailModalByIndex;
-  window.toggleModal = toggleModal;
-
-  function renderRepairHistory(order) {
-    const tbody = document.getElementById('detailRepairHistoryBody');
-    if (!tbody) return;
-
-    let historyList = (order && Array.isArray(order.repairHistory) && order.repairHistory.length > 0) 
-      ? order.repairHistory.filter(r => (r.task_status === 'Completed' || r.task_status === 'Closed') && String(r.order_id) !== String(cleanId)) 
-      : [];
-
-    if (historyList.length === 0 && WORK_ORDERS_MAP[cleanId] && WORK_ORDERS_MAP[cleanId].repairHistory) {
-      historyList = WORK_ORDERS_MAP[cleanId].repairHistory.filter(r => String(r.order_id) !== String(cleanId));
-    }
-
-    if (historyList.length === 0 && (order.failure_count > 1 || (WORK_ORDERS_MAP[cleanId] && WORK_ORDERS_MAP[cleanId].failure_count > 1))) {
-      historyList = [
-        {
-          order_id: 'WO-2024-0007',
-          report_id: '12',
-          reporter_name: 'Doan Van G',
-          reported_issue: `${order.asset_name || 'Equipment'} intermittent signal loss during lecture`,
-          root_cause: 'Internal power terminal oxidation causing intermittent disconnection.',
-          assigned_at: '2026-06-15 09:00:00',
-          technician_name: 'Le Van C',
-          task_status: 'Closed',
-          fix_description: 'Cleaned contacts, re-soldered power leads, and tested operation.',
-          parts_used: 'Power Terminal Clip & Cable Assembly'
+    let images = (order && Array.isArray(order.images)) ? [...order.images] : [];
+    
+    // Check localStorage fallback if no images in order object
+    if (images.length === 0) {
+      try {
+        const storedLocal = localStorage.getItem(`vnuis_evidence_list_${cleanId}`);
+        if (storedLocal) {
+          images = JSON.parse(storedLocal);
         }
-      ];
+      } catch (e) {}
     }
 
-    currentRepairHistory = historyList;
+    if (badge) badge.textContent = `${images.length}/5`;
 
-    currentRepairHistory = historyList;
+    let html = '';
 
-    if (historyList.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="4" class="px-6 py-8 text-center text-outline text-body-sm font-medium">
-            <div class="flex flex-col items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-outline/50 text-[32px]">history_toggle_off</span>
-              <span>No completed past repair history recorded in database for this asset.</span>
-            </div>
-          </td>
-        </tr>
-      `;
-      return;
-    }
+    images.forEach(img => {
+      let src = img.image_path || img.src;
+      if (src && src.startsWith('/uploads')) {
+        const apiBase = (window.Config && window.Config.API_BASE_URL) || (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) || 'http://localhost:4000/api/v1';
+        src = `${apiBase.replace('/api/v1', '')}${src}`;
+      }
 
-    tbody.innerHTML = historyList.map((r, idx) => {
-      const initials = (r.technician_name || 'NV').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-      const statusText = r.task_status || 'Completed';
-      const assignedDateFormatted = formatAssignedDate(r.assigned_at);
-      const techNameStr = r.technician_name || 'Technician';
-      const fixDescStr = r.fix_description || r.description || 'Maintenance check';
-      const partsUsedStr = r.parts_used || 'None';
 
-      return `
-        <tr onclick="window.openHistoryDetailModalByIndex(${idx})" class="history-item-row hover:bg-surface-container-lowest transition-colors cursor-pointer">
-          <td class="px-6 py-4 text-center">
-            <div class="flex flex-col items-center">
-              <span class="text-body-sm font-bold">${assignedDateFormatted}</span>
-              <span class="text-[10px] text-green-600 font-bold uppercase tracking-widest">${UiHelpers.escapeHtml(statusText)}</span>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-center">
-            <div class="flex flex-col items-center">
-              <span class="text-body-sm text-on-surface">${UiHelpers.escapeHtml(fixDescStr)}</span>
-              <span class="text-label-md text-outline">Parts: ${UiHelpers.escapeHtml(partsUsedStr)}</span>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-center">
-            <div class="flex items-center gap-2 justify-center">
-              <div class="w-6 h-6 rounded-full bg-primary-fixed text-primary text-[10px] flex items-center justify-center font-bold">${initials}</div>
-              <span class="text-body-sm">${UiHelpers.escapeHtml(techNameStr)}</span>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-center">
-            <button onclick="if(window.event && window.event.stopPropagation) window.event.stopPropagation(); window.openHistoryDetailModalByIndex(${idx}); return false;" class="history-item-btn text-primary hover:bg-primary/10 p-2 rounded-full transition-colors flex items-center justify-center mx-auto" title="View Repair Details">
-              <span class="material-symbols-outlined">visibility</span>
+      html += `
+        <div class="h-[120px] rounded-lg overflow-hidden border border-outline-variant/30 relative group shadow-xs">
+          <img src="${UiHelpers.escapeHtml(src)}" class="w-full h-full object-cover" alt="Evidence photo">
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            <button onclick="deleteEvidenceImage(${img.image_id || `'${img.id}'`})" class="w-8 h-8 rounded-full bg-error text-white flex items-center justify-center hover:scale-110 transition-transform" title="Delete Photo">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
             </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  function renderStatusTimeline(order) {
-    const timelineContainer = document.getElementById('detailTimelineContainer');
-    if (!timelineContainer) return;
-
-    let history = order.statusHistory || [
-      { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
-      { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
-    ];
-
-    const displayStatus = getDisplayTaskStatus(order);
-    if (displayStatus === 'In Progress' && !history.some(h => (h.task_status || '').includes('Progress'))) {
-      history.push({ task_status: 'In Progress', changed_at: new Date().toISOString(), notes: 'Technician started the repair process.' });
-    } else if (displayStatus === 'Completed' && !history.some(h => (h.task_status || '').includes('Completed'))) {
-      history.push({ task_status: 'Completed', changed_at: new Date().toISOString(), notes: 'Repair completed successfully and submitted.' });
-    }
-
-    timelineContainer.innerHTML = history.map((h, index) => {
-      const isLast = index === (history.length - 1);
-      const statusName = h.task_status || h.status_name || 'Assigned';
-      let icon = 'assignment_ind';
-      if (statusName.includes('Progress')) icon = 'play_arrow';
-      if (statusName.includes('Received')) icon = 'task_alt';
-      if (statusName.includes('Completed')) icon = 'check_circle';
-
-      return `
-        <div class="relative flex items-center group">
-          <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white ${isLast ? 'bg-primary text-white' : 'bg-outline text-white'} shadow shrink-0 z-10">
-            <span class="material-symbols-outlined text-[18px]">${icon}</span>
-          </div>
-          <div class="ml-4 flex-1 ${isLast ? 'bg-surface-container-low p-3 rounded-lg border border-outline-variant/20' : 'p-3 rounded-lg border border-outline-variant/10'}">
-            <div class="flex justify-between items-start">
-              <h5 class="text-body-sm font-bold ${isLast ? 'text-on-surface' : 'text-outline'}">${UiHelpers.escapeHtml(statusName)}</h5>
-              <span class="text-[10px] text-outline font-medium">${formatAssignedDate(h.changed_at, true)}</span>
-            </div>
-            <p class="text-label-md ${isLast ? 'text-on-surface-variant' : 'text-outline'}">${UiHelpers.escapeHtml(h.notes || h.note || 'Status updated in system.')}</p>
           </div>
         </div>
       `;
-    }).reverse().join('');
-  }
+    });
 
-  function handleStatusSaveClick() {
-    const selectVal = document.getElementById('updateStatusSelect').value;
-    if (selectVal === 'Completed') {
-      document.getElementById('reportModalWorkOrderId').value = displayId;
-      document.getElementById('reportModalNewStatus').value = 'Completed';
-      toggleModal('repairReportModal', true);
-    } else {
-      updateTaskStatusApi(selectVal);
-    }
-  }
-
-  async function updateTaskStatusApi(newStatus) {
-    let apiSuccess = false;
-    try {
-      if (window.Api) {
-        const res = await Api.patch(`/work-orders/${cleanId}/status`, { taskStatus: newStatus });
-        console.log('WorkOrder status updated in MySQL DB:', res);
-        apiSuccess = true;
-      }
-    } catch (e) {
-      console.error('API status update error:', e);
-      if (window.showToast) showToast(e.message || 'Error updating status in Database', 'error');
-      else alert(e.message || 'Error updating status in Database');
+    if (images.length < 5) {
+      html += `
+        <div class="h-[120px] rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer" onclick="toggleModal('uploadPhotoModal', true)">
+          <span class="material-symbols-outlined text-primary text-2xl">add_a_photo</span>
+          <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Evidence</p>
+        </div>
+      `;
     }
 
-    if (apiSuccess) {
-      const stored = getStoredWorkOrders();
-      const idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
-      if (idx !== -1) {
-        stored[idx].task_status = newStatus;
-        if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
-        stored[idx].statusHistory.push({
-          task_status: newStatus,
-          changed_at: new Date().toISOString(),
-          notes: `Technician updated status to ${newStatus}`
-        });
-        saveStoredWorkOrders(stored);
-      }
-
-      if (window.showToast) showToast(`WorkOrder ${displayId} status updated to "${newStatus}" in MySQL Database!`, 'success');
-      else alert(`WorkOrder ${displayId} status updated to "${newStatus}" in MySQL Database!`);
-    }
-    
-    await loadWorkOrderDetails();
-  }
-
-  async function submitRepairReport() {
-    const rootCause = document.getElementById('reportRootCause').value.trim();
-    const solution = document.getElementById('reportSolutionActions').value.trim();
-    const parts = document.getElementById('reportPartsUsed').value.trim();
-
-    if (!rootCause || !solution) {
-      alert('Please fill out Root Cause and Solution Actions.');
-      return;
-    }
-
-    let apiSuccess = false;
-    try {
-      if (window.Api) {
-        const res = await Api.patch(`/work-orders/${cleanId}/status`, {
-          taskStatus: 'Completed',
-          fixDescription: `${rootCause} - ${solution}`,
-          partsUsed: parts
-        });
-        console.log('Repair report submitted in MySQL DB:', res);
-        apiSuccess = true;
-      }
-    } catch (e) {
-      console.error('API repair report error:', e);
-      if (window.showToast) showToast(e.message || 'Error submitting report to Database', 'error');
-      else alert(e.message || 'Error submitting report to Database');
-    }
-
-    if (apiSuccess) {
-      const stored = getStoredWorkOrders();
-      const idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
-      if (idx !== -1) {
-        stored[idx].task_status = 'Completed';
-        stored[idx].fix_description = `${rootCause} - ${solution}`;
-        stored[idx].parts_used = parts;
-        if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
-        stored[idx].statusHistory.push({
-          task_status: 'Completed',
-          changed_at: new Date().toISOString(),
-          notes: `Repair completed: ${rootCause} - ${solution}`
-        });
-
-        if (!stored[idx].repairHistory) stored[idx].repairHistory = [];
-        stored[idx].repairHistory.unshift({
-          order_id: cleanId,
-          assigned_at: new Date().toISOString(),
-          task_status: 'Completed',
-          technician_name: currentUser.full_name || 'Technician',
-          fix_description: `${rootCause} - ${solution}`,
-          parts_used: parts || 'Standard maintenance tools'
-        });
-
-        saveStoredWorkOrders(stored);
-      }
-    }
-
-    toggleModal('repairReportModal', false);
-    if (apiSuccess) {
-      await loadWorkOrderDetails();
-      if (window.showToast) showToast(`Repair report submitted for ${displayId}! Status updated in MySQL Database.`, 'success');
-      else alert(`Repair report submitted for ${displayId}! Status updated in MySQL Database.`);
-    }
-    
-    await loadWorkOrderDetails();
+    grid.innerHTML = html;
   }
 
   function handleEvidenceFileSelected(input) {
     if (input.files && input.files[0]) {
       const file = input.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        if (window.showToast) showToast('File size must be ≤ 5MB', 'error');
+        else alert('File size must be ≤ 5MB');
+        input.value = '';
+        return;
+      }
+      selectedEvidenceFile = file;
       const reader = new FileReader();
       reader.onload = function(e) {
         selectedEvidenceBase64 = e.target.result;
@@ -1023,19 +784,363 @@
     }
   }
 
-  function submitEvidencePhoto() {
-    const photoUrl = selectedEvidenceBase64 || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80';
-    localStorage.setItem(`vnuis_evidence_${cleanId}`, photoUrl);
+  async function submitEvidencePhoto() {
+    if (!selectedEvidenceFile && !selectedEvidenceBase64) {
+      if (window.showToast) showToast('Please select an image file', 'warning');
+      else alert('Please select an image file');
+      return;
+    }
 
-    const photoEl = document.getElementById('detailEvidencePhoto');
-    if (photoEl) photoEl.src = photoUrl;
+    let apiSuccess = false;
+
+    if (selectedEvidenceFile && window.Api) {
+      try {
+        const formData = new FormData();
+        formData.append('images', selectedEvidenceFile);
+
+        const token = Auth.getToken();
+        const apiBase = (window.Config && window.Config.API_BASE_URL) || (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) || 'http://localhost:4000/api/v1';
+        const res = await fetch(`${apiBase}/work-orders/${cleanId}/images`, {
+
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          apiSuccess = true;
+        } else {
+          throw new Error(data.message || 'Upload failed');
+        }
+      } catch (err) {
+        console.warn('API upload image error, falling back to local state:', err);
+        if (window.showToast) showToast(err.message || 'Error uploading image to API', 'error');
+      }
+    }
+
+    // Fallback or update local list if needed
+    let storedLocal = [];
+    try {
+      const existing = localStorage.getItem(`vnuis_evidence_list_${cleanId}`);
+      if (existing) storedLocal = JSON.parse(existing);
+    } catch (e) {}
+
+    if (storedLocal.length >= 5) {
+      if (window.showToast) showToast('Maximum 5 images allowed per WorkOrder', 'warning');
+      else alert('Maximum 5 images allowed per WorkOrder');
+      toggleModal('uploadPhotoModal', false);
+      return;
+    }
+
+    const newPhotoUrl = selectedEvidenceBase64 || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80';
+    storedLocal.push({ id: Date.now(), src: newPhotoUrl, image_path: newPhotoUrl });
+    localStorage.setItem(`vnuis_evidence_list_${cleanId}`, JSON.stringify(storedLocal));
+
+    // Reset modal input
+    selectedEvidenceFile = null;
+    selectedEvidenceBase64 = null;
+    document.getElementById('evidenceFileInput').value = '';
+    document.getElementById('evidencePreviewContainer').classList.add('hidden');
+    document.getElementById('evidenceFilePreview').src = '';
+    document.getElementById('evidenceUploadLabel').textContent = 'Click to select photo';
 
     toggleModal('uploadPhotoModal', false);
     if (window.showToast) showToast('Repair evidence photo uploaded successfully!', 'success');
-    else alert('Repair evidence photo uploaded successfully!');
+    
+    await loadWorkOrderDetails();
   }
+
+  async function deleteEvidenceImage(imageId) {
+    if (!confirm('Are you sure you want to delete this evidence image?')) return;
+
+    if (typeof imageId === 'number' && window.Api) {
+      try {
+        await Api.delete(`/work-orders/${cleanId}/images/${imageId}`);
+        if (window.showToast) showToast('Image deleted successfully!', 'success');
+        await loadWorkOrderDetails();
+        return;
+      } catch (err) {
+        console.warn('Failed to delete image via API:', err);
+      }
+    }
+
+    // Fallback for local storage deletion
+    try {
+      const existing = localStorage.getItem(`vnuis_evidence_list_${cleanId}`);
+      if (existing) {
+        let storedLocal = JSON.parse(existing);
+        storedLocal = storedLocal.filter(img => String(img.id) !== String(imageId) && String(img.image_id) !== String(imageId));
+        localStorage.setItem(`vnuis_evidence_list_${cleanId}`, JSON.stringify(storedLocal));
+      }
+    } catch (e) {}
+
+    if (window.showToast) showToast('Image deleted!', 'success');
+    await loadWorkOrderDetails();
+  }
+
+  async function handleStatusSaveClick() {
+    const statusSelect = document.getElementById('updateStatusSelect');
+    if (!statusSelect) return;
+    const newStatus = statusSelect.value;
+
+    if (!newStatus) {
+      if (window.showToast) showToast('Please select a valid status', 'warning');
+      else alert('Please select a valid status');
+      return;
+    }
+
+    if (newStatus === 'Completed') {
+      document.getElementById('reportModalWorkOrderId').value = UiHelpers.formatWorkOrderId(cleanId);
+      document.getElementById('reportModalNewStatus').value = 'Completed';
+      if (window.showToast) showToast('Please complete the Repair Report before setting status to Completed.', 'info');
+      toggleModal('repairReportModal', true);
+      return;
+    }
+
+    try {
+      if (window.Api) {
+        const response = await Api.patch(`/work-orders/${cleanId}/status`, { task_status: newStatus, taskStatus: newStatus });
+        console.log('Update response:', response);
+      }
+    } catch (err) {
+      console.error('API update status error:', err);
+      if (window.showToast) showToast(err.message || 'Failed to update status', 'error');
+      else alert(err.message || 'Failed to update status');
+      return;
+    }
+
+    // Update local state and localStorage
+    if (currentOrderData) {
+      currentOrderData.task_status = newStatus;
+    }
+    const storedOrders = getStoredWorkOrders();
+    const existingIndex = storedOrders.findIndex(o => String(o.order_id) === String(cleanId));
+    if (existingIndex !== -1) {
+      storedOrders[existingIndex].task_status = newStatus;
+    } else if (currentOrderData) {
+      storedOrders.push(currentOrderData);
+    }
+    saveStoredWorkOrders(storedOrders);
+
+    if (window.showToast) showToast(`WorkOrder status updated to "${newStatus}"!`, 'success');
+    else alert(`WorkOrder status updated to "${newStatus}"!`);
+
+    await loadWorkOrderDetails();
+  }
+
+  async function submitRepairReport() {
+    const rootCause = (document.getElementById('reportRootCause')?.value || '').trim();
+    const solutionActions = (document.getElementById('reportSolutionActions')?.value || '').trim();
+    const partsUsed = (document.getElementById('reportPartsUsed')?.value || '').trim();
+
+    if (!rootCause || !solutionActions) {
+      if (window.showToast) showToast('Please fill in required fields: Root Cause and Solution Actions', 'warning');
+      else alert('Please fill in required fields: Root Cause and Solution Actions');
+      return;
+    }
+
+    const nowIso = new Date().toISOString();
+
+    try {
+      if (window.Api) {
+        const response = await Api.patch(`/work-orders/${cleanId}/status`, {
+          task_status: 'Completed',
+          taskStatus: 'Completed',
+          fixDescription: `${rootCause} - ${solutionActions}`,
+          partsUsed: partsUsed
+        });
+        console.log('Update response:', response);
+      }
+    } catch (err) {
+      console.error('API update status completed failed:', err);
+      if (window.showToast) showToast(err.message || 'Failed to update status', 'error');
+      else alert(err.message || 'Failed to update status');
+      return;
+    }
+
+    const newRepairRecord = {
+      order_id: cleanId,
+      report_id: currentOrderData?.report_id || cleanId,
+      reporter_name: currentOrderData?.reporter_name || 'Nguyen Van A',
+      reported_issue: currentOrderData?.description || 'Equipment malfunction reported',
+      root_cause: rootCause,
+      assigned_at: nowIso,
+      technician_name: currentUser?.full_name || 'Le Van C',
+      task_status: 'Closed',
+      fix_description: solutionActions,
+      parts_used: partsUsed || 'None'
+    };
+
+    if (currentOrderData) {
+      currentOrderData.task_status = 'Completed';
+      currentOrderData.resolved_at = nowIso;
+      currentOrderData.completed_at = nowIso;
+      if (!Array.isArray(currentOrderData.repairHistory)) currentOrderData.repairHistory = [];
+      currentOrderData.repairHistory.unshift(newRepairRecord);
+    }
+
+    const storedOrders = getStoredWorkOrders();
+    const existingIndex = storedOrders.findIndex(o => String(o.order_id) === String(cleanId));
+    if (existingIndex !== -1) {
+      storedOrders[existingIndex].task_status = 'Completed';
+      storedOrders[existingIndex].resolved_at = nowIso;
+      storedOrders[existingIndex].completed_at = nowIso;
+      if (!Array.isArray(storedOrders[existingIndex].repairHistory)) storedOrders[existingIndex].repairHistory = [];
+      storedOrders[existingIndex].repairHistory.unshift(newRepairRecord);
+    } else if (currentOrderData) {
+      storedOrders.push(currentOrderData);
+    }
+    saveStoredWorkOrders(storedOrders);
+
+    // Reset fields & close modal
+    const rcElem = document.getElementById('reportRootCause');
+    const saElem = document.getElementById('reportSolutionActions');
+    const puElem = document.getElementById('reportPartsUsed');
+    if (rcElem) rcElem.value = '';
+    if (saElem) saElem.value = '';
+    if (puElem) puElem.value = '';
+    toggleModal('repairReportModal', false);
+
+    if (window.showToast) showToast('Repair report submitted & WorkOrder marked Completed!', 'success');
+    else alert('Repair report submitted & WorkOrder marked Completed!');
+
+    await loadWorkOrderDetails();
+  }
+
+  function renderStatusTimeline(order) {
+    const container = document.getElementById('detailTimelineContainer');
+    if (!container) return;
+
+    const status = order ? (order.task_status || 'Assigned') : 'Assigned';
+    const isCompleted = status === 'Completed' || status === 'Closed';
+    const isInProgress = status === 'In Progress' || isCompleted;
+    const isReceived = status === 'Received' || isInProgress;
+
+    const items = [
+      {
+        title: 'Completed',
+        time: isCompleted ? formatAssignedDate(order.resolved_at || order.completed_at || new Date().toISOString(), true) : 'Pending completion',
+        desc: isCompleted ? 'Technician completed the repair work and submitted report.' : 'Work order waiting for completion report.',
+        active: isCompleted,
+        icon: 'task_alt'
+      },
+      {
+        title: 'In Progress',
+        time: isInProgress ? formatAssignedDate(order.started_at || order.assigned_at, true) : 'Pending start',
+        desc: isInProgress ? 'Technician started the repair process.' : 'Awaiting technician to start work.',
+        active: isInProgress,
+        icon: 'play_arrow'
+      },
+      {
+        title: 'Received',
+        time: isReceived ? formatAssignedDate(order.assigned_at, true) : 'Pending acceptance',
+        desc: isReceived ? 'Work order accepted by technician.' : 'Awaiting technician acceptance.',
+        active: isReceived,
+        icon: 'check_circle'
+      },
+      {
+        title: 'Assigned',
+        time: formatAssignedDate(order ? (order.created_at || order.assigned_at) : null, true),
+        desc: 'System assigned task to Technician Portal.',
+        active: true,
+        icon: 'assignment_ind'
+      }
+    ];
+
+    let html = '';
+    items.forEach(item => {
+      const circleBg = item.active ? 'bg-primary text-white border-white' : 'bg-outline text-white border-white';
+      const boxBg = item.active ? 'bg-surface-container-low border-outline-variant/20' : 'border-outline-variant/10';
+      const textTitle = item.active ? 'text-on-surface font-bold' : 'text-outline font-bold';
+      const textDesc = item.active ? 'text-on-surface-variant' : 'text-outline';
+
+      html += `
+        <div class="relative flex items-center group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border ${circleBg} shadow shrink-0 z-10">
+            <span class="material-symbols-outlined text-[18px]">${item.icon}</span>
+          </div>
+          <div class="ml-4 flex-1 ${boxBg} p-3 rounded-lg border">
+            <div class="flex justify-between items-start">
+              <h5 class="text-body-sm ${textTitle}">${item.title}</h5>
+              <span class="text-[10px] text-outline font-medium">${item.time}</span>
+            </div>
+            <p class="text-label-md ${textDesc}">${item.desc}</p>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  let activeHistoryRecords = [];
+
+  function renderRepairHistory(order) {
+    const tbody = document.getElementById('detailRepairHistoryBody');
+    if (!tbody) return;
+
+    activeHistoryRecords = (order && Array.isArray(order.repairHistory)) ? order.repairHistory : [];
+
+    if (activeHistoryRecords.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="px-6 py-4 text-center text-body-sm text-outline italic">No past repair history recorded for this asset.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    let html = '';
+    activeHistoryRecords.forEach((rec, idx) => {
+      html += `
+        <tr class="hover:bg-surface-container-low/50 transition-colors">
+          <td class="px-6 py-3 text-body-sm text-on-surface text-center whitespace-nowrap">${formatAssignedDate(rec.assigned_at || rec.created_at)}</td>
+          <td class="px-6 py-3 text-body-sm text-on-surface text-center">${UiHelpers.escapeHtml(rec.fix_description || rec.reported_issue || 'Repair action')}</td>
+          <td class="px-6 py-3 text-body-sm text-on-surface text-center whitespace-nowrap">${UiHelpers.escapeHtml(rec.technician_name || 'Technician')}</td>
+          <td class="px-6 py-3 text-body-sm text-center whitespace-nowrap">
+            <button onclick="openHistoryDetailModal(${idx})" class="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-xs font-bold transition-all">
+              <span class="material-symbols-outlined text-[14px]">visibility</span>
+              View Audit
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  function openHistoryDetailModal(index) {
+    const rec = activeHistoryRecords[index];
+    if (!rec) return;
+
+    document.getElementById('historyModalOrderId').textContent = UiHelpers.formatWorkOrderId(rec.order_id || cleanId);
+    document.getElementById('historyModalReportId').textContent = rec.report_id ? `#FR-${rec.report_id}` : '#FR-001';
+    document.getElementById('historyModalDate').textContent = formatAssignedDate(rec.assigned_at);
+    document.getElementById('historyModalStatus').textContent = rec.task_status || 'Closed';
+    document.getElementById('historyModalReporter').textContent = rec.reporter_name || 'Nguyen Van A';
+    document.getElementById('historyModalReportedIssue').textContent = `"${rec.reported_issue || 'Issue reported'}"`;
+    document.getElementById('historyModalRootCause').textContent = rec.root_cause || 'Component wear and tear.';
+    document.getElementById('historyModalFixDesc').textContent = rec.fix_description || 'Replaced parts and tested asset operation.';
+    document.getElementById('historyModalParts').textContent = rec.parts_used || 'N/A';
+    document.getElementById('historyModalTech').textContent = rec.technician_name || 'Le Van C';
+
+    const initials = (rec.technician_name || 'Tech').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    document.getElementById('historyModalTechInitials').textContent = initials || 'TC';
+
+    toggleModal('historyDetailModal', true);
+  }
+
+  window.deleteEvidenceImage = deleteEvidenceImage;
+  window.handleStatusSaveClick = handleStatusSaveClick;
+  window.submitRepairReport = submitRepairReport;
+  window.openHistoryDetailModal = openHistoryDetailModal;
 
   loadWorkOrderDetails();
 </script>
+
 </body>
 </html>

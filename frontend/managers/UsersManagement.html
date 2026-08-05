@@ -805,10 +805,10 @@
     try {
       if (window.Api && cleanNumId) {
         await Api.patch(`/users/${cleanNumId}/toggle`, { isActive: isActive });
-        if (window.showToast) showToast(`Đã cập nhật trạng thái user thành công!`, 'success');
+        if (window.showToast) showToast(`User status updated successfully!`, 'success');
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
     }
 
     const idx = allUsers.findIndex(u => u.user_id === id);

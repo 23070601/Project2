@@ -817,7 +817,7 @@
     const techId = manualSelect || (selectedRadio ? selectedRadio.value : null);
 
     if (!techId) {
-      if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
+      if (window.showToast) showToast('Please select a technician!', 'warning');
       else alert('Please select a technician.');
       return;
     }
@@ -828,14 +828,14 @@
     try {
       if (window.Api) {
         await Api.post('/work-orders', { reportId: currentActiveReqId, technicianId: Number(techId) });
-        if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
+        if (window.showToast) showToast('Report approved and work order assigned successfully!', 'success');
         else alert(`Successfully approved report #FR-${currentActiveReqId} and created work order!`);
         closeApproveModal();
         loadData();
         switchTab('assigned');
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || 'Failed to assign work order.');
     } finally {
       btn.disabled = false;
@@ -863,7 +863,7 @@
   async function confirmRejectReport() {
     const reason = document.getElementById('rejectionReasonInput').value.trim();
     if (!reason) {
-      if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
+      if (window.showToast) showToast('Please provide a reason for rejection!', 'warning');
       else alert('Please provide a reason for rejection.');
       return;
     }
@@ -875,13 +875,13 @@
     try {
       if (window.Api) {
         await Api.patch(`/fault-reports/${currentActiveReqId}/status`, { status: 'Rejected', rejectionReason: reason });
-        if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
+        if (window.showToast) showToast('Report rejected successfully!', 'success');
         else alert(`Report #FR-${currentActiveReqId} rejected successfully.`);
         closeRejectModal();
         loadData();
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || 'Failed to reject report.');
     } finally {
       btn.disabled = false;

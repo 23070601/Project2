@@ -185,7 +185,7 @@
             location.href = `PendingRequest.html?tab=${sourceTab}`;
           }, 1000);
         } catch (err) {
-          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
           else alert(`Failed: ${err.message}`);
           approveBtn.disabled = false;
         }
@@ -210,7 +210,7 @@
             errorBox.textContent = 'Please provide a reason.';
             errorBox.classList.remove('hidden');
           }
-          if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
+          if (window.showToast) showToast('Please provide a reason for rejection!', 'warning');
           return;
         }
         confirmRejectBtn.disabled = true;
@@ -218,13 +218,13 @@
           if (window.Api) {
             await Api.patch(`/fault-reports/${cleanId}/status`, { status: 'Rejected', rejectionReason: reason });
           }
-          if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
+          if (window.showToast) showToast('Report rejected successfully!', 'success');
           else alert(`Report rejected successfully.`);
           setTimeout(() => {
             location.href = `PendingRequest.html?tab=${sourceTab}`;
           }, 1000);
         } catch (err) {
-          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
           else alert(`Failed: ${err.message}`);
           confirmRejectBtn.disabled = false;
         }

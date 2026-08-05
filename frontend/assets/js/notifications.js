@@ -221,55 +221,38 @@ const Notifications = (() => {
 
   async function loadDropdown() {
     const container = document.getElementById('notificationList');
-    if (!container) return;
+    console.log('Container exists?', Boolean(container));
+    if (!container) {
+      console.error('Notification container (#notificationList) not found in DOM!');
+      return;
+    }
 
+    console.log('Fetching notifications...');
     let items = [];
     try {
       if (window.Api) {
-        const rawData = await Api.get('/notifications', { limit: 10 });
+        const rawData = await Api.get('/notifications', { limit: 5 });
+        console.log('Response data:', rawData);
         items = extractNotificationArray(rawData);
       }
     } catch (e) {
-      console.warn('loadDropdown: failed to load notifications from API', e.message);
+      console.error('Failed to load notifications from API:', e);
       items = [];
     }
 
-    if (!items || items.length === 0) {
-      const user = window.Auth?.getCurrentUser?.();
-      const role = (user?.role || '').toLowerCase();
-      if (role === 'technician') {
-        items = [
-          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R101).', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 102, order_id: 5, report_id: 9, message: 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
-          { notification_id: 103, order_id: 2, report_id: 3, message: 'Work Order #2 for Samsung Commercial TV in Room R101 completed successfully.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
-        ];
-      } else if (role === 'manager') {
-        items = [
-          { notification_id: 201, report_id: 2, message: 'New fault report #2 submitted by Tran Thi B requires your approval.', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R201.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
-          { notification_id: 203, report_id: 10, message: 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
-        ];
-      } else {
-        items = [
-          { notification_id: 301, report_id: 1, order_id: 1, message: 'Your fault report #1 has been approved and assigned to Technician Le Van C.', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 302, report_id: 3, order_id: 2, message: 'Work Order #2 completed. Please submit your feedback and confirm satisfaction.', is_read: false, created_at: new Date(Date.now() - 1800000).toISOString() },
-          { notification_id: 303, report_id: 4, message: 'Your fault report #4 was rejected by Manager. Reason: Duplicate report.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
-        ];
-      }
-    }
-
+    console.log('Current count:', items.length);
     renderList(items, container, true);
     refreshBadge();
   }
 
-  async function loadFullList(containerSelector) {
-    const container = document.querySelector(containerSelector);
-    if (!container) return [];
+  async function loadFullList(containerSelector = null, options = {}) {
+    const container = containerSelector ? document.querySelector(containerSelector) : null;
+    const { page = 1, limit = 50 } = options;
 
     let items = [];
     try {
       if (window.Api) {
-        const rawData = await Api.get('/notifications', { limit: 100 });
+        const rawData = await Api.get('/notifications', { page, limit });
         items = extractNotificationArray(rawData);
       }
     } catch (e) {
@@ -277,39 +260,19 @@ const Notifications = (() => {
       items = [];
     }
 
-    if (!items || items.length === 0) {
-      const user = window.Auth?.getCurrentUser?.();
-      const role = (user?.role || '').toLowerCase();
-      if (role === 'technician') {
-        items = [
-          { notification_id: 101, order_id: 1, report_id: 1, message: 'You have been assigned to Work Order #1 (Sony Projector in Room R101).', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 102, order_id: 5, report_id: 9, message: 'You have been assigned to Work Order #5 (AKG Wireless Mic in Room R402).', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
-          { notification_id: 103, order_id: 8, report_id: 15, message: 'You have been assigned to Work Order #8 (Gigabit Switch in Room R601).', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
-          { notification_id: 104, order_id: 2, report_id: 3, message: 'Work Order #2 for Samsung Commercial TV in Room R101 completed successfully.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
-        ];
-      } else if (role === 'manager') {
-        items = [
-          { notification_id: 201, report_id: 2, message: 'New fault report #2 submitted by Tran Thi B requires your approval.', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 202, report_id: 7, message: 'New fault report #7 submitted by Nguyen Van A for Room R201.', is_read: false, created_at: new Date(Date.now() - 7200000).toISOString() },
-          { notification_id: 203, report_id: 10, message: 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', is_read: false, created_at: new Date(Date.now() - 10800000).toISOString() },
-          { notification_id: 204, report_id: 15, message: 'Critical report #15 submitted by Doan Van G: Network switch down in Room R601.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
-        ];
-      } else {
-        items = [
-          { notification_id: 301, report_id: 1, order_id: 1, message: 'Your fault report #1 has been approved and assigned to Technician Le Van C.', is_read: false, created_at: new Date().toISOString() },
-          { notification_id: 302, report_id: 3, order_id: 2, message: 'Work Order #2 completed. Please submit your feedback and confirm satisfaction.', is_read: false, created_at: new Date(Date.now() - 1800000).toISOString() },
-          { notification_id: 303, report_id: 4, message: 'Your fault report #4 was rejected by Manager. Reason: Duplicate report.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
-        ];
-      }
-    }
-
     const normalized = sortNotifications(items).map(normalizeNotification);
-    renderList(items, container, false);
+    if (container) {
+      renderList(items, container, false);
+    }
     return normalized;
   }
 
   function startPolling() {
     refreshBadge();
+    const dropdown = document.getElementById('notificationDropdown');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+      loadDropdown();
+    }
     if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(() => {
       refreshBadge();

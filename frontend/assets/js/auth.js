@@ -134,11 +134,16 @@ const Auth = (() => {
     return user;
   }
 
-  const auth = { login, logout, getCurrentUser, isAuthenticated, homePageForRole, guard };
+  function getToken() {
+    return localStorage.getItem(TOKEN_KEY) || '';
+  }
+
+  const auth = { login, logout, getCurrentUser, isAuthenticated, homePageForRole, guard, getToken };
 
   if (typeof window !== 'undefined') {
     window.Auth = auth;
   }
 
   return auth;
+
 })();

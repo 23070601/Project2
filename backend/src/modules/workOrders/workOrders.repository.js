@@ -44,32 +44,75 @@ async function findAll({ technicianId, managerId, taskStatus, technicianResponse
 async function findById(orderId) {
   const [rows] = await pool.execute(`${BASE_SELECT} WHERE wo.order_id = ?`, [orderId]);
   const order = rows[0] || null;
-  if (order && order.asset_id) {
+  if (order) {
     try {
-      const [historyRows] = await pool.execute(
-        `SELECT wo.*, tech.full_name AS technician_name, mgr.full_name AS manager_name, fr.description AS reported_issue, fr.report_id, reporter.full_name AS reporter_name
-         FROM WorkOrders wo
-         JOIN Users tech ON tech.user_id = wo.technician_id
-         LEFT JOIN Users mgr ON mgr.user_id = wo.manager_id
-         JOIN FaultReports fr ON fr.report_id = wo.report_id
-         LEFT JOIN Users reporter ON reporter.user_id = fr.reporter_id
-         WHERE fr.asset_id = ? AND wo.task_status IN ('Completed', 'Closed') AND wo.order_id != ?
-         ORDER BY wo.assigned_at DESC LIMIT 5`,
-        [order.asset_id, orderId]
+      const [images] = await pool.execute(
+        `SELECT * FROM WorkOrderImages WHERE order_id = ? ORDER BY uploaded_at ASC`,
+        [orderId]
       );
-      order.repairHistory = historyRows;
-
-      const [failureRows] = await pool.execute(
-        `SELECT COUNT(*) AS count FROM FaultReports WHERE asset_id = ?`,
-        [order.asset_id]
-      );
-      order.failure_count = failureRows[0]?.count || 1;
+      order.images = images;
     } catch (e) {
-      console.log('Error fetching asset history details', e);
+      console.log('Error fetching WorkOrder images', e);
+      order.images = [];
+    }
+
+    if (order.asset_id) {
+      try {
+        const [historyRows] = await pool.execute(
+          `SELECT wo.*, tech.full_name AS technician_name, mgr.full_name AS manager_name, fr.description AS reported_issue, fr.report_id, reporter.full_name AS reporter_name
+           FROM WorkOrders wo
+           JOIN Users tech ON tech.user_id = wo.technician_id
+           LEFT JOIN Users mgr ON mgr.user_id = wo.manager_id
+           JOIN FaultReports fr ON fr.report_id = wo.report_id
+           LEFT JOIN Users reporter ON reporter.user_id = fr.reporter_id
+           WHERE fr.asset_id = ? AND wo.task_status IN ('Completed', 'Closed') AND wo.order_id != ?
+           ORDER BY wo.assigned_at DESC LIMIT 5`,
+          [order.asset_id, orderId]
+        );
+        order.repairHistory = historyRows;
+
+        const [failureRows] = await pool.execute(
+          `SELECT COUNT(*) AS count FROM FaultReports WHERE asset_id = ?`,
+          [order.asset_id]
+        );
+        order.failure_count = failureRows[0]?.count || 1;
+      } catch (e) {
+        console.log('Error fetching asset history details', e);
+      }
     }
   }
   return order;
 }
+
+async function findImagesByOrderId(orderId) {
+  const [rows] = await pool.execute(
+    `SELECT * FROM WorkOrderImages WHERE order_id = ? ORDER BY uploaded_at ASC`,
+    [orderId]
+  );
+  return rows;
+}
+
+async function findImageById(imageId) {
+  const [rows] = await pool.execute(
+    `SELECT * FROM WorkOrderImages WHERE image_id = ?`,
+    [imageId]
+  );
+  return rows[0] || null;
+}
+
+async function addImage(orderId, imagePath) {
+  const [result] = await pool.execute(
+    `INSERT INTO WorkOrderImages (order_id, image_path) VALUES (?, ?)`,
+    [orderId, imagePath]
+  );
+  return findImageById(result.insertId);
+}
+
+async function deleteImage(imageId) {
+  await pool.execute(`DELETE FROM WorkOrderImages WHERE image_id = ?`, [imageId]);
+  return true;
+}
+
 
 async function findByReportId(reportId) {
   const [rows] = await pool.execute(`${BASE_SELECT} WHERE wo.report_id = ?`, [reportId]);
@@ -126,7 +169,7 @@ async function updateDeadline(orderId, deadlineAt) {
 
 async function getStatusHistory(orderId) {
   const [rows] = await pool.execute(
-    'SELECT * FROM WorkOrderStatusHistory WHERE order_id = ? ORDER BY changed_at ASC',
+    'SELECT * FROM WorkOrderStatusHistory WHERE order_id = ? ORDER BY changed_at DESC',
     [orderId]
   );
   return rows;
@@ -190,4 +233,9 @@ module.exports = {
   getStatusHistory,
   reassign,
   rejectAssignment,
+  findImagesByOrderId,
+  findImageById,
+  addImage,
+  deleteImage,
 };
+

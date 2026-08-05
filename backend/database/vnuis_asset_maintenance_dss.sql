@@ -114,6 +114,19 @@ CREATE TABLE WorkOrders (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
+-- TABLE 5.1: WorkOrderImages
+-- ---------------------------------------------------------------------
+CREATE TABLE WorkOrderImages (
+    image_id        INT AUTO_INCREMENT PRIMARY KEY,
+    order_id        INT             NOT NULL,
+    image_path      VARCHAR(255)    NOT NULL,
+    uploaded_at     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_workorderimages_order FOREIGN KEY (order_id)
+        REFERENCES WorkOrders(order_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+-- ---------------------------------------------------------------------
 -- TABLE 6: UserConfirmations
 -- ---------------------------------------------------------------------
 CREATE TABLE UserConfirmations (
@@ -525,7 +538,7 @@ BEGIN
         IF NEW.task_status = 'Completed' THEN
             UPDATE FaultReports SET status = 'Completed' WHERE report_id = NEW.report_id;
 
-            INSERT INTO UserConfirmations (order_id, reporter_id)
+            INSERT IGNORE INTO UserConfirmations (order_id, reporter_id)
             SELECT NEW.order_id, reporter_id
             FROM FaultReports WHERE report_id = NEW.report_id;
 
@@ -533,12 +546,15 @@ BEGIN
             SELECT reporter_id, NEW.report_id, NEW.order_id,
                    CONCAT('Work Order #', NEW.order_id, ' is completed. Please confirm satisfaction.')
             FROM FaultReports WHERE report_id = NEW.report_id;
-        END IF;
-
-        IF NEW.task_status = 'Closed' THEN
+        ELSEIF NEW.task_status = 'Closed' THEN
             INSERT INTO Notifications (user_id, report_id, order_id, message)
             SELECT reporter_id, NEW.report_id, NEW.order_id,
                    CONCAT('Work Order #', NEW.order_id, ' has been officially closed.')
+            FROM FaultReports WHERE report_id = NEW.report_id;
+        ELSE
+            INSERT INTO Notifications (user_id, report_id, order_id, message)
+            SELECT reporter_id, NEW.report_id, NEW.order_id,
+                   CONCAT('Work Order #', NEW.order_id, ' status updated to ', NEW.task_status, '.')
             FROM FaultReports WHERE report_id = NEW.report_id;
         END IF;
     END IF;
@@ -550,6 +566,13 @@ CREATE TRIGGER trg_faultreports_after_insert_dss3
 AFTER INSERT ON FaultReports
 FOR EACH ROW
 BEGIN
+    INSERT INTO Notifications (user_id, report_id, message)
+    VALUES (NEW.reporter_id, NEW.report_id, CONCAT('Fault report #', NEW.report_id, ' created successfully.'));
+
+    INSERT INTO Notifications (user_id, report_id, message)
+    SELECT user_id, NEW.report_id, CONCAT('New fault report #', NEW.report_id, ' requires manager review.')
+    FROM Users WHERE role = 'Manager' AND is_active = TRUE;
+
     IF NEW.asset_id IS NOT NULL AND NEW.status NOT IN ('Rejected', 'Cancelled') THEN
         UPDATE Assets
         SET failure_count = failure_count + 1,
