@@ -41,6 +41,17 @@ async function addImages(orderId, imagePaths) {
   }
 }
 
+async function removeImage(orderId, imagePath) {
+  try {
+    await pool.execute(
+      `DELETE FROM WorkOrderImages WHERE order_id = ? AND image_path = ?`,
+      [orderId, imagePath]
+    );
+  } catch (e) {
+    console.warn('Failed to delete from WorkOrderImages:', e.message);
+  }
+}
+
 async function findAll({ technicianId, managerId, taskStatus, technicianResponse, priority, deadline, sort } = {}) {
   const clauses = [];
   const params = [];
@@ -103,6 +114,18 @@ async function findById(orderId) {
   if (order) {
     order.images = await getImages(orderId);
     order.comments = await getComments(orderId);
+    try {
+      const [shRows] = await pool.execute(
+        `SELECT history_id, order_id, old_status, new_status, changed_by, note AS notes, changed_at
+         FROM WorkOrderStatusHistory
+         WHERE order_id = ?
+         ORDER BY changed_at ASC`,
+        [orderId]
+      );
+      order.statusHistory = shRows;
+    } catch (e) {
+      order.statusHistory = [];
+    }
   }
   if (order && order.asset_id) {
     try {
@@ -323,6 +346,7 @@ module.exports = {
   reassign,
   rejectAssignment,
   addImages,
+  removeImage,
   getImages,
   getComments,
   addComment,

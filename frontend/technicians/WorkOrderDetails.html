@@ -290,7 +290,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
           <div class="bg-primary px-6 py-3 flex items-center justify-between">
             <h4 class="text-white font-bold text-label-lg">Repair Evidence</h4>
-            <button onclick="toggleModal('uploadPhotoModal', true)" class="text-xs bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
+            <button id="addEvidenceHeaderBtn" onclick="openUploadModal()" class="text-xs bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
               <span class="material-symbols-outlined text-sm">add_a_photo</span>
               <span>Add Evidence</span>
             </button>
@@ -938,16 +938,28 @@
     const timelineContainer = document.getElementById('detailTimelineContainer');
     if (!timelineContainer) return;
 
-    let history = (order.statusHistory && order.statusHistory.length > 0)
-      ? order.statusHistory.map(h => ({
-          task_status: h.task_status || h.new_status || 'Assigned',
-          changed_at: h.changed_at,
-          notes: h.notes || h.note || 'Status updated in system.'
-        }))
-      : [
-          { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
-          { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
-        ];
+    let history = [];
+    if (order.statusHistory && order.statusHistory.length > 0) {
+      history = order.statusHistory.map(h => ({
+        task_status: h.task_status || h.new_status || 'Assigned',
+        changed_at: h.changed_at,
+        notes: h.notes || h.note || 'Status updated in system.'
+      }));
+
+      // Ensure initial milestones Assigned and Received are present at beginning
+      const assignedDate = order.assigned_at || (history[0] ? history[0].changed_at : '2026-07-20 10:00:00');
+      if (!history.some(h => (h.task_status || '').includes('Received'))) {
+        history.unshift({ task_status: 'Received', changed_at: assignedDate, notes: 'Work order accepted by technician.' });
+      }
+      if (!history.some(h => (h.task_status || '').includes('Assigned'))) {
+        history.unshift({ task_status: 'Assigned', changed_at: assignedDate, notes: 'System assigned task to Technician Portal.' });
+      }
+    } else {
+      history = [
+        { task_status: 'Assigned', changed_at: order.assigned_at || '2026-07-20 10:00:00', notes: 'System assigned task to Technician Portal.' },
+        { task_status: 'Received', changed_at: order.assigned_at || '2026-07-20 10:30:00', notes: 'Work order accepted by technician.' }
+      ];
+    }
 
     const displayStatus = getDisplayTaskStatus(order);
     if (displayStatus === 'In Progress' && !history.some(h => (h.task_status || '').includes('Progress'))) {
@@ -1094,32 +1106,125 @@
 
   let selectedTechFiles = [];
 
+  function openUploadModal() {
+    const currentStatus = currentOrderData ? (currentOrderData.task_status || '') : '';
+    if (currentStatus.toLowerCase() !== 'in progress') {
+      const msg = 'Evidence images can only be uploaded when the work order is In Progress!';
+      if (window.showToast) showToast(msg, 'warning');
+      else alert(msg);
+      return;
+    }
+    toggleModal('uploadPhotoModal', true);
+  }
+
   function renderEvidenceGrid(images) {
     const grid = document.getElementById('detailEvidenceGrid');
     if (!grid) return;
 
-    let html = `
-      <div class="w-28 h-24 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer shrink-0" onclick="toggleModal('uploadPhotoModal', true)">
-        <span class="material-symbols-outlined text-primary text-2xl">add_a_photo</span>
-        <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Photo</p>
-      </div>
-    `;
+    const currentStatus = currentOrderData ? (currentOrderData.task_status || '') : '';
+    const canModify = currentStatus.toLowerCase() === 'in progress';
+
+    // Hide/show top header Add Evidence button
+    const headerBtn = document.getElementById('addEvidenceHeaderBtn');
+    if (headerBtn) {
+      if (canModify) headerBtn.classList.remove('hidden');
+      else headerBtn.classList.add('hidden');
+    }
+
+    let html = '';
+    if (canModify) {
+      html += `
+        <div class="w-28 h-24 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer shrink-0" onclick="openUploadModal()">
+          <span class="material-symbols-outlined text-primary text-2xl">add_a_photo</span>
+          <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Photo</p>
+        </div>
+      `;
+    }
 
     if (images && images.length > 0) {
       images.forEach((imgUrl, i) => {
+        const deleteBtnHtml = canModify ? `
+          <button type="button" onclick="event.stopPropagation(); event.preventDefault(); deleteEvidenceImage('${encodeURIComponent(imgUrl)}')" class="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center shadow-md" title="Delete photo">
+            <span class="material-symbols-outlined text-xs">delete</span>
+          </button>
+        ` : '';
+
         html += `
-          <a href="${imgUrl}" target="_blank" class="w-32 h-24 rounded-lg overflow-hidden border border-outline-variant/30 relative group bg-surface-container shrink-0">
-            <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="Evidence ${i+1}" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-[10px] text-gray-400 p-1 text-center\\'><span class=\\'material-symbols-outlined text-xl mb-1\\'>broken_image</span>Image ${i+1}</div>';" />
-            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-bold gap-1">
-              <span class="material-symbols-outlined text-xs">visibility</span>
-              <span>View #${i+1}</span>
-            </div>
-          </a>
+          <div class="w-32 h-24 rounded-lg overflow-hidden border border-outline-variant/30 relative group bg-surface-container shrink-0">
+            ${deleteBtnHtml}
+            <a href="${imgUrl}" target="_blank" class="w-full h-full block">
+              <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="Evidence ${i+1}" onError="this.onerror=null; this.parentElement.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-[10px] text-gray-400 p-1 text-center\\'><span class=\\'material-symbols-outlined text-xl mb-1\\'>broken_image</span>Image ${i+1}</div>';" />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-bold gap-1 pointer-events-none">
+                <span class="material-symbols-outlined text-xs">visibility</span>
+                <span>View #${i+1}</span>
+              </div>
+            </a>
+          </div>
         `;
       });
+    } else if (!canModify) {
+      html += `<p class="text-xs text-outline italic">No repair evidence uploaded.</p>`;
     }
 
     grid.innerHTML = html;
+  }
+
+  async function deleteEvidenceImage(encodedImgUrl) {
+    const imgUrl = decodeURIComponent(encodedImgUrl);
+    if (!confirm('Are you sure you want to delete this evidence image?')) return;
+
+    // Relative path extracted for API call if it comes from backend upload
+    let relativePath = imgUrl;
+    if (imgUrl.includes('/uploads/')) {
+      relativePath = '/uploads/' + imgUrl.split('/uploads/')[1];
+    } else {
+      try {
+        const u = new URL(imgUrl, window.location.origin);
+        relativePath = u.pathname;
+      } catch (e) {}
+    }
+
+    let apiSuccess = false;
+    try {
+      if (window.Api) {
+        await Api.delete(`/work-orders/${cleanId}/images`, { imagePath: relativePath });
+        apiSuccess = true;
+      }
+    } catch (e) {
+      console.warn('API evidence delete failed or fallback mode:', e);
+    }
+
+    // Update in-memory currentOrderData
+    if (currentOrderData) {
+      if (currentOrderData.images) {
+        currentOrderData.images = currentOrderData.images.filter(img => img !== imgUrl && img !== relativePath);
+      }
+    }
+
+    // Synchronize storedWorkOrders in localStorage
+    try {
+      const storedOrders = getStoredWorkOrders() || [];
+      const matchIndex = storedOrders.findIndex(o => String(o.order_id) === String(cleanId));
+      if (matchIndex !== -1) {
+        if (storedOrders[matchIndex].images) {
+          storedOrders[matchIndex].images = storedOrders[matchIndex].images.filter(img => img !== imgUrl && img !== relativePath);
+        }
+        saveStoredWorkOrders(storedOrders);
+      }
+    } catch (e) {}
+
+    // Fallback/sync localStorage evidence list
+    try {
+      let storedImages = JSON.parse(localStorage.getItem(`vnuis_evidence_list_${cleanId}`) || '[]');
+      storedImages = storedImages.filter(url => url !== imgUrl && url !== relativePath);
+      localStorage.setItem(`vnuis_evidence_list_${cleanId}`, JSON.stringify(storedImages));
+      localStorage.removeItem(`vnuis_evidence_${cleanId}`);
+    } catch (e) {}
+
+    if (window.showToast) showToast('Evidence image deleted successfully.', 'success');
+    else alert('Evidence image deleted successfully.');
+
+    await loadWorkOrderDetails();
   }
 
   function handleEvidenceFilesSelected(input) {
@@ -1129,19 +1234,19 @@
     const newFiles = Array.from(input.files);
 
     if (selectedTechFiles.length + newFiles.length > 5) {
-      alert(`Tối đa 5 ảnh / tệp tin minh chứng! (Bạn đã chọn ${selectedTechFiles.length} tệp)`);
+      alert(`Maximum 5 evidence files allowed! (You selected ${selectedTechFiles.length} files)`);
       input.value = '';
       return;
     }
 
     for (const f of newFiles) {
       if (!validTypes.includes(f.type)) {
-        alert(`Tệp "${f.name}" không hợp lệ. Chỉ chấp nhận các định dạng PNG, JPG, WEBP hoặc PDF.`);
+        alert(`File "${f.name}" is invalid. Only PNG, JPG, WEBP or PDF formats are supported.`);
         input.value = '';
         return;
       }
       if (f.size > 5 * 1024 * 1024) {
-        alert(`Tệp "${f.name}" vượt quá 5MB.`);
+        alert(`File "${f.name}" exceeds 5MB limit.`);
         input.value = '';
         return;
       }
@@ -1192,8 +1297,14 @@
   }
 
   async function submitEvidencePhoto() {
+    const currentStatus = currentOrderData ? (currentOrderData.task_status || '') : '';
+    if (currentStatus.toLowerCase() !== 'in progress') {
+      alert('Evidence images can only be uploaded when the work order is In Progress!');
+      return;
+    }
+
     if (selectedTechFiles.length === 0) {
-      alert('Vui lòng chọn ít nhất 1 hình ảnh hoặc tệp tin minh chứng!');
+      alert('Please select at least 1 image or evidence file!');
       return;
     }
 
@@ -1262,8 +1373,8 @@
     }
 
     toggleModal('uploadPhotoModal', false);
-    if (window.showToast) showToast('Minh chứng sửa chữa đã được tải lên thành công!', 'success');
-    else alert('Minh chứng sửa chữa đã được tải lên thành công!');
+    if (window.showToast) showToast('Repair evidence uploaded successfully!', 'success');
+    else alert('Repair evidence uploaded successfully!');
 
     await loadWorkOrderDetails();
   }

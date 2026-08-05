@@ -260,13 +260,16 @@
       const currentStatus = report.display_status || report.status || '';
       const isPending = ['Pending', 'Pending Approval'].includes(report.status) && ['Pending', 'Pending Approval'].includes(currentStatus);
       
-      const isUserConfirmed = confirmation && (confirmation.confirmed_at !== null || confirmation.is_confirmed === true || confirmation.is_confirmed === false || confirmation.is_confirmed === 1 || confirmation.is_confirmed === 0);
+      const isUserConfirmed = confirmation && (confirmation.is_confirmed === true || confirmation.is_confirmed === 1);
       
-      // If workOrder is Completed or Closed in DB but user HAS NOT confirmed yet, report & workOrder status MUST be Completed
-      if (workOrder && ['Completed', 'Resolved', 'Closed'].includes(workOrder.task_status || workOrder.status)) {
-        if (!isUserConfirmed) {
+      // Synchronize display status if workOrder task_status is updated
+      if (workOrder && workOrder.task_status) {
+        if (workOrder.task_status === 'In Progress') {
+          report.status = 'Processing';
+        } else if (workOrder.task_status === 'Completed' && !isUserConfirmed) {
           report.status = 'Completed';
-          workOrder.task_status = 'Completed';
+        } else if (workOrder.task_status === 'Closed' && isUserConfirmed) {
+          report.status = 'Closed';
         }
       }
 
@@ -513,12 +516,42 @@
     function renderHistory(report, workOrder, confirmation) {
       let events = [];
 
-      if (report && report.statusHistory && report.statusHistory.length > 0) {
+      if (workOrder && workOrder.statusHistory && workOrder.statusHistory.length > 0) {
+        events = workOrder.statusHistory.map(h => ({
+          date: formatDateTime(h.changed_at || h.created_at),
+          status: h.new_status || h.task_status || h.status,
+          note: h.notes || h.note || ''
+        })).reverse();
+
+        // Always prepend initial milestones if missing in DB statusHistory
+        const repDate = report ? formatDateTime(report.reported_at) : (events[events.length - 1]?.date || '');
+        const assignedDate = workOrder && workOrder.assigned_at ? formatDateTime(workOrder.assigned_at) : repDate;
+
+        if (!events.some(e => e.status === 'Processing' || e.status === 'Assigned')) {
+          events.push({
+            date: assignedDate,
+            status: 'Processing',
+            textColor: 'text-blue-600',
+            dotColor: 'bg-blue-500',
+            note: 'Manager approved report and assigned to technician for resolution.'
+          });
+        }
+
+        if (!events.some(e => e.status === 'Pending Approval' || e.status === 'Pending')) {
+          events.push({
+            date: repDate,
+            status: 'Pending Approval',
+            textColor: 'text-amber-600',
+            dotColor: 'bg-amber-400',
+            note: 'Fault report submitted successfully (pending manager approval).'
+          });
+        }
+      } else if (report && report.statusHistory && report.statusHistory.length > 0) {
         events = report.statusHistory.map(h => ({
-          date: formatDate(h.changed_at || h.created_at),
+          date: formatDateTime(h.changed_at || h.created_at),
           status: h.new_status || h.status,
-          note: h.note || ''
-        }));
+          note: h.notes || h.note || ''
+        })).reverse();
       } else if (report) {
         const s = report.status || 'Pending Approval';
         const repDate = formatDateTime(report.reported_at);
@@ -550,6 +583,26 @@
           });
         }
 
+        // Check if report was reopened via local storage
+        let reopenInfo = null;
+        try {
+          const rId = report.report_id || new URLSearchParams(location.search).get('id');
+          const savedReopen = localStorage.getItem('vnu_reopened_' + rId);
+          if (savedReopen) {
+            reopenInfo = JSON.parse(savedReopen);
+          }
+        } catch(e) {}
+
+        if (reopenInfo) {
+          events.push({
+            date: formatDateTime(reopenInfo.reopened_at),
+            status: 'In Progress',
+            textColor: 'text-blue-600',
+            dotColor: 'bg-blue-500',
+            note: `Reopened by user: ${reopenInfo.reason}`
+          });
+        }
+
         if (s === 'Closed' || confirmation) {
           events.push({
             date: confirmation && confirmation.created_at ? formatDateTime(confirmation.created_at) : repDate,
@@ -560,7 +613,7 @@
           });
         }
 
-        if (['Completed', 'Resolved', 'Closed'].includes(s) || confirmation) {
+        if (['Completed', 'Resolved', 'Closed'].includes(s) || confirmation || reopenInfo) {
           events.push({
             date: resolvedDate,
             status: 'Completed',
@@ -725,6 +778,7 @@
       }
 
       const numOrderId = parseInt(String(orderId).replace(/\D/g, ''), 10) || orderId;
+      const reportId = new URLSearchParams(location.search).get('id');
 
       let apiSuccess = false;
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
@@ -741,21 +795,43 @@
         }
       }
 
-      // Update local storage fallback for user reports
+      // Reopen API already updates WorkOrder & FaultReport status and notifies technicians
+
+      // Update local storage fallback for user reports and reopen history persistence
       try {
-        const reportId = new URLSearchParams(location.search).get('id');
         if (reportId) {
+          const formattedReportId = (window.UiHelpers && window.UiHelpers.formatReportId) ? UiHelpers.formatReportId(reportId) : reportId;
           let localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
-          let target = localReports.find(r => String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase());
+          let target = localReports.find(r => 
+            String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase() ||
+            String(r.report_id || r.id).toLowerCase() === String(formattedReportId).toLowerCase()
+          );
           if (target) {
             target.status = 'Processing';
-            localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
+          } else {
+            localReports.push({
+              report_id: formattedReportId,
+              status: 'Processing'
+            });
           }
+          localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
+
+          // Save reopen status & reason in local storage for history display
+          const reopenData = {
+            reopened: true,
+            reason: reason.trim(),
+            reopened_at: new Date().toISOString()
+          };
+          localStorage.setItem('vnu_reopened_' + reportId, JSON.stringify(reopenData));
+          localStorage.setItem('vnu_reopened_' + formattedReportId, JSON.stringify(reopenData));
+          
+          // Clear resolved confirmation state so confirmation form disappears
           localStorage.removeItem('vnu_confirmation_' + reportId);
+          localStorage.removeItem('vnu_confirmation_' + formattedReportId);
         }
       } catch (e) {}
 
-      const msg = "✅ Your report has been sent back to the technician.";
+      const msg = "✅ Issue reported as Not Fixed. Work Order & Report updated to In Progress and sent back to Technician.";
       if (window.showToast) {
         showToast(msg, 'success');
       } else if (window.UiHelpers && window.UiHelpers.showToast) {
@@ -1083,8 +1159,17 @@
         );
       }
 
-      // 4. Check for locally saved confirmation
-      if (!confirmation) {
+      // 4. Check for locally saved reopen state or confirmation
+      let isLocallyReopened = false;
+      try {
+        const savedReopen = localStorage.getItem('vnu_reopened_' + reportId);
+        if (savedReopen) {
+          isLocallyReopened = true;
+          if (report) report.status = 'Processing';
+        }
+      } catch (e) {}
+
+      if (!isLocallyReopened && !confirmation) {
         try {
           const savedConfirm = localStorage.getItem('vnu_confirmation_' + reportId);
           if (savedConfirm) {
@@ -1097,9 +1182,7 @@
       // 5. If report found, try workOrder & confirmation
       if (report) {
         if (report.order_id && !workOrder) {
-          const userRole = (window.Auth && Auth.getUser && Auth.getUser()) ? Auth.getUser().role : null;
-          const canFetchWO = window.Api && userRole && ['Manager', 'Technician'].includes(userRole);
-          if (canFetchWO) {
+          if (window.Api && window.Auth && Auth.isAuthenticated()) {
             try {
               workOrder = await Api.get(`/work-orders/${report.order_id}`);
             } catch (e) {}
@@ -1108,7 +1191,7 @@
             workOrder = {
               order_id: report.order_id,
               technician_name: report.technician_name || 'Le Van C',
-              task_status: report.status === 'Closed' ? 'Closed' : (report.task_status || 'Completed'),
+              task_status: isLocallyReopened ? 'In Progress' : (report.status === 'Closed' ? 'Closed' : (report.task_status || 'Completed')),
               assigned_at: report.assigned_at || report.reported_at,
               resolved_at: report.resolved_at || report.reported_at,
               fix_description: report.fix_description || 'Inspected and resolved issue.',
@@ -1120,7 +1203,12 @@
               const res = await Api.get(`/confirmations/${report.order_id}`);
               if (res && res.confirmed_at !== null && res.is_confirmed !== null && res.is_confirmed !== undefined) {
                 confirmation = res;
-                if (report && confirmation.is_confirmed) report.status = 'Closed';
+                if (report && (confirmation.is_confirmed === true || confirmation.is_confirmed === 1)) {
+                  report.status = 'Closed';
+                } else if (confirmation.is_confirmed === false || confirmation.is_confirmed === 0) {
+                  report.status = 'Processing';
+                  if (workOrder) workOrder.task_status = 'In Progress';
+                }
               }
             } catch (e) {}
           }

@@ -68,8 +68,7 @@ async function create(req, res) {
 async function getByOrderId(req, res) {
   const orderId = toPositiveInt(req.params.orderId, 'orderId');
   const confirmation = await confirmationsRepository.findByOrderId(orderId);
-  if (!confirmation) throw new ApiError(404, 'No confirmation found for this work order');
-  ok(res, confirmation);
+  ok(res, confirmation || null);
 }
 
 module.exports = { create, getByOrderId };

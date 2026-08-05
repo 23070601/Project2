@@ -317,6 +317,24 @@
         }
       });
 
+      // Check all reports in reportMap for local confirmation or reopen state overrides
+      reportMap.forEach((rep, rId) => {
+        try {
+          const savedReopen = localStorage.getItem('vnu_reopened_' + rId) || localStorage.getItem('vnu_reopened_' + rep.report_id);
+          if (savedReopen) {
+            rep.status = 'Processing';
+          } else {
+            const savedConfirm = localStorage.getItem('vnu_confirmation_' + rId) || localStorage.getItem('vnu_confirmation_' + rep.report_id);
+            if (savedConfirm) {
+              const c = JSON.parse(savedConfirm);
+              if (c && c.is_confirmed) {
+                rep.status = 'Closed';
+              }
+            }
+          }
+        } catch(e) {}
+      });
+
       allReports = Array.from(reportMap.values()).sort((a, b) => {
         return new Date(b.reported_at || 0) - new Date(a.reported_at || 0);
       });
