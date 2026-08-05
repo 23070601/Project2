@@ -47,7 +47,6 @@ async function start() {
   try {
     await checkConnection();
     await ensureSeedPasswords();
-    await ensureFaultReportsColumns();
     app.listen(env.port, () => {
       console.log(`[Server] VNUIS Asset Maintenance DSS API running on http://localhost:${env.port}`);
       console.log(`[Server] Environment: ${env.nodeEnv}`);
