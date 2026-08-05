@@ -43,22 +43,27 @@ const Layout = (() => {
     });
   }
 
+  function getNotificationsPageUrl() {
+    const pathname = window.location.pathname || '';
+    const user = window.Auth?.getCurrentUser?.();
+    const role = (user?.role || '').toLowerCase();
+
+    if (pathname.includes('/managers/') || role === 'manager') {
+      return pathname.includes('/managers/') ? 'Notifications.html' : '../managers/Notifications.html';
+    }
+    if (pathname.includes('/technicians/') || role === 'technician') {
+      return pathname.includes('/technicians/') ? 'Notifications.html' : '../technicians/Notifications.html';
+    }
+    return pathname.includes('/users/') ? 'Notifications.html' : '../users/Notifications.html';
+  }
+
   function wireNotificationBell() {
     const bell = document.getElementById('notificationBell');
-    const dropdown = document.getElementById('notificationDropdown');
-    if (!bell || !dropdown) return;
+    if (!bell) return;
 
     bell.addEventListener('click', (e) => {
       e.stopPropagation();
-      dropdown.classList.toggle('hidden');
-      if (!dropdown.classList.contains('hidden') && window.Notifications) {
-        Notifications.loadDropdown();
-      }
-    });
-    document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
-        dropdown.classList.add('hidden');
-      }
+      window.location.href = getNotificationsPageUrl();
     });
   }
 
@@ -160,14 +165,15 @@ const Layout = (() => {
     wireMobileSidebar();
 
     if (window.Notifications) {
-      // Load dropdown immediately since topbar is already in DOM
-      try {
-        await Notifications.loadDropdown();
-        await Notifications.refreshBadge();
-      } catch (e) {
-        console.warn('Initial notification load failed:', e);
-      }
+      Notifications.refreshBadge();
       Notifications.startPolling();
+    } else {
+      setTimeout(() => {
+        if (window.Notifications) {
+          Notifications.refreshBadge();
+          Notifications.startPolling();
+        }
+      }, 200);
     }
   }
 
