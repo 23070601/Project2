@@ -3,6 +3,7 @@ const env = require('./config/env');
 const { pool, checkConnection } = require('./config/db');
 const bcrypt = require('bcryptjs');
 const { sendOverdueAlerts } = require('./modules/notifications/overdueAlerts.service');
+const { ensureFaultReportsColumns } = require('./modules/faultReports/faultReports.repository');
 
 async function ensureSeedPasswords() {
   try {

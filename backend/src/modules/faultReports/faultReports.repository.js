@@ -167,4 +167,21 @@ async function remove(reportId) {
   await pool.execute('DELETE FROM FaultReports WHERE report_id = ?', [reportId]);
 }
 
-module.exports = { findAll, findById, create, updateStatus, getStatusHistory, remove, addImages, getImages };
+async function ensureFaultReportsColumns() {
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM FaultReports LIKE 'rejection_reason'");
+    if (!cols || cols.length === 0) {
+      await pool.query("ALTER TABLE FaultReports ADD COLUMN rejection_reason VARCHAR(255) NULL");
+    }
+    const [cols2] = await pool.query("SHOW COLUMNS FROM FaultReports LIKE 'rejected_at'");
+    if (!cols2 || cols2.length === 0) {
+      await pool.query("ALTER TABLE FaultReports ADD COLUMN rejected_at TIMESTAMP NULL");
+    }
+  } catch (e) {
+    console.warn('[DB] Could not ensure FaultReports columns:', e.message);
+  }
+}
+
+module.exports = { findAll, findById, create, updateStatus, getStatusHistory, remove, addImages, getImages, ensureFaultReportsColumns };
+
+
