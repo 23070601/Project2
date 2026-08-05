@@ -43,15 +43,6 @@ function startOverdueAlertsCron() {
   setInterval(run, intervalMs);
 }
 
-async function ensureFaultReportsColumns() {
-  try {
-    await pool.execute(`ALTER TABLE FaultReports ADD COLUMN rejection_reason VARCHAR(255) NULL`);
-  } catch (e) {}
-  try {
-    await pool.execute(`ALTER TABLE FaultReports ADD COLUMN rejected_at TIMESTAMP NULL`);
-  } catch (e) {}
-}
-
 async function start() {
   try {
     await checkConnection();

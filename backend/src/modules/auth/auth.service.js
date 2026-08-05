@@ -4,6 +4,7 @@ const env = require('../../config/env');
 const { pool } = require('../../config/db');
 const { ApiError } = require('../../shared/utils/responseWrapper');
 const auditLogRepository = require('../auditLog/auditLog.repository');
+const { inferRoleFromEmail } = require('./roleResolver');
 
 function signToken(user) {
   return jwt.sign(
@@ -46,7 +47,13 @@ async function login(email, password) {
     throw new ApiError(401, 'Invalid email or password');
   }
 
-  const token = signToken(user);
+  const resolvedRole = user.role || inferRoleFromEmail(user.email);
+  const userWithResolvedRole = {
+    ...user,
+    role: resolvedRole,
+  };
+
+  const token = signToken(userWithResolvedRole);
   await auditLogRepository.log({
     userId: user.user_id,
     actionType: 'LOGIN',
@@ -55,7 +62,7 @@ async function login(email, password) {
     description: `User ${user.email} logged in`,
   });
 
-  return { token, user: toSafeUser(user) };
+  return { token, user: toSafeUser(userWithResolvedRole) };
 }
 
 async function changePassword(userId, currentPassword, newPassword) {

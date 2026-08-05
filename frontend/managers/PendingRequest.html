@@ -631,23 +631,33 @@
               <button onclick="openRejectModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
             </div>
           </td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
+          <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(rejectedDate)}</td>
+          <td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
+            <button onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">visibility</span> View</button>
+          </td>
         </tr>
       `;
     }).join('');
+
+    const pagInfo = document.getElementById('rejectedPaginationInfo');
+    if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} rejected reports`;
   }
 
-  function getRejectedDate(r) {
-    if (!r) return null;
-    const rId = String(r.report_id || r.id || '').replace(/\D/g, '');
-    try {
-      const storedStr = localStorage.getItem('vnu_rejected_info_' + r.report_id) || localStorage.getItem('vnu_rejected_info_' + rId);
-      if (storedStr) {
-        const parsed = JSON.parse(storedStr);
-        if (parsed.rejected_at) return parsed.rejected_at;
-      }
-    } catch (e) {}
-
-    return r.rejected_at || r.rejected_date || r.updated_at || r.reported_at;
+  function filterRejected() {
+    const searchVal = document.getElementById('rejectedSearch').value.toLowerCase();
+    let filtered = allRejectedReports;
+    if (searchVal) {
+      filtered = filtered.filter(r => {
+        const reporterName = getReporterDisplayName(r).toLowerCase();
+        return reporterName.includes(searchVal) ||
+          (r.asset_name || '').toLowerCase().includes(searchVal) ||
+          (r.room_name || '').toLowerCase().includes(searchVal) ||
+          (r.description || '').toLowerCase().includes(searchVal);
+      });
+    }
+    renderRejectedTable(filtered);
   }
 
   function renderRejectedTable(reports) {
@@ -660,7 +670,6 @@
     tbody.innerHTML = reports.map((r, index) => {
       const reporterName = getReporterDisplayName(r);
       const initials = reporterName ? reporterName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
-      const rejectedDate = getRejectedDate(r);
       return `
         <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'">
           <td class="px-6 py-4 font-bold text-primary">${UiHelpers.formatReportId(r.report_id)}</td>
@@ -672,7 +681,7 @@
           </td>
           <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
           <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
-          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(rejectedDate)}</td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(r.updated_at || r.reported_at)}</td>
           <td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
             <button onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">visibility</span> View</button>
           </td>
@@ -881,9 +890,6 @@
   // Bind filter events
   document.getElementById('pendingSearch').addEventListener('input', filterPending);
   document.getElementById('pendingPriorityFilter').addEventListener('change', filterPending);
-  if (document.getElementById('pendingSortFilter')) {
-    document.getElementById('pendingSortFilter').addEventListener('change', filterPending);
-  }
   document.getElementById('rejectedSearch').addEventListener('input', filterRejected);
   document.getElementById('assignedSearch').addEventListener('input', filterAssigned);
   if (document.getElementById('assignedPriorityFilter')) {

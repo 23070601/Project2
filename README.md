@@ -102,6 +102,16 @@ DB_NAME=
 JWT_SECRET=
 JWT_EXPIRES_IN=
 BCRYPT_SALT_ROUNDS=
+
+# Frontend (email notification links)
+FRONTEND_BASE_URL=http://127.0.0.1:5500
+
+# Email notifications (optional)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=noreply@vnuis.edu.vn
 ```
 
 ---
@@ -157,6 +167,13 @@ Login.html
 Open with Live Server
 ```
 
+If SMTP is configured, the system will also send email notifications for major events such as:
+
+- new work order assignment
+- work order status updates
+- technician response and rejection
+- user confirmation of completed work
+
 The application will open automatically at:
 
 ```
@@ -186,7 +203,7 @@ Use the following sample accounts after the backend and database are running.
 | User (Student) | student.b@vnuis.edu.vn | 123456 | frontend/users/Dashboard.html |
 
 ---
-
+http://localhost:4000/api/v1
 # 6. Project Structure
 
 ```text
@@ -312,3 +329,33 @@ Recommended for Replacement
 ```
 
 This enables managers to identify aging equipment and make timely replacement decisions.
+
+---
+
+## Email Notifications
+
+When SMTP is configured in `.env`, the system sends email in addition to in-app notifications for these events:
+
+| Event | Recipients |
+|-------|------------|
+| New fault report submitted | Reporter, all Managers |
+| Fault report status updated | Reporter |
+| Work order assigned / reassigned | Technician |
+| Work order accepted / rejected | Manager |
+| Work order status updated | Reporter, Manager |
+| Work order deadline updated | Technician |
+| Work order reopened | Technician, Manager |
+| User confirms completion | Technician, Manager |
+
+Configure Gmail (App Password) or any SMTP provider:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+SMTP_FROM=VNU-IS DSS <your-email@gmail.com>
+FRONTEND_BASE_URL=http://127.0.0.1:5500
+```
+
+If SMTP is not configured, web notifications still work normally — email sending is skipped silently.

@@ -1,6 +1,7 @@
 const confirmationsRepository = require('./confirmations.repository');
 const workOrdersRepository = require('../workOrders/workOrders.repository');
 const notificationsRepository = require('../notifications/notifications.repository');
+const links = require('../notifications/notificationLinks');
 const { created, ok, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, toPositiveInt } = require('../../shared/utils/validators');
 const { TASK_STATUS } = require('../../shared/constants/statusEnums');
@@ -46,6 +47,8 @@ async function create(req, res) {
       reportId: order.report_id,
       orderId: order.order_id,
       message: `User has confirmed completion of Work Order #${orderId}${ratingStr}.`,
+      title: 'User Confirmation Received',
+      actionUrl: links.technicianTasks,
     });
   }
   if (order.manager_id) {
@@ -54,6 +57,8 @@ async function create(req, res) {
       reportId: order.report_id,
       orderId: order.order_id,
       message: `User has confirmed completion of Work Order #${orderId}${ratingStr}.`,
+      title: 'User Confirmation Received',
+      actionUrl: links.managerPending,
     });
   }
 
