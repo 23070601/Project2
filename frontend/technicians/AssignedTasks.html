@@ -63,6 +63,16 @@
           <option value="Received">Received</option>
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+
+      <!-- Sort By Filter -->
+      <div class="w-full md:w-44">
+        <label class="block text-label-md font-bold text-on-surface mb-2">Sort by</label>
+        <select id="sortFilter" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm focus:ring-primary outline-none" onchange="filterTasksTable()">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
         </select>
       </div>
     </div>
@@ -279,7 +289,19 @@
     const floor = activeQuickFloorFilter.toLowerCase();
     const priority = document.getElementById('priorityFilter').value;
     const status = document.getElementById('statusFilter').value;
-    const rows = document.querySelectorAll('#taskTableBody .task-row');
+    const sortVal = document.getElementById('sortFilter') ? document.getElementById('sortFilter').value : 'newest';
+    const tbody = document.getElementById('taskTableBody');
+    const rows = Array.from(document.querySelectorAll('#taskTableBody .task-row'));
+
+    rows.sort((a, b) => {
+      const timeA = new Date(a.dataset.assignedAt || 0).getTime();
+      const timeB = new Date(b.dataset.assignedAt || 0).getTime();
+      return sortVal === 'oldest' ? timeA - timeB : timeB - timeA;
+    });
+
+    if (tbody) {
+      rows.forEach(r => tbody.appendChild(r));
+    }
 
     let visibleCount = 0;
     rows.forEach(row => {
@@ -367,7 +389,10 @@
 
           <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-slate-100 text-slate-600">
             <div><span class="font-bold text-slate-800">Room:</span> ${UiHelpers.escapeHtml(room || 'Room')}</div>
-            <div><span class="font-bold text-slate-800">Status:</span> ${getStatusBadgeHtml(status)}</div>
+            <div>
+              <span class="font-bold text-slate-800">Status:</span> ${getStatusBadgeHtml(status)}
+              ${status === 'Rejected' && row.dataset.rejectionReason ? `<div class="text-[11px] text-error mt-1 italic font-medium">Reason: ${UiHelpers.escapeHtml(row.dataset.rejectionReason)}</div>` : ''}
+            </div>
           </div>
 
           <div class="flex items-center gap-2 pt-1">
@@ -554,18 +579,21 @@
 
     currentTasks = tasks;
 
-    const activeDisplayTasks = currentTasks.filter(o => getDisplayTaskStatus(o) !== 'Rejected');
+    const activeDisplayTasks = currentTasks;
 
     tbody.innerHTML = activeDisplayTasks.map(o => {
       const displayStatus = getDisplayTaskStatus(o);
       const isAssigned = o.technician_response === 'Pending' && displayStatus === 'Assigned';
       return `
-      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${displayStatus}" data-assigned-at="${o.assigned_at || ''}">
+      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${displayStatus}" data-assigned-at="${o.assigned_at || ''}" data-rejection-reason="${UiHelpers.escapeHtml(o.rejection_reason || '')}">
         <td class="px-6 py-4 text-body-sm font-bold text-center">WO-${o.order_id}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.room_name || 'Room')}</td>
         <td class="px-6 py-4 text-center">${getPriorityBadgeHtml(o.priority)}</td>
-        <td class="px-6 py-4 text-center">${getStatusBadgeHtml(o)}</td>
+        <td class="px-6 py-4 text-center">
+          ${getStatusBadgeHtml(o)}
+          ${displayStatus === 'Rejected' && o.rejection_reason ? `<div class="text-[11px] text-error mt-1 italic font-medium max-w-[200px] mx-auto truncate" title="${UiHelpers.escapeHtml(o.rejection_reason)}">Reason: ${UiHelpers.escapeHtml(o.rejection_reason)}</div>` : ''}
+        </td>
         <td class="px-6 py-4 flex items-center gap-3 text-center justify-center">
           ${isAssigned ? `
             <button onclick="acceptTaskRow(this, '${o.order_id}')" class="text-green-600 hover:bg-surface-container-high p-1.5 rounded-full transition-colors" title="Accept"><span class="material-symbols-outlined">check_circle</span></button>

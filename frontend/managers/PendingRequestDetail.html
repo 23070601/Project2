@@ -8,18 +8,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="../assets/js/theme.config.js"></script>
-<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .bg-brand-blue { background-color: #005BAC; }
+  .text-brand-blue { color: #005BAC; }
+</style>
 </head>
-<body class="bg-surface text-on-surface overflow-x-hidden">
+<body class="bg-surface text-on-surface overflow-x-hidden min-h-screen flex flex-col">
 
 <div id="sidebar-placeholder"></div>
 
 <div class="ml-[240px] flex flex-col min-h-screen">
   <div id="topbar-placeholder"></div>
 
-  <main class="flex-1 p-8 max-w-[820px]">
-    <a href="PendingRequest.html" class="text-brand-blue text-label-md font-label-md flex items-center gap-1 mb-4 hover:underline">
-      <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Requests
+  <main class="flex-1 mt-[20px] mb-[40px] p-8 max-w-6xl mx-auto w-full">
+    <a id="backLink" href="PendingRequest.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-brand-blue font-bold rounded-xl border border-outline-variant/30 shadow-xs hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all duration-200 text-body-sm mb-6 group">
+      <span class="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-1">arrow_back</span>
+      <span>Back to Requests</span>
     </a>
     <div id="content" class="space-y-6"></div>
   </main>
@@ -34,13 +39,28 @@
 <script>
   Auth.guard('Manager');
   Layout.init({ role: 'Manager', activePage: 'PendingRequest' });
+  
   const reportId = new URLSearchParams(location.search).get('id');
-  const cleanId = String(reportId || '10').replace(/^(#|FR-|REP-)+/gi, '');
+  const rawIdStr = String(reportId || '10').trim();
+  const cleanId = rawIdStr.replace(/^(#|FR-|REP-)+/gi, '');
+  const numericId = cleanId.replace(/^0+/, '') || cleanId;
 
-  const DEMO_PENDING_REPORTS = {
-    '10': { report_id: '10', reporter_name: 'Nguyen Van A', asset_name: 'Panasonic 4K Projector PT-VMZ51', room_name: 'R102', priority: 'High', status: 'Pending Approval', description: 'Panasonic Projector power light turns amber and powers down.', reported_at: '2026-07-29 08:00:00' },
-    '2': { report_id: '2', reporter_name: 'Tran Thi B', asset_name: 'Daikin Inverter AC 18000 BTU', room_name: 'R401', priority: 'Medium', status: 'Pending Approval', description: 'Air conditioner is running but blowing warm air into the classroom.', reported_at: '2026-07-28 14:00:00' },
-    '7': { report_id: '7', reporter_name: 'Nguyen Van A', asset_name: 'Daikin Inverter AC 18000 BTU', room_name: 'R201', priority: 'Medium', status: 'Pending Approval', description: 'Air conditioner leaking water heavily onto student desks.', reported_at: '2026-07-29 07:00:00' }
+  const DEMO_REPORTS = {
+    '10': { report_id: '10', reporter_name: 'Nguyen Van A', asset_name: 'Panasonic 4K Projector PT-VMZ51', asset_type: 'Projector / Display', room_name: 'R102', room_id: 'R102', priority: 'High', status: 'Pending Approval', description: 'Panasonic Projector power light turns amber and powers down.', reported_at: '2026-07-29 08:00:00' },
+    '2': { report_id: '2', reporter_name: 'Tran Thi B', asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Air Conditioner', room_name: 'R401', room_id: 'R401', priority: 'Medium', status: 'Pending Approval', description: 'Air conditioner is running but blowing warm air into the classroom.', reported_at: '2026-07-28 14:00:00' },
+    '7': { report_id: '7', reporter_name: 'Nguyen Van A', asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Air Conditioner', room_name: 'R201', room_id: 'R201', priority: 'Medium', status: 'Pending Approval', description: 'Air conditioner leaking water heavily onto student desks.', reported_at: '2026-07-29 07:00:00' },
+    '4': { 
+      report_id: '4', 
+      reporter_name: 'Tran Thi B', 
+      asset_name: 'JBL Wall Mount Speaker System', 
+      asset_type: 'Audio System', 
+      room_name: 'R401', 
+      room_id: 'R401', 
+      priority: 'Low', 
+      status: 'Rejected', 
+      description: 'Speaker system makes static noise when microphone is turned on.', 
+      reported_at: '2026-07-26 23:30:00'
+    }
   };
 
   const DEMO_SUGGESTIONS = [
@@ -73,33 +93,147 @@
             <h1 class="text-headline-md font-headline-md text-primary">Report ${formattedReportId}</h1>
             <p class="text-on-surface-variant text-body-sm mt-1">${r.room_name}${r.asset_name ? ' · ' + r.asset_name : ''} · reported by ${UiHelpers.escapeHtml(reporterName)}</p>
           </div>
-          <div class="flex gap-2">${UiHelpers.priorityBadge(r.priority)}${UiHelpers.statusBadge(r.status)}</div>
         </div>
-        <p class="text-body-md mt-4 whitespace-pre-line">${UiHelpers.escapeHtml(r.description)}</p>
-        <p class="text-on-surface-variant text-body-sm mt-4">Reported at ${UiHelpers.formatDate(r.reported_at)}</p>
-      </div>`;
-  }
+      </div>
+    `;
 
-  function renderAssignForm(suggestions) {
-    return `
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
-        <h2 class="text-headline-sm font-headline-sm mb-1">Approve &amp; Assign Technician</h2>
-        <p class="text-on-surface-variant text-body-sm mb-4">DSS2 suggestion: ranked by specialty match and current workload.</p>
+    // ===== MAIN GRID =====
+    html += `
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- LEFT COLUMN (2 Cols) -->
+        <div class="xl:col-span-2 space-y-6">
 
-        <div class="space-y-2 mb-5">
-          ${suggestions.map((s, i) => `
-            <label class="flex items-center justify-between p-3 rounded-lg border ${i === 0 ? 'border-brand-blue bg-blue-50' : 'border-outline-variant/30'} cursor-pointer">
-              <div class="flex items-center gap-3">
-                <input type="radio" name="technicianId" value="${s.technicianId}" ${i === 0 ? 'checked' : ''}>
-                <div>
-                  <p class="text-label-lg font-label-lg">${s.fullName} ${i === 0 ? '<span class="text-[10px] text-brand-blue font-bold ml-1">RECOMMENDED</span>' : ''}</p>
-                  <p class="text-[11px] text-on-surface-variant">${s.specialty || 'General'} ${s.specialtyMatch ? '· specialty match' : ''}</p>
+          ${isRejected ? `
+            <!-- REJECTION REASON CARD -->
+            <div class="bg-red-50/90 border border-red-200 rounded-2xl p-6 shadow-xs flex items-start gap-4">
+              <div class="w-11 h-11 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-2xl">gavel</span>
+              </div>
+              <div class="flex-1 space-y-2">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <h3 class="text-title-medium font-bold text-red-900 flex items-center gap-2">
+                    Report Rejected by Manager
+                  </h3>
+                  <span class="text-xs text-red-700 font-medium">${UiHelpers.formatDateTime(rejectionInfo.rejectedAt)}</span>
+                </div>
+                <p class="text-xs uppercase tracking-wider font-bold text-red-800">Rejection Reason</p>
+                <div class="bg-white p-4 rounded-xl border border-red-200 text-body-md text-red-950 font-normal leading-relaxed whitespace-pre-line shadow-xs">
+                  ${UiHelpers.escapeHtml(rejectionInfo.reason)}
                 </div>
               </div>
-              <span class="text-body-sm text-on-surface-variant">${s.activeWorkload} active task(s)</span>
-            </label>
-          `).join('')}
-        </div>
+            </div>
+          ` : ''}
+
+          <!-- ISSUE DETAILS CARD -->
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6 space-y-6">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p class="text-label-md text-on-surface-variant">Issue summary</p>
+                <h3 class="text-headline-sm font-headline-sm text-on-surface mt-1">${UiHelpers.escapeHtml(report.description || 'No description provided')}</h3>
+              </div>
+              <div class="rounded-full bg-primary-fixed px-3 py-1 text-sm font-semibold text-brand-blue">
+                ${UiHelpers.escapeHtml(report.priority || 'Medium')}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div class="rounded-xl bg-surface-container-low p-4">
+                <p class="text-label-md text-on-surface-variant">Equipment</p>
+                <p class="text-body-md font-bold text-on-surface">${UiHelpers.escapeHtml(equipment)}</p>
+              </div>
+              <div class="rounded-xl bg-surface-container-low p-4">
+                <p class="text-label-md text-on-surface-variant">Asset type</p>
+                <p class="text-body-md font-medium text-on-surface mt-0.5">${UiHelpers.escapeHtml(assetType)}</p>
+              </div>
+              <div class="rounded-xl bg-surface-container-low p-4">
+                <p class="text-label-md text-on-surface-variant">Room</p>
+                <p class="text-body-md font-bold text-on-surface">${UiHelpers.escapeHtml(room)}</p>
+              </div>
+              <div class="rounded-xl bg-surface-container-low p-4">
+                <p class="text-label-md text-on-surface-variant">Room ID</p>
+                <p class="text-body-md font-medium text-on-surface mt-0.5">${UiHelpers.escapeHtml(report.room_id || report.room_name || 'N/A')}</p>
+              </div>
+              <div class="rounded-xl bg-surface-container-low p-4">
+                <p class="text-label-md text-on-surface-variant">Reported by</p>
+                <p class="text-body-md font-medium text-on-surface mt-0.5">${UiHelpers.escapeHtml(reporterName)}</p>
+              </div>
+              <div class="rounded-xl bg-surface-container-low p-4">
+                <p class="text-label-md text-on-surface-variant">Reported date</p>
+                <p class="text-body-md font-medium text-on-surface mt-0.5">${UiHelpers.formatDate(report.reported_at)}</p>
+              </div>
+            </div>
+
+            <!-- Uploaded Evidence -->
+            <div>
+              <p class="text-label-md text-on-surface-variant mb-2 font-medium">Uploaded Evidence ${reportImages.length > 0 ? `(${reportImages.length})` : ''}</p>
+              ${reportImages.length > 0 ? `
+                <div class="flex items-center gap-3 flex-wrap">
+                  ${reportImages.map((imgUrl, i) => `
+                    <a href="${imgUrl}" target="_blank" class="block relative w-36 h-28 rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group bg-surface-container shrink-0">
+                      <img src="${imgUrl}" alt="Uploaded Evidence ${i+1}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 p-2 text-center\\'><span class=\\'material-symbols-outlined text-2xl mb-1\\'>broken_image</span>Image ${i+1}</div>';" />
+                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                        <span class="material-symbols-outlined text-sm">visibility</span>
+                        <span>View #${i+1}</span>
+                      </div>
+                    </a>
+                  `).join('')}
+                </div>
+              ` : `
+                <div class="w-44 h-28 rounded-xl border border-outline-variant/30 bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant p-4 text-center gap-1">
+                  <span class="material-symbols-outlined text-3xl text-outline">image</span>
+                  <span class="text-xs font-medium text-outline">No evidence attached</span>
+                </div>
+              `}
+            </div>
+          </div>
+
+          ${isPending ? `
+            <!-- APPROVE & ASSIGN FORM -->
+            <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
+              <h2 class="text-headline-sm font-headline-sm font-bold text-on-surface">Approve &amp; Assign Technician</h2>
+              <p class="text-on-surface-variant text-body-sm">DSS2 suggestion: ranked by specialty match and current workload.</p>
+
+              <div class="space-y-2.5 my-4">
+                ${suggestions.map((s, i) => `
+                  <label class="flex items-center justify-between p-3.5 rounded-xl border ${i === 0 ? 'border-brand-blue bg-blue-50/70' : 'border-outline-variant/30 hover:bg-surface-container-lowest'} cursor-pointer transition-all">
+                    <div class="flex items-center gap-3">
+                      <input type="radio" name="technicianId" value="${s.technicianId}" ${i === 0 ? 'checked' : ''} class="text-brand-blue focus:ring-brand-blue">
+                      <div>
+                        <p class="text-label-lg font-label-lg font-bold">${s.fullName} ${i === 0 ? '<span class="text-[10px] bg-brand-blue text-white px-2 py-0.5 rounded-full font-bold ml-1">RECOMMENDED</span>' : ''}</p>
+                        <p class="text-[12px] text-on-surface-variant mt-0.5">${s.specialty || 'General'} ${s.specialtyMatch ? '· specialty match' : ''}</p>
+                      </div>
+                    </div>
+                    <span class="text-body-sm font-medium text-on-surface-variant">${s.activeWorkload} active task(s)</span>
+                  </label>
+                `).join('')}
+              </div>
+
+              <div class="mb-4">
+                <label class="text-label-md font-label-md text-on-surface-variant font-medium">Deadline</label>
+                <input id="deadlineInput" type="datetime-local" class="mt-1 w-full rounded-xl border border-outline-variant/50 px-3.5 py-2.5 text-body-sm focus:border-brand-blue focus:ring-brand-blue" />
+                <p class="text-[11px] text-on-surface-variant mt-1">Automatically defaults to 48 hours from now if left blank.</p>
+              </div>
+
+              <p id="assignError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2 mb-3"></p>
+
+              <div class="flex gap-3 pt-2">
+                <button id="approveBtn" class="bg-brand-blue text-white text-label-lg font-label-lg px-6 py-2.5 rounded-xl hover:opacity-90 transition-all shadow-xs font-bold">Approve &amp; Assign</button>
+                <button id="rejectBtn" class="border border-error text-error text-label-lg font-label-lg px-6 py-2.5 rounded-xl hover:bg-error/5 transition-all font-bold">Reject Report</button>
+              </div>
+            </div>
+
+            <!-- REJECT REASON FORM -->
+            <div id="rejectFormWrap" class="hidden bg-white rounded-2xl shadow-sm border border-red-200 p-6 space-y-3">
+              <h2 class="text-headline-sm font-headline-sm font-bold text-red-900 flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-600">report_problem</span> Reject Report
+              </h2>
+              <label class="text-label-md font-label-md text-on-surface-variant font-medium">Reason for rejection *</label>
+              <textarea id="rejectReason" rows="3" class="mt-1 w-full rounded-xl border border-outline-variant/50 px-3.5 py-2.5 text-body-sm focus:border-red-500 focus:ring-red-500"
+                        placeholder="e.g. Duplicate report, not a facility issue, resolved self-service"></textarea>
+              <p id="rejectError" class="hidden text-error text-body-sm"></p>
+              <button id="confirmRejectBtn" class="mt-2 bg-error text-white text-label-lg font-label-lg px-6 py-2.5 rounded-xl hover:opacity-90 transition-all font-bold">Confirm Reject</button>
+            </div>
+          ` : ''}
 
         <div class="mb-4">
           <label class="text-label-md font-label-md text-on-surface-variant">Deadline</label>
@@ -107,28 +241,60 @@
           <p class="text-[11px] text-on-surface-variant mt-1">Automatically defaults to 48 hours from now if left blank.</p>
         </div>
 
-        <p id="assignError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2 mb-3"></p>
+        <!-- RIGHT COLUMN (1 Col) -->
+        <div class="space-y-6">
+          <!-- TIMELINE CARD -->
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
+            <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-brand-blue">history</span>
+              <span>Report Timeline</span>
+            </h3>
+            
+            <div class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-outline-variant/30">
+              ${isRejected ? `
+                <div class="relative">
+                  <div class="absolute -left-6 top-1 w-4 h-4 rounded-full bg-red-500 ring-4 ring-white"></div>
+                  <p class="text-body-sm font-bold text-red-600">Rejected</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">${UiHelpers.formatDate(rejectionInfo.rejectedAt)}</p>
+                  <p class="text-xs text-on-surface-variant/80 mt-1 italic">${UiHelpers.escapeHtml(rejectionInfo.reason)}</p>
+                </div>
+              ` : ''}
 
-        <div class="flex gap-3">
-          <button id="approveBtn" class="bg-brand-blue text-white text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:opacity-90">Approve &amp; Assign</button>
-          <button id="rejectBtn" class="border border-error text-error text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:bg-error/5">Reject Report</button>
+              ${!isRejected && !isPending ? `
+                <div class="relative">
+                  <div class="absolute -left-6 top-1 w-4 h-4 rounded-full bg-brand-blue ring-4 ring-white"></div>
+                  <p class="text-body-sm font-bold text-brand-blue">${report.status}</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">${UiHelpers.formatDate(report.updated_at || report.reported_at)}</p>
+                </div>
+              ` : ''}
+
+              ${isPending ? `
+                <div class="relative">
+                  <div class="absolute -left-6 top-1 w-4 h-4 rounded-full bg-amber-400 ring-4 ring-white"></div>
+                  <p class="text-body-sm font-bold text-amber-700">Pending Approval</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">Awaiting Manager Review & Assignment</p>
+                </div>
+              ` : ''}
+
+              <div class="relative">
+                <div class="absolute -left-6 top-1 w-4 h-4 rounded-full bg-slate-300 ring-4 ring-white"></div>
+                <p class="text-body-sm font-bold text-on-surface">Submitted</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">${UiHelpers.formatDate(report.reported_at)}</p>
+                <p class="text-xs text-on-surface-variant/70 mt-0.5">Reported by ${UiHelpers.escapeHtml(reporterName)}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    `;
 
-      <div id="rejectFormWrap" class="hidden bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
-        <h2 class="text-headline-sm font-headline-sm mb-3">Reject Report</h2>
-        <label class="text-label-md font-label-md text-on-surface-variant">Reason *</label>
-        <textarea id="rejectReason" rows="3" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-3 py-2 text-body-sm"
-                  placeholder="e.g. Duplicate report, not a facility issue"></textarea>
-        <p id="rejectError" class="hidden text-error text-body-sm mt-2"></p>
-        <button id="confirmRejectBtn" class="mt-3 bg-error text-white text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:opacity-90">Confirm Reject</button>
-      </div>`;
+    return html;
   }
 
   const sourceTab = new URLSearchParams(location.search).get('tab') || 'pending';
 
   // Update back button link dynamically
-  const backLink = document.querySelector('main a');
+  const backLink = document.getElementById('backLink');
   if (backLink) {
     backLink.href = `PendingRequest.html?tab=${sourceTab}`;
     const backLabel = sourceTab === 'pending'
@@ -152,11 +318,11 @@
     }
 
     if (!report) {
-      report = DEMO_PENDING_REPORTS[cleanId] || DEMO_PENDING_REPORTS['10'];
+      report = DEMO_REPORTS[cleanId] || DEMO_REPORTS[numericId] || DEMO_REPORTS['10'];
     }
 
     try {
-      if (window.Api && report.status === 'Pending Approval') {
+      if (window.Api && (report.status === 'Pending Approval' || report.status === 'Pending')) {
         const apiSuggestions = await Api.get(`/work-orders/suggestions/${cleanId}`);
         if (apiSuggestions && Array.isArray(apiSuggestions) && apiSuggestions.length > 0) {
           suggestions = apiSuggestions;
@@ -164,7 +330,8 @@
       }
     } catch (e) {}
 
-    let html = renderHeader(report);
+    const content = document.getElementById('content');
+    content.innerHTML = renderReportDetails(report, suggestions);
 
     if (report.status === 'Pending Approval') {
       html += renderAssignForm(suggestions);
@@ -212,7 +379,7 @@
             location.href = `PendingRequest.html?tab=${sourceTab}`;
           }, 1000);
         } catch (err) {
-          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
           else alert(`Failed: ${err.message}`);
           approveBtn.disabled = false;
         }
@@ -222,8 +389,11 @@
     const rejectBtn = document.getElementById('rejectBtn');
     if (rejectBtn) {
       rejectBtn.addEventListener('click', () => {
-        document.getElementById('rejectFormWrap').classList.remove('hidden');
-        document.getElementById('rejectFormWrap').scrollIntoView({ behavior: 'smooth' });
+        const rejectWrap = document.getElementById('rejectFormWrap');
+        if (rejectWrap) {
+          rejectWrap.classList.remove('hidden');
+          rejectWrap.scrollIntoView({ behavior: 'smooth' });
+        }
       });
     }
 
@@ -237,21 +407,28 @@
             errorBox.textContent = 'Please provide a reason.';
             errorBox.classList.remove('hidden');
           }
-          if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
+          if (window.showToast) showToast('Please provide a reason for rejection!', 'warning');
           return;
         }
         confirmRejectBtn.disabled = true;
+        const nowIso = new Date().toISOString();
         try {
           if (window.Api) {
             await Api.patch(`/fault-reports/${cleanId}/status`, { status: 'Rejected', rejectionReason: reason });
           }
-          if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
+          try {
+            const rejectedInfo = { reason: reason, rejected_at: nowIso };
+            localStorage.setItem('vnu_rejected_info_' + cleanId, JSON.stringify(rejectedInfo));
+            localStorage.setItem('vnu_rejected_info_' + numericId, JSON.stringify(rejectedInfo));
+          } catch(e){}
+
+          if (window.showToast) showToast('Report rejected successfully!', 'success');
           else alert(`Report rejected successfully.`);
           setTimeout(() => {
-            location.href = `PendingRequest.html?tab=${sourceTab}`;
-          }, 1000);
+            location.href = `PendingRequestDetail.html?id=${cleanId}&tab=${sourceTab}`;
+          }, 800);
         } catch (err) {
-          if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+          if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
           else alert(`Failed: ${err.message}`);
           confirmRejectBtn.disabled = false;
         }
@@ -259,7 +436,9 @@
     }
   }
 
-  load().catch(err => { content.innerHTML = `<p class="text-error">${err.message}</p>`; });
+  load().catch(err => { 
+    document.getElementById('content').innerHTML = `<p class="text-error">${err.message}</p>`; 
+  });
 </script>
 </body>
 </html>

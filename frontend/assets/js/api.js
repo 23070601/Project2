@@ -156,11 +156,15 @@ const Api = (() => {
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
         body: requestBody !== undefined ? requestBody : undefined,
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (response.status === 204) {
         return null;

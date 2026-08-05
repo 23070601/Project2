@@ -83,6 +83,18 @@ CREATE TABLE FaultReports (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
+-- TABLE 4.1: ReportImages
+-- ---------------------------------------------------------------------
+CREATE TABLE ReportImages (
+    image_id        INT AUTO_INCREMENT PRIMARY KEY,
+    report_id       INT             NOT NULL,
+    image_path      VARCHAR(255)    NOT NULL,
+    uploaded_at     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_reportimages_report FOREIGN KEY (report_id)
+        REFERENCES FaultReports(report_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
 -- TABLE 5: WorkOrders
 -- ---------------------------------------------------------------------
 CREATE TABLE WorkOrders (
@@ -112,6 +124,35 @@ CREATE TABLE WorkOrders (
         task_status IN ('Assigned', 'Received', 'In Progress', 'Completed', 'Closed')
     )
 ) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- TABLE 5.1: WorkOrderImages
+-- ---------------------------------------------------------------------
+CREATE TABLE WorkOrderImages (
+    image_id        INT AUTO_INCREMENT PRIMARY KEY,
+    order_id        INT             NOT NULL,
+    image_path      VARCHAR(255)    NOT NULL,
+    uploaded_at     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_workorderimages_order FOREIGN KEY (order_id)
+        REFERENCES WorkOrders(order_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- TABLE 5.2: WorkOrderComments
+-- ---------------------------------------------------------------------
+CREATE TABLE WorkOrderComments (
+    comment_id      INT AUTO_INCREMENT PRIMARY KEY,
+    order_id        INT             NOT NULL,
+    user_id         INT             NOT NULL,
+    comment         TEXT            NOT NULL,
+    created_at      TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_wocomments_order FOREIGN KEY (order_id)
+        REFERENCES WorkOrders(order_id) ON DELETE CASCADE,
+    CONSTRAINT fk_wocomments_user FOREIGN KEY (user_id)
+        REFERENCES Users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
 
 -- ---------------------------------------------------------------------
 -- TABLE 6: UserConfirmations
@@ -196,20 +237,31 @@ CREATE TABLE Notifications (
         REFERENCES WorkOrders(order_id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- =====================================================================
+-- ---------------------------------------------------------------------
+-- TABLE 10: OverdueAlertDelivery
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS OverdueAlertDelivery (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    alert_type  VARCHAR(50)     NOT NULL,
+    entity_id   INT             NOT NULL,
+    recipient   VARCHAR(100)    NOT NULL,
+    created_at  TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_delivery (alert_type, entity_id, recipient)
+) ENGINE=InnoDB;
+
 -- SEED DATA (FULL ASSETS POPULATION FOR EVERY SINGLE CLASSROOM)
 -- =====================================================================
 
 -- 1. USERS (Default password: 123456)
 INSERT INTO Users (user_id, full_name, email, password_hash, role, phone, technician_specialty, is_active) VALUES
-(1,  'Nguyen Van A',   'lecturer.a@vnuis.edu.vn', '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0912345678', NULL, TRUE),
-(2,  'Tran Thi B',     'student.b@vnuis.edu.vn',  '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0923456789', NULL, TRUE),
-(3,  'Le Van C',       'tech.c@vnuis.edu.vn',     '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Technician', '0934567890', 'Electrical', TRUE),
-(4,  'Pham Thi D',     'tech.d@vnuis.edu.vn',     '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Technician', '0945678901', 'Networking', TRUE),
-(5,  'Hoang Van E',    'manager.e@vnuis.edu.vn',  '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Manager',    '0956789012', NULL, TRUE),
-(6,  'Vu Van F',       'tech.f@vnuis.edu.vn',     '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'Technician', '0967890123', 'General', TRUE),
-(7,  'Doan Van G',     'lecturer.g@vnuis.edu.vn', '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0978901234', NULL, TRUE),
-(8,  'Bui Thi H',      'student.h@vnuis.edu.vn',  '$2a$10$MGOlou/3/r7KXD7uls2owOLRYx2aHIItYQeCpz28YQYcH2S0jszS', 'User',       '0989012345', NULL, TRUE);
+(1,  'Nguyen Van A',   'lecturer.a@vnuis.edu.vn', '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0912345678', NULL, TRUE),
+(2,  'Tran Thi B',     'student.b@vnuis.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0923456789', NULL, TRUE),
+(3,  'Le Van C',       'tech.c@vnuis.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0934567890', 'Electrical', TRUE),
+(4,  'Pham Thi D',     'tech.d@vnuis.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0945678901', 'Networking', TRUE),
+(5,  'Hoang Van E',    'manager.e@vnuis.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Manager',    '0956789012', NULL, TRUE),
+(6,  'Vu Van F',       'tech.f@vnuis.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0967890123', 'General', TRUE),
+(7,  'Doan Van G',     'lecturer.g@vnuis.edu.vn', '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0978901234', NULL, TRUE),
+(8,  'Bui Thi H',      'student.h@vnuis.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0989012345', NULL, TRUE);
 
 -- 2. CLASSROOMS (26 CLASSROOMS - FLOORS 1, 3, 4, 5, 6 - NO FLOOR 2)
 INSERT INTO Classrooms (room_id, room_name, qr_code) VALUES
@@ -533,7 +585,7 @@ BEGIN
         IF NEW.task_status = 'Completed' THEN
             UPDATE FaultReports SET status = 'Completed' WHERE report_id = NEW.report_id;
 
-            INSERT INTO UserConfirmations (order_id, reporter_id)
+            INSERT IGNORE INTO UserConfirmations (order_id, reporter_id)
             SELECT NEW.order_id, reporter_id
             FROM FaultReports WHERE report_id = NEW.report_id;
 
@@ -541,12 +593,15 @@ BEGIN
             SELECT reporter_id, NEW.report_id, NEW.order_id,
                    CONCAT('Work Order #', NEW.order_id, ' is completed. Please confirm satisfaction.')
             FROM FaultReports WHERE report_id = NEW.report_id;
-        END IF;
-
-        IF NEW.task_status = 'Closed' THEN
+        ELSEIF NEW.task_status = 'Closed' THEN
             INSERT INTO Notifications (user_id, report_id, order_id, message)
             SELECT reporter_id, NEW.report_id, NEW.order_id,
                    CONCAT('Work Order #', NEW.order_id, ' has been officially closed.')
+            FROM FaultReports WHERE report_id = NEW.report_id;
+        ELSE
+            INSERT INTO Notifications (user_id, report_id, order_id, message)
+            SELECT reporter_id, NEW.report_id, NEW.order_id,
+                   CONCAT('Work Order #', NEW.order_id, ' status updated to ', NEW.task_status, '.')
             FROM FaultReports WHERE report_id = NEW.report_id;
         END IF;
     END IF;
@@ -558,6 +613,13 @@ CREATE TRIGGER trg_faultreports_after_insert_dss3
 AFTER INSERT ON FaultReports
 FOR EACH ROW
 BEGIN
+    INSERT INTO Notifications (user_id, report_id, message)
+    VALUES (NEW.reporter_id, NEW.report_id, CONCAT('Fault report #', NEW.report_id, ' created successfully.'));
+
+    INSERT INTO Notifications (user_id, report_id, message)
+    SELECT user_id, NEW.report_id, CONCAT('New fault report #', NEW.report_id, ' requires manager review.')
+    FROM Users WHERE role = 'Manager' AND is_active = TRUE;
+
     IF NEW.asset_id IS NOT NULL AND NEW.status NOT IN ('Rejected', 'Cancelled') THEN
         UPDATE Assets
         SET failure_count = failure_count + 1,
