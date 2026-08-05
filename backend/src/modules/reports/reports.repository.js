@@ -79,6 +79,9 @@ async function getMaintenanceOverview({ year = new Date().getFullYear(), filter,
   } else if (filter === 'This Month') {
     dateClause = 'AND YEAR(reported_at) = YEAR(CURDATE()) AND MONTH(reported_at) = MONTH(CURDATE())';
     params = [];
+  } else if (filter === 'This Year') {
+    dateClause = 'AND YEAR(reported_at) = YEAR(CURDATE())';
+    params = [];
   } else if (filter === 'Custom Range' && startDate && endDate) {
     dateClause = 'AND DATE(reported_at) BETWEEN ? AND ?';
     params = [startDate, endDate];

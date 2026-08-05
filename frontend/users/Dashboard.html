@@ -356,10 +356,11 @@
       });
 
       // 5. Calculate KPIs and Progress Bar from real data
-      const pending = reports.filter(r => ['Pending', 'Pending Approval'].includes(r.status)).length;
-      const inProgress = reports.filter(r => ['In Progress', 'Processing'].includes(r.status)).length;
-      const completed = reports.filter(r => ['Completed', 'Resolved'].includes(r.status)).length;
-      const total = reports.length || 1;
+      const getStatus = (r) => r.display_status || r.status || '';
+      const pending = reports.filter(r => ['Pending', 'Pending Approval'].includes(getStatus(r))).length;
+      const inProgress = reports.filter(r => ['In Progress', 'Processing', 'Assigned', 'Received'].includes(getStatus(r))).length;
+      const completed = reports.filter(r => ['Completed', 'Resolved', 'Closed'].includes(getStatus(r))).length;
+      const total = (pending + inProgress + completed) || 1;
 
       document.getElementById('kpiPending').textContent = pending;
       document.getElementById('kpiInProgress').textContent = inProgress;
@@ -387,9 +388,9 @@
       if (countInProgress) countInProgress.textContent = inProgress;
       if (countPending) countPending.textContent = pending;
 
-      // 6. Render table
+      // 6. Render table (Hiển thị 5 report mới nhất, đồng bộ status với ListReports)
       const tbody = document.getElementById('reportsTableBody');
-      const recent = reports.slice(0, 8);
+      const recent = reports.slice(0, 5);
 
       if (recent.length === 0) {
         document.getElementById('emptyState').classList.remove('hidden');
@@ -418,6 +419,8 @@
           'classroom_name'
         ], 'N/A');
 
+        const effectiveStatus = r.display_status || r.status;
+
         return `
           <tr class="bg-white hover:bg-[#D6EBFF] transition-colors border-b border-outline-variant/10 cursor-pointer"
               onclick="location.href='ReportDetails.html?id=${r.report_id}'">
@@ -427,7 +430,7 @@
             <td class="py-4 px-6 text-body-md">${room}</td>
             <td class="py-4 px-6">${priorityBadge(r.priority)}</td>
             <td class="py-4 px-6 text-body-md">${formatDate(r.reported_at)}</td>
-            <td class="py-4 px-6">${statusBadge(r.status)}</td>
+            <td class="py-4 px-6">${statusBadge(effectiveStatus)}</td>
             <td class="py-4 px-6 text-center">
               <button class="text-brand-blue hover:text-primary-container p-1 rounded-full hover:bg-primary-fixed transition-all" 
                       onclick="event.stopPropagation(); location.href='ReportDetails.html?id=${r.report_id}'">
