@@ -15,14 +15,14 @@ test('allows deactivating a non-technician user', async () => {
   }));
 });
 
-test('prevents deactivating a technician with active work orders', async () => {
+test('prevents deactivating a user with active work orders', async () => {
   const pool = {
-    query: async () => [[{ activeWorkOrderCount: 2 }]],
+    query: async () => [[{ technicianActiveWorkOrderCount: 2, managerActiveWorkOrderCount: 0 }]],
   };
 
   await assert.rejects(() => ensureUserCanBeDeactivated({
     pool,
     user: { user_id: 7, role: ROLES.TECHNICIAN },
     newActive: false,
-  }), /Cannot deactivate technician/i);
+  }), /Cannot deactivate user/i);
 });

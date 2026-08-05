@@ -20,12 +20,12 @@
 <div id="sidebar-placeholder"></div>
 
 <!-- MAIN WRAPPER -->
-<div class="ml-[240px] flex flex-col h-screen">
+<div class="flex flex-col h-screen md:ml-[240px]">
   <!-- TOP APP BAR PLACEHOLDER -->
   <div id="topbar-placeholder"></div>
 
   <!-- MAIN CONTENT AREA -->
-  <main class="flex-1 overflow-y-auto bg-surface p-8 pb-32">
+  <main class="flex-1 overflow-y-auto bg-surface p-4 sm:p-6 lg:p-8 pb-32">
     <!-- Welcome Section -->
     <div class="mb-8">
       <div class="flex items-center gap-4">
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Personal KPI Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
       <!-- In Progress Card -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col gap-2" style="border-left: 4px solid #004482;">
         <div class="flex items-center justify-between">
@@ -87,11 +87,11 @@
 
     <!-- Upcoming Schedule Section -->
     <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden mb-8">
-      <div class="p-6 border-b border-outline-variant/10 flex items-center justify-between">
+      <div class="p-4 sm:p-6 border-b border-outline-variant/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 class="text-headline-sm font-headline-sm text-on-surface">Upcoming Tasks</h3>
         <a href="AssignedTasks.html" class="text-primary text-label-lg font-bold hover:underline">View All Tasks</a>
       </div>
-      <div id="upcomingTasksContainer" class="p-6 space-y-4">
+      <div id="upcomingTasksContainer" class="p-4 sm:p-6 space-y-4">
         <!-- Task Item 1 -->
         <div class="flex gap-6 group cursor-pointer" onclick="location.href='AssignedTasks.html'">
           <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 group-hover:border-primary/40 group-hover:bg-primary-fixed/20 transition-all">

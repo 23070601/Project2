@@ -26,22 +26,22 @@
 <div id="sidebar-placeholder"></div>
 
 <!-- Main wrapper với margin-left cho sidebar -->
-<div class="ml-[240px] flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen md:ml-[240px]">
   <!-- Topbar placeholder -->
   <div id="topbar-placeholder"></div>
 
   <!-- Main Content Area -->
-  <main class="flex-1 mt-[60px] mb-[40px] p-8 bg-content-bg min-h-[calc(100vh-100px)]">
+  <main class="flex-1 mt-[60px] mb-[40px] p-4 sm:p-6 lg:p-8 bg-content-bg min-h-[calc(100vh-100px)]">
     <div class="max-w-4xl mx-auto">
       <!-- MY PROFILE COMPONENT -->
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-8">
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-5 sm:p-8">
         <header class="mb-8">
           <h2 class="text-headline-md text-on-surface font-headline-md mb-2">My Profile</h2>
           <p class="text-body-sm text-on-surface-variant">Manage your personal profile information and security settings.</p>
         </header>
 
         <!-- Profile Info -->
-        <div class="flex items-center gap-6 mb-8 pb-8 border-b border-outline-variant/20">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-8 pb-8 border-b border-outline-variant/20">
           <div class="w-20 h-20 rounded-full bg-primary-fixed flex items-center justify-center text-headline-lg font-headline-lg text-brand-blue" id="avatarBig">?</div>
           <div>
             <p id="profileName" class="text-headline-sm font-headline-sm text-on-surface">-</p>
@@ -65,9 +65,9 @@
           <!-- Phone Number -->
           <div class="flex flex-col gap-2 md:col-span-2">
             <label class="text-label-md font-semibold text-on-surface-variant">Phone Number</label>
-            <div class="flex gap-3">
+            <div class="flex flex-col sm:flex-row gap-3">
               <input id="phoneInput" class="flex-1 bg-white border border-outline-variant/30 rounded-lg py-2.5 px-4 text-body-md text-on-surface focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all" type="text" value="-">
-              <button id="savePhoneBtn" class="bg-brand-blue text-white hover:bg-primary-container px-6 py-2.5 rounded-lg text-label-lg font-bold shadow-sm transition-all whitespace-nowrap">
+              <button id="savePhoneBtn" class="w-full sm:w-auto bg-brand-blue text-white hover:bg-primary-container px-6 py-2.5 rounded-lg text-label-lg font-bold shadow-sm transition-all whitespace-nowrap">
                 Save Changes
               </button>
             </div>
@@ -78,7 +78,7 @@
         <div class="border-t border-outline-variant/20 my-8"></div>
         <div class="flex flex-col gap-4">
           <h3 class="text-label-lg font-semibold text-on-surface">Security</h3>
-          <a href="ChangePassword.html" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-error/30 text-error hover:bg-red-50 rounded-lg text-label-lg font-bold transition-all w-fit">
+          <a href="ChangePassword.html" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-error/30 text-error hover:bg-red-50 rounded-lg text-label-lg font-bold transition-all w-full sm:w-fit">
             <span class="material-symbols-outlined text-[20px]">lock_reset</span>
             <span>Change Password</span>
           </a>

@@ -95,17 +95,6 @@
           </div>
         </div>
 
-        <!-- Rejection Reason Card -->
-        <div id="detailRejectionCard" class="hidden bg-error-container/20 border border-error/30 rounded-xl p-5 mb-6">
-          <div class="flex items-start gap-3">
-            <span class="material-symbols-outlined text-error text-[24px] shrink-0 mt-0.5">warning</span>
-            <div>
-              <h4 class="text-body-md font-bold text-error">WorkOrder Rejected</h4>
-              <p id="detailRejectionReasonText" class="text-body-sm text-on-surface mt-1 italic font-medium">"No reason specified"</p>
-            </div>
-          </div>
-        </div>
-
         <!-- Fault Description Card -->
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
           <div class="bg-primary px-6 py-3">
@@ -201,39 +190,7 @@
           </div>
         </div>
 
-        <!-- Manager - Technician Comments Timeline Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-          <div class="bg-primary px-6 py-3 flex items-center justify-between">
-            <h4 class="text-white font-bold text-label-lg flex items-center gap-2">
-              <span class="material-symbols-outlined text-[20px]">forum</span>
-              Manager &amp; Technician Comments
-            </h4>
-            <span id="commentsCountBadge" class="bg-white/20 text-white text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
-          </div>
-          <div class="p-6 space-y-6">
-            <!-- Comments list -->
-            <div id="commentsTimelineContainer" class="space-y-4 max-h-[400px] overflow-y-auto pr-1">
-              <!-- Rendered via JS -->
-            </div>
-
-            <!-- New Comment Form -->
-            <div class="pt-4 border-t border-outline-variant/20">
-              <label class="block text-label-md font-bold text-on-surface mb-2">Thêm trao đổi mới</label>
-              <div class="flex flex-col gap-3">
-                <textarea id="newCommentInput" rows="2" placeholder="Nhập trao đổi giữa Manager và Technician..." class="w-full border border-outline-variant/30 rounded-lg p-3 text-body-md focus:ring-primary focus:border-primary outline-none resize-none transition-all"></textarea>
-                <div class="flex justify-end">
-                  <button id="submitCommentBtn" onclick="submitWorkOrderComment()" class="px-5 py-2.5 bg-primary text-white text-body-sm font-bold rounded-lg hover:bg-primary/90 transition-all flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]">send</span>
-                    Gửi comment
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
-
 
       <!-- RIGHT COLUMN (4 cols) -->
       <div class="lg:col-span-4 space-y-6">
@@ -289,18 +246,18 @@
         <!-- Repair Evidence Card -->
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
           <div class="bg-primary px-6 py-3 flex items-center justify-between">
-            <h4 class="text-white font-bold text-label-lg">Repair Evidence</h4>
-            <button id="addEvidenceHeaderBtn" onclick="openUploadModal()" class="text-xs bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
+            <h4 class="text-white font-bold text-label-lg flex items-center gap-2">
+              <span class="material-symbols-outlined text-xl">photo_camera</span>
+              Repair Evidence
+            </h4>
+            <button onclick="toggleModal('uploadPhotoModal', true)" class="text-xs font-bold bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition-all flex items-center gap-1 active:scale-95">
               <span class="material-symbols-outlined text-sm">add_a_photo</span>
-              <span>Add Evidence</span>
+              Add Evidence
             </button>
           </div>
           <div class="p-6">
-            <div id="detailEvidenceGrid" class="flex flex-wrap gap-3">
-              <div class="w-28 h-24 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer shrink-0" onclick="toggleModal('uploadPhotoModal', true)">
-                <span class="material-symbols-outlined text-primary text-2xl">add_a_photo</span>
-                <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Photo</p>
-              </div>
+            <div id="repairEvidenceGrid" class="grid grid-cols-2 gap-3">
+              <!-- Dynamically populated evidence thumbnails & add tile -->
             </div>
           </div>
         </div>
@@ -342,38 +299,72 @@
 <!-- 1. Upload Repair Photo Modal -->
 <div class="fixed inset-0 z-[100] hidden" id="uploadPhotoModal">
   <div class="absolute inset-0 bg-on-surface/50 backdrop-blur-sm" onclick="toggleModal('uploadPhotoModal', false)"></div>
-  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
     <div class="bg-primary px-6 py-4 flex justify-between items-center">
-      <h3 class="text-white font-headline-sm text-headline-sm">Upload Evidence (Max 5 files, ≤ 5MB each)</h3>
+      <h3 class="text-white font-headline-sm text-headline-sm flex items-center gap-2">
+        <span class="material-symbols-outlined">add_photo_alternate</span>
+        Upload Repair Evidence
+      </h3>
       <button class="text-white/80 hover:text-white" onclick="toggleModal('uploadPhotoModal', false)">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <div class="p-8 space-y-6">
-      <input type="file" id="evidenceFileInput" class="hidden" accept="image/*,.pdf" multiple onchange="handleEvidenceFilesSelected(this)">
-      <div onclick="document.getElementById('evidenceFileInput').click()" class="border-2 border-dashed border-outline-variant/50 rounded-xl p-6 flex flex-col items-center justify-center gap-3 bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer text-center">
-        <span class="material-symbols-outlined text-[40px] text-primary/40">cloud_upload</span>
+    <div class="p-6 space-y-5 max-h-[85vh] overflow-y-auto">
+      <input type="file" id="evidenceFileInput" class="hidden" accept="image/*" multiple onchange="handleEvidenceFileSelected(this)">
+      
+      <!-- Drag & Drop Zone -->
+      <div id="evidenceDropZone" onclick="document.getElementById('evidenceFileInput').click()" class="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center justify-center gap-3 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer text-center group">
+        <span class="material-symbols-outlined text-[42px] text-primary group-hover:scale-110 transition-transform">cloud_upload</span>
         <div>
-          <p id="evidenceUploadLabel" class="text-body-md font-bold text-on-surface">Click to select photos/files</p>
-          <p class="text-label-md text-outline">PNG, JPG, WEBP or PDF (Max 5 files, ≤ 5MB each)</p>
+          <p class="text-body-md font-bold text-on-surface">Click to select photos or drag & drop</p>
+          <p class="text-label-md text-outline">Select multiple photos (PNG, JPG, WEBP, max 5MB each)</p>
         </div>
       </div>
 
-      <!-- Preview Grid in Modal -->
-      <div id="modalEvidencePreviewList" class="hidden space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+      <!-- Selected Files Preview List -->
+      <div id="evidencePendingSection" class="hidden space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="text-label-md font-bold text-on-surface uppercase tracking-wider">Selected Files (<span id="pendingFilesCount">0</span>)</label>
+          <button type="button" onclick="clearPendingEvidenceFiles()" class="text-xs text-error font-medium hover:underline">Clear all</button>
+        </div>
+        <div id="evidencePendingPreviewContainer" class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 bg-surface-container-low rounded-xl border border-outline-variant/30">
+          <!-- Pending thumbnails inserted here -->
+        </div>
+      </div>
 
+      <!-- Photo Category Select -->
       <div class="space-y-2">
         <label class="text-label-lg font-bold text-on-surface">Photo Category</label>
-        <select id="evidenceCategorySelect" class="w-full rounded-lg border-outline-variant focus:ring-primary focus:border-primary text-body-md">
-          <option>Before Repair</option>
-          <option>During Repair</option>
-          <option>After Repair</option>
+        <select id="evidenceCategorySelect" class="w-full rounded-lg border border-outline-variant focus:ring-primary focus:border-primary text-body-md bg-surface-container-low py-2.5 px-3">
+          <option value="Before Repair">Before Repair</option>
+          <option value="During Repair">During Repair</option>
+          <option value="After Repair">After Repair</option>
+          <option value="General Evidence">General Evidence</option>
         </select>
       </div>
-      <div class="flex gap-3 pt-4">
-        <button id="submitEvidenceBtn" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-container transition-all cursor-pointer" onclick="submitEvidencePhoto()">Upload Photos</button>
-        <button class="px-6 py-3 border border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer" onclick="toggleModal('uploadPhotoModal', false)">Cancel</button>
+
+      <div class="flex gap-3 pt-2">
+        <button id="submitEvidenceBtn" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-md active:scale-98" onclick="submitEvidencePhoto()">
+          <span class="material-symbols-outlined text-lg">upload</span>
+          Upload Photos
+        </button>
+        <button type="button" class="px-6 py-3 border border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all" onclick="toggleModal('uploadPhotoModal', false)">Cancel</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Evidence Image Lightbox Modal -->
+<div class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" id="imageLightboxModal" onclick="closeImageLightbox()">
+  <div class="relative max-w-4xl max-h-[90vh] bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl flex flex-col" onclick="event.stopPropagation()">
+    <div class="bg-surface-container-high px-5 py-3 flex justify-between items-center border-b border-outline-variant/20">
+      <h4 id="lightboxTitle" class="text-on-surface font-bold text-body-lg">Repair Evidence</h4>
+      <button class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition-colors" onclick="closeImageLightbox()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="p-3 bg-black flex items-center justify-center min-h-[300px] max-h-[75vh] overflow-hidden">
+      <img id="lightboxImage" src="" alt="Evidence Preview" class="max-w-full max-h-[70vh] object-contain rounded">
     </div>
   </div>
 </div>
@@ -729,18 +720,6 @@
     const displayStatus = getDisplayTaskStatus(order);
     const statusContainer = document.getElementById('detailStatusBadgeContainer');
     if (statusContainer) statusContainer.innerHTML = getStatusBadgeHtml(displayStatus);
-
-    const isRejected = order.technician_response === 'Rejected' || displayStatus === 'Rejected';
-    const rejCard = document.getElementById('detailRejectionCard');
-    if (rejCard) {
-      if (isRejected) {
-        rejCard.classList.remove('hidden');
-        document.getElementById('detailRejectionReasonText').textContent = order.rejection_reason ? `"${order.rejection_reason}"` : '"No reason provided"';
-      } else {
-        rejCard.classList.add('hidden');
-      }
-    }
-
     document.getElementById('detailAssignedDate').textContent = formatAssignedDate(order.assigned_at);
     const deadlineElem = document.getElementById('detailDeadlineDate');
     if (deadlineElem) {
@@ -776,28 +755,12 @@
       }
     }
 
-    // Render Evidence Images Grid
-    const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
-    let orderImages = [];
-    if (order.images && Array.isArray(order.images) && order.images.length > 0) {
-      orderImages = order.images.map(img => (img.startsWith('http') || img.startsWith('data:') ? img : (backendBase + img)));
-    } else {
-      try {
-        const storedImages = JSON.parse(localStorage.getItem(`vnuis_evidence_list_${cleanId}`) || '[]');
-        if (storedImages.length > 0) orderImages = storedImages;
-      } catch(e) {}
-    }
-    if (orderImages.length === 0) {
-      const singleSaved = localStorage.getItem(`vnuis_evidence_${cleanId}`);
-      if (singleSaved) orderImages.push(singleSaved);
-    }
-
-    renderEvidenceGrid(orderImages);
+    // Render Evidence Photos Gallery
+    renderEvidencePhotos(order);
 
     // Render Timeline & Repair History
     renderStatusTimeline(order);
     renderRepairHistory(order);
-    await loadComments();
   }
 
   let currentRepairHistory = [];
@@ -1104,429 +1067,312 @@
     await loadWorkOrderDetails();
   }
 
-  let selectedTechFiles = [];
+  let pendingEvidenceFiles = [];
 
-  function openUploadModal() {
-    const currentStatus = currentOrderData ? (currentOrderData.task_status || '') : '';
-    if (currentStatus.toLowerCase() !== 'in progress') {
-      const msg = 'Evidence images can only be uploaded when the work order is In Progress!';
-      if (window.showToast) showToast(msg, 'warning');
-      else alert(msg);
-      return;
+  function getStoredEvidenceList(cleanId) {
+    try {
+      const raw = localStorage.getItem(`vnuis_evidence_${cleanId}`);
+      if (!raw) return [];
+      if (raw.trim().startsWith('[')) {
+        return JSON.parse(raw);
+      }
+      return [{ url: raw, category: 'Before Repair', timestamp: new Date().toISOString() }];
+    } catch (e) {
+      return [];
     }
-    toggleModal('uploadPhotoModal', true);
   }
 
-  function renderEvidenceGrid(images) {
-    const grid = document.getElementById('detailEvidenceGrid');
+  function saveStoredEvidenceList(cleanId, list) {
+    localStorage.setItem(`vnuis_evidence_${cleanId}`, JSON.stringify(list));
+  }
+
+  function renderEvidencePhotos(order) {
+    const grid = document.getElementById('repairEvidenceGrid');
     if (!grid) return;
 
-    const currentStatus = currentOrderData ? (currentOrderData.task_status || '') : '';
-    const canModify = currentStatus.toLowerCase() === 'in progress';
+    const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
 
-    // Hide/show top header Add Evidence button
-    const headerBtn = document.getElementById('addEvidenceHeaderBtn');
-    if (headerBtn) {
-      if (canModify) headerBtn.classList.remove('hidden');
-      else headerBtn.classList.add('hidden');
+    let apiImages = [];
+    if (order && Array.isArray(order.images)) {
+      apiImages = order.images.map(img => ({
+        url: (img.startsWith('http') || img.startsWith('data:') ? img : (backendBase + img)),
+        category: 'Repair Evidence',
+        isApi: true
+      }));
     }
 
-    let html = '';
-    if (canModify) {
-      html += `
-        <div class="w-28 h-24 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer shrink-0" onclick="openUploadModal()">
-          <span class="material-symbols-outlined text-primary text-2xl">add_a_photo</span>
-          <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Photo</p>
+    const localItems = getStoredEvidenceList(cleanId);
+
+    const combined = [...apiImages];
+    localItems.forEach(item => {
+      const url = item.url || item;
+      if (!combined.some(c => c.url === url)) {
+        combined.push({
+          url: url,
+          category: item.category || 'Repair Evidence',
+          isApi: false
+        });
+      }
+    });
+
+    if (combined.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-2 py-6 px-4 rounded-xl border border-dashed border-outline-variant/40 bg-surface-container-low flex flex-col items-center justify-center gap-2 text-center">
+          <span class="material-symbols-outlined text-outline text-3xl">no_photography</span>
+          <p class="text-xs font-bold text-on-surface-variant">No repair evidence uploaded yet</p>
+          <p class="text-[11px] text-outline">Upload photos before and after repairing the asset</p>
+          <button onclick="toggleModal('uploadPhotoModal', true)" class="mt-2 text-xs font-bold bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-container transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">add_a_photo</span>
+            Add Evidence
+          </button>
         </div>
       `;
+      return;
     }
 
-    if (images && images.length > 0) {
-      images.forEach((imgUrl, i) => {
-        const deleteBtnHtml = canModify ? `
-          <button type="button" onclick="event.stopPropagation(); event.preventDefault(); deleteEvidenceImage('${encodeURIComponent(imgUrl)}')" class="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center shadow-md" title="Delete photo">
-            <span class="material-symbols-outlined text-xs">delete</span>
-          </button>
-        ` : '';
+    let html = combined.map((item, idx) => `
+      <div class="h-[120px] rounded-lg overflow-hidden border border-outline-variant/30 relative group shadow-sm bg-surface-container shrink-0">
+        <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" alt="Evidence ${idx + 1}" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-[10px] text-gray-400 p-1 text-center\\'><span class=\\'material-symbols-outlined text-xl mb-1\\'>broken_image</span>Image ${idx + 1}</div>';" />
+        
+        <div class="absolute bottom-0 left-0 right-0 p-1.5 bg-black/50 backdrop-blur-xs flex justify-between items-center">
+          <p class="text-white text-[8px] font-bold uppercase tracking-wider truncate">${UiHelpers.escapeHtml(item.category)}</p>
+        </div>
 
-        html += `
-          <div class="w-32 h-24 rounded-lg overflow-hidden border border-outline-variant/30 relative group bg-surface-container shrink-0">
-            ${deleteBtnHtml}
-            <a href="${imgUrl}" target="_blank" class="w-full h-full block">
-              <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="Evidence ${i+1}" onError="this.onerror=null; this.parentElement.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-[10px] text-gray-400 p-1 text-center\\'><span class=\\'material-symbols-outlined text-xl mb-1\\'>broken_image</span>Image ${i+1}</div>';" />
-              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-bold gap-1 pointer-events-none">
-                <span class="material-symbols-outlined text-xs">visibility</span>
-                <span>View #${i+1}</span>
-              </div>
-            </a>
-          </div>
-        `;
-      });
-    } else if (!canModify) {
-      html += `<p class="text-xs text-outline italic">No repair evidence uploaded.</p>`;
+        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <button onclick="openImageLightbox('${item.url}', '${UiHelpers.escapeHtml(item.category)}')" class="p-1.5 bg-white/80 hover:bg-white text-on-surface rounded-full shadow transition-all transform hover:scale-110" title="View image">
+            <span class="material-symbols-outlined text-sm">visibility</span>
+          </button>
+          <button onclick="deleteEvidencePhoto(${idx})" class="p-1.5 bg-error-container/80 hover:bg-error text-white rounded-full shadow transition-all transform hover:scale-110" title="Delete evidence">
+            <span class="material-symbols-outlined text-sm">delete</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    if (combined.length < 5) {
+      html += `
+        <div class="h-[120px] rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center gap-1 group hover:bg-primary/10 transition-all cursor-pointer" onclick="toggleModal('uploadPhotoModal', true)">
+          <span class="material-symbols-outlined text-primary text-2xl group-hover:scale-110 transition-transform">add_a_photo</span>
+          <p class="text-[10px] font-bold text-primary uppercase tracking-wide">Add Evidence</p>
+          <p class="text-[9px] text-outline">(${combined.length}/5 photos)</p>
+        </div>
+      `;
     }
 
     grid.innerHTML = html;
   }
 
-  async function deleteEvidenceImage(encodedImgUrl) {
-    const imgUrl = decodeURIComponent(encodedImgUrl);
-    if (!confirm('Are you sure you want to delete this evidence image?')) return;
-
-    // Relative path extracted for API call if it comes from backend upload
-    let relativePath = imgUrl;
-    if (imgUrl.includes('/uploads/')) {
-      relativePath = '/uploads/' + imgUrl.split('/uploads/')[1];
-    } else {
-      try {
-        const u = new URL(imgUrl, window.location.origin);
-        relativePath = u.pathname;
-      } catch (e) {}
-    }
-
-    let apiSuccess = false;
-    try {
-      if (window.Api) {
-        await Api.delete(`/work-orders/${cleanId}/images`, { imagePath: relativePath });
-        apiSuccess = true;
-      }
-    } catch (e) {
-      console.warn('API evidence delete failed or fallback mode:', e);
-    }
-
-    // Update in-memory currentOrderData
-    if (currentOrderData) {
-      if (currentOrderData.images) {
-        currentOrderData.images = currentOrderData.images.filter(img => img !== imgUrl && img !== relativePath);
-      }
-    }
-
-    // Synchronize storedWorkOrders in localStorage
-    try {
-      const storedOrders = getStoredWorkOrders() || [];
-      const matchIndex = storedOrders.findIndex(o => String(o.order_id) === String(cleanId));
-      if (matchIndex !== -1) {
-        if (storedOrders[matchIndex].images) {
-          storedOrders[matchIndex].images = storedOrders[matchIndex].images.filter(img => img !== imgUrl && img !== relativePath);
-        }
-        saveStoredWorkOrders(storedOrders);
-      }
-    } catch (e) {}
-
-    // Fallback/sync localStorage evidence list
-    try {
-      let storedImages = JSON.parse(localStorage.getItem(`vnuis_evidence_list_${cleanId}`) || '[]');
-      storedImages = storedImages.filter(url => url !== imgUrl && url !== relativePath);
-      localStorage.setItem(`vnuis_evidence_list_${cleanId}`, JSON.stringify(storedImages));
-      localStorage.removeItem(`vnuis_evidence_${cleanId}`);
-    } catch (e) {}
-
-    if (window.showToast) showToast('Evidence image deleted successfully.', 'success');
-    else alert('Evidence image deleted successfully.');
-
-    await loadWorkOrderDetails();
-  }
-
-  function handleEvidenceFilesSelected(input) {
-    if (!input.files || !input.files.length) return;
-
-    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'application/pdf'];
-    const newFiles = Array.from(input.files);
-
-    if (selectedTechFiles.length + newFiles.length > 5) {
-      alert(`Maximum 5 evidence files allowed! (You selected ${selectedTechFiles.length} files)`);
+  function handleEvidenceFileSelected(input) {
+    if (input.files && input.files.length > 0) {
+      addPendingFiles(Array.from(input.files));
       input.value = '';
+    }
+  }
+
+  function addPendingFiles(filesList) {
+    const localItems = getStoredEvidenceList(cleanId);
+    const apiCount = (currentOrderData && Array.isArray(currentOrderData.images)) ? currentOrderData.images.length : 0;
+    const currentTotal = Math.max(localItems.length, apiCount);
+
+    if (currentTotal + pendingEvidenceFiles.length + filesList.length > 5) {
+      alert(`Maximum 5 evidence images allowed per work order. You currently have ${currentTotal} saved and ${pendingEvidenceFiles.length} selected.`);
       return;
     }
 
-    for (const f of newFiles) {
-      if (!validTypes.includes(f.type)) {
-        alert(`File "${f.name}" is invalid. Only PNG, JPG, WEBP or PDF formats are supported.`);
-        input.value = '';
-        return;
-      }
+    for (let f of filesList) {
       if (f.size > 5 * 1024 * 1024) {
-        alert(`File "${f.name}" exceeds 5MB limit.`);
-        input.value = '';
+        alert(`File "${f.name}" exceeds the maximum 5MB size limit.`);
         return;
       }
-    }
-
-    newFiles.forEach(f => selectedTechFiles.push(f));
-    input.value = '';
-    renderModalEvidencePreviews();
-  }
-
-  function removeTechFileAt(index) {
-    selectedTechFiles.splice(index, 1);
-    renderModalEvidencePreviews();
-  }
-
-  function renderModalEvidencePreviews() {
-    const container = document.getElementById('modalEvidencePreviewList');
-    if (!container) return;
-
-    if (selectedTechFiles.length === 0) {
-      container.classList.add('hidden');
-      container.innerHTML = '';
-      return;
-    }
-
-    container.classList.remove('hidden');
-    container.innerHTML = '';
-
-    selectedTechFiles.forEach((file, idx) => {
-      const item = document.createElement('div');
-      item.className = 'p-2 bg-surface-container-low border border-outline-variant/30 rounded-lg flex items-center justify-between gap-2 shadow-xs';
-      
-      const sizeKb = (file.size / 1024).toFixed(1) + ' KB';
-      item.innerHTML = `
-        <div class="flex items-center gap-2 min-w-0 flex-1">
-          <span class="material-symbols-outlined text-primary text-xl shrink-0">${file.type.startsWith('image/') ? 'image' : 'picture_as_pdf'}</span>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-semibold text-on-surface truncate">${file.name}</p>
-            <p class="text-[10px] text-outline">${sizeKb}</p>
-          </div>
-        </div>
-        <button type="button" onclick="removeTechFileAt(${idx})" class="text-error hover:bg-red-50 p-1 rounded-full text-xs">
-          <span class="material-symbols-outlined text-sm">close</span>
-        </button>
-      `;
-      container.appendChild(item);
-    });
-  }
-
-  async function submitEvidencePhoto() {
-    const currentStatus = currentOrderData ? (currentOrderData.task_status || '') : '';
-    if (currentStatus.toLowerCase() !== 'in progress') {
-      alert('Evidence images can only be uploaded when the work order is In Progress!');
-      return;
-    }
-
-    if (selectedTechFiles.length === 0) {
-      alert('Please select at least 1 image or evidence file!');
-      return;
-    }
-
-    const submitBtn = document.getElementById('submitEvidenceBtn');
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Uploading...';
-    }
-
-    let apiSuccess = false;
-    try {
-      const formData = new FormData();
-      selectedTechFiles.forEach(file => {
-        formData.append('images', file);
-      });
-
-      const baseUrl = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:4000/api/v1';
-      const token = localStorage.getItem('vnuis_token') || localStorage.getItem('auth_token') || '';
-      const headers = {};
-      if (token) headers['Authorization'] = 'Bearer ' + token;
-
-      const response = await fetch(`${baseUrl}/work-orders/${cleanId}/images`, {
-        method: 'POST',
-        headers: headers,
-        body: formData
-      });
-
-      if (response.ok) {
-        apiSuccess = true;
+      if (!f.type.startsWith('image/')) {
+        alert(`File "${f.name}" is not a valid image file.`);
+        return;
       }
-    } catch (e) {
-      console.warn('API evidence upload error, saving base64 fallback:', e);
+      pendingEvidenceFiles.push(f);
     }
 
-    // Convert to base64 for fallback
-    function getBase64(file) {
-      return new Promise(res => {
-        const r = new FileReader();
-        r.onload = e => res(e.target.result);
-        r.onerror = () => res(null);
-        r.readAsDataURL(file);
-      });
-    }
-
-    const b64List = [];
-    for (const f of selectedTechFiles) {
-      const b64 = await getBase64(f);
-      if (b64) b64List.push(b64);
-    }
-
-    if (b64List.length > 0) {
-      try {
-        const existing = JSON.parse(localStorage.getItem(`vnuis_evidence_list_${cleanId}`) || '[]');
-        const merged = existing.concat(b64List).slice(-5);
-        localStorage.setItem(`vnuis_evidence_list_${cleanId}`, JSON.stringify(merged));
-        localStorage.setItem(`vnuis_evidence_${cleanId}`, merged[0]);
-      } catch(e) {}
-    }
-
-    selectedTechFiles = [];
-    renderModalEvidencePreviews();
-
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Upload Photos';
-    }
-
-    toggleModal('uploadPhotoModal', false);
-    if (window.showToast) showToast('Repair evidence uploaded successfully!', 'success');
-    else alert('Repair evidence uploaded successfully!');
-
-    await loadWorkOrderDetails();
+    renderPendingPreviews();
   }
 
-  function renderCommentsTimeline(comments) {
-    const container = document.getElementById('commentsTimelineContainer');
-    const countBadge = document.getElementById('commentsCountBadge');
-    if (!container) return;
+  function removePendingEvidenceFile(index) {
+    pendingEvidenceFiles.splice(index, 1);
+    renderPendingPreviews();
+  }
 
-    if (countBadge) countBadge.textContent = comments ? comments.length : 0;
+  function clearPendingEvidenceFiles() {
+    pendingEvidenceFiles = [];
+    renderPendingPreviews();
+  }
 
-    if (!comments || comments.length === 0) {
-      container.innerHTML = `
-        <div class="text-center py-6 text-outline bg-surface-container-low/50 rounded-lg border border-dashed border-outline-variant/30">
-          <span class="material-symbols-outlined text-3xl mb-1 opacity-50">chat_bubble_outline</span>
-          <p class="text-body-sm">Chưa có trao đổi nào cho công việc này.</p>
-        </div>
-      `;
+  function renderPendingPreviews() {
+    const pendingSection = document.getElementById('evidencePendingSection');
+    const container = document.getElementById('evidencePendingPreviewContainer');
+    const countEl = document.getElementById('pendingFilesCount');
+
+    if (!pendingSection || !container || !countEl) return;
+
+    if (pendingEvidenceFiles.length === 0) {
+      pendingSection.classList.add('hidden');
+      container.innerHTML = '';
+      countEl.textContent = '0';
       return;
     }
 
-    container.innerHTML = comments.map(c => {
-      const isManager = (c.user_role === 'Manager' || (c.user_name && c.user_name.toLowerCase().includes('manager')));
-      const roleBadgeClass = isManager 
-        ? 'bg-primary/10 text-primary border-primary/20' 
-        : 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      const avatarBg = isManager ? 'bg-primary text-white' : 'bg-emerald-600 text-white';
-      const roleTitle = isManager ? 'Manager' : 'Technician';
-      const dateStr = c.created_at ? new Date(c.created_at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }) : 'Vừa xong';
-      const initials = (c.user_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    pendingSection.classList.remove('hidden');
+    countEl.textContent = pendingEvidenceFiles.length;
 
+    container.innerHTML = pendingEvidenceFiles.map((file, idx) => {
+      const tempUrl = URL.createObjectURL(file);
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
       return `
-        <div class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/20 flex gap-3 transition-all hover:border-outline-variant/40">
-          <div class="w-9 h-9 rounded-full ${avatarBg} font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-            ${initials}
+        <div class="relative h-20 rounded-lg overflow-hidden border border-outline-variant/30 group bg-black/5">
+          <img src="${tempUrl}" class="w-full h-full object-cover" alt="Preview ${idx + 1}" />
+          <div class="absolute inset-x-0 bottom-0 bg-black/60 p-1 text-[8px] text-white truncate">
+            ${UiHelpers.escapeHtml(file.name)} (${sizeMb}MB)
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-body-sm text-on-surface truncate">${c.user_name || 'Người dùng'}</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleBadgeClass}">${roleTitle}</span>
-              </div>
-              <span class="text-[11px] text-outline font-medium shrink-0">${dateStr}</span>
-            </div>
-            <p class="text-body-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">${c.comment}</p>
-          </div>
+          <button type="button" onclick="removePendingEvidenceFile(${idx})" class="absolute top-1 right-1 bg-black/60 hover:bg-error text-white w-5 h-5 rounded-full flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined text-xs">close</span>
+          </button>
         </div>
       `;
     }).join('');
   }
 
-  async function loadComments() {
-    let apiComments = [];
-    let localComments = [];
+  async function submitEvidencePhoto() {
+    const categorySelect = document.getElementById('evidenceCategorySelect');
+    const category = categorySelect ? categorySelect.value : 'Repair Evidence';
 
-    try {
-      localComments = JSON.parse(localStorage.getItem(`vnuis_comments_${cleanId}`) || '[]');
-    } catch(e) { localComments = []; }
-
-    try {
-      const baseUrl = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:4000/api/v1';
-      const token = localStorage.getItem('vnuis_token') || localStorage.getItem('auth_token') || '';
-      const headers = {};
-      if (token) headers['Authorization'] = 'Bearer ' + token;
-
-      const res = await fetch(`${baseUrl}/work-orders/${cleanId}/comments`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        apiComments = data.data || data || [];
-      }
-    } catch (e) {
-      console.warn('API fetch comments failed, using local storage fallback', e);
-    }
-
-    const mergedMap = new Map();
-    localComments.forEach(c => {
-      const key = (c.comment || '').trim() + '___' + (c.user_name || c.user_role || '');
-      mergedMap.set(key, c);
-    });
-    apiComments.forEach(c => {
-      const key = (c.comment || '').trim() + '___' + (c.user_name || c.user_role || '');
-      mergedMap.set(key, c);
-    });
-
-    const finalComments = Array.from(mergedMap.values());
-    
-    try {
-      localStorage.setItem(`vnuis_comments_${cleanId}`, JSON.stringify(finalComments));
-    } catch(e) {}
-
-    renderCommentsTimeline(finalComments);
-  }
-
-  async function submitWorkOrderComment() {
-    const input = document.getElementById('newCommentInput');
-    const submitBtn = document.getElementById('submitCommentBtn');
-    if (!input) return;
-
-    const text = input.value.trim();
-    if (!text) {
-      alert('Vui lòng nhập nội dung comment!');
+    if (pendingEvidenceFiles.length === 0) {
+      if (window.showToast) showToast('Please select at least one photo to upload.', 'warning');
+      else alert('Please select at least one photo to upload.');
       return;
     }
 
-    if (submitBtn) submitBtn.disabled = true;
-
-    let currentUser = {};
-    try { currentUser = JSON.parse(localStorage.getItem('vnuis_user') || '{}'); } catch(e) {}
-
-    const localNewComment = {
-      comment_id: Date.now(),
-      order_id: cleanId,
-      user_id: currentUser.user_id || 1,
-      user_name: currentUser.full_name || currentUser.fullName || 'Technician',
-      user_role: currentUser.role || 'Technician',
-      comment: text,
-      created_at: new Date().toISOString()
-    };
-
-    try {
-      const existing = JSON.parse(localStorage.getItem(`vnuis_comments_${cleanId}`) || '[]');
-      existing.push(localNewComment);
-      localStorage.setItem(`vnuis_comments_${cleanId}`, JSON.stringify(existing));
-    } catch(e) {}
-
-    try {
-      const baseUrl = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:4000/api/v1';
-      const token = localStorage.getItem('vnuis_token') || localStorage.getItem('auth_token') || '';
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = 'Bearer ' + token;
-
-      await fetch(`${baseUrl}/work-orders/${cleanId}/comments`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ comment: text })
-      });
-    } catch(e) {
-      console.warn('API post comment failed, preserved in local storage:', e);
+    const btn = document.getElementById('submitEvidenceBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Uploading...`;
     }
 
-    input.value = '';
-    if (submitBtn) submitBtn.disabled = false;
-    
-    if (window.showToast) showToast('Đã gửi comment thành công!', 'success');
-    
-    await loadComments();
+    let apiSuccess = false;
+
+    // 1. Try uploading to Backend API
+    try {
+      if (window.Api) {
+        const formData = new FormData();
+        pendingEvidenceFiles.forEach(file => {
+          formData.append('images', file);
+          formData.append('evidence', file);
+        });
+
+        const res = await Api.upload(`/work-orders/${cleanId}/images`, formData);
+        console.log('WorkOrder evidence images uploaded via API:', res);
+        apiSuccess = true;
+      }
+    } catch (e) {
+      console.warn('API upload warning (falling back to local storage):', e.message);
+    }
+
+    // 2. Read files as base64 for local storage cache & fallback
+    const localList = getStoredEvidenceList(cleanId);
+    for (let file of pendingEvidenceFiles) {
+      try {
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        localList.push({
+          url: base64,
+          category: category,
+          timestamp: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error('Failed to read file for local storage', err);
+      }
+    }
+
+    saveStoredEvidenceList(cleanId, localList);
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<span class="material-symbols-outlined text-lg">upload</span> Upload Photos`;
+    }
+
+    clearPendingEvidenceFiles();
+    toggleModal('uploadPhotoModal', false);
+
+    if (window.showToast) showToast(`Successfully uploaded ${pendingEvidenceFiles.length || 1} evidence photo(s)!`, 'success');
+    else alert(`Successfully uploaded evidence photo(s)!`);
+
+    await loadWorkOrderDetails();
   }
 
-  window.submitWorkOrderComment = submitWorkOrderComment;
+  function deleteEvidencePhoto(index) {
+    if (!confirm('Are you sure you want to remove this evidence photo?')) return;
+
+    const list = getStoredEvidenceList(cleanId);
+    if (index >= 0 && index < list.length) {
+      list.splice(index, 1);
+      saveStoredEvidenceList(cleanId, list);
+    }
+
+    renderEvidencePhotos(currentOrderData || {});
+    if (window.showToast) showToast('Evidence photo removed.', 'info');
+  }
+
+  function openImageLightbox(url, title) {
+    const modal = document.getElementById('imageLightboxModal');
+    const img = document.getElementById('lightboxImage');
+    const titleEl = document.getElementById('lightboxTitle');
+
+    if (!modal || !img) return;
+
+    img.src = url;
+    if (titleEl) titleEl.textContent = title || 'Repair Evidence';
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeImageLightbox() {
+    const modal = document.getElementById('imageLightboxModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // Set up Drag and Drop listeners
+  setTimeout(() => {
+    const dropZone = document.getElementById('evidenceDropZone');
+    if (dropZone) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, false);
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.add('border-primary', 'bg-primary/10');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.remove('border-primary', 'bg-primary/10');
+        }, false);
+      });
+
+      dropZone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length) {
+          addPendingFiles(Array.from(dt.files));
+        }
+      }, false);
+    }
+  }, 500);
 
   loadWorkOrderDetails();
-
 </script>
 </body>
 </html>

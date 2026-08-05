@@ -31,13 +31,13 @@
 <!-- Sidebar placeholder - sẽ được load từ sidebar chung -->
 <div id="sidebar-placeholder"></div>
 
-<div class="ml-[240px] flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen md:ml-[240px]">
   <!-- Topbar placeholder -->
   <div id="topbar-placeholder"></div>
 
-  <main class="flex-1 p-8">
+  <main class="flex-1 p-4 sm:p-6 lg:p-8">
     <!-- Student Profile & Quick Action Block -->
-    <div class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div class="mb-8 bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
       <div>
         <h1 id="welcomeHeading" class="text-brand-blue font-bold text-headline-lg">Welcome back!</h1>
         <p id="userInfo" class="text-on-surface-variant text-body-md mb-3"></p>
@@ -45,8 +45,8 @@
           <!-- Dynamic badges will be inserted here -->
         </div>
       </div>
-      <div class="shrink-0 flex items-center gap-3 w-full md:w-auto">
-        <a href="CreateReport.html" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-label-lg shadow-md hover:bg-opacity-90 transition-all active:scale-95">
+      <div class="shrink-0 flex items-center gap-3 w-full lg:w-auto">
+        <a href="CreateReport.html" class="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-label-lg shadow-md hover:bg-opacity-90 transition-all active:scale-95">
           <span class="material-symbols-outlined">add_circle</span>
           <span>Create New Report</span>
         </a>
@@ -75,7 +75,7 @@
     </div>
 
     <!-- KPI cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-8">
       <div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/20 border-l-4 border-l-[#005BAC]">
         <div class="flex items-center gap-2 mb-2">
           <span class="material-symbols-outlined text-brand-blue">pending_actions</span>
@@ -101,14 +101,14 @@
 
     <!-- Recent Reports Table -->
     <section class="bg-white rounded-xl shadow-sm overflow-hidden border border-outline-variant/20 mb-8">
-      <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
+      <div class="px-4 sm:px-6 py-5 border-b border-outline-variant/20 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <h2 class="text-headline-sm font-headline-sm text-on-surface">Recent Issue Reports</h2>
         <a href="CreateReport.html" class="text-brand-blue font-label-lg hover:underline transition-all flex items-center gap-1">
           + Report an Issue
         </a>
       </div>
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full min-w-[720px] text-left border-collapse">
           <thead class="bg-brand-blue text-white">
             <tr>
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">#</th>

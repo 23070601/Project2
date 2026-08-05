@@ -43,22 +43,27 @@ const Layout = (() => {
     });
   }
 
+  function getNotificationsPageUrl() {
+    const pathname = window.location.pathname || '';
+    const user = window.Auth?.getCurrentUser?.();
+    const role = (user?.role || '').toLowerCase();
+
+    if (pathname.includes('/managers/') || role === 'manager') {
+      return pathname.includes('/managers/') ? 'Notifications.html' : '../managers/Notifications.html';
+    }
+    if (pathname.includes('/technicians/') || role === 'technician') {
+      return pathname.includes('/technicians/') ? 'Notifications.html' : '../technicians/Notifications.html';
+    }
+    return pathname.includes('/users/') ? 'Notifications.html' : '../users/Notifications.html';
+  }
+
   function wireNotificationBell() {
     const bell = document.getElementById('notificationBell');
-    const dropdown = document.getElementById('notificationDropdown');
-    if (!bell || !dropdown) return;
+    if (!bell) return;
 
     bell.addEventListener('click', (e) => {
       e.stopPropagation();
-      dropdown.classList.toggle('hidden');
-      if (!dropdown.classList.contains('hidden') && window.Notifications) {
-        Notifications.loadDropdown();
-      }
-    });
-    document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
-        dropdown.classList.add('hidden');
-      }
+      window.location.href = getNotificationsPageUrl();
     });
   }
 
@@ -76,6 +81,54 @@ const Layout = (() => {
         dropdown.classList.add('hidden');
       }
     });
+  }
+
+  function setSidebarOpen(isOpen) {
+    const sidebar = document.querySelector('#sidebar-placeholder > aside');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (!sidebar) return;
+
+    sidebar.classList.toggle('-translate-x-full', !isOpen);
+    sidebar.classList.toggle('translate-x-0', isOpen);
+    if (backdrop) {
+      backdrop.classList.toggle('hidden', !isOpen);
+    }
+  }
+
+  function syncSidebarVisibility() {
+    const sidebar = document.querySelector('#sidebar-placeholder > aside');
+    if (!sidebar) return;
+
+    if (window.innerWidth >= 768) {
+      sidebar.classList.remove('-translate-x-full');
+      sidebar.classList.add('translate-x-0');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+      sidebar.classList.remove('translate-x-0');
+    }
+  }
+
+  function wireMobileSidebar() {
+    const toggle = document.getElementById('mobileSidebarToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const sidebar = document.querySelector('#sidebar-placeholder > aside');
+    if (!toggle || !sidebar) return;
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setSidebarOpen(!sidebar.classList.contains('translate-x-0'));
+    });
+
+    if (backdrop) {
+      backdrop.addEventListener('click', () => setSidebarOpen(false));
+    }
+
+    document.querySelectorAll('#sidebar-placeholder .nav-link').forEach((link) => {
+      link.addEventListener('click', () => setSidebarOpen(false));
+    });
+
+    window.addEventListener('resize', syncSidebarVisibility);
+    syncSidebarVisibility();
   }
 
   async function init({ role, activePage }) {
@@ -109,16 +162,18 @@ const Layout = (() => {
     wireLogout();
     wireNotificationBell();
     wireUserProfileDropdown();
+    wireMobileSidebar();
 
     if (window.Notifications) {
-      // Load dropdown immediately since topbar is already in DOM
-      try {
-        await Notifications.loadDropdown();
-        await Notifications.refreshBadge();
-      } catch (e) {
-        console.warn('Initial notification load failed:', e);
-      }
+      Notifications.refreshBadge();
       Notifications.startPolling();
+    } else {
+      setTimeout(() => {
+        if (window.Notifications) {
+          Notifications.refreshBadge();
+          Notifications.startPolling();
+        }
+      }, 200);
     }
   }
 
