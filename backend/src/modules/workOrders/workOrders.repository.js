@@ -16,13 +16,47 @@ const BASE_SELECT = `
   JOIN Users mgr ON mgr.user_id = wo.manager_id
 `;
 
-async function findAll({ technicianId, managerId, taskStatus, technicianResponse, priority, deadline } = {}) {
+async function getImages(orderId) {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT image_path FROM WorkOrderImages WHERE order_id = ? ORDER BY image_id ASC`,
+      [orderId]
+    );
+    return rows.map(r => r.image_path);
+  } catch (e) {
+    return [];
+  }
+}
+
+async function addImages(orderId, imagePaths) {
+  if (!imagePaths || !imagePaths.length) return;
+  try {
+    const values = imagePaths.map(path => [orderId, path]);
+    await pool.query(
+      `INSERT INTO WorkOrderImages (order_id, image_path) VALUES ?`,
+      [values]
+    );
+  } catch (e) {
+    console.warn('Failed to insert into WorkOrderImages:', e.message);
+  }
+}
+
+async function findAll({ technicianId, managerId, taskStatus, technicianResponse, priority, deadline, sort } = {}) {
   const clauses = [];
   const params = [];
 
   if (technicianId) { clauses.push('wo.technician_id = ?'); params.push(technicianId); }
   if (managerId) { clauses.push('wo.manager_id = ?'); params.push(managerId); }
-  if (taskStatus && taskStatus !== 'All') { clauses.push('wo.task_status = ?'); params.push(taskStatus); }
+  if (taskStatus && taskStatus !== 'All') {
+    if (taskStatus === 'Rejected') {
+      clauses.push("wo.technician_response = 'Rejected'");
+    } else if (taskStatus === 'Assigned') {
+      clauses.push("wo.task_status = 'Assigned' AND (wo.technician_response != 'Rejected' OR wo.technician_response IS NULL)");
+    } else {
+      clauses.push('wo.task_status = ?');
+      params.push(taskStatus);
+    }
+  }
   if (technicianResponse && technicianResponse !== 'All') { clauses.push('wo.technician_response = ?'); params.push(technicianResponse); }
   if (priority && priority !== 'All') { clauses.push('fr.priority = ?'); params.push(priority); }
 
@@ -36,14 +70,40 @@ async function findAll({ technicianId, managerId, taskStatus, technicianResponse
     }
   }
 
+  const orderSql = sort === 'oldest' ? 'ORDER BY wo.assigned_at ASC' : 'ORDER BY wo.assigned_at DESC';
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-  const [rows] = await pool.query(`${BASE_SELECT} ${where} ORDER BY wo.assigned_at DESC`, params);
+  const [rows] = await pool.query(`${BASE_SELECT} ${where} ${orderSql}`, params);
+
+  const orderIds = rows.map(r => r.order_id);
+  if (orderIds.length > 0) {
+    try {
+      const [imgRows] = await pool.query(
+        `SELECT order_id, image_path FROM WorkOrderImages WHERE order_id IN (?) ORDER BY image_id ASC`,
+        [orderIds]
+      );
+      const imgMap = {};
+      imgRows.forEach(r => {
+        if (!imgMap[r.order_id]) imgMap[r.order_id] = [];
+        imgMap[r.order_id].push(r.image_path);
+      });
+      rows.forEach(r => {
+        r.images = imgMap[r.order_id] || [];
+      });
+    } catch (e) {
+      rows.forEach(r => { r.images = []; });
+    }
+  }
+
   return rows;
 }
 
 async function findById(orderId) {
   const [rows] = await pool.execute(`${BASE_SELECT} WHERE wo.order_id = ?`, [orderId]);
   const order = rows[0] || null;
+  if (order) {
+    order.images = await getImages(orderId);
+    order.comments = await getComments(orderId);
+  }
   if (order && order.asset_id) {
     try {
       const [historyRows] = await pool.execute(
@@ -73,7 +133,11 @@ async function findById(orderId) {
 
 async function findByReportId(reportId) {
   const [rows] = await pool.execute(`${BASE_SELECT} WHERE wo.report_id = ?`, [reportId]);
-  return rows[0] || null;
+  const order = rows[0] || null;
+  if (order) {
+    order.images = await getImages(order.order_id);
+  }
+  return order;
 }
 
 // INSERT vào WorkOrders sẽ tự kích hoạt trigger trg_workorders_after_insert
@@ -176,6 +240,74 @@ async function addStatusHistory({ orderId, oldStatus, newStatus, note, changedBy
   );
 }
 
+async function ensureCommentsTable() {
+  try {
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS WorkOrderComments (
+          comment_id  INT AUTO_INCREMENT PRIMARY KEY,
+          order_id    INT NOT NULL,
+          user_id     INT NOT NULL,
+          comment     TEXT NOT NULL,
+          created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT fk_wocomments_order FOREIGN KEY (order_id) REFERENCES WorkOrders(order_id) ON DELETE CASCADE,
+          CONSTRAINT fk_wocomments_user FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+  } catch(e) {
+    try {
+      await pool.execute(`
+        CREATE TABLE IF NOT EXISTS WorkOrderComments (
+            comment_id  INT AUTO_INCREMENT PRIMARY KEY,
+            order_id    INT NOT NULL,
+            user_id     INT NOT NULL,
+            comment     TEXT NOT NULL,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      `);
+    } catch(err) {
+      console.warn('Could not auto-create WorkOrderComments table:', err.message);
+    }
+  }
+}
+
+async function getComments(orderId) {
+  try {
+    await ensureCommentsTable();
+    const [rows] = await pool.execute(
+      `SELECT c.comment_id, c.order_id, c.user_id, c.comment, c.created_at,
+              u.full_name AS user_name, u.role AS user_role
+       FROM WorkOrderComments c
+       JOIN Users u ON u.user_id = c.user_id
+       WHERE c.order_id = ?
+       ORDER BY c.created_at ASC, c.comment_id ASC`,
+      [orderId]
+    );
+    return rows;
+  } catch (e) {
+    console.warn('Failed to fetch WorkOrderComments:', e.message);
+    return [];
+  }
+}
+
+async function addComment(orderId, userId, commentText) {
+  await ensureCommentsTable();
+  const [result] = await pool.execute(
+    `INSERT INTO WorkOrderComments (order_id, user_id, comment) VALUES (?, ?, ?)`,
+    [orderId, userId, commentText]
+  );
+  const commentId = result.insertId;
+  const [rows] = await pool.execute(
+    `SELECT c.comment_id, c.order_id, c.user_id, c.comment, c.created_at,
+            u.full_name AS user_name, u.role AS user_role
+     FROM WorkOrderComments c
+     JOIN Users u ON u.user_id = c.user_id
+     WHERE c.comment_id = ?`,
+    [commentId]
+  );
+  return rows[0];
+}
+
+
 module.exports = {
   findAll,
   findById,
@@ -190,4 +322,9 @@ module.exports = {
   getStatusHistory,
   reassign,
   rejectAssignment,
+  addImages,
+  getImages,
+  getComments,
+  addComment,
 };
+

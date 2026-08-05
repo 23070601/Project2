@@ -20,8 +20,8 @@ const { ROLES } = require('../../shared/constants/roles');
  * GET /api/work-orders
  */
 async function list(req, res) {
-  const { taskStatus, technicianResponse, priority, deadline, mine } = req.query;
-  const filters = { taskStatus, technicianResponse, priority, deadline };
+  const { taskStatus, technicianResponse, priority, deadline, mine, sort } = req.query;
+  const filters = { taskStatus, technicianResponse, priority, deadline, sort };
 
   // Apply role-based filters
   if (req.user.role === ROLES.TECHNICIAN) {
@@ -273,6 +273,60 @@ async function reject(req, res) {
   ok(res, updated);
 }
 
+/**
+ * Technician or Manager uploads evidence images for a work order
+ * POST /api/work-orders/:id/images
+ */
+async function uploadImages(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) throw new ApiError(404, 'Work order not found');
+
+  let uploadedFiles = [];
+  if (req.files) {
+    if (Array.isArray(req.files)) {
+      uploadedFiles = req.files;
+    } else if (req.files.images && req.files.images.length > 0) {
+      uploadedFiles = req.files.images;
+    } else if (req.files.evidence && req.files.evidence.length > 0) {
+      uploadedFiles = req.files.evidence;
+    } else {
+      Object.values(req.files).forEach(fileArray => {
+        if (Array.isArray(fileArray)) {
+          uploadedFiles = uploadedFiles.concat(fileArray);
+        }
+      });
+    }
+  } else if (req.file) {
+    uploadedFiles.push(req.file);
+  }
+
+  const seen = new Set();
+  uploadedFiles = uploadedFiles.filter(f => {
+    if (!f || !f.filename) return false;
+    if (seen.has(f.filename)) return false;
+    seen.add(f.filename);
+    return true;
+  });
+
+  if (uploadedFiles.length > 5) {
+    throw new ApiError(400, 'Maximum 5 evidence images allowed per work order');
+  }
+  for (const f of uploadedFiles) {
+    if (f.size > 5 * 1024 * 1024) {
+      throw new ApiError(400, `File ${f.originalname || 'uploaded'} exceeds maximum limit of 5MB`);
+    }
+  }
+
+  const imagePaths = uploadedFiles.map(f => '/uploads/' + f.filename);
+  if (imagePaths.length > 0) {
+    await workOrdersRepository.addImages(orderId, imagePaths);
+  }
+
+  const updated = await workOrdersRepository.findById(orderId);
+  ok(res, updated);
+}
+
 async function updateStatus(req, res) {
   const orderId = toPositiveInt(req.params.id, 'id');
   requireFields(req.body, ['taskStatus']);
@@ -294,6 +348,24 @@ async function updateStatus(req, res) {
       400,
       `Cannot change status from "${order.task_status}" to "${req.body.taskStatus}". Allowed next: ${allowedNext.join(', ') || 'none'}`
     );
+  }
+
+  // Process any uploaded evidence images if present
+  let uploadedFiles = [];
+  if (req.files) {
+    if (Array.isArray(req.files)) {
+      uploadedFiles = req.files;
+    } else if (req.files.images && req.files.images.length > 0) {
+      uploadedFiles = req.files.images;
+    } else if (req.files.evidence && req.files.evidence.length > 0) {
+      uploadedFiles = req.files.evidence;
+    }
+  } else if (req.file) {
+    uploadedFiles.push(req.file);
+  }
+  if (uploadedFiles.length > 0) {
+    const imagePaths = uploadedFiles.map(f => '/uploads/' + f.filename);
+    await workOrdersRepository.addImages(orderId, imagePaths);
   }
 
   // Update fix details if provided
@@ -515,5 +587,47 @@ async function reopen(req, res) {
   return ok(res, updatedOrder);
 }
 
-module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign, updateDeadline, reopen };
+async function getComments(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) throw new ApiError(404, 'Work order not found');
+
+  const comments = await workOrdersRepository.getComments(orderId);
+  ok(res, comments);
+}
+
+async function addComment(req, res) {
+  const orderId = toPositiveInt(req.params.id, 'id');
+  requireFields(req.body, ['comment']);
+  const commentText = req.body.comment.trim();
+  if (!commentText) throw new ApiError(400, 'Comment content cannot be empty');
+
+  const order = await workOrdersRepository.findById(orderId);
+  if (!order) throw new ApiError(404, 'Work order not found');
+
+  const newComment = await workOrdersRepository.addComment(orderId, req.user.userId, commentText);
+
+  try {
+    const targetUserId = req.user.role === ROLES.MANAGER ? order.technician_id : order.manager_id;
+    if (targetUserId && targetUserId !== req.user.userId) {
+      const senderName = req.user.fullName || (req.user.role === ROLES.MANAGER ? 'Manager' : 'Technician');
+      const actionUrl = req.user.role === ROLES.MANAGER ? links.technicianTasks : links.managerPending;
+      await notificationsRepository.createNotification({
+        userId: targetUserId,
+        reportId: order.report_id,
+        orderId: orderId,
+        message: `${senderName} commented on WorkOrder WO-${orderId}: "${commentText.slice(0, 50)}${commentText.length > 50 ? '...' : ''}"`,
+        title: 'New Work Order Comment',
+        actionUrl: actionUrl,
+      });
+    }
+  } catch (e) {
+    console.log('Failed to send comment notification:', e.message);
+  }
+
+  created(res, newComment);
+}
+
+module.exports = { list, getById, suggestions, create, respond, reject, updateStatus, reassign, updateDeadline, reopen, uploadImages, getComments, addComment };
+
 

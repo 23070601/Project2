@@ -324,13 +324,13 @@
     try {
       if (window.Api) {
         await Api.post(`/qrcodes/${roomId}/generate`);
-        if (window.showToast) showToast('Đã tạo mã QR thành công!', 'success');
+        if (window.showToast) showToast('QR Code generated successfully!', 'success');
         else alert(`QR Code generated successfully!`);
         closeGenerateQrModal();
         loadQrCodes();
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || 'Failed to generate QR Code.');
     } finally {
       btn.disabled = false;
@@ -357,7 +357,7 @@
         }
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || 'Failed to load QR Code details.');
     }
   }
@@ -369,7 +369,7 @@
   function downloadQr(qrId) {
     const img = document.getElementById('qrModalImage');
     if (!img || !img.src) {
-      if (window.showToast) showToast('Không tìm thấy ảnh QR để tải!', 'error');
+      if (window.showToast) showToast('No QR image found to download!', 'error');
       else alert('No QR image found to download.');
       return;
     }
@@ -379,7 +379,7 @@
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    if (window.showToast) showToast('Đã tải ảnh mã QR thành công!', 'success');
+    if (window.showToast) showToast('QR Code image downloaded successfully!', 'success');
   }
 
   function renderQrTable(qrs) {

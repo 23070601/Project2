@@ -273,7 +273,13 @@
       const isCompleted = ['Completed', 'Resolved'].includes(report.status) || ['Completed', 'Resolved'].includes(report.display_status);
 
       const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
-      const imageUrl = report.image_path ? (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path)) : null;
+      let reportImages = [];
+      if (report.images && Array.isArray(report.images) && report.images.length > 0) {
+        reportImages = report.images.map(img => (img.startsWith('http') || img.startsWith('data:') ? img : (backendBase + img)));
+      } else if (report.image_path) {
+        const url = (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path));
+        reportImages = [url];
+      }
 
       // WorkOrder fallback if null for completed or assigned reports
       if (!workOrder && (report.order_id || report.technician_name || isCompleted || ['Assigned', 'In Progress', 'Processing'].includes(report.status))) {
@@ -283,8 +289,8 @@
           task_status: isCompleted ? 'Completed' : (report.status || 'In Progress'),
           assigned_at: report.assigned_at || report.reported_at,
           resolved_at: report.resolved_at || (isCompleted ? report.reported_at : null),
-          fix_description: report.fix_description || (isCompleted ? 'Đã thay linh kiện mới, vệ sinh thiết bị và kiểm tra vận hành tốt.' : 'Đang xử lý thiết bị.'),
-          parts_used: report.parts_used || (isCompleted ? 'Linh kiện thay thế mới (1 bộ)' : null)
+          fix_description: report.fix_description || (isCompleted ? 'Replaced new parts, cleaned equipment, and verified proper operation.' : 'Processing equipment.'),
+          parts_used: report.parts_used || (isCompleted ? 'Replacement spare parts (1 set)' : null)
         };
       }
 
@@ -310,9 +316,58 @@
       `;
 
       // ===== MAIN CONTENT =====
+      const isRejected = (report.status === 'Rejected');
+      let rejectionReason = isRejected ? (report.rejection_reason || report.rejectionReason || report.reject_reason) : '';
+      let rejectedAt = isRejected ? (report.rejected_at || report.updated_at) : null;
+
+      if (isRejected) {
+        const rId = String(report.report_id || '').replace(/\D/g, '');
+        try {
+          const storedStr = localStorage.getItem('vnu_rejected_info_' + report.report_id) || localStorage.getItem('vnu_rejected_info_' + rId);
+          if (storedStr) {
+            const parsed = JSON.parse(storedStr);
+            if (parsed.reason) rejectionReason = parsed.reason;
+            if (parsed.rejected_at) rejectedAt = parsed.rejected_at;
+          }
+        } catch (e) {}
+
+        if (!rejectionReason) {
+          try {
+            const storedOnly = localStorage.getItem('vnu_rejection_reason_' + report.report_id) || localStorage.getItem('vnu_rejection_reason_' + rId);
+            if (storedOnly) rejectionReason = storedOnly;
+          } catch (e) {}
+        }
+
+        if (!rejectionReason && report.note) rejectionReason = report.note;
+        if (!rejectionReason) rejectionReason = 'No specific rejection reason recorded.';
+        if (!rejectedAt) rejectedAt = report.reported_at || new Date().toISOString();
+      }
+
       html += `
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div class="xl:col-span-2 space-y-6">
+
+            ${isRejected ? `
+              <!-- REJECTION REASON CARD -->
+              <div class="bg-red-50/90 border border-red-200 rounded-2xl p-6 shadow-xs flex items-start gap-4">
+                <div class="w-11 h-11 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-2xl">gavel</span>
+                </div>
+                <div class="flex-1 space-y-2">
+                  <div class="flex items-center justify-between flex-wrap gap-2">
+                    <h3 class="text-title-medium font-bold text-red-900 flex items-center gap-2">
+                      Report Rejected by Manager
+                    </h3>
+                    <span class="text-xs text-red-700 font-medium">${formatDateTime(rejectedAt)}</span>
+                  </div>
+                  <p class="text-xs uppercase tracking-wider font-bold text-red-800">Rejection Reason</p>
+                  <div class="bg-white p-4 rounded-xl border border-red-200 text-body-md text-red-950 font-normal leading-relaxed whitespace-pre-line shadow-xs">
+                    ${escapeHtml(rejectionReason)}
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
             <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6 space-y-6">
               <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -353,20 +408,23 @@
 
               <!-- Uploaded Evidence -->
               <div>
-                <p class="text-label-md text-on-surface-variant mb-2">Uploaded Evidence</p>
-                ${imageUrl ? `
-                  <a href="${imageUrl}" target="_blank" class="block relative w-44 h-36 rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group bg-surface-container">
-                    <img src="${imageUrl}" alt="Uploaded Evidence" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 p-2 text-center\\'><span class=\\'material-symbols-outlined text-2xl mb-1\\'>broken_image</span>Failed to load image</div>';" />
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
-                      <span class="material-symbols-outlined text-sm">visibility</span>
-                      <span>View Image</span>
-                    </div>
-                  </a>
+                <p class="text-label-md text-on-surface-variant mb-2">Uploaded Evidence ${reportImages.length > 0 ? `(${reportImages.length})` : ''}</p>
+                ${reportImages.length > 0 ? `
+                  <div class="flex items-center gap-3 flex-wrap">
+                    ${reportImages.map((imgUrl, i) => `
+                      <a href="${imgUrl}" target="_blank" class="block relative w-36 h-28 rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group bg-surface-container shrink-0">
+                        <img src="${imgUrl}" alt="Uploaded Evidence ${i+1}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 p-2 text-center\\'><span class=\\'material-symbols-outlined text-2xl mb-1\\'>broken_image</span>Image ${i+1}</div>';" />
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                          <span class="material-symbols-outlined text-sm">visibility</span>
+                          <span>View #${i+1}</span>
+                        </div>
+                      </a>
+                    `).join('')}
+                  </div>
                 ` : `
-                  <div class="w-44 h-36 rounded-xl border border-outline-variant/30 bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant p-4 text-center gap-1">
+                  <div class="w-44 h-28 rounded-xl border border-outline-variant/30 bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant p-4 text-center gap-1">
                     <span class="material-symbols-outlined text-3xl text-outline">image</span>
-                    <span class="text-xs font-medium text-outline">Img_0001.jpg</span>
-                    <span class="text-[10px] text-outline/70">Evidence Preview</span>
+                    <span class="text-xs font-medium text-outline">No evidence attached</span>
                   </div>
                 `}
               </div>
@@ -466,11 +524,11 @@
         const repDate = formatDateTime(report.reported_at);
         const assignedDate = workOrder && workOrder.assigned_at ? formatDateTime(workOrder.assigned_at) : repDate;
         const resolvedDate = workOrder && workOrder.resolved_at ? formatDateTime(workOrder.resolved_at) : repDate;
-        const fixNote = (workOrder && workOrder.fix_description) ? workOrder.fix_description : 'Đã hoàn tất kiểm tra và xử lý kỹ thuật.';
+        const fixNote = (workOrder && workOrder.fix_description) ? workOrder.fix_description : 'Completed technical inspection and maintenance.';
 
         if (s === 'Rejected') {
           const rejectedDate = formatDateTime(report.rejected_at || report.updated_at || report.reported_at);
-          const reason = report.rejection_reason || report.rejectionReason || report.reject_reason || report.note || 'Báo cáo bị quản lý từ chối duyệt (Thông tin sự cố không phù hợp hoặc bị trùng lặp).';
+          const reason = report.rejection_reason || report.rejectionReason || report.reject_reason || report.note || 'Report rejected by manager (Information non-matching or duplicate).';
           events.push({
             date: rejectedDate,
             status: 'Rejected',
@@ -482,7 +540,7 @@
 
         if (s === 'Cancelled') {
           const cancelledDate = formatDateTime(report.cancelled_at || report.updated_at || report.reported_at);
-          const reason = report.cancel_reason || report.cancelReason || report.note || 'Báo cáo sự cố đã được người dùng chủ động hủy.';
+          const reason = report.cancel_reason || report.cancelReason || report.note || 'Fault report cancelled by user.';
           events.push({
             date: cancelledDate,
             status: 'Cancelled',
@@ -498,7 +556,7 @@
             status: 'Closed',
             textColor: 'text-slate-600',
             dotColor: 'bg-slate-400',
-            note: confirmation && confirmation.feedback ? confirmation.feedback : 'Người dùng đã xác nhận hoàn thành sửa chữa.'
+            note: confirmation && confirmation.feedback ? confirmation.feedback : 'User confirmed repair completion.'
           });
         }
 
@@ -518,7 +576,7 @@
             status: 'Processing',
             textColor: 'text-blue-600',
             dotColor: 'bg-blue-500',
-            note: 'Quản lý đã duyệt báo cáo và giao cho kỹ thuật viên xử lý.'
+            note: 'Manager approved report and assigned to technician for resolution.'
           });
         }
 
@@ -527,7 +585,7 @@
           status: 'Pending Approval',
           textColor: 'text-amber-600',
           dotColor: 'bg-amber-400',
-          note: 'Đã gửi báo cáo sự cố thành công (chờ quản lý duyệt).'
+          note: 'Fault report submitted successfully (pending manager approval).'
         });
       }
 
@@ -632,7 +690,7 @@
             <div id="reopenSection" class="pt-4 border-t border-red-200/50 space-y-4 hidden">
               <div>
                 <p class="text-label-md font-bold text-red-900 mb-2">Reason (Issue persists): <span class="text-red-600">*</span></p>
-                <textarea id="reopenReasonInput" class="w-full bg-white border border-red-300 rounded-lg p-3 text-body-sm focus:ring-1 focus:ring-red-500 outline-none resize-none" rows="3" placeholder="Mô tả lỗi vẫn còn..."></textarea>
+                <textarea id="reopenReasonInput" class="w-full bg-white border border-red-300 rounded-lg p-3 text-body-sm focus:ring-1 focus:ring-red-500 outline-none resize-none" rows="3" placeholder="Describe remaining issue..."></textarea>
               </div>
             </div>
             
@@ -770,7 +828,7 @@
         order_id: 'WO-2024-0001',
         technician_name: 'Le Van C',
         assigned_at: '2026-07-27 10:20:00',
-        fix_description: 'Đã nhận thiết bị và đang tiến hành kiểm tra linh kiện nguồn.',
+        fix_description: 'Received device and inspecting power supply components.',
         reporter_name: 'Nguyen Van A',
         reporter_id: 1,
         user_email: 'lecturer.a@vnuis.edu.vn'
@@ -840,7 +898,7 @@
         order_id: 'WO-2024-0003',
         technician_name: 'Vu Van F',
         assigned_at: '2026-07-28 18:00:00',
-        fix_description: 'Đang kiểm tra bo mạch điều khiển camera.',
+        fix_description: 'Inspecting camera control board.',
         reporter_name: 'Bui Thi H',
         reporter_id: 8,
         user_email: 'student.h@vnuis.edu.vn'
@@ -868,7 +926,7 @@
         order_id: 'WO-2024-0004',
         technician_name: 'Le Van C',
         assigned_at: '2026-07-28 12:00:00',
-        fix_description: 'Kỹ thuật viên đang kiểm tra linh kiện tín hiệu TV.',
+        fix_description: 'Technician is inspecting TV signal components.',
         reporter_name: 'Doan Van G',
         reporter_id: 7,
         user_email: 'lecturer.g@vnuis.edu.vn'
@@ -884,7 +942,7 @@
         order_id: 'WO-2024-0005',
         technician_name: 'Pham Thi D',
         assigned_at: '2026-07-29 00:00:00',
-        fix_description: 'Đang đo tần số sóng thu phát và kiểm tra micro.',
+        fix_description: 'Testing wireless frequency and checking microphone.',
         reporter_name: 'Bui Thi H',
         reporter_id: 8,
         user_email: 'student.h@vnuis.edu.vn'
@@ -973,8 +1031,8 @@
         technician_name: 'Pham Thi D',
         assigned_at: '2026-07-29 08:45:00',
         resolved_at: '2026-07-29 09:15:00',
-        fix_description: 'Đã kiểm tra và thay thế bộ nguồn switch mạng.',
-        parts_used: 'Bộ nguồn Gigabit Switch 12V',
+        fix_description: 'Inspected and replaced network switch power supply.',
+        parts_used: 'Gigabit Switch 12V Power Supply',
         reporter_name: 'Doan Van G',
         reporter_id: 7,
         user_email: 'lecturer.g@vnuis.edu.vn'
@@ -1053,7 +1111,7 @@
               task_status: report.status === 'Closed' ? 'Closed' : (report.task_status || 'Completed'),
               assigned_at: report.assigned_at || report.reported_at,
               resolved_at: report.resolved_at || report.reported_at,
-              fix_description: report.fix_description || 'Đã kiểm tra và xử lý xong sự cố.',
+              fix_description: report.fix_description || 'Inspected and resolved issue.',
               parts_used: report.parts_used || null
             };
           }

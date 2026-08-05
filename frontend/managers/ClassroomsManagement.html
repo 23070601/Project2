@@ -185,8 +185,12 @@
       <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Scan this QR code to report an issue for this classroom.</p>
     </div>
     <div class="p-8 flex flex-col items-center">
-      <div class="w-[200px] h-[200px] bg-surface-container-high rounded-lg flex items-center justify-center mb-8 border border-outline-variant/30 shadow-inner">
-        <span class="material-symbols-outlined text-[100px] text-primary">qr_code_2</span>
+      <div class="w-[200px] h-[200px] bg-surface-container-high rounded-lg flex items-center justify-center mb-6 border border-outline-variant/30 shadow-inner overflow-hidden">
+        <img id="qrModalImage" src="" alt="QR Code" class="w-full h-full object-contain hidden" />
+        <div id="qrModalLoading" class="flex flex-col items-center gap-2 text-outline">
+          <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
+          <span class="text-label-md">Loading QR...</span>
+        </div>
       </div>
       <div class="w-full space-y-3 bg-surface-container-low p-4 rounded-lg border border-outline-variant/20">
         <div class="flex justify-between">
@@ -203,8 +207,11 @@
         </div>
       </div>
     </div>
-    <div class="p-4 bg-surface-container-lowest border-t border-outline-variant/20 flex justify-end">
-      <button onclick="closeQrModal()" class="px-6 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-lg hover:bg-surface-container transition-colors">
+    <div class="p-4 bg-surface-container-lowest border-t border-outline-variant/20 flex justify-between items-center">
+      <button onclick="downloadClassroomQr()" class="px-4 py-2 bg-primary text-white rounded-lg font-label-lg hover:bg-primary-container transition-colors flex items-center gap-2 text-body-sm">
+        <span class="material-symbols-outlined text-base">download</span> Download QR
+      </button>
+      <button onclick="closeQrModal()" class="px-6 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-lg hover:bg-surface-container transition-colors text-body-sm">
         Close
       </button>
     </div>
@@ -339,11 +346,50 @@
     }
   }
 
-  function openQrModal(roomId, roomName, location) {
-    document.getElementById('qrModalRoomId').textContent = roomId;
+  async function openQrModal(roomId, roomName, location) {
+    document.getElementById('qrModalRoomId').textContent = `CR-${roomId}`;
     document.getElementById('qrModalRoomName').textContent = roomName;
     document.getElementById('qrModalLocation').textContent = location;
+
+    const img = document.getElementById('qrModalImage');
+    const loading = document.getElementById('qrModalLoading');
+    img.classList.add('hidden');
+    img.src = '';
+    loading.classList.remove('hidden');
+
     document.getElementById('classroomQrModal').classList.remove('hidden');
+
+    try {
+      if (window.Api) {
+        const data = await Api.get(`/qrcodes/${roomId}`);
+        if (data && data.qrImageDataUrl) {
+          img.src = data.qrImageDataUrl;
+          img.classList.remove('hidden');
+          loading.classList.add('hidden');
+          document.getElementById('qrModalRoomId').textContent = data.qrCode || `CR-${roomId}`;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load QR code image:', err);
+      loading.innerHTML = `<span class="text-error text-body-sm">Failed to load QR code</span>`;
+    }
+  }
+
+  function downloadClassroomQr() {
+    const img = document.getElementById('qrModalImage');
+    const qrId = document.getElementById('qrModalRoomId').textContent || 'QR-Code';
+    if (!img || !img.src) {
+      if (window.showToast) showToast('No QR code image available to download!', 'error');
+      else alert('No QR code image available to download.');
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = `${qrId}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (window.showToast) showToast('QR Code downloaded successfully!', 'success');
   }
 
   function closeQrModal() {
@@ -465,7 +511,7 @@
             <td class="py-4 px-6 text-center">
               <div class="flex items-center justify-center gap-2">
                 <button onclick="location.href='ClassroomsDetail.html?id=${r.room_id}'" class="p-2 text-primary hover:bg-primary-fixed/30 rounded-lg transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                <button onclick="openQrModal('${r.qr_code || 'N/A'}', 'Room ${r.room_name}', 'Floor ${fl}')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+                <button onclick="openQrModal(${r.room_id}, 'Room ${r.room_name}', 'Floor ${fl}')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
                 <button onclick="openDeleteModal(${r.room_id}, 'Room ${r.room_name}')" class="p-2 text-error hover:bg-error-container/40 rounded-lg transition-colors"><span class="material-symbols-outlined">delete</span></button>
               </div>
             </td>
@@ -533,7 +579,7 @@
     renderAccordions();
     const select = document.getElementById('sortBySelect');
     const sortLabel = select.options[select.selectedIndex].text;
-    if (window.showToast) showToast(`Đã sắp xếp danh sách theo: ${sortLabel}`, 'info');
+    if (window.showToast) showToast(`Sorted list by: ${sortLabel}`, 'info');
   });
 
   async function confirmDeleteRoom() {
@@ -544,13 +590,13 @@
     try {
       if (window.Api && deletingRoomId) {
         await Api.delete(`/classrooms/${deletingRoomId}`);
-        if (window.showToast) showToast('Đã xóa phòng học thành công!', 'success');
+        if (window.showToast) showToast('Classroom deleted successfully!', 'success');
         else alert(`Classroom deleted successfully.`);
         closeDeleteModal();
         await loadClassrooms();
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || `Failed to delete classroom.`);
       closeDeleteModal();
     } finally {
@@ -746,7 +792,7 @@
     a.download = `assets_report_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    if (window.showToast) showToast('Đã xuất báo cáo CSV thành công!', 'success');
+    if (window.showToast) showToast('CSV report exported successfully!', 'success');
   }
 
   loadClassrooms();

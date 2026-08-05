@@ -112,29 +112,19 @@
 
           <!-- Upload Evidence -->
           <div class="space-y-2">
-            <label class="text-label-lg font-semibold text-on-surface">Upload Evidence (Optional)</label>
+            <label class="text-label-lg font-semibold text-on-surface">Upload Evidence (Optional - Max 5 files, ≤ 5MB each)</label>
             <div class="border-2 border-dashed border-outline-variant/50 rounded-xl p-6 flex flex-col items-center justify-center bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer group" id="uploadZone">
               <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
                 <span class="material-symbols-outlined">cloud_upload</span>
               </div>
               <p class="text-label-lg font-semibold text-on-surface">Click to upload or drag and drop</p>
-              <p class="text-body-sm text-on-surface-variant">PNG, JPG or PDF (max. 5MB)</p>
-              <input class="hidden" type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf">
+              <p class="text-body-sm text-on-surface-variant">PNG, JPG, WEBP or PDF (up to 5 files, max. 5MB per file)</p>
+              <input class="hidden" type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp,.pdf" multiple>
             </div>
             <div id="fileInfo" class="hidden text-body-sm text-on-surface-variant mt-2"></div>
             <!-- Image Thumbnail Preview Container -->
-            <div id="imagePreviewContainer" class="hidden mt-3 p-3 bg-surface-container-low border border-outline-variant/30 rounded-xl flex items-center justify-between gap-4">
-              <div class="flex items-center gap-3 overflow-hidden">
-                <img id="previewImg" class="w-16 h-16 object-cover rounded-lg border border-outline-variant/40 shrink-0 hidden" src="" alt="Evidence Preview">
-                <span id="pdfIcon" class="material-symbols-outlined text-primary text-3xl shrink-0 hidden">picture_as_pdf</span>
-                <div class="truncate">
-                  <p id="previewFileName" class="text-body-sm font-semibold text-on-surface truncate">-</p>
-                  <p id="previewFileSize" class="text-xs text-on-surface-variant">-</p>
-                </div>
-              </div>
-              <button id="removeFileBtn" type="button" class="text-error hover:bg-red-50 p-1.5 rounded-full transition-colors shrink-0" title="Remove file">
-                <span class="material-symbols-outlined text-sm">close</span>
-              </button>
+            <div id="imagePreviewContainer" class="hidden mt-3 space-y-2">
+              <div id="previewList" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
             </div>
           </div>
 
@@ -180,11 +170,11 @@
       activePage: 'CreateReport' 
     });
 
-    // 3. Upload file handling
+    // 3. Upload file handling (Multi-file support: up to 5 files, ≤ 5MB each)
     var uploadZone = document.getElementById('uploadZone');
     var fileInput = document.getElementById('fileInput');
     var fileInfo = document.getElementById('fileInfo');
-    var selectedFile = null;
+    var selectedFiles = [];
 
     if (uploadZone) {
       uploadZone.addEventListener('click', function() {
@@ -204,7 +194,7 @@
         e.preventDefault();
         uploadZone.classList.remove('border-primary');
         if (e.dataTransfer.files.length) {
-          handleFile(e.dataTransfer.files[0]);
+          handleFiles(e.dataTransfer.files);
         }
       });
     }
@@ -212,58 +202,104 @@
     if (fileInput) {
       fileInput.addEventListener('change', function(e) {
         if (e.target.files.length) {
-          handleFile(e.target.files[0]);
+          handleFiles(e.target.files);
+          fileInput.value = '';
         }
       });
     }
 
-    var imagePreviewContainer = document.getElementById('imagePreviewContainer');
-    var previewImg = document.getElementById('previewImg');
-    var pdfIcon = document.getElementById('pdfIcon');
-    var previewFileName = document.getElementById('previewFileName');
-    var previewFileSize = document.getElementById('previewFileSize');
-    var removeFileBtn = document.getElementById('removeFileBtn');
+    function handleFiles(filesList) {
+      var validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'application/pdf'];
+      var newFiles = Array.from(filesList);
 
-    if (removeFileBtn) {
-      removeFileBtn.addEventListener('click', function() {
-        selectedFile = null;
-        fileInput.value = '';
-        if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
-        if (fileInfo) fileInfo.classList.add('hidden');
+      if (selectedFiles.length + newFiles.length > 5) {
+        alert('Tối đa 5 ảnh / tệp tin cho mỗi báo cáo! (Hiện tại bạn đã chọn ' + selectedFiles.length + ' tệp)');
+        return;
+      }
+
+      for (var i = 0; i < newFiles.length; i++) {
+        var file = newFiles[i];
+        if (!validTypes.includes(file.type)) {
+          alert('Tệp "' + file.name + '" không hợp lệ. Chỉ chấp nhận các định dạng PNG, JPG, WEBP hoặc PDF.');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Dung lượng tệp "' + file.name + '" vượt quá 5MB.');
+          return;
+        }
+      }
+
+      newFiles.forEach(function(f) {
+        selectedFiles.push(f);
       });
+
+      renderPreviews();
     }
 
-    function handleFile(file) {
-      var validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
-      if (!validTypes.includes(file.type)) {
-        alert('Please upload PNG, JPG, or PDF files only.');
+    function removeFileAt(index) {
+      selectedFiles.splice(index, 1);
+      renderPreviews();
+    }
+
+    function renderPreviews() {
+      var container = document.getElementById('imagePreviewContainer');
+      var previewList = document.getElementById('previewList');
+      if (!container || !previewList) return;
+
+      if (selectedFiles.length === 0) {
+        container.classList.add('hidden');
+        previewList.innerHTML = '';
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB.');
-        return;
-      }
-      selectedFile = file;
 
-      if (previewFileName) previewFileName.textContent = file.name;
-      if (previewFileSize) previewFileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+      container.classList.remove('hidden');
+      previewList.innerHTML = '';
 
-      if (file.type.startsWith('image/')) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          if (previewImg) {
-            previewImg.src = e.target.result;
-            previewImg.classList.remove('hidden');
-          }
-          if (pdfIcon) pdfIcon.classList.add('hidden');
-          if (imagePreviewContainer) imagePreviewContainer.classList.remove('hidden');
+      selectedFiles.forEach(function(file, idx) {
+        var card = document.createElement('div');
+        card.className = 'p-3 bg-surface-container-low border border-outline-variant/30 rounded-xl flex items-center justify-between gap-3 shadow-xs';
+        
+        var left = document.createElement('div');
+        left.className = 'flex items-center gap-3 overflow-hidden min-w-0';
+
+        var sizeKb = (file.size / 1024).toFixed(1) + ' KB';
+
+        if (file.type.startsWith('image/')) {
+          var img = document.createElement('img');
+          img.className = 'w-14 h-14 object-cover rounded-lg border border-outline-variant/40 shrink-0';
+          img.alt = file.name;
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+          left.appendChild(img);
+        } else {
+          var icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined text-primary text-3xl shrink-0';
+          icon.textContent = 'picture_as_pdf';
+          left.appendChild(icon);
+        }
+
+        var textDiv = document.createElement('div');
+        textDiv.className = 'truncate';
+        textDiv.innerHTML = '<p class="text-body-sm font-semibold text-on-surface truncate">' + file.name + '</p><p class="text-xs text-on-surface-variant">' + sizeKb + '</p>';
+        left.appendChild(textDiv);
+
+        card.appendChild(left);
+
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'text-error hover:bg-red-50 p-1.5 rounded-full transition-colors shrink-0 cursor-pointer';
+        delBtn.title = 'Remove file';
+        delBtn.innerHTML = '<span class="material-symbols-outlined text-sm">close</span>';
+        delBtn.onclick = function() {
+          removeFileAt(idx);
         };
-        reader.readAsDataURL(file);
-      } else if (file.type === 'application/pdf') {
-        if (previewImg) previewImg.classList.add('hidden');
-        if (pdfIcon) pdfIcon.classList.remove('hidden');
-        if (imagePreviewContainer) imagePreviewContainer.classList.remove('hidden');
-      }
+        card.appendChild(delBtn);
+
+        previewList.appendChild(card);
+      });
     }
 
     // Draft Auto-save for Description
@@ -737,9 +773,11 @@
           formData.append('description', document.getElementById('description').value.trim());
           formData.append('urgencyHint', document.getElementById('urgencySelect').value);
           
-          if (selectedFile) {
-            formData.append('evidence', selectedFile);
-            console.log('Uploading file:', selectedFile.name);
+          if (selectedFiles && selectedFiles.length > 0) {
+            selectedFiles.forEach(function(file) {
+              formData.append('images', file);
+            });
+            console.log('Uploading ' + selectedFiles.length + ' files');
           }
 
           var token = localStorage.getItem('vnuis_token') || localStorage.getItem('auth_token') || '';
@@ -793,7 +831,12 @@
             });
           }
 
-          var imageBase64 = selectedFile ? await getFileBase64(selectedFile) : null;
+          var imagesBase64 = [];
+          for (var i = 0; i < selectedFiles.length; i++) {
+            var b64 = await getFileBase64(selectedFiles[i]);
+            if (b64) imagesBase64.push(b64);
+          }
+
           var report = result.data || result;
           var newReport = {
             report_id: report.report_id || report.id || ('REP-' + String(Date.now()).slice(-4)),
@@ -804,7 +847,8 @@
             description: document.getElementById('description').value.trim(),
             priority: report.priority || document.getElementById('urgencySelect').value || 'Medium',
             status: 'Pending',
-            image_path: report.image_path || imageBase64,
+            image_path: (report.images && report.images[0]) || report.image_path || (imagesBase64[0] || null),
+            images: (report.images && report.images.length > 0) ? report.images : (imagesBase64.length > 0 ? imagesBase64 : (report.image_path ? [report.image_path] : [])),
             reported_at: new Date().toISOString(),
             reporter_id: currentUser.user_id || currentUser.id || 1,
             reporter_name: currentUser.full_name || currentUser.fullName || '',

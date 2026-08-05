@@ -33,12 +33,26 @@ async function view(req, res) {
   const roomId = toPositiveInt(req.params.roomId, 'roomId');
   const room = await classroomsRepository.findById(roomId);
   if (!room) throw new ApiError(404, 'Classroom not found');
-  if (!room.qr_code) throw new ApiError(404, 'This classroom does not have a QR code yet');
+
+  if (!room.qr_code) {
+    const qrCode = `QR-${room.room_name}-${Date.now()}`;
+    await classroomsRepository.updateQrCode(roomId, qrCode);
+    room.qr_code = qrCode;
+
+    await auditLogRepository.log({
+      userId: req.user ? req.user.userId : null,
+      actionType: 'CREATE',
+      entityTable: 'Classrooms',
+      entityId: roomId,
+      roomId,
+      description: `Manager ${req.user ? req.user.email : 'System'} generated a new QR code for room ${room.room_name}`,
+    });
+  }
 
   const targetUrl = `${FRONTEND_BASE_URL}/CreateReport.html?room_id=${roomId}&room_name=${encodeURIComponent(room.room_name)}`;
   const qrImageDataUrl = await QRCode.toDataURL(targetUrl, { width: 400, margin: 1 });
 
-  ok(res, { roomId, roomName: room.room_name, qrCode: room.qr_code, targetUrl, qrImageDataUrl });
+  ok(res, { roomId, roomName: room.room_name, qrCode: room.qr_code, targetUrl, qrImageDataUrl, qr_url: qrImageDataUrl });
 }
 
 async function list(req, res) {

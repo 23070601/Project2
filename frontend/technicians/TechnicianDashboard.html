@@ -257,11 +257,11 @@
       }
     }
 
-    const activeOrders = orders.filter(o => getDisplayTaskStatus(o) !== 'Rejected');
+    const activeOrders = orders;
 
     const inProgress = activeOrders.filter(o => ['Received', 'In Progress'].includes(getDisplayTaskStatus(o))).length;
     const completed = activeOrders.filter(o => ['Completed', 'Closed'].includes(getDisplayTaskStatus(o))).length;
-    const overdue = activeOrders.filter(o => getDisplayTaskStatus(o) === 'Overdue' || (o.priority === 'High' && !['Completed', 'Closed'].includes(getDisplayTaskStatus(o)))).length;
+    const overdue = activeOrders.filter(o => getDisplayTaskStatus(o) === 'Overdue' || (o.priority === 'High' && !['Completed', 'Closed', 'Rejected'].includes(getDisplayTaskStatus(o)))).length;
 
     document.getElementById('kpiInProgress').textContent = inProgress;
     document.getElementById('kpiCompleted').textContent = completed;

@@ -55,14 +55,23 @@
             <span class="material-symbols-outlined text-outline">search</span>
             <input id="pendingSearch" class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline-variant/60 outline-none" placeholder="Search requests..." type="text">
           </div>
-          <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
-            <span class="text-body-sm text-on-surface-variant font-medium">Priority:</span>
-            <select id="pendingPriorityFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
-              <option value="All">All</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
+              <span class="text-body-sm text-on-surface-variant font-medium">Priority:</span>
+              <select id="pendingPriorityFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
+                <option value="All">All</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
+              <span class="text-body-sm text-on-surface-variant font-medium">Sort by:</span>
+              <select id="pendingSortFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -196,6 +205,7 @@
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
                 <option value="Closed">Closed</option>
+                <option value="Rejected">Rejected</option>
               </select>
             </div>
             <!-- Deadline Filter -->
@@ -206,6 +216,14 @@
                 <option value="overdue">Overdue</option>
                 <option value="due_soon">Due Soon</option>
                 <option value="on_time">On Time</option>
+              </select>
+            </div>
+            <!-- Sort Filter -->
+            <div class="flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-colors">
+              <span class="text-body-sm text-on-surface-variant font-medium whitespace-nowrap">Sort by:</span>
+              <select id="assignedSortFilter" class="border-none p-0 pr-6 focus:ring-0 bg-transparent text-body-sm font-medium text-on-surface cursor-pointer outline-none">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
               </select>
             </div>
           </div>
@@ -613,9 +631,33 @@
               <button onclick="openRejectModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
             </div>
           </td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
+          <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
+          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(rejectedDate)}</td>
+          <td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
+            <button onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">visibility</span> View</button>
+          </td>
         </tr>
       `;
     }).join('');
+
+    const pagInfo = document.getElementById('rejectedPaginationInfo');
+    if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} rejected reports`;
+  }
+
+  function filterRejected() {
+    const searchVal = document.getElementById('rejectedSearch').value.toLowerCase();
+    let filtered = allRejectedReports;
+    if (searchVal) {
+      filtered = filtered.filter(r => {
+        const reporterName = getReporterDisplayName(r).toLowerCase();
+        return reporterName.includes(searchVal) ||
+          (r.asset_name || '').toLowerCase().includes(searchVal) ||
+          (r.room_name || '').toLowerCase().includes(searchVal) ||
+          (r.description || '').toLowerCase().includes(searchVal);
+      });
+    }
+    renderRejectedTable(filtered);
   }
 
   function renderRejectedTable(reports) {
@@ -728,7 +770,10 @@
           <td class="px-6 py-4">${UiHelpers.escapeHtml(o.asset_name || 'General Asset')}</td>
           <td class="px-6 py-4">${UiHelpers.escapeHtml(o.technician_name || 'Unassigned')}</td>
           <td class="px-6 py-4"><span class="px-3 py-1 ${prioClass} text-[11px] font-bold rounded-full capitalize">${priorityVal}</span></td>
-          <td class="px-6 py-4"><span class="px-3 py-1 ${badgeClass} text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">${statusText}</span></td>
+          <td class="px-6 py-4">
+            <span class="px-3 py-1 ${badgeClass} text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">${statusText}</span>
+            ${isRejected && o.rejection_reason ? `<div class="text-[11px] text-amber-900 mt-1 italic font-medium max-w-[200px] truncate" title="${UiHelpers.escapeHtml(o.rejection_reason)}">Reason: ${UiHelpers.escapeHtml(o.rejection_reason)}</div>` : ''}
+          </td>
           <td class="px-6 py-4">${getDeadlineBadgeHtml(o.deadline_at, o.task_status)}</td>
           <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(o.assigned_at)}</td>
           <td class="px-6 py-4 text-center">
@@ -742,6 +787,7 @@
   function filterPending() {
     const searchVal = document.getElementById('pendingSearch').value.toLowerCase();
     const prioVal = document.getElementById('pendingPriorityFilter').value;
+    const sortVal = document.getElementById('pendingSortFilter') ? document.getElementById('pendingSortFilter').value : 'newest';
     
     let filtered = allPendingReports.filter(r => !r.order_id && ['Pending Approval', 'Pending'].includes(r.status || 'Pending Approval'));
     if (searchVal) {
@@ -756,6 +802,13 @@
     if (prioVal !== 'All') {
       filtered = filtered.filter(r => r.priority === prioVal);
     }
+
+    filtered.sort((a, b) => {
+      const timeA = new Date(a.reported_at || 0).getTime();
+      const timeB = new Date(b.reported_at || 0).getTime();
+      return sortVal === 'oldest' ? timeA - timeB : timeB - timeA;
+    });
+
     renderPendingTable(filtered);
   }
 
@@ -764,6 +817,7 @@
     const priorityVal = document.getElementById('assignedPriorityFilter') ? document.getElementById('assignedPriorityFilter').value : 'All';
     const statusVal = document.getElementById('assignedStatusFilter').value;
     const deadlineVal = document.getElementById('assignedDeadlineFilter') ? document.getElementById('assignedDeadlineFilter').value : 'All';
+    const sortVal = document.getElementById('assignedSortFilter') ? document.getElementById('assignedSortFilter').value : 'newest';
     
     try {
       if (window.Api) {
@@ -771,6 +825,7 @@
         if (priorityVal !== 'All') params.priority = priorityVal;
         if (statusVal !== 'All') params.taskStatus = statusVal;
         if (deadlineVal !== 'All') params.deadline = deadlineVal;
+        if (sortVal) params.sort = sortVal;
         
         const fetchedOrders = await Api.get('/work-orders', params);
         if (fetchedOrders && Array.isArray(fetchedOrders)) {
@@ -794,7 +849,10 @@
       filtered = filtered.filter(o => o.priority === priorityVal);
     }
     if (statusVal !== 'All') {
-      filtered = filtered.filter(o => o.task_status === statusVal);
+      filtered = filtered.filter(o => {
+        const effectiveStatus = o.technician_response === 'Rejected' ? 'Rejected' : o.task_status;
+        return effectiveStatus === statusVal;
+      });
     }
     if (deadlineVal !== 'All') {
       const now = new Date();
@@ -816,6 +874,12 @@
       });
     }
 
+    filtered.sort((a, b) => {
+      const timeA = new Date(a.assigned_at || 0).getTime();
+      const timeB = new Date(b.assigned_at || 0).getTime();
+      return sortVal === 'oldest' ? timeA - timeB : timeB - timeA;
+    });
+
     renderAssignedTable(filtered);
     
     const start = filtered.length > 0 ? 1 : 0;
@@ -834,6 +898,9 @@
   document.getElementById('assignedStatusFilter').addEventListener('change', filterAssigned);
   if (document.getElementById('assignedDeadlineFilter')) {
     document.getElementById('assignedDeadlineFilter').addEventListener('change', filterAssigned);
+  }
+  if (document.getElementById('assignedSortFilter')) {
+    document.getElementById('assignedSortFilter').addEventListener('change', filterAssigned);
   }
 
   // --- APPROVE MODAL ---
@@ -921,7 +988,7 @@
     const techId = manualSelect || (selectedRadio ? selectedRadio.value : null);
 
     if (!techId) {
-      if (window.showToast) showToast('Vui lòng chọn kỹ thuật viên!', 'warning');
+      if (window.showToast) showToast('Please select a technician!', 'warning');
       else alert('Please select a technician.');
       return;
     }
@@ -932,14 +999,14 @@
     try {
       if (window.Api) {
         await Api.post('/work-orders', { reportId: currentActiveReqId, technicianId: Number(techId) });
-        if (window.showToast) showToast('Đã duyệt báo cáo và gán công việc thành công!', 'success');
+        if (window.showToast) showToast('Report approved and work order assigned successfully!', 'success');
         else alert(`Successfully approved report #FR-${currentActiveReqId} and created work order!`);
         closeApproveModal();
         loadData();
         switchTab('assigned');
       }
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || 'Failed to assign work order.');
     } finally {
       btn.disabled = false;
@@ -967,7 +1034,7 @@
   async function confirmRejectReport() {
     const reason = document.getElementById('rejectionReasonInput').value.trim();
     if (!reason) {
-      if (window.showToast) showToast('Vui lòng cung cấp lý do từ chối!', 'warning');
+      if (window.showToast) showToast('Please provide a reason for rejection!', 'warning');
       else alert('Please provide a reason for rejection.');
       return;
     }
@@ -979,13 +1046,20 @@
     try {
       if (window.Api) {
         await Api.patch(`/fault-reports/${currentActiveReqId}/status`, { status: 'Rejected', rejectionReason: reason });
-        if (window.showToast) showToast('Đã từ chối báo cáo thành công!', 'success');
-        else alert(`Report #FR-${currentActiveReqId} rejected successfully.`);
-        closeRejectModal();
-        loadData();
       }
+      try {
+        const nowIso = new Date().toISOString();
+        const rejectedInfo = { reason: reason, rejected_at: nowIso };
+        localStorage.setItem('vnu_rejected_info_' + currentActiveReqId, JSON.stringify(rejectedInfo));
+        localStorage.setItem('vnu_rejected_info_' + String(currentActiveReqId).replace(/\D/g, ''), JSON.stringify(rejectedInfo));
+      } catch(e){}
+
+      if (window.showToast) showToast('Report rejected successfully!', 'success');
+      else alert(`Report #FR-${currentActiveReqId} rejected successfully.`);
+      closeRejectModal();
+      loadData();
     } catch (err) {
-      if (window.showToast) showToast(`Có lỗi xảy ra: ${err.message}`, 'error');
+      if (window.showToast) showToast(`An error occurred: ${err.message}`, 'error');
       else alert(err.message || 'Failed to reject report.');
     } finally {
       btn.disabled = false;
