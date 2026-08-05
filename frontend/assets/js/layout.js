@@ -78,6 +78,54 @@ const Layout = (() => {
     });
   }
 
+  function setSidebarOpen(isOpen) {
+    const sidebar = document.querySelector('#sidebar-placeholder > aside');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (!sidebar) return;
+
+    sidebar.classList.toggle('-translate-x-full', !isOpen);
+    sidebar.classList.toggle('translate-x-0', isOpen);
+    if (backdrop) {
+      backdrop.classList.toggle('hidden', !isOpen);
+    }
+  }
+
+  function syncSidebarVisibility() {
+    const sidebar = document.querySelector('#sidebar-placeholder > aside');
+    if (!sidebar) return;
+
+    if (window.innerWidth >= 768) {
+      sidebar.classList.remove('-translate-x-full');
+      sidebar.classList.add('translate-x-0');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+      sidebar.classList.remove('translate-x-0');
+    }
+  }
+
+  function wireMobileSidebar() {
+    const toggle = document.getElementById('mobileSidebarToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const sidebar = document.querySelector('#sidebar-placeholder > aside');
+    if (!toggle || !sidebar) return;
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setSidebarOpen(!sidebar.classList.contains('translate-x-0'));
+    });
+
+    if (backdrop) {
+      backdrop.addEventListener('click', () => setSidebarOpen(false));
+    }
+
+    document.querySelectorAll('#sidebar-placeholder .nav-link').forEach((link) => {
+      link.addEventListener('click', () => setSidebarOpen(false));
+    });
+
+    window.addEventListener('resize', syncSidebarVisibility);
+    syncSidebarVisibility();
+  }
+
   async function init({ role, activePage }) {
     await loadPartial(SIDEBAR_FILE[role], '#sidebar-placeholder');
     await loadPartial('../partials/topbar.html', '#topbar-placeholder');
@@ -109,6 +157,7 @@ const Layout = (() => {
     wireLogout();
     wireNotificationBell();
     wireUserProfileDropdown();
+    wireMobileSidebar();
 
     if (window.Notifications) {
       // Load dropdown immediately since topbar is already in DOM

@@ -20,26 +20,26 @@
   }
 </style>
 </head>
-<body class="bg-background text-on-background min-h-screen">
+<body class="bg-background text-on-background min-h-screen overflow-x-hidden">
 
 <!-- Sidebar placeholder -->
 <div id="sidebar-placeholder"></div>
 
-<div class="ml-[240px] flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen md:ml-[240px]">
   <!-- Topbar placeholder -->
   <div id="topbar-placeholder"></div>
 
   <!-- Main Content Area -->
-  <main class="flex-1 mt-[60px] mb-[40px] p-8 bg-content-bg min-h-[calc(100vh-100px)]">
+  <main class="flex-1 mt-[60px] mb-[40px] p-4 sm:p-6 lg:p-8 bg-content-bg min-h-[calc(100vh-100px)]">
     <div class="max-w-4xl mx-auto">
       <header class="mb-6">
         <h1 class="text-headline-md font-headline-md font-bold text-on-surface mb-2">Create New Report</h1>
         <p class="text-body-sm text-on-surface-variant">Please provide the details below to submit a new facility or infrastructure repair request.</p>
       </header>
 
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-8">
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-5 sm:p-8">
         <form id="reportForm" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <!-- Custom Classroom Selector -->
             <div class="space-y-2 relative" id="customRoomContainer">
               <label for="roomTrigger" class="text-label-lg font-semibold text-on-surface cursor-pointer">Classroom <span class="text-error">*</span></label>
@@ -142,7 +142,7 @@
           <p id="formError" class="hidden text-error text-body-sm bg-error-container/40 rounded-lg px-3 py-2"></p>
           <p id="formSuccess" class="hidden text-green-700 text-body-sm bg-green-50 rounded-lg px-3 py-2"></p>
 
-          <div class="pt-4 flex justify-end gap-4">
+          <div class="pt-4 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button class="px-6 py-2.5 rounded-lg text-label-lg font-semibold text-secondary border border-outline-variant hover:bg-surface-container transition-colors" type="reset">Cancel</button>
             <button id="submitBtn" class="px-6 py-2.5 rounded-lg text-label-lg font-semibold text-on-primary bg-primary hover:opacity-90 transition-all shadow-md active:scale-95" type="submit">Submit Report</button>
           </div>

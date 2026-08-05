@@ -31,19 +31,19 @@
 <!-- Sidebar placeholder -->
 <div id="sidebar-placeholder"></div>
 
-<div class="flex-1 flex flex-col ml-[240px]">
+<div class="flex-1 flex flex-col md:ml-[240px]">
   <!-- Topbar placeholder -->
   <div id="topbar-placeholder"></div>
 
   <!-- Main Content -->
-  <main class="p-margin-desktop bg-surface min-h-[calc(100vh-60px-40px)] mb-[40px]">
+  <main class="p-4 sm:p-6 lg:p-8 bg-surface min-h-[calc(100vh-60px-40px)] mb-[40px]">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
       <div>
         <h1 class="text-headline-lg font-headline-lg text-on-surface">My Reports</h1>
         <p class="text-body-md text-on-surface-variant">Overview and management of all your facility maintenance requests.</p>
       </div>
-      <a href="CreateReport.html" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-brand-blue text-white rounded-lg font-label-lg shadow-md hover:opacity-90 transition-all active:scale-95">
+      <a href="CreateReport.html" class="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-2.5 bg-brand-blue text-white rounded-lg font-label-lg shadow-md hover:opacity-90 transition-all active:scale-95">
         <span class="material-symbols-outlined">add</span>
         <span>Create New Report</span>
       </a>
@@ -69,8 +69,8 @@
     </div>
 
     <!-- Control Row -->
-    <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4 border border-outline-variant/30">
-      <div class="flex-1 min-w-[260px] relative">
+    <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm mb-6 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 border border-outline-variant/30">
+      <div class="w-full lg:flex-1 min-w-0 relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">search</span>
         <input id="searchInput" class="w-full pl-10 pr-9 py-2.5 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" placeholder="Search by ID, Equipment, Room, Description..." type="text">
         <button id="clearSearchBtn" type="button" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface text-sm p-1 rounded-full">
@@ -78,7 +78,7 @@
         </button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
         <!-- Priority Filter -->
         <div class="flex items-center gap-2">
           <span class="text-label-md text-on-surface-variant shrink-0 font-medium">Priority:</span>
@@ -106,7 +106,7 @@
     <!-- Data Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full min-w-[760px] text-left border-collapse">
           <thead>
             <tr class="bg-brand-blue text-white">
               <th class="py-4 px-6 font-label-lg uppercase tracking-wider text-label-md">#</th>

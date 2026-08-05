@@ -1,4 +1,5 @@
 const classroomsRepository = require('./classrooms.repository');
+const { ensureRoomCanBeDeleted } = require('./classroomDeletion.service');
 const auditLogRepository = require('../auditLog/auditLog.repository');
 const { ok, created, noContent, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, toPositiveInt } = require('../../shared/utils/validators');
@@ -60,6 +61,8 @@ async function remove(req, res) {
   const roomId = toPositiveInt(req.params.id, 'id');
   const existing = await classroomsRepository.findById(roomId);
   if (!existing) throw new ApiError(404, 'Classroom not found');
+
+  await ensureRoomCanBeDeleted({ pool: require('../../config/db').pool, roomId });
 
   await classroomsRepository.remove(roomId);
 

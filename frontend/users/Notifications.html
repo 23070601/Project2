@@ -14,28 +14,28 @@
   }
 </style>
 </head>
-<body class="bg-surface text-on-surface overflow-hidden">
+<body class="bg-surface text-on-surface overflow-x-hidden min-h-screen">
 
 <!-- SIDEBAR PLACEHOLDER -->
 <div id="sidebar-placeholder"></div>
 
 <!-- MAIN WRAPPER -->
-<div class="ml-[240px] flex flex-col h-screen">
+<div class="flex flex-col min-h-screen md:ml-[240px]">
   <!-- TOP APP BAR PLACEHOLDER -->
   <div id="topbar-placeholder"></div>
 
   <!-- MAIN CONTENT AREA -->
-  <main class="flex-1 overflow-y-auto bg-surface p-8 pb-32">
+  <main class="flex-1 overflow-y-auto bg-surface p-4 sm:p-6 lg:p-8 pb-32">
     <!-- Header Title & Mark All as Read Button -->
-    <div class="mb-8 flex items-center justify-between">
+    <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-headline-lg font-headline-lg text-on-surface">Notifications</h1>
-      <button id="markAllReadPageBtn" class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-lg hover:opacity-90 transition-all focus:outline-none">
+      <button id="markAllReadPageBtn" class="w-full sm:w-auto bg-primary text-on-primary px-4 py-2 rounded-lg font-label-lg hover:opacity-90 transition-all focus:outline-none">
         Mark All as Read
       </button>
     </div>
 
     <!-- Filter Tabs (All / Unread / Read) -->
-    <div class="flex items-center gap-8 border-b border-outline-variant/20 mb-6">
+    <div class="flex flex-wrap items-center gap-4 sm:gap-8 border-b border-outline-variant/20 mb-6">
       <button id="tabAll" class="pb-3 text-primary border-b-2 border-primary font-label-lg tab-btn focus:outline-none" onclick="filterNotifications('all')">
         All
       </button>
@@ -125,7 +125,7 @@
     if (emptyBox) emptyBox.classList.add('hidden');
     if (container) {
       container.innerHTML = visibleItems.map((n) => `
-        <div class="notif-card ${!n.is_read ? 'bg-primary-fixed/20 border-primary-fixed/40' : 'bg-white border-outline-variant/20'} p-4 rounded-xl border flex items-start gap-4 relative cursor-pointer hover:${!n.is_read ? 'bg-primary-fixed/30' : 'bg-surface-container-low'} transition-colors"
+        <div class="notif-card ${!n.is_read ? 'bg-primary-fixed/20 border-primary-fixed/40' : 'bg-white border-outline-variant/20'} p-4 rounded-xl border flex flex-col sm:flex-row items-start gap-4 relative cursor-pointer hover:${!n.is_read ? 'bg-primary-fixed/30' : 'bg-surface-container-low'} transition-colors"
              data-id="${n.notification_id}">
           <div class="w-2 h-2 ${!n.is_read ? 'bg-primary' : 'bg-transparent'} rounded-full mt-2 shrink-0"></div>
           <div class="flex-1">

@@ -3,6 +3,7 @@ const env = require('../../config/env');
 const usersRepository = require('./users.repository');
 const auditLogRepository = require('../auditLog/auditLog.repository');
 const { ensureUserCanBeDeactivated } = require('./userStatus.service');
+const { pool } = require('../../config/db');
 const { ok, created, noContent, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, requireOneOf, isValidEmail, toPositiveInt } = require('../../shared/utils/validators');
 const { ALL_ROLES, ROLES } = require('../../shared/constants/roles');
@@ -109,6 +110,7 @@ async function deactivate(req, res) {
   const existing = await usersRepository.findById(userId);
   if (!existing) throw new ApiError(404, 'User not found');
 
+  await ensureUserCanBeDeactivated({ pool, user: existing, newActive: false });
   await usersRepository.remove(userId);
 
   await auditLogRepository.log({
