@@ -144,7 +144,11 @@ mysql -u root -p vnuis_asset_maintenance_dss < backend/database/vnuis_asset_main
    npm install
    ```
 
-3. Create the environment configuration file `.env` inside `backend/`:
+3. Create the environment configuration file `.env` inside `backend/` (or copy from `.env.example`):
+   ```bash
+   cp .env.example .env
+   ```
+   Or create `.env` manually with sample values:
    ```env
    # Server Configuration
    PORT=4000
@@ -158,8 +162,8 @@ mysql -u root -p vnuis_asset_maintenance_dss < backend/database/vnuis_asset_main
    DB_PASSWORD=
    DB_NAME=vnuis_asset_maintenance_dss
 
-   # Authentication
-   JWT_SECRET=vnuis_dss_secret_key_2026_super_secure
+   # Authentication (Use a secure secret in production)
+   JWT_SECRET=your_jwt_secret_key_here
    JWT_EXPIRES_IN=7d
    BCRYPT_SALT_ROUNDS=10
 
