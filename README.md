@@ -1,67 +1,130 @@
 # Classroom Asset Maintenance Decision Support System (DSS) — VNU-IS Group 2 (INS3282)
 
-A Decision Support System for Classroom Asset Maintenance at VNU International School (VNU-IS).  
-This full-stack application is built using **Node.js (Express REST API)**, **MySQL 8.0 / XAMPP**, and **HTML5 + Tailwind CSS + Vanilla JavaScript**.
+A Decision Support System (DSS) for managing and maintaining classroom assets at VNU International School (VNU-IS).
+
+This full-stack web application is built with a **Node.js (Express REST API)** backend, **MySQL 8.0 / XAMPP** database, and an **HTML5 + Tailwind CSS + Vanilla JavaScript** frontend.
+
+> **Course Alignment**: INS3282 - Capstone Project II (Tutorial 10 — Review and Final Preparation & Reproducibility Audit).
 
 ---
 
-# Table of Contents
+## 📑 Table of Contents
 
-1. [Prerequisites](#1-prerequisites)
-2. [Database Setup](#2-database-setup)
-3. [Backend Setup (Node.js API)](#3-backend-setup-nodejs-api)
-4. [Frontend Setup](#4-frontend-setup)
-5. [Test Accounts](#5-test-accounts)
-6. [Project Structure](#6-project-structure)
-7. [Decision Support System (DSS) Features](#7-decision-support-system-dss-features)
-
----
-
-# 1. Prerequisites
-
-Before running the project, ensure the following software is installed:
-
-- **Node.js** (LTS version recommended, v18+ or v20+)
-- **MySQL Server** or **XAMPP** (for MySQL database)
-- **Visual Studio Code**
-- **Live Server** extension (by Ritwick Dey)
+1. [Project Overview](#1-project-overview)
+2. [Tech Stack](#2-tech-stack)
+3. [Decision Support System (DSS) Features](#3-decision-support-system-dss-features)
+4. [Project Structure](#4-project-structure)
+5. [Prerequisites](#5-prerequisites)
+6. [Installation & Clean Setup Guide](#6-installation--clean-setup-guide)
+   - [Step 1: Database Initialization](#step-1-database-initialization)
+   - [Step 2: Backend Setup & Launch](#step-2-backend-setup--launch)
+   - [Step 3: Frontend Setup & Launch](#step-3-frontend-setup--launch)
+7. [Test Accounts & Demo Roles](#7-test-accounts--demo-roles)
+8. [Email Notification Setup (Optional)](#8-email-notification-setup-optional)
+9. [Reproducibility & Quality Gate Checklist](#9-reproducibility--quality-gate-checklist)
 
 ---
 
-# 2. Database Setup
+## 1. Project Overview
 
-The project uses a MySQL database with pre-configured schema, views, triggers, and seed data.
+In university environments, ensuring the operational readiness of classroom equipment (projectors, air conditioners, sound systems, PCs, smart boards) is critical. The **VNU-IS Classroom Asset Maintenance DSS** replaces manual maintenance tracking through:
+- **Instant Fault Reporting**: Students and lecturers submit fault reports via web UI or QR Code scans.
+- **Automated Priority Assessment (DSS1)**: Ranks incoming issues based on location impact, severity, and asset type.
+- **Smart Technician Recommendation (DSS2)**: Recommends optimal technician assignments based on workload, specialization, and availability.
+- **Asset Replacement Alerts (DSS3)**: Automatically alerts management when repair frequencies or costs exceed economic efficiency thresholds.
 
-## Option 1 — Import using phpMyAdmin (Recommended for XAMPP)
+---
 
-1. Open **XAMPP Control Panel**.
-2. Start **Apache** and **MySQL**.
-3. Open:
+## 2. Tech Stack
 
-```
-http://localhost/phpmyadmin
-```
+### Backend
+- **Framework**: Node.js & Express.js (RESTful API architecture)
+- **Database**: MySQL 8.0 (MySQL2 driver with connection pooling)
+- **Security & Authentication**: JSON Web Tokens (JWT), Bcrypt.js password hashing, Role-Based Access Control (RBAC)
+- **Utilities**: Multer (image uploads), Nodemailer (email notifications), QRCode generator
 
-4. Create a new database named:
+### Frontend
+- **Interface**: HTML5, Tailwind CSS (responsive UI), Vanilla JavaScript (ES6+)
+- **Data Visualization**: Chart.js for managerial analytics
+- **Icons & Scanner**: Lucide Icons, QR Scanner integration
 
-```
-vnuis_asset_maintenance_dss
-```
+---
 
-5. Select the database.
-6. Open the **Import** tab.
-7. Choose the SQL file:
+## 3. Decision Support System (DSS) Features
+
+### 🔹 DSS1 — Automatic Fault Priority Assessment
+- **Implementation**: `backend/src/modules/faultReports/priority.service.js`
+- **Logic**: Calculates a composite *Priority Score* for new fault reports based on asset category, room location impact, teaching disruption level, and fault severity. High-priority items are automatically elevated in manager dashboards.
+
+### 🔹 DSS2 — Smart Technician Assignment Recommendation
+- **Implementation**: `backend/src/modules/workOrders/assignment.service.js` & MySQL View `v_dss2_technician_workload`
+- **Logic**: Analyzes real-time technician workload (active work orders), specialized skill matching (electrical, IT, HVAC), and availability to suggest the best-suited technician to managers.
+
+### 🔹 DSS3 — Asset Replacement Recommendation
+- **Implementation**: MySQL Trigger `trg_assets_before_update_dss3` & View `v_dss3_replacement_alerts`
+- **Logic**: Tracks repair frequency and cumulative maintenance costs. When threshold limits are crossed, the system automatically flags the asset status as `Recommended for Replacement`.
+
+---
+
+## 4. Project Structure
 
 ```text
-backend/database/vnuis_asset_maintenance_dss.sql
+FinalCode/
+├── backend/                        # Node.js Express REST API
+│   ├── database/                   # Schema, Views, Triggers & Seed Data SQL
+│   │   └── vnuis_asset_maintenance_dss.sql
+│   ├── src/
+│   │   ├── config/                 # DB Pool & Nodemailer configuration
+│   │   ├── middlewares/            # JWT Auth, RBAC, Multer upload
+│   │   ├── modules/                # Business modules (Assets, Faults, WorkOrders, DSS)
+│   │   │   ├── faultReports/       # DSS1 Service
+│   │   │   └── workOrders/         # DSS2 Service
+│   │   ├── app.js
+│   │   └── server.js               # API Server Entrypoint
+│   ├── .env.example                # Environment variables template
+│   └── package.json
+├── frontend/                       # Web Client Applications
+│   ├── assets/                     # JS helpers (api.js, auth.js, layout.js, ui-helpers.js)
+│   ├── partials/                   # Reusable UI components
+│   ├── users/                      # User & Lecturer Dashboard & Login
+│   ├── technicians/                # Technician Task Management Dashboard
+│   └── managers/                   # Manager & DSS Analytics Dashboard
+├── migrations/                     # Database incremental migration scripts
+├── README.md                       # Documentation & Setup Guide
+└── package.json
 ```
-
-8. Click **Import** (or **Go**).
 
 ---
 
-## Option 2 — Import using MySQL Command Line
+## 5. Prerequisites
 
+Ensure your environment meets the following requirements:
+- **Node.js**: LTS version (v18.x or v20.x recommended)
+- **MySQL**: MySQL 8.0+ or **XAMPP** (with Apache & MySQL modules)
+- **Web Browser**: Chrome, Edge, or Firefox
+- **IDE**: VS Code with **Live Server** extension (by Ritwick Dey)
+
+---
+
+## 6. Installation & Clean Setup Guide
+
+### Step 1: Database Initialization
+
+#### Option A: Import via phpMyAdmin (Recommended for XAMPP)
+1. Launch **XAMPP Control Panel** and start **Apache** and **MySQL**.
+2. Open phpMyAdmin: [http://localhost/phpmyadmin](http://localhost/phpmyadmin)
+3. Create a new database named:
+   ```sql
+   vnuis_asset_maintenance_dss
+   ```
+4. Select the created database and click the **Import** tab.
+5. Choose the SQL file located at:
+   ```text
+   backend/database/vnuis_asset_maintenance_dss.sql
+   ```
+6. Click **Import** (or **Go**).
+
+#### Option B: Import via MySQL Command Line
 ```bash
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS vnuis_asset_maintenance_dss CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -u root -p vnuis_asset_maintenance_dss < backend/database/vnuis_asset_maintenance_dss.sql
@@ -69,293 +132,111 @@ mysql -u root -p vnuis_asset_maintenance_dss < backend/database/vnuis_asset_main
 
 ---
 
-# 3. Backend Setup (Node.js API)
+### Step 2: Backend Setup & Launch
 
-## Step 3.1 Navigate to Backend
+1. Open terminal and navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-Open a terminal inside VS Code and run:
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```bash
-cd backend
-```
+3. Create the environment configuration file `.env` inside `backend/`:
+   ```env
+   # Server Configuration
+   PORT=4000
+   NODE_ENV=development
+   CORS_ORIGIN=http://127.0.0.1:5500,http://localhost:5500,http://localhost:3000
 
----
+   # Database Configuration
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=
+   DB_NAME=vnuis_asset_maintenance_dss
 
-## Step 3.2 Create Environment Configuration
+   # Authentication
+   JWT_SECRET=vnuis_dss_secret_key_2026_super_secure
+   JWT_EXPIRES_IN=7d
+   BCRYPT_SALT_ROUNDS=10
 
-Create a file named `.env` inside the **backend** directory (same level as `package.json`).
+   # Frontend Base URL
+   FRONTEND_BASE_URL=http://127.0.0.1:5500
 
-```env
-# Server
-PORT=
-NODE_ENV=
-CORS_ORIGIN=
+   # Optional Email Notification Configuration
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=
+   SMTP_PASS=
+   SMTP_FROM=noreply@vnuis.edu.vn
+   ```
 
-# Database
-DB_HOST=
-DB_PORT=
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=
+4. Start the API Server:
+   - **Development mode (Auto-reload)**:
+     ```bash
+     npm run dev
+     ```
+   - **Production mode**:
+     ```bash
+     npm start
+     ```
 
-# Authentication
-JWT_SECRET=
-JWT_EXPIRES_IN=
-BCRYPT_SALT_ROUNDS=
-
-# Frontend (email notification links)
-FRONTEND_BASE_URL=http://127.0.0.1:5500
-
-# Email notifications (optional)
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM=noreply@vnuis.edu.vn
-```
-
----
-
-## Step 3.3 Install Dependencies
-
-```bash
-npm install
-```
-
----
-
-## Step 3.4 Start the Backend Server
-
-```bash
-npm run dev
-```
-
-### Expected Startup Output
-
-When the server starts successfully, it automatically hashes the default password (`123456`) for all predefined test accounts.
-
-Example log:
-
-```text
-[DB] Connected to MySQL database "vnuis_asset_maintenance_dss" at localhost:3306
-[DB] Updated default password (123456) for 5 user(s).
-[Server] VNUIS Asset Maintenance DSS API running on http://localhost:4000
-[Server] Health check: http://localhost:4000/health
-```
+5. Successful startup logs:
+   ```text
+   [DB] Connected to MySQL database "vnuis_asset_maintenance_dss" at 127.0.0.1:3306
+   [DB] Updated default password (123456) for user(s).
+   [Server] VNUIS Asset Maintenance DSS API running on http://localhost:4000
+   ```
 
 ---
 
-# 4. Frontend Setup
+### Step 3: Frontend Setup & Launch
 
-The frontend is built using **HTML5**, **Tailwind CSS**, and **Vanilla JavaScript**.
-
-1. Open the folder:
-
-```
-frontend/users/
-```
-
-2. Right-click:
-
-```
-Login.html
-```
-
-3. Select:
-
-```
-Open with Live Server
-```
-
-If SMTP is configured, the system will also send email notifications for major events such as:
-
-- new work order assignment
-- work order status updates
-- technician response and rejection
-- user confirmation of completed work
-
-The application will open automatically at:
-
-```
-http://127.0.0.1:5500/frontend/users/Login.html
-```
-
-(or another available Live Server port such as **5501**).
+1. In VS Code, navigate to `frontend/users/`.
+2. Right-click `Login.html` and select **Open with Live Server**.
+3. Access the web application at:
+   ```text
+   http://127.0.0.1:5500/frontend/users/Login.html
+   ```
 
 ---
 
-# 5. Test Accounts
+## 7. Test Accounts & Demo Roles
 
-Use the following sample accounts after the backend and database are running.
+Pre-configured demo accounts with the default password: **`123456`**
 
-**Default password for all accounts:**
-
-```
-123456
-```
-
-| Role | Email | Password | Redirect Page |
-|------|-------|----------|---------------|
-| Manager | manager.e@vnuis.edu.vn | 123456 | frontend/managers/ManagerDashboard.html |
-| Technician | tech.c@vnuis.edu.vn | 123456 | frontend/technicians/TechnicianDashboard.html |
-| Technician | tech.d@vnuis.edu.vn | 123456 | frontend/technicians/TechnicianDashboard.html |
-| User (Lecturer) | lecturer.a@vnuis.edu.vn | 123456 | frontend/users/Dashboard.html |
-| User (Student) | student.b@vnuis.edu.vn | 123456 | frontend/users/Dashboard.html |
-
----
-http://localhost:4000/api/v1
-# 6. Project Structure
-
-```text
-Project2/
-├── backend/
-│   ├── database/
-│   │   └── vnuis_asset_maintenance_dss.sql
-│   │       # MySQL schema, views, triggers, and seed data
-│   │
-│   ├── src/
-│   │   ├── config/
-│   │   │       # Database connection pool & environment configuration
-│   │   │
-│   │   ├── middlewares/
-│   │   │       # JWT authentication, RBAC authorization, error handling
-│   │   │
-│   │   ├── modules/
-│   │   │   ├── auth/
-│   │   │   ├── users/
-│   │   │   ├── classrooms/
-│   │   │   ├── assets/
-│   │   │   ├── faultReports/
-│   │   │   ├── workOrders/
-│   │   │   ├── confirmations/
-│   │   │   ├── notifications/
-│   │   │   ├── qrcodes/
-│   │   │   ├── dashboard/
-│   │   │   └── auditLog/
-│   │   │
-│   │   ├── app.js
-│   │   └── server.js
-│   │
-│   ├── .env.example
-│   └── package.json
-│
-├── frontend/
-│   ├── assets/
-│   │   └── js/
-│   │       ├── api.js
-│   │       ├── auth.js
-│   │       ├── layout.js
-│   │       └── ui-helpers.js
-│   │
-│   ├── partials/
-│   ├── users/
-│   ├── technicians/
-│   └── managers/
-│
-├── PROJECT_PLAN.md
-└── README.md
-```
+| Role | Email Address | Default Password | Redirect Target Page |
+|---|---|---|---|
+| **Manager** | `manager.e@vnuis.edu.vn` | `123456` | `frontend/managers/ManagerDashboard.html` |
+| **Technician (Electrical)** | `tech.c@vnuis.edu.vn` | `123456` | `frontend/technicians/TechnicianDashboard.html` |
+| **Technician (IT/Network)** | `tech.d@vnuis.edu.vn` | `123456` | `frontend/technicians/TechnicianDashboard.html` |
+| **User (Lecturer)** | `lecturer.a@vnuis.edu.vn` | `123456` | `frontend/users/Dashboard.html` |
+| **User (Student)** | `student.b@vnuis.edu.vn` | `123456` | `frontend/users/Dashboard.html` |
 
 ---
 
-# 7. Decision Support System (DSS) Features
+## 8. Email Notification Setup (Optional)
 
-## DSS1 — Automatic Fault Priority Assessment
+The application includes automated transactional email dispatch for key workflows:
+- New fault report submission
+- Work order assignment & status updates
+- Completion confirmations
 
-**Location**
-
-```
-backend/src/modules/faultReports/priority.service.js
-```
-
-Automatically calculates the priority score of a newly submitted fault report based on:
-
-- Asset type
-- Classroom location
-- Impact level
-- Fault severity
-
-The calculated priority is then used to determine the order in which maintenance requests should be handled.
+To enable real email dispatch via Google SMTP:
+1. Generate an **App Password** in your Google Account security settings.
+2. Populate `SMTP_USER` and `SMTP_PASS` in `backend/.env`.
+*(Note: If SMTP parameters are omitted, the application will silently skip email transmission while web UI notifications remain fully operational).*
 
 ---
 
-## DSS2 — Smart Technician Assignment Recommendation
+## 9. Reproducibility & Quality Gate Checklist
 
-**Location**
-
-```
-backend/src/modules/workOrders/assignment.service.js
-```
-
-Uses the MySQL view:
-
-```
-v_dss2_technician_workload
-```
-
-to recommend the most suitable technician by considering:
-
-- Current workload
-- Technician specialization
-- Asset category
-- Availability
-
-This helps managers assign maintenance tasks more efficiently.
-
----
-
-## DSS3 — Asset Replacement Recommendation
-
-**Location**
-
-- MySQL Trigger
-
-```
-trg_assets_before_update_dss3
-```
-
-- MySQL View
-
-```
-v_dss3_replacement_alerts
-```
-
-Automatically monitors maintenance history and repair frequency.
-
-When an asset exceeds the predefined maintenance threshold, the system automatically changes its status to:
-
-```
-Recommended for Replacement
-```
-
-This enables managers to identify aging equipment and make timely replacement decisions.
-
----
-
-## Email Notifications
-
-When SMTP is configured in `.env`, the system sends email in addition to in-app notifications for these events:
-
-| Event | Recipients |
-|-------|------------|
-| New fault report submitted | Reporter, all Managers |
-| Fault report status updated | Reporter |
-| Work order assigned / reassigned | Technician |
-| Work order accepted / rejected | Manager |
-| Work order status updated | Reporter, Manager |
-| Work order deadline updated | Technician |
-| Work order reopened | Technician, Manager |
-| User confirms completion | Technician, Manager |
-
-Configure Gmail (App Password) or any SMTP provider:
-
-```env
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=VNU-IS DSS <your-email@gmail.com>
-FRONTEND_BASE_URL=http://127.0.0.1:5500
-```
-
-If SMTP is not configured, web notifications still work normally — email sending is skipped silently.
+| Item | Requirement / Status | Verification |
+|---|---|---|
+| **Clean Setup** | Project deploys cleanly without undocumented dependencies | Verified with Node v18+ & MySQL 8 |
+| **Database Seed** | Database triggers, views, and seed accounts load via single SQL file | `vnuis_asset_maintenance_dss.sql` |
+| **Auth & Security** | Passwords hashed using Bcrypt; JWT session validation active | Verified |
+| **DSS Logic Audit** | DSS1 (Priority), DSS2 (Technician Workload), DSS3 (Replacement Alert) operating | Verified |
