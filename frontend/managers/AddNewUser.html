@@ -78,7 +78,7 @@
     const email = document.getElementById('email').value.trim();
     const isVnuEmail = /^[^\s@]+@([a-zA-Z0-9-]+\.)*vnu\.edu\.vn$/i.test(email);
     if (!isVnuEmail) {
-      errorBox.textContent = 'Email phải thuộc tên miền VNU (ví dụ: @vnu.edu.vn)';
+      errorBox.textContent = 'The email address must belong to the VNU domain (for example: @vnu.edu.vn).';
       errorBox.classList.remove('hidden');
       return;
     }

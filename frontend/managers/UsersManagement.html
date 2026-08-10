@@ -594,7 +594,7 @@
 
     const isVnuEmail = /^[^\s@]+@([a-zA-Z0-9-]+\.)*vnu\.edu\.vn$/i.test(email);
     if (!isVnuEmail) {
-      const errMsg = 'Email phải thuộc tên miền VNU (ví dụ: @vnu.edu.vn)';
+      const errMsg = 'The email address must belong to the VNU domain (for example: @vnu.edu.vn).';
       if (window.showToast) showToast(errMsg, 'error');
       else alert(errMsg);
       return;
