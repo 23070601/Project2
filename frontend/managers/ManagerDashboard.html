@@ -285,7 +285,7 @@
                 <td class="p-3 text-body-sm font-medium text-primary">AST-${String(a.asset_id).padStart(3, '0')}</td>
                 <td class="p-3 text-body-sm font-bold text-on-surface text-left">${UiHelpers.escapeHtml(a.asset_name)}</td>
                 <td class="p-3 text-body-sm text-left">${UiHelpers.escapeHtml(a.asset_type)}</td>
-                <td class="p-3 text-body-sm font-medium">${a.failure_count}</td>
+                <td class="p-3 text-body-sm font-medium">${Math.max(Number(a.failure_count || 0), Number(a.recent_failures || 0))}</td>
                 <td class="p-3 text-body-sm font-bold text-error">${a.recent_failures}</td>
                 <td class="p-3">
                   <button onclick="viewAssetHistory(${a.asset_id}, '${UiHelpers.escapeJsString(a.asset_name)}')" class="px-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-container transition-all">

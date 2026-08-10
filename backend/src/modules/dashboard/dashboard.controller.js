@@ -94,15 +94,25 @@ async function criticalAssets(req, res) {
         a.asset_name,
         a.asset_type,
         c.room_name,
-        a.failure_count,
-        COUNT(fr.report_id) AS recent_failures
+        GREATEST(COALESCE(tf.total_failures, 0), COALESCE(rf.recent_failures, 0), COALESCE(a.failure_count, 0)) AS failure_count,
+        COALESCE(rf.recent_failures, 0) AS recent_failures
     FROM Assets a
     JOIN Classrooms c ON c.room_id = a.room_id
-    LEFT JOIN FaultReports fr ON a.asset_id = fr.asset_id
-    WHERE fr.reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
-      AND fr.status NOT IN ('Rejected', 'Cancelled')
-    GROUP BY a.asset_id, a.asset_name, a.asset_type, c.room_name, a.failure_count
-    HAVING recent_failures >= 3
+    JOIN (
+        SELECT asset_id, COUNT(*) AS recent_failures
+        FROM FaultReports
+        WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+          AND status NOT IN ('Rejected', 'Cancelled')
+        GROUP BY asset_id
+        HAVING recent_failures >= 3
+    ) rf ON a.asset_id = rf.asset_id
+    LEFT JOIN (
+        SELECT asset_id, COUNT(*) AS total_failures
+        FROM FaultReports
+        WHERE status NOT IN ('Rejected', 'Cancelled')
+        GROUP BY asset_id
+    ) tf ON a.asset_id = tf.asset_id
+    ORDER BY recent_failures DESC, failure_count DESC
   `);
   ok(res, rows);
 }
