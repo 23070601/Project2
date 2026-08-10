@@ -67,7 +67,7 @@
         Closed <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 font-bold" id="countClosed">0</span>
       </button>
       <button type="button" data-status="Rejected" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
-        Rejected / Cancelled <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-bold" id="countRejected">0</span>
+        Rejected<span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-bold" id="countRejected">0</span>
       </button>
     </div>
 
@@ -179,7 +179,6 @@
       'Resolved': 'bg-green-100 text-green-800 border border-green-200',
       'Closed': 'bg-gray-600 text-white border border-gray-700 font-bold',
       'Rejected': 'bg-red-100 text-red-800 border border-red-200',
-      'Cancelled': 'bg-gray-100 text-gray-800 border border-gray-200'
     };
     return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
   };
@@ -242,7 +241,6 @@
         { report_id: 'REP-0007', equipment_name: 'Daikin Inverter AC 18000 BTU', room_name: 'Room 301', priority: 'Medium', reported_at: '2026-07-28 20:38:35', status: 'Pending Approval', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' },
         { report_id: 'REP-0001', equipment_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'Room 302', priority: 'High', reported_at: '2026-07-26 23:38:35', status: 'Processing', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' },
         { report_id: 'REP-0003', equipment_name: 'Samsung 75in Commercial TV', room_name: 'Room 101', priority: 'High', reported_at: '2026-07-23 23:38:35', status: 'Completed', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' },
-        { report_id: 'REP-0014', equipment_name: 'Ceiling Speaker R104', room_name: 'Room 104', priority: 'Low', reported_at: '2026-07-21 23:38:35', status: 'Cancelled', reporter_id: 1, user_email: 'lecturer.a@vnuis.edu.vn' }
       ],
       2: [ // Student B (student.b@vnuis.edu.vn)
         { report_id: 'REP-0002', equipment_name: 'Daikin Inverter AC 18000 BTU', room_name: 'Room 401', priority: 'Medium', reported_at: '2026-07-27 23:38:35', status: 'Pending Approval', reporter_id: 2, user_email: 'student.b@vnuis.edu.vn' },
@@ -252,7 +250,6 @@
       7: [ // Lecturer G (lecturer.g@vnuis.edu.vn)
         { report_id: 'REP-0015', equipment_name: 'Gigabit Switch R601', room_name: 'Room 601', priority: 'High', reported_at: '2026-07-29 08:38:35', status: 'Closed', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' },
         { report_id: 'REP-0008', equipment_name: 'Samsung 75in Commercial TV', room_name: 'Room 302', priority: 'High', reported_at: '2026-07-28 11:38:35', status: 'Processing', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' },
-        { report_id: 'REP-0005', equipment_name: 'Ultra HD 4K HDMI Cable', room_name: 'Room 302', priority: 'Low', reported_at: '2026-07-25 23:38:35', status: 'Cancelled', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' },
         { report_id: 'REP-0012', equipment_name: 'Shure Wireless Dual Microphone', room_name: 'Room 503', priority: 'Low', reported_at: '2026-07-22 23:38:35', status: 'Completed', reporter_id: 7, user_email: 'lecturer.g@vnuis.edu.vn' }
       ],
       8: [ // Student H (student.h@vnuis.edu.vn)

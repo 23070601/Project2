@@ -605,6 +605,8 @@
     if (!tbody) return;
     if (!reports || reports.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant font-medium">No pending requests found.</td></tr>`;
+      const pagInfo = document.getElementById('pendingPaginationInfo');
+      if (pagInfo) pagInfo.textContent = `Showing 0 of 0 pending requests`;
       return;
     }
     tbody.innerHTML = reports.map(r => {
@@ -631,18 +633,12 @@
               <button onclick="openRejectModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
             </div>
           </td>
-          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
-          <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
-          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(rejectedDate)}</td>
-          <td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
-            <button onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">visibility</span> View</button>
-          </td>
         </tr>
       `;
     }).join('');
 
-    const pagInfo = document.getElementById('rejectedPaginationInfo');
-    if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} rejected reports`;
+    const pagInfo = document.getElementById('pendingPaginationInfo');
+    if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} pending requests`;
   }
 
   function filterRejected() {
@@ -665,6 +661,8 @@
     if (!tbody) return;
     if (!reports || reports.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant font-medium">No rejected reports found.</td></tr>`;
+      const pagInfo = document.getElementById('rejectedPaginationInfo');
+      if (pagInfo) pagInfo.textContent = `Showing 0 of 0 rejected reports`;
       return;
     }
     tbody.innerHTML = reports.map((r, index) => {
@@ -691,21 +689,6 @@
 
     const pagInfo = document.getElementById('rejectedPaginationInfo');
     if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} rejected reports`;
-  }
-
-  function filterRejected() {
-    const searchVal = document.getElementById('rejectedSearch').value.toLowerCase();
-    let filtered = allRejectedReports;
-    if (searchVal) {
-      filtered = filtered.filter(r => {
-        const reporterName = getReporterDisplayName(r).toLowerCase();
-        return reporterName.includes(searchVal) ||
-          (r.asset_name || '').toLowerCase().includes(searchVal) ||
-          (r.room_name || '').toLowerCase().includes(searchVal) ||
-          (r.description || '').toLowerCase().includes(searchVal);
-      });
-    }
-    renderRejectedTable(filtered);
   }
 
   function getDeadlineBadgeHtml(deadlineAt, taskStatus) {

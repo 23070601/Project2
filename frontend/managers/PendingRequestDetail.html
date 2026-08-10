@@ -87,15 +87,43 @@
     const formattedReportId = UiHelpers.formatReportId(r.report_id);
     const reporterName = resolveReporterName(r);
     return `
-      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
+      <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
         <div class="flex items-start justify-between">
           <div>
             <h1 class="text-headline-md font-headline-md text-primary">Report ${formattedReportId}</h1>
-            <p class="text-on-surface-variant text-body-sm mt-1">${r.room_name}${r.asset_name ? ' · ' + r.asset_name : ''} · reported by ${UiHelpers.escapeHtml(reporterName)}</p>
+            <p class="text-on-surface-variant text-body-sm mt-1">${UiHelpers.escapeHtml(r.room_name || r.room_id || 'N/A')}${r.asset_name ? ' · ' + UiHelpers.escapeHtml(r.asset_name) : ''} · reported by ${UiHelpers.escapeHtml(reporterName)}</p>
           </div>
         </div>
       </div>
     `;
+  }
+
+  function renderReportDetails(report, suggestions = []) {
+    const reporterName = resolveReporterName(report);
+    const isRejected = report.status === 'Rejected';
+    const isPending = report.status === 'Pending Approval' || report.status === 'Pending';
+    const equipment = report.asset_name || 'N/A';
+    const assetType = report.asset_type || 'Facility / Classroom Equipment';
+    const room = report.room_name || report.room_id || 'N/A';
+    const reportImages = Array.isArray(report.images) ? report.images : (report.image_url ? [report.image_url] : []);
+    
+    let rejectionInfo = {
+      rejectedAt: report.rejected_at || report.updated_at || report.reported_at,
+      reason: report.rejection_reason || report.reject_reason || ''
+    };
+    if (isRejected && (!rejectionInfo.reason || rejectionInfo.reason === 'No reason provided.')) {
+      try {
+        const stored = localStorage.getItem('vnu_rejected_info_' + cleanId) || localStorage.getItem('vnu_rejected_info_' + numericId);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.reason) rejectionInfo.reason = parsed.reason;
+          if (parsed.rejected_at) rejectionInfo.rejectedAt = parsed.rejected_at;
+        }
+      } catch (e) {}
+    }
+    if (!rejectionInfo.reason) rejectionInfo.reason = 'No reason provided.';
+
+    let html = renderHeader(report);
 
     // ===== MAIN GRID =====
     html += `
@@ -235,10 +263,6 @@
             </div>
           ` : ''}
 
-        <div class="mb-4">
-          <label class="text-label-md font-label-md text-on-surface-variant">Deadline</label>
-          <input id="deadlineInput" type="datetime-local" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-3 py-2 text-body-sm" />
-          <p class="text-[11px] text-on-surface-variant mt-1">Automatically defaults to 48 hours from now if left blank.</p>
         </div>
 
         <!-- RIGHT COLUMN (1 Col) -->
@@ -332,14 +356,6 @@
 
     const content = document.getElementById('content');
     content.innerHTML = renderReportDetails(report, suggestions);
-
-    if (report.status === 'Pending Approval') {
-      html += renderAssignForm(suggestions);
-    } else {
-      html += `<div class="bg-surface-container-low rounded-xl p-6 text-body-sm text-on-surface-variant">${report.status === 'Rejected' ? 'This report has been rejected and is available in the rejected reports history.' : 'This report is no longer pending approval.'}</div>`;
-    }
-
-    content.innerHTML = html;
 
     const deadlineEl = document.getElementById('deadlineInput');
     if (deadlineEl && !deadlineEl.value) {
