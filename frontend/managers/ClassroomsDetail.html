@@ -78,11 +78,15 @@
           <form id="roomInfoForm" onsubmit="event.preventDefault(); saveRoomChanges();" class="p-6 space-y-4">
             <div class="flex flex-col gap-1">
               <label class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Room Name</label>
-              <input id="inputRoomName" type="text" value="401" class="w-full px-3 py-2 border border-outline-variant/40 rounded-lg text-body-md font-medium text-on-surface focus:ring-2 focus:ring-primary outline-none">
+              <div class="flex items-center rounded-lg border border-outline-variant/40 overflow-hidden bg-surface-container-low focus-within:ring-2 focus-within:ring-primary">
+                <span id="roomPrefixBadge" class="px-3 py-2 bg-surface-container-high text-primary font-bold border-r border-outline-variant/30 select-none">R1</span>
+                <input id="inputRoomSuffix" type="text" value="02" placeholder="02" class="w-full px-3 py-2 bg-transparent text-body-md font-medium text-on-surface outline-none">
+              </div>
+              <input id="inputRoomName" type="hidden" value="R102">
             </div>
             <div class="flex flex-col gap-1">
               <label class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Floor</label>
-              <input id="inputFloor" type="text" value="4" class="w-full px-3 py-2 border border-outline-variant/40 rounded-lg text-body-md font-medium text-on-surface focus:ring-2 focus:ring-primary outline-none">
+              <input id="inputFloor" type="text" value="1" readonly class="w-full px-3 py-2 border border-outline-variant/40 rounded-lg text-body-md font-medium text-on-surface-variant bg-surface-container-low cursor-not-allowed outline-none">
             </div>
             <div class="flex flex-col gap-1">
               <label class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Capacity</label>
@@ -511,6 +515,24 @@
     console.warn(e);
   }
 
+  function parseRoomName(fullName) {
+    const clean = String(fullName || '').trim();
+    // Ví dụ 'R102' -> prefix: 'R1', suffix: '02'
+    // 'R1205' -> prefix: 'R12', suffix: '05'
+    const match = clean.match(/^(R?\d+?)(\d{2})$/i) || clean.match(/^(R?\d)(.*)$/i);
+    if (match) {
+      return {
+        prefix: match[1].toUpperCase(),
+        suffix: match[2]
+      };
+    }
+    const fl = UiHelpers.getFloorFromName(clean);
+    return {
+      prefix: `R${fl}`,
+      suffix: clean.replace(/^R/i, '').replace(new RegExp(`^${fl}`), '')
+    };
+  }
+
   function updateUIForRoom(name, floor, capacity, description) {
     const formattedTitle = name.startsWith('Room') ? name : `Room ${name}`;
     document.getElementById('breadcrumbRoomName').textContent = name;
@@ -519,7 +541,11 @@
     if (document.getElementById('editAssetRoom')) document.getElementById('editAssetRoom').value = formattedTitle;
     document.getElementById('assetsCardTitle').textContent = `Assets in ${formattedTitle}`;
 
-    if (document.getElementById('inputRoomName')) document.getElementById('inputRoomName').value = name;
+    const parsed = parseRoomName(name);
+    if (document.getElementById('roomPrefixBadge')) document.getElementById('roomPrefixBadge').textContent = parsed.prefix;
+    if (document.getElementById('inputRoomSuffix')) document.getElementById('inputRoomSuffix').value = parsed.suffix;
+    if (document.getElementById('inputRoomName')) document.getElementById('inputRoomName').value = `${parsed.prefix}${parsed.suffix}`;
+    
     if (document.getElementById('inputFloor')) document.getElementById('inputFloor').value = floor;
     if (document.getElementById('inputCapacity')) document.getElementById('inputCapacity').value = capacity;
     if (document.getElementById('inputDescription')) document.getElementById('inputDescription').value = description;
@@ -529,11 +555,12 @@
   let calculatedFloor = UiHelpers.getFloorFromName(currentRoomData.room_name);
   updateUIForRoom(currentRoomData.room_name, calculatedFloor, currentRoomData.capacity, currentRoomData.description);
 
-  // Tự động cập nhật Floor khi người dùng nhập Room Name
-  document.getElementById('inputRoomName').addEventListener('input', (e) => {
-    const val = e.target.value.trim();
-    const fl = UiHelpers.getFloorFromName(val);
-    document.getElementById('inputFloor').value = fl;
+  // Khi nhập suffix, tự động cập nhật input hidden inputRoomName
+  document.getElementById('inputRoomSuffix').addEventListener('input', (e) => {
+    const prefix = document.getElementById('roomPrefixBadge').textContent;
+    const suffix = e.target.value.trim();
+    const fullName = `${prefix}${suffix}`;
+    document.getElementById('inputRoomName').value = fullName;
   });
 
   // Add Asset Modal
