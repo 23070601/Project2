@@ -74,10 +74,19 @@
     e.preventDefault();
     const errorBox = document.getElementById('formError');
     errorBox.classList.add('hidden');
+
+    const email = document.getElementById('email').value.trim();
+    const isVnuEmail = /^[^\s@]+@([a-zA-Z0-9-]+\.)*vnu\.edu\.vn$/i.test(email);
+    if (!isVnuEmail) {
+      errorBox.textContent = 'Email phải thuộc tên miền VNU (ví dụ: @vnu.edu.vn)';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+
     try {
       await Api.post('/users', {
         fullName: document.getElementById('fullName').value.trim(),
-        email: document.getElementById('email').value.trim(),
+        email: email,
         password: document.getElementById('password').value,
         role: roleSelect.value,
         phone: document.getElementById('phone').value.trim() || undefined,

@@ -118,7 +118,7 @@ const Api = (() => {
       if (currentUser.email) headers['X-User-Email'] = currentUser.email;
       if (currentUser.role) headers['X-User-Role'] = currentUser.role;
     } else {
-      headers['X-User-Email'] = 'tech.c@vnuis.edu.vn';
+      headers['X-User-Email'] = 'tech.c@vnu.edu.vn';
       headers['X-User-Id'] = '3';
     }
 

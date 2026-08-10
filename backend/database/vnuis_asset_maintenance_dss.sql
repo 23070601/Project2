@@ -254,14 +254,14 @@ CREATE TABLE IF NOT EXISTS OverdueAlertDelivery (
 
 -- 1. USERS (Default password: 123456)
 INSERT INTO Users (user_id, full_name, email, password_hash, role, phone, technician_specialty, is_active) VALUES
-(1,  'Nguyen Van A',   'lecturer.a@vnuis.edu.vn', '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0912345678', NULL, TRUE),
-(2,  'Tran Thi B',     'student.b@vnuis.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0923456789', NULL, TRUE),
-(3,  'Le Van C',       'tech.c@vnuis.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0934567890', 'Electrical', TRUE),
-(4,  'Pham Thi D',     'tech.d@vnuis.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0945678901', 'Networking', TRUE),
-(5,  'Hoang Van E',    'manager.e@vnuis.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Manager',    '0956789012', NULL, TRUE),
-(6,  'Vu Van F',       'tech.f@vnuis.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0967890123', 'General', TRUE),
-(7,  'Doan Van G',     'lecturer.g@vnuis.edu.vn', '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0978901234', NULL, TRUE),
-(8,  'Bui Thi H',      'student.h@vnuis.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0989012345', NULL, TRUE);
+(1,  'Nguyen Van A',   'lecturer.a@vnu.edu.vn', '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0912345678', NULL, TRUE),
+(2,  'Tran Thi B',     'student.b@vnu.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0923456789', NULL, TRUE),
+(3,  'Le Van C',       'tech.c@vnu.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0934567890', 'Electrical', TRUE),
+(4,  'Pham Thi D',     'tech.d@vnu.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0945678901', 'Networking', TRUE),
+(5,  'Hoang Van E',    'manager.e@vnu.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Manager',    '0956789012', NULL, TRUE),
+(6,  'Vu Van F',       'tech.f@vnu.edu.vn',     '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'Technician', '0967890123', 'General', TRUE),
+(7,  'Doan Van G',     'lecturer.g@vnu.edu.vn', '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0978901234', NULL, TRUE),
+(8,  'Bui Thi H',      'student.h@vnu.edu.vn',  '$2a$10$ZFlhBpA8iq1yKV4dNqzrbeHmJMTuHOAvr8iiRo5D.77F9oMU4BamO', 'User',       '0989012345', NULL, TRUE);
 
 -- 2. CLASSROOMS (26 CLASSROOMS - FLOORS 1, 3, 4, 5, 6 - NO FLOOR 2)
 INSERT INTO Classrooms (room_id, room_name, qr_code) VALUES
@@ -438,7 +438,7 @@ INSERT INTO WorkOrderStatusHistory (history_id, order_id, old_status, new_status
 
 -- 8. AUDIT LOG
 INSERT INTO AuditLog (log_id, user_id, action_type, entity_table, entity_id, room_id, asset_id, description, action_at) VALUES
-(1,  5, 'LOGIN',  'Users', 5, NULL, NULL, 'User manager.e@vnuis.edu.vn logged into the system', NOW() - INTERVAL 2 DAY),
+(1,  5, 'LOGIN',  'Users', 5, NULL, NULL, 'User manager.e@vnu.edu.vn logged into the system', NOW() - INTERVAL 2 DAY),
 (2,  1, 'CREATE', 'FaultReports', 1, 1, 1, 'Fault report #1 created for Sony Projector in Room R101', NOW() - INTERVAL 2 DAY),
 (3,  5, 'CREATE', 'WorkOrders', 1, 7, 19, 'Work order #1 generated and assigned to Technician Le Van C', NOW() - INTERVAL 40 HOUR),
 (4,  3, 'UPDATE', 'WorkOrders', 1, 7, 19, 'Technician Le Van C updated task status to In Progress', NOW() - INTERVAL 35 HOUR),
@@ -454,7 +454,7 @@ INSERT INTO AuditLog (log_id, user_id, action_type, entity_table, entity_id, roo
 
 -- 9. NOTIFICATIONS
 INSERT INTO Notifications (notification_id, user_id, report_id, order_id, message, is_read, created_at) VALUES
-(1,  5, NULL, NULL, 'User manager.e@vnuis.edu.vn logged into the system successfully.', TRUE, NOW() - INTERVAL 2 DAY),
+(1,  5, NULL, NULL, 'User manager.e@vnu.edu.vn logged into the system successfully.', TRUE, NOW() - INTERVAL 2 DAY),
 (2,  5, 2, NULL, 'New fault report #2 submitted by Tran Thi B requires your approval.', FALSE, NOW() - INTERVAL 1 DAY),
 (3,  5, 7, NULL, 'New fault report #7 submitted by Nguyen Van A for Room R201.', FALSE, NOW() - INTERVAL 3 HOUR),
 (4,  5, 10, NULL, 'New fault report #10 submitted by Nguyen Van A for Panasonic Projector in Room R102.', FALSE, NOW() - INTERVAL 2 HOUR),

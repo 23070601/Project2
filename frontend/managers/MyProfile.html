@@ -69,7 +69,7 @@
                 <div class="space-y-2">
                   <label class="text-label-md font-label-md text-outline">Email Address</label>
                   <div id="profileEmail" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/20 rounded-lg text-body-md text-on-surface-variant">
-                    manager.e@vnuis.edu.vn
+                    manager.e@vnu.edu.vn
                   </div>
                 </div>
                 <div class="space-y-2">
@@ -128,7 +128,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn', role: 'Manager', user_id: 5, phone: '+84 912 345 678' };
+  let user = { full_name: 'Hoang Van E', email: 'manager.e@vnu.edu.vn', role: 'Manager', user_id: 5, phone: '+84 912 345 678' };
   try {
     user = Auth.guard('Manager');
   } catch (e) {
@@ -151,7 +151,7 @@
     document.getElementById('profileAvatar').textContent = initial;
     document.getElementById('profileRoleBadge').textContent = user.full_name || 'Hoang Van E';
     document.getElementById('profileFullName').textContent = user.full_name || 'Hoang Van E';
-    document.getElementById('profileEmail').textContent = user.email || 'manager.e@vnuis.edu.vn';
+    document.getElementById('profileEmail').textContent = user.email || 'manager.e@vnu.edu.vn';
     document.getElementById('profileRole').textContent = user.role || 'Manager';
     document.getElementById('phone').value = user.phone || '+84 912 345 678';
   }

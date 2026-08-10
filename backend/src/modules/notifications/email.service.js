@@ -63,7 +63,7 @@ async function sendEmail({ to, subject, title, message, actionUrl }) {
 
   try {
     await transport.sendMail({
-      from: env.smtp?.from || process.env.SMTP_FROM || 'noreply@vnuis.edu.vn',
+      from: env.smtp?.from || process.env.SMTP_FROM || 'noreply@vnu.edu.vn',
       ...mailOptions,
     });
     return { sent: true, messageId: 'queued' };

@@ -2,10 +2,11 @@ const bcrypt = require('bcryptjs');
 const env = require('../../config/env');
 const usersRepository = require('./users.repository');
 const auditLogRepository = require('../auditLog/auditLog.repository');
+const notificationsRepository = require('../notifications/notifications.repository');
 const { ensureUserCanBeDeactivated } = require('./userStatus.service');
 const { pool } = require('../../config/db');
 const { ok, created, noContent, ApiError } = require('../../shared/utils/responseWrapper');
-const { requireFields, requireOneOf, isValidEmail, toPositiveInt } = require('../../shared/utils/validators');
+const { requireFields, requireOneOf, isValidEmail, isVnuEmail, toPositiveInt } = require('../../shared/utils/validators');
 const { ALL_ROLES, ROLES } = require('../../shared/constants/roles');
 
 async function list(req, res) {
@@ -35,6 +36,7 @@ async function create(req, res) {
   const { fullName, email, password, role, phone, technicianSpecialty } = req.body;
 
   if (!isValidEmail(email)) throw new ApiError(400, 'Invalid email format');
+  if (!isVnuEmail(email)) throw new ApiError(400, 'Only VNU email addresses (@vnu.edu.vn) are allowed');
   requireOneOf(role, ALL_ROLES, 'role');
   if (String(password).length < 6) throw new ApiError(400, 'Password must be at least 6 characters');
 
@@ -58,6 +60,18 @@ async function create(req, res) {
     entityId: user.user_id,
     description: `Manager ${req.user.email} created user ${email} with role ${role}`,
   });
+
+  try {
+    await notificationsRepository.createNotification({
+      userId: user.user_id,
+      title: 'VNU-IS Account Created',
+      message: `Your account (${email}) has been created successfully with role ${role}. Initial password: ${password}`,
+      recipientEmail: email,
+      email: true,
+    });
+  } catch (err) {
+    console.error('Failed to send user creation notification:', err);
+  }
 
   created(res, user);
 }

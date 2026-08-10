@@ -19,6 +19,10 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
 }
 
+function isVnuEmail(email) {
+  return /^[^\s@]+@([a-zA-Z0-9-]+\.)*vnu\.edu\.vn$/i.test(String(email).trim());
+}
+
 function toPositiveInt(value, fieldName) {
   if (value === undefined || value === null || value === '') {
     throw new ApiError(400, `"${fieldName}" must be a positive integer`);
@@ -70,6 +74,9 @@ function validateCreateUser(body) {
   }
   if (!email || !isValidEmail(email)) {
     throw new ApiError(400, 'Invalid email address format.');
+  }
+  if (!isVnuEmail(email)) {
+    throw new ApiError(400, 'Email must belong to VNU domain (@vnu.edu.vn).');
   }
   if (role === 'Technician' && (!technician_specialty || !String(technician_specialty).trim())) {
     throw new ApiError(400, 'Technician specialty is required for Technician role.');
@@ -128,6 +135,7 @@ module.exports = {
   requireFields,
   requireOneOf,
   isValidEmail,
+  isVnuEmail,
   toPositiveInt,
   validateLogin,
   validateCreateReport,

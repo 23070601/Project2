@@ -175,7 +175,7 @@ mysql -u root -p vnuis_asset_maintenance_dss < backend/database/vnuis_asset_main
    SMTP_PORT=587
    SMTP_USER=
    SMTP_PASS=
-   SMTP_FROM=noreply@vnuis.edu.vn
+   SMTP_FROM=noreply@vnu.edu.vn
    ```
 
 4. Start the API Server:
