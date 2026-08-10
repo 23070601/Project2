@@ -284,6 +284,24 @@
     const status = document.getElementById('roomStatus').value;
 
     try {
+      // 1. Kiểm tra danh sách phòng hiện có từ API / LocalStorage
+      let existingRooms = [];
+      if (window.Api) {
+        try {
+          const res = await Api.get('/classrooms');
+          if (Array.isArray(res)) existingRooms = res;
+        } catch (fetchErr) {
+          console.warn('Could not fetch existing rooms for validation:', fetchErr);
+        }
+      }
+
+      // 2. Kiểm tra nếu trùng tên phòng (không phân biệt hoa thường)
+      const isDuplicate = existingRooms.some(r => r.room_name && r.room_name.trim().toLowerCase() === roomName.toLowerCase());
+      if (isDuplicate) {
+        throw new Error(`Phòng "${roomName}" đã tồn tại trong hệ thống! Vui lòng đặt tên phòng khác.`);
+      }
+
+      // 3. Thực hiện tạo mới
       if (window.Api) {
         try {
           if (selectedPhotoFiles.length > 0) {
@@ -300,7 +318,7 @@
           }
         } catch (err) {
           console.warn('API create classroom notice:', err);
-          // If server returned a business validation error (e.g. 409 duplicate name, 400 bad input), throw it to show alert
+          // Ném lỗi 409 hoặc 400 nếu server trả về trùng tên phòng
           if (err.status && err.status >= 400 && err.status < 500) {
             throw err;
           }
@@ -317,7 +335,11 @@
         window.location.href = 'ClassroomsManagement.html';
       }, 1500);
     } catch (err) {
-      alert(err.message || 'Error creating classroom');
+      if (window.showToast) {
+        showToast(err.message || 'Lỗi khi tạo phòng học mới', 'error');
+      } else {
+        alert(err.message || 'Lỗi khi tạo phòng học mới');
+      }
     } finally {
       btn.disabled = false;
       btn.textContent = 'Create Classroom';
