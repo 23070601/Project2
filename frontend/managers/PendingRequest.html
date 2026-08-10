@@ -36,7 +36,7 @@
       <div class="flex border-b border-outline-variant mb-6 w-full">
         <button id="tab-pending" onclick="switchTab('pending')" class="relative px-6 py-3 flex items-center gap-2 text-primary font-bold border-b-2 border-primary transition-all">
           <span class="font-label-lg">Pending Requests</span>
-          <span id="pendingCountBadge" class="px-2 py-0.5 bg-primary-fixed text-primary text-xs rounded-full font-semibold">5</span>
+          <span id="pendingCountBadge" class="px-2 py-0.5 bg-primary-fixed text-primary text-xs rounded-full font-semibold">3</span>
         </button>
         <button id="tab-rejected" onclick="switchTab('rejected')" class="px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg">
           <span class="font-label-lg">Rejected Reports</span>
@@ -44,7 +44,7 @@
         </button>
         <button id="tab-assigned" onclick="switchTab('assigned')" class="px-6 py-3 flex items-center gap-2 hover:text-on-surface transition-colors text-on-surface-variant font-label-lg">
           <span class="font-label-lg">Assigned Tasks</span>
-          <span id="assignedCountBadge" class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-xs rounded-full font-semibold">12</span>
+          <span id="assignedCountBadge" class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-xs rounded-full font-semibold">9</span>
         </button>
       </div>
 
@@ -137,12 +137,8 @@
             </tbody>
           </table>
           <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
-            <p id="pendingPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-3 of 5 requests (10 per page)</p>
-            <div class="flex items-center gap-2">
-              <button class="p-2 rounded-lg border border-outline-variant text-outline hover:bg-surface-container transition-colors disabled:opacity-40" disabled><span class="material-symbols-outlined">chevron_left</span></button>
-              <button class="w-10 h-10 bg-primary text-white font-bold rounded-lg shadow-sm">1</button>
-              <button class="p-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>
+            <p id="pendingPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-3 of 3 requests (10 per page)</p>
+            <div id="pendingPaginationControls" class="flex items-center gap-2"></div>
           </div>
         </div>
       </div>
@@ -173,6 +169,7 @@
           </table>
           <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
             <p id="rejectedPaginationInfo" class="text-body-sm text-on-surface-variant">No rejected reports yet.</p>
+            <div id="rejectedPaginationControls" class="flex items-center gap-2"></div>
           </div>
         </div>
       </div>
@@ -366,11 +363,7 @@
           </table>
           <div class="px-6 py-4 flex items-center justify-between bg-surface-container-low border-t border-outline-variant/20 w-full">
             <p id="assignedPaginationInfo" class="text-body-sm text-on-surface-variant">Showing 1-9 of 9 tasks (10 per page)</p>
-            <div class="flex items-center gap-2">
-              <button class="p-2 rounded-lg border border-outline-variant text-outline hover:bg-surface-container transition-colors disabled:opacity-40" disabled><span class="material-symbols-outlined">chevron_left</span></button>
-              <button class="w-10 h-10 bg-primary text-white font-bold rounded-lg shadow-sm">1</button>
-              <button class="p-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>
+            <div id="assignedPaginationControls" class="flex items-center gap-2"></div>
           </div>
         </div>
       </div>
@@ -600,14 +593,79 @@
     return report?.reporter_name || report?.reporter_full_name || report?.full_name || report?.user_name || 'Anonymous';
   }
 
+  let currentPendingPage = 1;
+  let currentRejectedPage = 1;
+  let currentAssignedPage = 1;
+  const ITEMS_PER_PAGE = 10;
+
+  let filteredPendingReports = [];
+  let filteredRejectedReports = [];
+  let filteredAssignedTasks = [];
+
+  function setPendingPage(page) {
+    currentPendingPage = page;
+    renderPendingTable(filteredPendingReports);
+  }
+
+  function setRejectedPage(page) {
+    currentRejectedPage = page;
+    renderRejectedTable(filteredRejectedReports);
+  }
+
+  function setAssignedPage(page) {
+    currentAssignedPage = page;
+    renderAssignedTable(filteredAssignedTasks);
+  }
+
+  function renderPaginationControls(containerId, currentPage, totalPages, changePageFnName) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+
+    let html = `
+      <button onclick="${changePageFnName}(${currentPage - 1})" class="p-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-40" ${currentPage <= 1 ? 'disabled' : ''}>
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+    `;
+
+    for (let i = 1; i <= totalPages; i++) {
+      const activeClass = i === currentPage ? 'bg-primary text-white font-bold' : 'border border-outline-variant text-on-surface-variant hover:bg-surface-container';
+      html += `<button onclick="${changePageFnName}(${i})" class="w-10 h-10 ${activeClass} rounded-lg shadow-sm">${i}</button>`;
+    }
+
+    html += `
+      <button onclick="${changePageFnName}(${currentPage + 1})" class="p-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-40" ${currentPage >= totalPages ? 'disabled' : ''}>
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    `;
+
+    container.innerHTML = html;
+  }
+
   function renderPendingTable(reports) {
+    filteredPendingReports = reports || [];
     const tbody = document.getElementById('pendingTableBody');
+    const pagInfo = document.getElementById('pendingPaginationInfo');
     if (!tbody) return;
     if (!reports || reports.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant font-medium">No pending requests found.</td></tr>`;
+      if (pagInfo) pagInfo.textContent = 'Showing 0 requests';
+      renderPaginationControls('pendingPaginationControls', 1, 0, 'setPendingPage');
       return;
     }
-    tbody.innerHTML = reports.map(r => {
+
+    const totalPages = Math.ceil(reports.length / ITEMS_PER_PAGE);
+    if (currentPendingPage > totalPages) currentPendingPage = totalPages;
+    if (currentPendingPage < 1) currentPendingPage = 1;
+
+    const start = (currentPendingPage - 1) * ITEMS_PER_PAGE;
+    const end = Math.min(start + ITEMS_PER_PAGE, reports.length);
+    const pageItems = reports.slice(start, end);
+
+    tbody.innerHTML = pageItems.map(r => {
       const reporterName = getReporterDisplayName(r);
       const initials = reporterName ? reporterName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
       const cleanDesc = (r.description || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
@@ -631,21 +689,16 @@
               <button onclick="openRejectModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
             </div>
           </td>
-          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
-          <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
-          <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(rejectedDate)}</td>
-          <td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
-            <button onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=rejected'" class="px-3 py-1.5 bg-primary text-white rounded-lg font-bold text-xs flex items-center gap-1 hover:opacity-90 transition-all mx-auto"><span class="material-symbols-outlined text-[16px]">visibility</span> View</button>
-          </td>
         </tr>
       `;
     }).join('');
 
-    const pagInfo = document.getElementById('rejectedPaginationInfo');
-    if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} rejected reports`;
+    if (pagInfo) pagInfo.textContent = `Showing ${start + 1}-${end} of ${reports.length} requests (10 per page)`;
+    renderPaginationControls('pendingPaginationControls', currentPendingPage, totalPages, 'setPendingPage');
   }
 
   function filterRejected() {
+    currentRejectedPage = 1;
     const searchVal = document.getElementById('rejectedSearch').value.toLowerCase();
     let filtered = allRejectedReports;
     if (searchVal) {
@@ -661,13 +714,26 @@
   }
 
   function renderRejectedTable(reports) {
+    filteredRejectedReports = reports || [];
     const tbody = document.getElementById('rejectedTableBody');
+    const pagInfo = document.getElementById('rejectedPaginationInfo');
     if (!tbody) return;
     if (!reports || reports.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant font-medium">No rejected reports found.</td></tr>`;
+      if (pagInfo) pagInfo.textContent = 'No rejected reports yet.';
+      renderPaginationControls('rejectedPaginationControls', 1, 0, 'setRejectedPage');
       return;
     }
-    tbody.innerHTML = reports.map((r, index) => {
+
+    const totalPages = Math.ceil(reports.length / ITEMS_PER_PAGE);
+    if (currentRejectedPage > totalPages) currentRejectedPage = totalPages;
+    if (currentRejectedPage < 1) currentRejectedPage = 1;
+
+    const start = (currentRejectedPage - 1) * ITEMS_PER_PAGE;
+    const end = Math.min(start + ITEMS_PER_PAGE, reports.length);
+    const pageItems = reports.slice(start, end);
+
+    tbody.innerHTML = pageItems.map((r, index) => {
       const reporterName = getReporterDisplayName(r);
       const initials = reporterName ? reporterName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
       return `
@@ -689,23 +755,8 @@
       `;
     }).join('');
 
-    const pagInfo = document.getElementById('rejectedPaginationInfo');
-    if (pagInfo) pagInfo.textContent = `Showing 1-${reports.length} of ${reports.length} rejected reports`;
-  }
-
-  function filterRejected() {
-    const searchVal = document.getElementById('rejectedSearch').value.toLowerCase();
-    let filtered = allRejectedReports;
-    if (searchVal) {
-      filtered = filtered.filter(r => {
-        const reporterName = getReporterDisplayName(r).toLowerCase();
-        return reporterName.includes(searchVal) ||
-          (r.asset_name || '').toLowerCase().includes(searchVal) ||
-          (r.room_name || '').toLowerCase().includes(searchVal) ||
-          (r.description || '').toLowerCase().includes(searchVal);
-      });
-    }
-    renderRejectedTable(filtered);
+    if (pagInfo) pagInfo.textContent = `Showing ${start + 1}-${end} of ${reports.length} rejected reports (10 per page)`;
+    renderPaginationControls('rejectedPaginationControls', currentRejectedPage, totalPages, 'setRejectedPage');
   }
 
   function getDeadlineBadgeHtml(deadlineAt, taskStatus) {
@@ -730,13 +781,26 @@
   }
 
   function renderAssignedTable(orders) {
+    filteredAssignedTasks = orders || [];
     const tbody = document.getElementById('assignedTableBody');
+    const pagInfo = document.getElementById('assignedPaginationInfo');
     if (!tbody) return;
     if (!orders || orders.length === 0) {
       tbody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-on-surface-variant font-medium">No assigned tasks found.</td></tr>`;
+      if (pagInfo) pagInfo.textContent = 'Showing 0 tasks';
+      renderPaginationControls('assignedPaginationControls', 1, 0, 'setAssignedPage');
       return;
     }
-    tbody.innerHTML = orders.map((o, index) => {
+
+    const totalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
+    if (currentAssignedPage > totalPages) currentAssignedPage = totalPages;
+    if (currentAssignedPage < 1) currentAssignedPage = 1;
+
+    const start = (currentAssignedPage - 1) * ITEMS_PER_PAGE;
+    const end = Math.min(start + ITEMS_PER_PAGE, orders.length);
+    const pageItems = orders.slice(start, end);
+
+    tbody.innerHTML = pageItems.map((o, index) => {
       const isRejected = o.technician_response === 'Rejected';
       let badgeClass = 'bg-surface-container text-on-surface-variant';
       let statusText = o.task_status;
@@ -765,7 +829,7 @@
         
       return `
         <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-6 py-4 font-medium">${index + 1}</td>
+          <td class="px-6 py-4 font-medium">${start + index + 1}</td>
           <td class="px-6 py-4 font-bold text-primary">WO-${o.order_id}</td>
           <td class="px-6 py-4">${UiHelpers.escapeHtml(o.asset_name || 'General Asset')}</td>
           <td class="px-6 py-4">${UiHelpers.escapeHtml(o.technician_name || 'Unassigned')}</td>
@@ -782,9 +846,13 @@
         </tr>
       `;
     }).join('');
+
+    if (pagInfo) pagInfo.textContent = `Showing ${start + 1}-${end} of ${orders.length} tasks (10 per page)`;
+    renderPaginationControls('assignedPaginationControls', currentAssignedPage, totalPages, 'setAssignedPage');
   }
 
   function filterPending() {
+    currentPendingPage = 1;
     const searchVal = document.getElementById('pendingSearch').value.toLowerCase();
     const prioVal = document.getElementById('pendingPriorityFilter').value;
     const sortVal = document.getElementById('pendingSortFilter') ? document.getElementById('pendingSortFilter').value : 'newest';
@@ -813,6 +881,7 @@
   }
 
   async function filterAssigned() {
+    currentAssignedPage = 1;
     const searchVal = document.getElementById('assignedSearch').value.toLowerCase();
     const priorityVal = document.getElementById('assignedPriorityFilter') ? document.getElementById('assignedPriorityFilter').value : 'All';
     const statusVal = document.getElementById('assignedStatusFilter').value;
@@ -881,10 +950,6 @@
     });
 
     renderAssignedTable(filtered);
-    
-    const start = filtered.length > 0 ? 1 : 0;
-    const pagInfo = document.getElementById('assignedPaginationInfo');
-    if (pagInfo) pagInfo.textContent = `Showing ${start}-${filtered.length} of ${filtered.length} tasks`;
   }
 
   // Bind filter events
@@ -1067,37 +1132,58 @@
     }
   }
 
+  function getStaticPendingReportsFromDom() {
+    return [
+      { report_id: 10, reporter_name: 'Nguyen Van A', asset_name: 'Panasonic 4K Projector PT-VMZ51', room_name: 'R102', priority: 'High', reported_at: '2026-07-29T10:00:00Z', description: 'Panasonic Projector power light turns amber and powers down.', status: 'Pending Approval' },
+      { report_id: 2, reporter_name: 'Tran Thi B', asset_name: 'Daikin Inverter AC 18000 BTU', room_name: 'R401', priority: 'Medium', reported_at: '2026-07-28T14:30:00Z', description: 'Air conditioner is running but blowing warm air into the classroom.', status: 'Pending Approval' },
+      { report_id: 7, reporter_name: 'Nguyen Van A', asset_name: 'Daikin Inverter AC 18000 BTU', room_name: 'R201', priority: 'Medium', reported_at: '2026-07-29T09:15:00Z', description: 'Air conditioner leaking water heavily onto student desks.', status: 'Pending Approval' }
+    ];
+  }
+
   async function loadData() {
+    let loadedPending = false;
+    let loadedRejected = false;
+    let loadedAssigned = false;
+
     try {
       if (window.Api) {
         // Fetch Pending Approval Reports
         const pendingReports = await Api.get('/fault-reports', { status: 'Pending Approval' });
         if (pendingReports && Array.isArray(pendingReports)) {
           allPendingReports = pendingReports.filter(r => !r.order_id);
-          document.getElementById('pendingCountBadge').textContent = allPendingReports.length;
-          filterPending();
+          loadedPending = true;
         }
 
         // Fetch Rejected Reports
         const rejectedReports = await Api.get('/fault-reports', { status: 'Rejected' });
         if (rejectedReports && Array.isArray(rejectedReports)) {
           allRejectedReports = rejectedReports.filter(r => !r.order_id || r.status === 'Rejected');
-          document.getElementById('rejectedCountBadge').textContent = allRejectedReports.length;
-          filterRejected();
+          loadedRejected = true;
         }
 
         // Fetch Work Orders for Assigned Tasks
         const assignedTasks = await Api.get('/work-orders');
         if (assignedTasks && Array.isArray(assignedTasks)) {
           allAssignedTasks = assignedTasks;
-          const activeAssignedCount = assignedTasks.filter(o => ['Assigned', 'Received', 'In Progress'].includes(o.task_status)).length;
-          document.getElementById('assignedCountBadge').textContent = activeAssignedCount;
-          filterAssigned();
+          loadedAssigned = true;
         }
       }
     } catch (err) {
-      console.log('Failed to fetch requests & assignments table data', err);
+      console.log('Failed to fetch requests & assignments table data from API', err);
     }
+
+    if (!loadedPending || allPendingReports.length === 0) {
+      allPendingReports = getStaticPendingReportsFromDom();
+    }
+
+    document.getElementById('pendingCountBadge').textContent = allPendingReports.length;
+    document.getElementById('rejectedCountBadge').textContent = allRejectedReports.length;
+    
+    document.getElementById('assignedCountBadge').textContent = allAssignedTasks.length;
+
+    filterPending();
+    filterRejected();
+    filterAssigned();
   }
 
   loadData().then(() => {

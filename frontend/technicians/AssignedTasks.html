@@ -244,9 +244,18 @@
 
   let activeQuickFloorFilter = '';
 
-  function updatePaginationControls(visibleCount) {
+  let currentTasksPage = 1;
+  const PAGE_SIZE = 10;
+
+  function goToTasksPage(p) {
+    currentTasksPage = p;
+    filterTasksTable(false);
+  }
+
+  function updatePaginationControls(visibleRows) {
     const info = document.getElementById('tablePaginationInfo');
     const controls = document.getElementById('tablePaginationControls');
+    const visibleCount = visibleRows ? visibleRows.length : 0;
 
     if (visibleCount === 0) {
       if (info) info.textContent = 'Showing 0 matching entries';
@@ -254,37 +263,50 @@
       return;
     }
 
-    const pageSize = 10;
-    const totalPages = Math.ceil(visibleCount / pageSize);
+    const totalPages = Math.ceil(visibleCount / PAGE_SIZE);
+    if (currentTasksPage > totalPages) currentTasksPage = totalPages;
+    if (currentTasksPage < 1) currentTasksPage = 1;
+
+    const start = (currentTasksPage - 1) * PAGE_SIZE;
+    const end = Math.min(start + PAGE_SIZE, visibleCount);
+
+    visibleRows.forEach((row, idx) => {
+      if (idx >= start && idx < end) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
 
     if (info) {
-      info.textContent = `Showing 1 to ${visibleCount} of ${visibleCount} matching entry${visibleCount > 1 ? 's' : ''}`;
+      info.textContent = `Showing ${start + 1} to ${end} of ${visibleCount} matching entries (${PAGE_SIZE} per page)`;
     }
 
     if (!controls) return;
 
     if (totalPages <= 1) {
-      controls.innerHTML = `
-        <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>
-        <button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">1</button>
-        <button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>
-      `;
+      controls.innerHTML = '';
       return;
     }
 
-    let buttonsHtml = `<button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Previous</button>`;
+    let buttonsHtml = `
+      <button onclick="goToTasksPage(${currentTasksPage - 1})" class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors disabled:opacity-40" ${currentTasksPage <= 1 ? 'disabled' : ''}>Previous</button>
+    `;
     for (let p = 1; p <= totalPages; p++) {
-      if (p === 1) {
-        buttonsHtml += `<button class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">${p}</button>`;
+      if (p === currentTasksPage) {
+        buttonsHtml += `<button onclick="goToTasksPage(${p})" class="px-3 py-1 rounded bg-primary text-white text-label-md font-bold">${p}</button>`;
       } else {
-        buttonsHtml += `<button class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">${p}</button>`;
+        buttonsHtml += `<button onclick="goToTasksPage(${p})" class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors">${p}</button>`;
       }
     }
-    buttonsHtml += `<button disabled class="px-3 py-1 rounded border border-outline-variant/20 text-label-md text-slate-300 cursor-not-allowed">Next</button>`;
+    buttonsHtml += `
+      <button onclick="goToTasksPage(${currentTasksPage + 1})" class="px-3 py-1 rounded border border-outline-variant/30 text-label-md hover:bg-surface-container-low transition-colors disabled:opacity-40" ${currentTasksPage >= totalPages ? 'disabled' : ''}>Next</button>
+    `;
     controls.innerHTML = buttonsHtml;
   }
 
-  function filterTasksTable() {
+  function filterTasksTable(resetPage = true) {
+    if (resetPage) currentTasksPage = 1;
     const search = document.getElementById('taskSearchInput').value.toLowerCase().trim();
     const floor = activeQuickFloorFilter.toLowerCase();
     const priority = document.getElementById('priorityFilter').value;
@@ -303,7 +325,7 @@
       rows.forEach(r => tbody.appendChild(r));
     }
 
-    let visibleCount = 0;
+    const matchingRows = [];
     rows.forEach(row => {
       const rowId = row.dataset.id.toLowerCase();
       const rowEquip = row.dataset.equipment.toLowerCase();
@@ -318,14 +340,13 @@
       const matchesStatus = !status || rowStatus === status;
 
       if (matchesSearch && matchesFloor && matchesPriority && matchesStatus) {
-        row.style.display = '';
-        visibleCount++;
+        matchingRows.push(row);
       } else {
         row.style.display = 'none';
       }
     });
 
-    updatePaginationControls(visibleCount);
+    updatePaginationControls(matchingRows);
     if (currentViewMode === 'grid') {
       renderTaskGridCards();
     }
