@@ -120,6 +120,17 @@ const UiHelpers = (() => {
     return `AST-${s.padStart(3, '0')}`;
   }
 
+  function getFloorFromName(name) {
+    if (!name) return 1;
+    const match = String(name).match(/(\d+)/);
+    if (!match) return 1;
+    const numStr = match[1];
+    if (numStr.length >= 3) {
+      return parseInt(numStr.substring(0, numStr.length - 2), 10) || 1;
+    }
+    return parseInt(numStr.charAt(0), 10) || 1;
+  }
+
   // Bind to window for global access
   window.showToast = showToast;
   window.formatWorkOrderId = formatWorkOrderId;
@@ -127,6 +138,7 @@ const UiHelpers = (() => {
   window.formatAssetId = formatAssetId;
   window.formatDate = formatDate;
   window.formatDateTime = formatDateTime;
+  window.getFloorFromName = getFloorFromName;
 
-  return { priorityBadge, statusBadge, formatDate, formatDateTime, escapeHtml, escapeJsString, showToast, formatWorkOrderId, formatReportId, formatAssetId };
+  return { priorityBadge, statusBadge, formatDate, formatDateTime, escapeHtml, escapeJsString, showToast, formatWorkOrderId, formatReportId, formatAssetId, getFloorFromName };
 })();
