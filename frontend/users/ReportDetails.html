@@ -1,221 +1,229 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Report Details - VNU-IS Asset Maintenance</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script src="../assets/js/theme.config.js"></script>
-<style>
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  }
-  .bg-brand-blue {
-    background-color: #005BAC;
-  }
-  .text-brand-blue {
-    color: #005BAC;
-  }
-</style>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Report Details - VNU-IS Asset Maintenance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="../assets/js/theme.config.js"></script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .bg-brand-blue {
+      background-color: #005BAC;
+    }
+
+    .text-brand-blue {
+      color: #005BAC;
+    }
+  </style>
 </head>
+
 <body class="bg-content-bg text-on-surface font-body-md overflow-x-hidden min-h-screen flex flex-col">
 
-<!-- Sidebar placeholder -->
-<div id="sidebar-placeholder"></div>
+  <!-- Sidebar placeholder -->
+  <div id="sidebar-placeholder"></div>
 
-<!-- Main wrapper -->
-<div class="ml-[240px] flex flex-col min-h-screen">
-  <!-- Topbar placeholder -->
-  <div id="topbar-placeholder"></div>
+  <!-- Main wrapper -->
+  <div class="ml-[240px] flex flex-col min-h-screen">
+    <!-- Topbar placeholder -->
+    <div id="topbar-placeholder"></div>
 
-  <!-- Main Content Area -->
-  <main class="flex-1 mt-[60px] mb-[40px] p-8 bg-content-bg min-h-[calc(100vh-100px)]">
-    <div class="max-w-6xl mx-auto">
-      <!-- Back Button -->
-      <a id="backLink" href="ListReports.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-brand-blue font-bold rounded-xl border border-outline-variant/30 shadow-xs hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all duration-200 text-body-sm mb-6 group">
-        <span class="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-1">arrow_back</span>
-        <span>Back to List Reports</span>
-      </a>
+    <!-- Main Content Area -->
+    <main class="flex-1 mt-[60px] mb-[40px] p-8 bg-content-bg min-h-[calc(100vh-100px)]">
+      <div class="max-w-6xl mx-auto">
+        <!-- Back Button -->
+        <a id="backLink" href="ListReports.html"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-white text-brand-blue font-bold rounded-xl border border-outline-variant/30 shadow-xs hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all duration-200 text-body-sm mb-6 group">
+          <span
+            class="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-1">arrow_back</span>
+          <span>Back to List Reports</span>
+        </a>
 
-      <!-- Report Details - Dynamic Content -->
-      <div id="content">
-        <div class="text-center py-8 text-on-surface-variant">Loading report details...</div>
+        <!-- Report Details - Dynamic Content -->
+        <div id="content">
+          <div class="text-center py-8 text-on-surface-variant">Loading report details...</div>
+        </div>
       </div>
-    </div>
-  </main>
-</div>
+    </main>
+  </div>
 
-<script src="../assets/js/config.js"></script>
-<script src="../assets/js/api.js"></script>
-<script src="../assets/js/auth.js"></script>
-<script src="../assets/js/layout.js"></script>
-<script src="../assets/js/notifications.js"></script>
-<script src="../assets/js/ui-helpers.js"></script>
-<script>
-  window.confirmDeleteReport = async function(id) {
-    if (!confirm('Are you sure you want to delete report #' + id + '? This action cannot be undone.')) {
-      return;
-    }
-    try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/layout.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/ui-helpers.js"></script>
+  <script>
+    window.confirmDeleteReport = async function (id) {
+      if (!confirm('Are you sure you want to delete report #' + id + '? This action cannot be undone.')) {
+        return;
+      }
+      try {
+        if (window.Api && window.Auth && Auth.isAuthenticated()) {
+          try {
+            await Api.delete('/fault-reports/' + id);
+          } catch (e) { }
+        }
+
+        // Filter out from local storage
         try {
-          await Api.delete('/fault-reports/' + id);
-        } catch (e) {}
+          let userReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+          userReports = userReports.filter(r => String(r.report_id || r.id) !== String(id));
+          localStorage.setItem('vnu_user_reports', JSON.stringify(userReports));
+        } catch (e) { }
+
+        // Add to deleted reports list
+        try {
+          let deletedReports = JSON.parse(localStorage.getItem('vnu_deleted_reports') || '[]');
+          const formattedId = window.UiHelpers ? UiHelpers.formatReportId(id) : String(id);
+          const rawId = String(id).replace(/\D/g, '');
+          if (!deletedReports.includes(formattedId)) deletedReports.push(formattedId);
+          if (rawId && !deletedReports.includes(rawId)) deletedReports.push(rawId);
+          if (!deletedReports.includes(String(id))) deletedReports.push(String(id));
+          localStorage.setItem('vnu_deleted_reports', JSON.stringify(deletedReports));
+        } catch (e) { }
+
+        sessionStorage.setItem('vnu_toast_msg', 'Report #' + id + ' deleted successfully.');
+        sessionStorage.setItem('vnu_toast_type', 'success');
+        window.location.href = 'ListReports.html';
+      } catch (err) {
+        console.error('Delete report error:', err);
+        alert('Failed to delete report: ' + (err.message || err));
       }
-      
-      // Filter out from local storage
-      try {
-        let userReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
-        userReports = userReports.filter(r => String(r.report_id || r.id) !== String(id));
-        localStorage.setItem('vnu_user_reports', JSON.stringify(userReports));
-      } catch (e) {}
+    };
 
-      // Add to deleted reports list
-      try {
-        let deletedReports = JSON.parse(localStorage.getItem('vnu_deleted_reports') || '[]');
-        const formattedId = window.UiHelpers ? UiHelpers.formatReportId(id) : String(id);
-        const rawId = String(id).replace(/\D/g, '');
-        if (!deletedReports.includes(formattedId)) deletedReports.push(formattedId);
-        if (rawId && !deletedReports.includes(rawId)) deletedReports.push(rawId);
-        if (!deletedReports.includes(String(id))) deletedReports.push(String(id));
-        localStorage.setItem('vnu_deleted_reports', JSON.stringify(deletedReports));
-      } catch (e) {}
-
-      sessionStorage.setItem('vnu_toast_msg', 'Report #' + id + ' deleted successfully.');
-      sessionStorage.setItem('vnu_toast_type', 'success');
-      window.location.href = 'ListReports.html';
-    } catch (err) {
-      console.error('Delete report error:', err);
-      alert('Failed to delete report: ' + (err.message || err));
-    }
-  };
-
-  (function() {
-    // 1. Get user from Auth
-    const user = Auth.getCurrentUser();
-    if (!user) {
-      window.location.href = 'Login.html';
-      return;
-    }
-
-    // 2. Initialize Layout
-    Layout.init({ 
-      role: user.role || 'User', 
-      activePage: 'ListReports' 
-    });
-
-    // 3. Get report ID from URL
-    const reportId = new URLSearchParams(location.search).get('id');
-    if (!reportId) {
-      document.getElementById('content').innerHTML = '<p class="text-error text-center py-8">No report ID provided</p>';
-      return;
-    }
-
-    const content = document.getElementById('content');
-
-    // 4. Helper functions
-    function priorityBadge(priority) {
-      const colors = {
-        'Low': 'bg-green-100 text-green-800',
-        'Medium': 'bg-yellow-100 text-yellow-800',
-        'High': 'bg-orange-100 text-orange-800',
-        'Critical': 'bg-red-100 text-red-800'
-      };
-      return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[priority] || 'bg-gray-100 text-gray-800'}">${priority || 'N/A'}</span>`;
-    }
-
-    function statusBadge(status) {
-      const colors = {
-        'Pending': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-        'Pending Approval': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-        'Processing': 'bg-blue-100 text-blue-800 border border-blue-200',
-        'In Progress': 'bg-blue-100 text-blue-800 border border-blue-200',
-        'Completed': 'bg-green-100 text-green-800 border border-green-200',
-        'Resolved': 'bg-green-100 text-green-800 border border-green-200',
-        'Closed': 'bg-gray-600 text-white border border-gray-700 font-bold',
-        'Rejected': 'bg-red-100 text-red-800 border border-red-200',
-        'Cancelled': 'bg-gray-100 text-gray-800 border border-gray-200',
-        'Assigned': 'bg-blue-100 text-blue-800 border border-blue-200'
-      };
-      return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
-    }
-
-    function formatDate(dateStr) {
-      if (!dateStr) return '-';
-      try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric' 
-        });
-      } catch {
-        return dateStr;
+    (function () {
+      // 1. Get user from Auth
+      const user = Auth.getCurrentUser();
+      if (!user) {
+        window.location.href = 'Login.html';
+        return;
       }
-    }
 
-    function formatDateTime(dateStr) {
-      if (!dateStr) return '-';
-      try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      } catch {
-        return dateStr;
+      // 2. Initialize Layout
+      Layout.init({
+        role: user.role || 'User',
+        activePage: 'ListReports'
+      });
+
+      // 3. Get report ID from URL
+      const reportId = new URLSearchParams(location.search).get('id');
+      if (!reportId) {
+        document.getElementById('content').innerHTML = '<p class="text-error text-center py-8">No report ID provided</p>';
+        return;
       }
-    }
 
-    function getFieldValue(obj, fieldNames, defaultValue = 'N/A') {
-      for (const field of fieldNames) {
-        if (obj[field] !== undefined && obj[field] !== null && obj[field] !== '') {
-          return obj[field];
+      const content = document.getElementById('content');
+
+      // 4. Helper functions
+      function priorityBadge(priority) {
+        const colors = {
+          'Low': 'bg-green-100 text-green-800',
+          'Medium': 'bg-yellow-100 text-yellow-800',
+          'High': 'bg-orange-100 text-orange-800',
+          'Critical': 'bg-red-100 text-red-800'
+        };
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[priority] || 'bg-gray-100 text-gray-800'}">${priority || 'N/A'}</span>`;
+      }
+
+      function statusBadge(status) {
+        const colors = {
+          'Pending': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+          'Pending Approval': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+          'Processing': 'bg-blue-100 text-blue-800 border border-blue-200',
+          'In Progress': 'bg-blue-100 text-blue-800 border border-blue-200',
+          'Completed': 'bg-green-100 text-green-800 border border-green-200',
+          'Resolved': 'bg-green-100 text-green-800 border border-green-200',
+          'Closed': 'bg-gray-600 text-white border border-gray-700 font-bold',
+          'Rejected': 'bg-red-100 text-red-800 border border-red-200',
+          'Cancelled': 'bg-gray-100 text-gray-800 border border-gray-200',
+          'Assigned': 'bg-blue-100 text-blue-800 border border-blue-200'
+        };
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || 'bg-gray-100 text-gray-800'}">${status || 'N/A'}</span>`;
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        try {
+          const date = new Date(dateStr);
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        } catch {
+          return dateStr;
         }
       }
-      return defaultValue;
-    }
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+      function formatDateTime(dateStr) {
+        if (!dateStr) return '-';
+        try {
+          const date = new Date(dateStr);
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        } catch {
+          return dateStr;
+        }
+      }
 
-    function renderVisualStepper(status) {
-      const steps = [
-        { label: 'Submitted', key: 'Submitted' },
-        { label: 'Reviewed', key: 'Reviewed' },
-        { label: 'Assigned', key: 'Assigned' },
-        { label: 'Processing', key: 'Processing' },
-        { label: 'Closed', key: 'Closed' }
-      ];
+      function getFieldValue(obj, fieldNames, defaultValue = 'N/A') {
+        for (const field of fieldNames) {
+          if (obj[field] !== undefined && obj[field] !== null && obj[field] !== '') {
+            return obj[field];
+          }
+        }
+        return defaultValue;
+      }
 
-      const s = status || '';
-      let activeIndex = 0;
-      if (['Pending', 'Pending Approval'].includes(s)) activeIndex = 0;
-      else if (s === 'Reviewed') activeIndex = 1;
-      else if (s === 'Assigned' || s === 'Received') activeIndex = 2;
-      else if (['Processing', 'In Progress'].includes(s)) activeIndex = 3;
-      else if (['Completed', 'Resolved', 'Closed'].includes(s)) activeIndex = 4;
-      else activeIndex = 0;
+      function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
 
-      return `
+      function renderVisualStepper(status) {
+        const steps = [
+          { label: 'Submitted', key: 'Submitted' },
+          { label: 'Reviewed', key: 'Reviewed' },
+          { label: 'Assigned', key: 'Assigned' },
+          { label: 'Processing', key: 'Processing' },
+          { label: 'Closed', key: 'Closed' }
+        ];
+
+        const s = status || '';
+        let activeIndex = 0;
+        if (['Pending', 'Pending Approval'].includes(s)) activeIndex = 0;
+        else if (s === 'Reviewed') activeIndex = 1;
+        else if (s === 'Assigned' || s === 'Received') activeIndex = 2;
+        else if (['Processing', 'In Progress'].includes(s)) activeIndex = 3;
+        else if (['Completed', 'Resolved', 'Closed'].includes(s)) activeIndex = 4;
+        else activeIndex = 0;
+
+        return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
           <div class="flex items-center justify-between relative max-w-3xl mx-auto px-4">
             <div class="absolute left-10 right-10 top-5 -translate-y-1/2 h-1 bg-surface-container-high z-0"></div>
             <div class="absolute left-10 top-5 -translate-y-1/2 h-1 bg-brand-blue z-0 transition-all duration-500" style="width: calc(${(activeIndex / (steps.length - 1)) * 100}% - 20px)"></div>
             
             ${steps.map((step, idx) => {
-              const isDone = idx <= activeIndex;
-              const isCurrent = idx === activeIndex;
-              return `
+          const isDone = idx <= activeIndex;
+          const isCurrent = idx === activeIndex;
+          return `
                 <div class="relative z-10 flex flex-col items-center gap-1.5">
                   <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${isDone ? 'bg-brand-blue text-white shadow-md' : 'bg-white border-2 border-outline-variant text-on-surface-variant'} ${isCurrent ? 'ring-4 ring-brand-blue/20 scale-110' : ''}">
                     ${isDone ? '<span class="material-symbols-outlined text-base">check</span>' : (idx + 1)}
@@ -223,84 +231,84 @@
                   <span class="text-xs font-semibold ${isDone ? 'text-brand-blue' : 'text-on-surface-variant'}">${step.label}</span>
                 </div>
               `;
-            }).join('')}
+        }).join('')}
           </div>
         </div>
       `;
-    }
-
-    function cleanLabel(val) {
-      if (!val) return '';
-      return String(val)
-        .replace(/^(meeting_room|router|devices|ac_unit|videocam|tv|volume_up|mic|cable|photo_camera|computer)\s+/gi, '')
-        .trim();
-    }
-
-    function resolveReporterName(report) {
-      if (report.reporter_name) return report.reporter_name;
-      const user = window.Auth && Auth.getUser ? Auth.getUser() : null;
-      const reportReporterId = report.reporter_id;
-      const currentUserId = user?.user_id || user?.id;
-      if (user && reportReporterId && String(reportReporterId) === String(currentUserId)) {
-        return user.full_name || user.fullName || user.email || 'N/A';
       }
-      return report.reporter_email || report.user_email || 'N/A';
-    }
 
-    // 5. Render Report
-    function renderReport(report, workOrder, confirmation) {
-      const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name']);
-      const rawRoom = getFieldValue(report, ['room_name']);
-      const equipment = cleanLabel(rawEquipment);
-      const room = cleanLabel(rawRoom);
-      const assetType = getFieldValue(report, ['asset_type'], 'N/A');
-      const roomId = getFieldValue(report, ['room_id'], 'N/A');
-      const reporter = resolveReporterName(report);
-      const history = report.statusHistory || [];
-      const currentStatus = report.display_status || report.status || '';
-      const isPending = ['Pending', 'Pending Approval'].includes(report.status) && ['Pending', 'Pending Approval'].includes(currentStatus);
-      
-      const isUserConfirmed = confirmation && (confirmation.is_confirmed === true || confirmation.is_confirmed === 1);
-      
-      // Synchronize display status if workOrder task_status is updated
-      if (workOrder && workOrder.task_status) {
-        if (workOrder.task_status === 'In Progress') {
-          report.status = 'Processing';
-        } else if (workOrder.task_status === 'Completed' && !isUserConfirmed) {
-          report.status = 'Completed';
-        } else if (workOrder.task_status === 'Closed' && isUserConfirmed) {
-          report.status = 'Closed';
+      function cleanLabel(val) {
+        if (!val) return '';
+        return String(val)
+          .replace(/^(meeting_room|router|devices|ac_unit|videocam|tv|volume_up|mic|cable|photo_camera|computer)\s+/gi, '')
+          .trim();
+      }
+
+      function resolveReporterName(report) {
+        if (report.reporter_name) return report.reporter_name;
+        const user = window.Auth && Auth.getUser ? Auth.getUser() : null;
+        const reportReporterId = report.reporter_id;
+        const currentUserId = user?.user_id || user?.id;
+        if (user && reportReporterId && String(reportReporterId) === String(currentUserId)) {
+          return user.full_name || user.fullName || user.email || 'N/A';
         }
+        return report.reporter_email || report.user_email || 'N/A';
       }
 
-      const isCompleted = ['Completed', 'Resolved'].includes(report.status) || ['Completed', 'Resolved'].includes(report.display_status);
+      // 5. Render Report
+      function renderReport(report, workOrder, confirmation) {
+        const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name']);
+        const rawRoom = getFieldValue(report, ['room_name']);
+        const equipment = cleanLabel(rawEquipment);
+        const room = cleanLabel(rawRoom);
+        const assetType = getFieldValue(report, ['asset_type'], 'N/A');
+        const roomId = getFieldValue(report, ['room_id'], 'N/A');
+        const reporter = resolveReporterName(report);
+        const history = report.statusHistory || [];
+        const currentStatus = report.display_status || report.status || '';
+        const isPending = ['Pending', 'Pending Approval'].includes(report.status) && ['Pending', 'Pending Approval'].includes(currentStatus);
 
-      const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
-      let reportImages = [];
-      if (report.images && Array.isArray(report.images) && report.images.length > 0) {
-        reportImages = report.images.map(img => (img.startsWith('http') || img.startsWith('data:') ? img : (backendBase + img)));
-      } else if (report.image_path) {
-        const url = (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path));
-        reportImages = [url];
-      }
+        const isUserConfirmed = confirmation && (confirmation.is_confirmed === true || confirmation.is_confirmed === 1);
 
-      // WorkOrder fallback if null for completed or assigned reports
-      if (!workOrder && (report.order_id || report.technician_name || isCompleted || ['Assigned', 'In Progress', 'Processing'].includes(report.status))) {
-        workOrder = {
-          order_id: report.order_id || ('WO-2024-' + String(report.report_id || '015').replace(/\D/g, '')),
-          technician_name: report.technician_name || 'Le Van C',
-          task_status: isCompleted ? 'Completed' : (report.status || 'In Progress'),
-          assigned_at: report.assigned_at || report.reported_at,
-          resolved_at: report.resolved_at || (isCompleted ? report.reported_at : null),
-          fix_description: report.fix_description || (isCompleted ? 'Replaced new parts, cleaned equipment, and verified proper operation.' : 'Processing equipment.'),
-          parts_used: report.parts_used || (isCompleted ? 'Replacement spare parts (1 set)' : null)
-        };
-      }
+        // Synchronize display status if workOrder task_status is updated
+        if (workOrder && workOrder.task_status) {
+          if (workOrder.task_status === 'In Progress') {
+            report.status = 'Processing';
+          } else if (workOrder.task_status === 'Completed' && !isUserConfirmed) {
+            report.status = 'Completed';
+          } else if (workOrder.task_status === 'Closed' && isUserConfirmed) {
+            report.status = 'Closed';
+          }
+        }
 
-      let html = '';
+        const isCompleted = ['Completed', 'Resolved'].includes(report.status) || ['Completed', 'Resolved'].includes(report.display_status);
 
-      // ===== HEADER =====
-      html += `
+        const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
+        let reportImages = [];
+        if (report.images && Array.isArray(report.images) && report.images.length > 0) {
+          reportImages = report.images.map(img => (img.startsWith('http') || img.startsWith('data:') ? img : (backendBase + img)));
+        } else if (report.image_path) {
+          const url = (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path));
+          reportImages = [url];
+        }
+
+        // WorkOrder fallback if null for completed or assigned reports
+        if (!workOrder && (report.order_id || report.technician_name || isCompleted || ['Assigned', 'In Progress', 'Processing'].includes(report.status))) {
+          workOrder = {
+            order_id: report.order_id || ('WO-2024-' + String(report.report_id || '015').replace(/\D/g, '')),
+            technician_name: report.technician_name || 'Le Van C',
+            task_status: isCompleted ? 'Completed' : (report.status || 'In Progress'),
+            assigned_at: report.assigned_at || report.reported_at,
+            resolved_at: report.resolved_at || (isCompleted ? report.reported_at : null),
+            fix_description: report.fix_description || (isCompleted ? 'Replaced new parts, cleaned equipment, and verified proper operation.' : 'Processing equipment.'),
+            parts_used: report.parts_used || (isCompleted ? 'Replacement spare parts (1 set)' : null)
+          };
+        }
+
+        let html = '';
+
+        // ===== HEADER =====
+        html += `
         <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
           <div class="flex items-center gap-4 flex-wrap">
             <h2 class="text-headline-md font-headline-md font-bold text-on-surface">Report Details - ${escapeHtml(UiHelpers.formatReportId(report.report_id))}</h2>
@@ -318,35 +326,35 @@
         </div>
       `;
 
-      // ===== MAIN CONTENT =====
-      const isRejected = (report.status === 'Rejected');
-      let rejectionReason = isRejected ? (report.rejection_reason || report.rejectionReason || report.reject_reason) : '';
-      let rejectedAt = isRejected ? (report.rejected_at || report.updated_at) : null;
+        // ===== MAIN CONTENT =====
+        const isRejected = (report.status === 'Rejected');
+        let rejectionReason = isRejected ? (report.rejection_reason || report.rejectionReason || report.reject_reason) : '';
+        let rejectedAt = isRejected ? (report.rejected_at || report.updated_at) : null;
 
-      if (isRejected) {
-        const rId = String(report.report_id || '').replace(/\D/g, '');
-        try {
-          const storedStr = localStorage.getItem('vnu_rejected_info_' + report.report_id) || localStorage.getItem('vnu_rejected_info_' + rId);
-          if (storedStr) {
-            const parsed = JSON.parse(storedStr);
-            if (parsed.reason) rejectionReason = parsed.reason;
-            if (parsed.rejected_at) rejectedAt = parsed.rejected_at;
-          }
-        } catch (e) {}
-
-        if (!rejectionReason) {
+        if (isRejected) {
+          const rId = String(report.report_id || '').replace(/\D/g, '');
           try {
-            const storedOnly = localStorage.getItem('vnu_rejection_reason_' + report.report_id) || localStorage.getItem('vnu_rejection_reason_' + rId);
-            if (storedOnly) rejectionReason = storedOnly;
-          } catch (e) {}
+            const storedStr = localStorage.getItem('vnu_rejected_info_' + report.report_id) || localStorage.getItem('vnu_rejected_info_' + rId);
+            if (storedStr) {
+              const parsed = JSON.parse(storedStr);
+              if (parsed.reason) rejectionReason = parsed.reason;
+              if (parsed.rejected_at) rejectedAt = parsed.rejected_at;
+            }
+          } catch (e) { }
+
+          if (!rejectionReason) {
+            try {
+              const storedOnly = localStorage.getItem('vnu_rejection_reason_' + report.report_id) || localStorage.getItem('vnu_rejection_reason_' + rId);
+              if (storedOnly) rejectionReason = storedOnly;
+            } catch (e) { }
+          }
+
+          if (!rejectionReason && report.note) rejectionReason = report.note;
+          if (!rejectionReason) rejectionReason = 'No specific rejection reason recorded.';
+          if (!rejectedAt) rejectedAt = report.reported_at || new Date().toISOString();
         }
 
-        if (!rejectionReason && report.note) rejectionReason = report.note;
-        if (!rejectionReason) rejectionReason = 'No specific rejection reason recorded.';
-        if (!rejectedAt) rejectedAt = report.reported_at || new Date().toISOString();
-      }
-
-      html += `
+        html += `
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div class="xl:col-span-2 space-y-6">
 
@@ -416,10 +424,10 @@
                   <div class="flex items-center gap-3 flex-wrap">
                     ${reportImages.map((imgUrl, i) => `
                       <a href="${imgUrl}" target="_blank" class="block relative w-36 h-28 rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group bg-surface-container shrink-0">
-                        <img src="${imgUrl}" alt="Uploaded Evidence ${i+1}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 p-2 text-center\\'><span class=\\'material-symbols-outlined text-2xl mb-1\\'>broken_image</span>Image ${i+1}</div>';" />
+                        <img src="${imgUrl}" alt="Uploaded Evidence ${i + 1}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onError="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 p-2 text-center\\'><span class=\\'material-symbols-outlined text-2xl mb-1\\'>broken_image</span>Image ${i + 1}</div>';" />
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
                           <span class="material-symbols-outlined text-sm">visibility</span>
-                          <span>View #${i+1}</span>
+                          <span>View #${i + 1}</span>
                         </div>
                       </a>
                     `).join('')}
@@ -442,21 +450,21 @@
         </div>
       `;
 
-      // ===== CONFIRMATION SECTION FOR COMPLETED REPORTS =====
-      if (isUserConfirmed) {
-        html += renderConfirmationDone(confirmation);
-      } else if (['Completed', 'Resolved'].includes(report.status) || (workOrder && ['Completed', 'Resolved'].includes(workOrder.task_status))) {
-        html += renderConfirmationForm(workOrder ? workOrder.order_id : (report.order_id || 'WO-2024-015'));
+        // ===== CONFIRMATION SECTION FOR COMPLETED REPORTS =====
+        if (isUserConfirmed) {
+          html += renderConfirmationDone(confirmation);
+        } else if (['Completed', 'Resolved'].includes(report.status) || (workOrder && ['Completed', 'Resolved'].includes(workOrder.task_status))) {
+          html += renderConfirmationForm(workOrder ? workOrder.order_id : (report.order_id || 'WO-2024-015'));
+        }
+
+        return html;
       }
 
-      return html;
-    }
+      // ===== WORK ORDER =====
+      function renderWorkOrder(workOrder, reportStatus, isUserConfirmed) {
+        const status = (reportStatus === 'Closed' && isUserConfirmed) ? 'Closed' : (workOrder.task_status || workOrder.status || 'Completed');
 
-    // ===== WORK ORDER =====
-    function renderWorkOrder(workOrder, reportStatus, isUserConfirmed) {
-      const status = (reportStatus === 'Closed' && isUserConfirmed) ? 'Closed' : (workOrder.task_status || workOrder.status || 'Completed');
-      
-      return `
+        return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
           <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2">Work Order Info</h3>
           <div class="space-y-3">
@@ -487,13 +495,13 @@
           </div>
         </div>
       `;
-    }
+      }
 
-    // ===== TIMELINE =====
-    function renderTimeline(workOrder) {
-      if (!workOrder || !workOrder.assigned_at) return '';
-      
-      return `
+      // ===== TIMELINE =====
+      function renderTimeline(workOrder) {
+        if (!workOrder || !workOrder.assigned_at) return '';
+
+        return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
           <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2">Timeline</h3>
           <div class="space-y-3">
@@ -510,34 +518,129 @@
           </div>
         </div>
       `;
-    }
+      }
 
-    // ===== REPAIR HISTORY TIMELINE =====
-    function renderHistory(report, workOrder, confirmation) {
-      let events = [];
+      // ===== REPAIR HISTORY TIMELINE =====
+      function renderHistory(report, workOrder, confirmation) {
+        let events = [];
 
-      if (workOrder && workOrder.statusHistory && workOrder.statusHistory.length > 0) {
-        events = workOrder.statusHistory.map(h => ({
-          date: formatDateTime(h.changed_at || h.created_at),
-          status: h.new_status || h.task_status || h.status,
-          note: h.notes || h.note || ''
-        })).reverse();
+        if (workOrder && workOrder.statusHistory && workOrder.statusHistory.length > 0) {
+          events = workOrder.statusHistory.map(h => ({
+            date: formatDateTime(h.changed_at || h.created_at),
+            status: h.new_status || h.task_status || h.status,
+            note: h.notes || h.note || ''
+          })).reverse();
 
-        // Always prepend initial milestones if missing in DB statusHistory
-        const repDate = report ? formatDateTime(report.reported_at) : (events[events.length - 1]?.date || '');
-        const assignedDate = workOrder && workOrder.assigned_at ? formatDateTime(workOrder.assigned_at) : repDate;
+          // Always prepend initial milestones if missing in DB statusHistory
+          const repDate = report ? formatDateTime(report.reported_at) : (events[events.length - 1]?.date || '');
+          const assignedDate = workOrder && workOrder.assigned_at ? formatDateTime(workOrder.assigned_at) : repDate;
 
-        if (!events.some(e => e.status === 'Processing' || e.status === 'Assigned')) {
-          events.push({
-            date: assignedDate,
-            status: 'Processing',
-            textColor: 'text-blue-600',
-            dotColor: 'bg-blue-500',
-            note: 'Manager approved report and assigned to technician for resolution.'
-          });
-        }
+          if (!events.some(e => e.status === 'Processing' || e.status === 'Assigned')) {
+            events.push({
+              date: assignedDate,
+              status: 'Processing',
+              textColor: 'text-blue-600',
+              dotColor: 'bg-blue-500',
+              note: 'Manager approved report and assigned to technician for resolution.'
+            });
+          }
 
-        if (!events.some(e => e.status === 'Pending Approval' || e.status === 'Pending')) {
+          if (!events.some(e => e.status === 'Pending Approval' || e.status === 'Pending')) {
+            events.push({
+              date: repDate,
+              status: 'Pending Approval',
+              textColor: 'text-amber-600',
+              dotColor: 'bg-amber-400',
+              note: 'Fault report submitted successfully (pending manager approval).'
+            });
+          }
+        } else if (report && report.statusHistory && report.statusHistory.length > 0) {
+          events = report.statusHistory.map(h => ({
+            date: formatDateTime(h.changed_at || h.created_at),
+            status: h.new_status || h.status,
+            note: h.notes || h.note || ''
+          })).reverse();
+        } else if (report) {
+          const s = report.status || 'Pending Approval';
+          const repDate = formatDateTime(report.reported_at);
+          const assignedDate = workOrder && workOrder.assigned_at ? formatDateTime(workOrder.assigned_at) : repDate;
+          const resolvedDate = workOrder && workOrder.resolved_at ? formatDateTime(workOrder.resolved_at) : repDate;
+          const fixNote = (workOrder && workOrder.fix_description) ? workOrder.fix_description : 'Completed technical inspection and maintenance.';
+
+          if (s === 'Rejected') {
+            const rejectedDate = formatDateTime(report.rejected_at || report.updated_at || report.reported_at);
+            const reason = report.rejection_reason || report.rejectionReason || report.reject_reason || report.note || 'Report rejected by manager (Information non-matching or duplicate).';
+            events.push({
+              date: rejectedDate,
+              status: 'Rejected',
+              textColor: 'text-red-600',
+              dotColor: 'bg-red-500',
+              note: reason
+            });
+          }
+
+          if (s === 'Cancelled') {
+            const cancelledDate = formatDateTime(report.cancelled_at || report.updated_at || report.reported_at);
+            const reason = report.cancel_reason || report.cancelReason || report.note || 'Fault report cancelled by user.';
+            events.push({
+              date: cancelledDate,
+              status: 'Cancelled',
+              textColor: 'text-slate-600',
+              dotColor: 'bg-slate-400',
+              note: reason
+            });
+          }
+
+          // Check if report was reopened via local storage
+          let reopenInfo = null;
+          try {
+            const rId = report.report_id || new URLSearchParams(location.search).get('id');
+            const savedReopen = localStorage.getItem('vnu_reopened_' + rId);
+            if (savedReopen) {
+              reopenInfo = JSON.parse(savedReopen);
+            }
+          } catch (e) { }
+
+          if (reopenInfo) {
+            events.push({
+              date: formatDateTime(reopenInfo.reopened_at),
+              status: 'In Progress',
+              textColor: 'text-blue-600',
+              dotColor: 'bg-blue-500',
+              note: `Reopened by user: ${reopenInfo.reason}`
+            });
+          }
+
+          if (s === 'Closed' || confirmation) {
+            events.push({
+              date: confirmation && confirmation.created_at ? formatDateTime(confirmation.created_at) : repDate,
+              status: 'Closed',
+              textColor: 'text-slate-600',
+              dotColor: 'bg-slate-400',
+              note: confirmation && confirmation.feedback ? confirmation.feedback : 'User confirmed repair completion.'
+            });
+          }
+
+          if (['Completed', 'Resolved', 'Closed'].includes(s) || confirmation || reopenInfo) {
+            events.push({
+              date: resolvedDate,
+              status: 'Completed',
+              textColor: 'text-green-600',
+              dotColor: 'bg-green-500',
+              note: fixNote
+            });
+          }
+
+          if (['Processing', 'In Progress', 'Completed', 'Resolved', 'Closed'].includes(s) && workOrder) {
+            events.push({
+              date: assignedDate,
+              status: 'Processing',
+              textColor: 'text-blue-600',
+              dotColor: 'bg-blue-500',
+              note: 'Manager approved report and assigned to technician for resolution.'
+            });
+          }
+
           events.push({
             date: repDate,
             status: 'Pending Approval',
@@ -546,149 +649,54 @@
             note: 'Fault report submitted successfully (pending manager approval).'
           });
         }
-      } else if (report && report.statusHistory && report.statusHistory.length > 0) {
-        events = report.statusHistory.map(h => ({
-          date: formatDateTime(h.changed_at || h.created_at),
-          status: h.new_status || h.status,
-          note: h.notes || h.note || ''
-        })).reverse();
-      } else if (report) {
-        const s = report.status || 'Pending Approval';
-        const repDate = formatDateTime(report.reported_at);
-        const assignedDate = workOrder && workOrder.assigned_at ? formatDateTime(workOrder.assigned_at) : repDate;
-        const resolvedDate = workOrder && workOrder.resolved_at ? formatDateTime(workOrder.resolved_at) : repDate;
-        const fixNote = (workOrder && workOrder.fix_description) ? workOrder.fix_description : 'Completed technical inspection and maintenance.';
 
-        if (s === 'Rejected') {
-          const rejectedDate = formatDateTime(report.rejected_at || report.updated_at || report.reported_at);
-          const reason = report.rejection_reason || report.rejectionReason || report.reject_reason || report.note || 'Report rejected by manager (Information non-matching or duplicate).';
-          events.push({
-            date: rejectedDate,
-            status: 'Rejected',
-            textColor: 'text-red-600',
-            dotColor: 'bg-red-500',
-            note: reason
-          });
-        }
-
-        if (s === 'Cancelled') {
-          const cancelledDate = formatDateTime(report.cancelled_at || report.updated_at || report.reported_at);
-          const reason = report.cancel_reason || report.cancelReason || report.note || 'Fault report cancelled by user.';
-          events.push({
-            date: cancelledDate,
-            status: 'Cancelled',
-            textColor: 'text-slate-600',
-            dotColor: 'bg-slate-400',
-            note: reason
-          });
-        }
-
-        // Check if report was reopened via local storage
-        let reopenInfo = null;
-        try {
-          const rId = report.report_id || new URLSearchParams(location.search).get('id');
-          const savedReopen = localStorage.getItem('vnu_reopened_' + rId);
-          if (savedReopen) {
-            reopenInfo = JSON.parse(savedReopen);
-          }
-        } catch(e) {}
-
-        if (reopenInfo) {
-          events.push({
-            date: formatDateTime(reopenInfo.reopened_at),
-            status: 'In Progress',
-            textColor: 'text-blue-600',
-            dotColor: 'bg-blue-500',
-            note: `Reopened by user: ${reopenInfo.reason}`
-          });
-        }
-
-        if (s === 'Closed' || confirmation) {
-          events.push({
-            date: confirmation && confirmation.created_at ? formatDateTime(confirmation.created_at) : repDate,
-            status: 'Closed',
-            textColor: 'text-slate-600',
-            dotColor: 'bg-slate-400',
-            note: confirmation && confirmation.feedback ? confirmation.feedback : 'User confirmed repair completion.'
-          });
-        }
-
-        if (['Completed', 'Resolved', 'Closed'].includes(s) || confirmation || reopenInfo) {
-          events.push({
-            date: resolvedDate,
-            status: 'Completed',
-            textColor: 'text-green-600',
-            dotColor: 'bg-green-500',
-            note: fixNote
-          });
-        }
-
-        if (['Processing', 'In Progress', 'Completed', 'Resolved', 'Closed'].includes(s) && workOrder) {
-          events.push({
-            date: assignedDate,
-            status: 'Processing',
-            textColor: 'text-blue-600',
-            dotColor: 'bg-blue-500',
-            note: 'Manager approved report and assigned to technician for resolution.'
-          });
-        }
-
-        events.push({
-          date: repDate,
-          status: 'Pending Approval',
-          textColor: 'text-amber-600',
-          dotColor: 'bg-amber-400',
-          note: 'Fault report submitted successfully (pending manager approval).'
-        });
-      }
-
-      if (events.length === 0) {
-        return `
+        if (events.length === 0) {
+          return `
           <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
             <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2 mb-4">Repair History</h3>
             <p class="text-body-sm text-on-surface-variant text-center py-4">No repair history available</p>
           </div>
         `;
-      }
+        }
 
-      const statusTextColors = {
-        'Completed': 'text-green-600',
-        'Closed': 'text-slate-600',
-        'Resolved': 'text-green-600',
-        'In Progress': 'text-blue-600',
-        'Processing': 'text-blue-600',
-        'Assigned': 'text-gray-700',
-        'Pending Approval': 'text-amber-600',
-        'Pending': 'text-amber-600',
-        'Rejected': 'text-red-600',
-        'Cancelled': 'text-slate-500'
-      };
+        const statusTextColors = {
+          'Completed': 'text-green-600',
+          'Closed': 'text-slate-600',
+          'Resolved': 'text-green-600',
+          'In Progress': 'text-blue-600',
+          'Processing': 'text-blue-600',
+          'Assigned': 'text-gray-700',
+          'Pending Approval': 'text-amber-600',
+          'Pending': 'text-amber-600',
+          'Rejected': 'text-red-600',
+          'Cancelled': 'text-slate-500'
+        };
 
-      const dotBgColors = {
-        'Completed': 'bg-green-500',
-        'Closed': 'bg-slate-400',
-        'Resolved': 'bg-green-500',
-        'In Progress': 'bg-blue-500',
-        'Processing': 'bg-blue-500',
-        'Assigned': 'bg-slate-300',
-        'Pending Approval': 'bg-amber-400',
-        'Pending': 'bg-amber-400',
-        'Rejected': 'bg-red-500',
-        'Cancelled': 'bg-slate-400'
-      };
+        const dotBgColors = {
+          'Completed': 'bg-green-500',
+          'Closed': 'bg-slate-400',
+          'Resolved': 'bg-green-500',
+          'In Progress': 'bg-blue-500',
+          'Processing': 'bg-blue-500',
+          'Assigned': 'bg-slate-300',
+          'Pending Approval': 'bg-amber-400',
+          'Pending': 'bg-amber-400',
+          'Rejected': 'bg-red-500',
+          'Cancelled': 'bg-slate-400'
+        };
 
-      return `
+        return `
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6">
           <h3 class="text-label-lg font-bold text-on-surface border-b border-outline-variant/10 pb-2 mb-4">Repair History</h3>
           <div class="relative space-y-6 pl-6 before:content-[''] before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant/20">
             ${events.map((h, index) => {
-              const statusText = h.status;
-              const textColor = h.textColor || statusTextColors[statusText] || 'text-on-surface-variant';
-              const dotColor = h.dotColor || dotBgColors[statusText] || 'bg-slate-300';
-              const note = h.note || '';
-              const date = h.date;
-              
-              return `
+          const statusText = h.status;
+          const textColor = h.textColor || statusTextColors[statusText] || 'text-on-surface-variant';
+          const dotColor = h.dotColor || dotBgColors[statusText] || 'bg-slate-300';
+          const note = h.note || '';
+          const date = h.date;
+
+          return `
                 <div class="relative">
                   <div class="absolute -left-[23px] top-1.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white shadow-xs z-10"></div>
                   <p class="text-xs font-bold text-on-surface mb-0.5">${escapeHtml(date)}</p>
@@ -696,15 +704,15 @@
                   ${note ? `<p class="text-body-sm text-on-surface-variant mt-1 leading-relaxed">Note: ${escapeHtml(note)}</p>` : ''}
                 </div>
               `;
-            }).join('')}
+        }).join('')}
           </div>
         </div>
       `;
-    }
+      }
 
-    // ===== CONFIRMATION FORM =====
-    function renderConfirmationForm(orderId) {
-      return `
+      // ===== CONFIRMATION FORM =====
+      function renderConfirmationForm(orderId) {
+        return `
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 shadow-sm mt-6">
           <p class="text-body-md font-medium text-emerald-900 flex items-center gap-2 mb-4">
             <span class="text-[14px]">🟢</span> The issue has been marked as resolved. Please confirm the repair results.
@@ -724,7 +732,7 @@
               <div>
                 <p class="text-label-md font-bold text-emerald-900 mb-2">Quality assessment:</p>
                 <div class="flex gap-1" id="ratingStars">
-                  ${[1,2,3,4,5].map(i => `
+                  ${[1, 2, 3, 4, 5].map(i => `
                     <span class="material-symbols-outlined cursor-pointer text-2xl hover:scale-110 transition-transform rating-star text-amber-500" 
                           data-value="${i}" onclick="setRating(${i})"
                           style="font-variation-settings: 'FILL' ${i <= 3 ? 1 : 0}">
@@ -755,564 +763,564 @@
           </form>
         </div>
       `;
-    }
+      }
 
-    // ===== CONFIRMATION DONE =====
-    function renderConfirmationDone(confirmation) {
-      const hasFeedback = confirmation && confirmation.feedback && String(confirmation.feedback).trim().length > 0;
-      return `
+      // ===== CONFIRMATION DONE =====
+      function renderConfirmationDone(confirmation) {
+        const hasFeedback = confirmation && confirmation.feedback && String(confirmation.feedback).trim().length > 0;
+        return `
         <div class="bg-green-50 border border-green-200 rounded-xl p-6 shadow-sm mt-6">
           <p class="text-green-800 text-body-md font-bold flex items-center gap-2">
             ${confirmation.is_confirmed
-              ? '\u2705 B\u1ea1n \u0111\u00e3 x\u00e1c nh\u1eadn vi\u1ec7c s\u1eeda ch\u1eefa th\u00e0nh c\u00f4ng.'
-              : '\u26a0\ufe0f B\u1ea1n \u0111\u00e3 b\u00e1o c\u00e1o l\u1ed7i ch\u01b0a \u0111\u01b0\u1ee3c kh\u1eafc ph\u1ee5c. B\u00e1o c\u00e1o \u0111\u00e3 \u0111\u01b0\u1ee3c Reopen.'}
+            ? '\u2705 B\u1ea1n \u0111\u00e3 x\u00e1c nh\u1eadn vi\u1ec7c s\u1eeda ch\u1eefa th\u00e0nh c\u00f4ng.'
+            : '\u26a0\ufe0f B\u1ea1n \u0111\u00e3 b\u00e1o c\u00e1o l\u1ed7i ch\u01b0a \u0111\u01b0\u1ee3c kh\u1eafc ph\u1ee5c. B\u00e1o c\u00e1o \u0111\u00e3 \u0111\u01b0\u1ee3c Reopen.'}
           </p>
           ${confirmation.rating ? `<p class="text-body-sm text-green-700 font-semibold mt-2">\u0110\u00e1nh gi\u00e1: ${'\u2b50'.repeat(confirmation.rating)}</p>` : ''}
           ${hasFeedback ? `<p class="text-body-sm text-green-700 italic mt-2">"${escapeHtml(confirmation.feedback)}"</p>` : ''}
         </div>
       `;
-    }
-
-    // ===== GLOBAL FUNCTIONS =====
-    window.reportIssuePersists = async function(orderId, reason) {
-      if (!reason || !reason.trim()) {
-        alert('Please enter a detailed description of the unresolved issue.');
-        return;
       }
 
-      const numOrderId = parseInt(String(orderId).replace(/\D/g, ''), 10) || orderId;
-      const reportId = new URLSearchParams(location.search).get('id');
-
-      // Disable submit button to prevent double-submission
-      const submitBtn = document.getElementById('confirmSubmitBtn');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Đang gửi...';
-      }
-
-      let apiSuccess = false;
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
-        // Try the correct endpoint first: /work-orders/:id/reopen
-        try {
-          await Api.post(`/work-orders/${numOrderId}/reopen`, { reason: reason.trim() });
-          apiSuccess = true;
-        } catch (e1) {
-          // Fallback: try /workOrders/:id/reopen
-          try {
-            await Api.post(`/workOrders/${numOrderId}/reopen`, { reason: reason.trim() });
-            apiSuccess = true;
-          } catch (e2) {
-            console.warn('API reopen call failed (may be offline or seed data), using local fallback:', e2.message || e2);
-          }
+      // ===== GLOBAL FUNCTIONS =====
+      window.reportIssuePersists = async function (orderId, reason) {
+        if (!reason || !reason.trim()) {
+          alert('Please enter a detailed description of the unresolved issue.');
+          return;
         }
-      }
 
-      // If API failed, try to update FaultReport status directly
-      if (!apiSuccess && window.Api && window.Auth && Auth.isAuthenticated()) {
-        try {
-          const numReportId = parseInt(String(reportId).replace(/\D/g, ''), 10);
-          if (numReportId) {
-            await Api.patch(`/fault-reports/${numReportId}/status`, { status: 'Processing' });
-          }
-        } catch (e) {
-          // Ignore - will use local storage fallback
-        }
-      }
+        const numOrderId = parseInt(String(orderId).replace(/\D/g, ''), 10) || orderId;
+        const reportId = new URLSearchParams(location.search).get('id');
 
-      // Reopen API already updates WorkOrder & FaultReport status and notifies technicians
-
-      // Update local storage fallback for user reports and reopen history persistence
-      try {
-        if (reportId) {
-          const formattedReportId = (window.UiHelpers && window.UiHelpers.formatReportId) ? UiHelpers.formatReportId(reportId) : reportId;
-          let localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
-          let target = localReports.find(r => 
-            String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase() ||
-            String(r.report_id || r.id).toLowerCase() === String(formattedReportId).toLowerCase()
-          );
-          if (target) {
-            target.status = 'Processing';
-          } else {
-            localReports.push({
-              report_id: formattedReportId,
-              status: 'Processing'
-            });
-          }
-          localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
-
-          // Save reopen status & reason in local storage for history display
-          const reopenData = {
-            reopened: true,
-            reason: reason.trim(),
-            reopened_at: new Date().toISOString()
-          };
-          localStorage.setItem('vnu_reopened_' + reportId, JSON.stringify(reopenData));
-          localStorage.setItem('vnu_reopened_' + formattedReportId, JSON.stringify(reopenData));
-          
-          // Clear resolved confirmation state so confirmation form disappears
-          localStorage.removeItem('vnu_confirmation_' + reportId);
-          localStorage.removeItem('vnu_confirmation_' + formattedReportId);
-        }
-      } catch (e) {}
-
-      const msg = "✅ Successfully reopened. The report status has been changed to In Progress. The technician will be notified to continue the repair.";
-      if (window.showToast) {
-        showToast(msg, 'success');
-      } else if (window.UiHelpers && window.UiHelpers.showToast) {
-        window.UiHelpers.showToast(msg, 'success');
-      } else {
-        sessionStorage.setItem('vnu_toast_msg', msg);
-        sessionStorage.setItem('vnu_toast_type', 'success');
-      }
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 800);
-    };
-
-    window.setConfirmation = function(value) {
-      const input = document.getElementById('isConfirmed');
-      if (input) input.value = value;
-      const yesBtn = document.getElementById('btnConfirmedYes');
-      const noBtn = document.getElementById('btnConfirmedNo');
-      if (yesBtn) yesBtn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#28A745]');
-      if (noBtn) noBtn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#DC3545]');
-      if (value) {
-        if (yesBtn) yesBtn.classList.add('ring-2', 'ring-offset-2', 'ring-[#28A745]');
-      } else {
-        if (noBtn) noBtn.classList.add('ring-2', 'ring-offset-2', 'ring-[#DC3545]');
-      }
-
-      const ratingSection = document.getElementById('ratingSection');
-      const reopenSection = document.getElementById('reopenSection');
-      const submitBtn = document.getElementById('confirmSubmitBtn');
-
-      if (value) {
-        if (ratingSection) ratingSection.classList.remove('hidden');
-        if (reopenSection) reopenSection.classList.add('hidden');
+        // Disable submit button to prevent double-submission
+        const submitBtn = document.getElementById('confirmSubmitBtn');
         if (submitBtn) {
-          submitBtn.textContent = 'Confirm & Close';
-          submitBtn.className = 'px-8 py-3 bg-[#005BAC] text-white rounded-lg font-bold text-body-md shadow-lg shadow-brand-blue/20 hover:opacity-90 transition-all cursor-pointer';
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Đang gửi...';
         }
-      } else {
-        if (ratingSection) ratingSection.classList.add('hidden');
-        if (reopenSection) reopenSection.classList.remove('hidden');
-        if (submitBtn) {
-          submitBtn.textContent = 'Send Reopen Request';
-          submitBtn.className = 'px-8 py-3 bg-[#DC3545] text-white rounded-lg font-bold text-body-md shadow-lg shadow-red-500/20 hover:opacity-90 transition-all cursor-pointer';
-        }
-      }
-    };
 
-    window.setRating = function(value) {
-      const input = document.getElementById('ratingInput');
-      if (input) input.value = value;
-      document.querySelectorAll('.rating-star').forEach(star => {
-        const val = parseInt(star.dataset.value);
-        if (val <= value) {
-          star.style.fontVariationSettings = "'FILL' 1";
-        } else {
-          star.style.fontVariationSettings = "'FILL' 0";
-        }
-      });
-    };
-
-    const ALL_SEED_REPORTS = [
-      {
-        report_id: 'REP-0001',
-        equipment_name: 'Sony Laser Projector VPL-PHZ60',
-        room_name: 'Room 302',
-        priority: 'High',
-        reported_at: '2026-07-26 23:38:35',
-        status: 'Processing',
-        description: 'Sony Projector has no display signal and blinks red LED indicator.',
-        order_id: 'WO-2024-0001',
-        technician_name: 'Le Van C',
-        assigned_at: '2026-07-27 10:20:00',
-        fix_description: 'Received device and inspecting power supply components.',
-        reporter_name: 'Nguyen Van A',
-        reporter_id: 1,
-        user_email: 'lecturer.a@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0002',
-        equipment_name: 'Daikin Inverter AC 18000 BTU',
-        room_name: 'Room 401',
-        priority: 'Medium',
-        reported_at: '2026-07-27 23:38:35',
-        status: 'Pending Approval',
-        description: 'Air conditioner is running but blowing warm air into the classroom.',
-        reporter_name: 'Tran Thi B',
-        reporter_id: 2,
-        user_email: 'student.b@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0003',
-        equipment_name: 'Samsung 75in Commercial TV',
-        room_name: 'Room 101',
-        priority: 'High',
-        reported_at: '2026-07-23 23:38:35',
-        status: 'Completed',
-        description: 'Samsung Commercial TV screen sensor unresponsive during lecture.',
-        order_id: 'WO-2024-0002',
-        technician_name: 'Pham Thi D',
-        assigned_at: '2026-07-24 09:45:00',
-        resolved_at: '2026-07-25 09:45:00',
-        fix_description: 'Replaced display panel driver and updated firmware.',
-        parts_used: 'Display Controller Board',
-        reporter_name: 'Nguyen Van A',
-        reporter_id: 1,
-        user_email: 'lecturer.a@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0004',
-        equipment_name: 'JBL Classroom Wall Speaker',
-        room_name: 'Room 401',
-        priority: 'Low',
-        reported_at: '2026-07-25 23:38:35',
-        status: 'Rejected',
-        description: 'Speaker system makes static noise when microphone is turned on.',
-        reporter_name: 'Tran Thi B',
-        reporter_id: 2,
-        user_email: 'student.b@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0005',
-        equipment_name: 'Ultra HD 4K HDMI Cable',
-        room_name: 'Room 302',
-        priority: 'Low',
-        reported_at: '2026-07-25 23:38:35',
-        status: 'Cancelled',
-        description: 'HDMI cable loose contact, replaced by lecturer using spare cable.',
-        reporter_name: 'Doan Van G',
-        reporter_id: 7,
-        user_email: 'lecturer.g@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0006',
-        equipment_name: 'Epson HD Document Camera',
-        room_name: 'Room 503',
-        priority: 'Medium',
-        reported_at: '2026-07-28 17:38:35',
-        status: 'Processing',
-        description: 'Document camera fails to zoom and image flickers constantly.',
-        order_id: 'WO-2024-0003',
-        technician_name: 'Vu Van F',
-        assigned_at: '2026-07-28 18:00:00',
-        fix_description: 'Inspecting camera control board.',
-        reporter_name: 'Bui Thi H',
-        reporter_id: 8,
-        user_email: 'student.h@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0007',
-        equipment_name: 'Daikin Inverter AC 18000 BTU',
-        room_name: 'Room 301',
-        priority: 'Medium',
-        reported_at: '2026-07-28 20:38:35',
-        status: 'Pending Approval',
-        description: 'Air conditioner leaking water heavily onto student desks.',
-        reporter_name: 'Nguyen Van A',
-        reporter_id: 1,
-        user_email: 'lecturer.a@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0008',
-        equipment_name: 'Samsung 75in Commercial TV',
-        room_name: 'Room 302',
-        priority: 'High',
-        reported_at: '2026-07-28 11:38:35',
-        status: 'Processing',
-        description: 'TV screen displays distorted color lines across display panel.',
-        order_id: 'WO-2024-0004',
-        technician_name: 'Le Van C',
-        assigned_at: '2026-07-28 12:00:00',
-        fix_description: 'Technician is inspecting TV signal components.',
-        reporter_name: 'Doan Van G',
-        reporter_id: 7,
-        user_email: 'lecturer.g@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0009',
-        equipment_name: 'Shure Wireless Dual Microphone',
-        room_name: 'Room 303',
-        priority: 'Medium',
-        reported_at: '2026-07-28 23:38:35',
-        status: 'Processing',
-        description: 'Wireless microphone loses signal every 2 minutes during lecture.',
-        order_id: 'WO-2024-0005',
-        technician_name: 'Pham Thi D',
-        assigned_at: '2026-07-29 00:00:00',
-        fix_description: 'Testing wireless frequency and checking microphone.',
-        reporter_name: 'Bui Thi H',
-        reporter_id: 8,
-        user_email: 'student.h@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0010',
-        equipment_name: 'Panasonic 4K Laser Projector',
-        room_name: 'Room 102',
-        priority: 'High',
-        reported_at: '2026-07-28 21:38:35',
-        status: 'Pending Approval',
-        description: 'Panasonic Projector power light turns amber and powers down.',
-        reporter_name: 'Nguyen Van A',
-        reporter_id: 1,
-        user_email: 'lecturer.a@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0011',
-        equipment_name: 'Samsung 75in Commercial TV',
-        room_name: 'Room 103',
-        priority: 'Medium',
-        reported_at: '2026-07-22 23:38:35',
-        status: 'Completed',
-        description: 'Classroom TV remote control unresponsive and HDMI port loose.',
-        order_id: 'WO-2024-0006',
-        technician_name: 'Vu Van F',
-        assigned_at: '2026-07-23 09:00:00',
-        resolved_at: '2026-07-24 10:00:00',
-        fix_description: 'Fixed HDMI port connection and replaced TV remote battery.',
-        parts_used: 'HDMI Female Socket',
-        reporter_name: 'Tran Thi B',
-        reporter_id: 2,
-        user_email: 'student.b@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0012',
-        equipment_name: 'Shure Wireless Dual Microphone',
-        room_name: 'Room 503',
-        priority: 'Low',
-        reported_at: '2026-07-22 23:38:35',
-        status: 'Completed',
-        description: 'Microphone battery compartment cover broken and wire frayed.',
-        order_id: 'WO-2024-0007',
-        technician_name: 'Le Van C',
-        assigned_at: '2026-07-23 08:00:00',
-        resolved_at: '2026-07-23 15:00:00',
-        fix_description: 'Replaced microphone shell casing and soldered broken audio lead.',
-        parts_used: 'Mic Housing Clip',
-        reporter_name: 'Doan Van G',
-        reporter_id: 7,
-        user_email: 'lecturer.g@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0013',
-        equipment_name: 'Cisco Catalyst 24-Port Switch',
-        room_name: 'Room 101',
-        priority: 'High',
-        reported_at: '2026-07-24 23:38:35',
-        status: 'Rejected',
-        description: 'Network switch port #12 dead, no internet connection in Room R101.',
-        reporter_name: 'Bui Thi H',
-        reporter_id: 8,
-        user_email: 'student.h@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0014',
-        equipment_name: 'Ceiling Speaker R104',
-        room_name: 'Room 104',
-        priority: 'Low',
-        reported_at: '2026-07-21 23:38:35',
-        status: 'Cancelled',
-        description: 'Ceiling speaker buzzing sound when audio volume exceeds 50%.',
-        reporter_name: 'Nguyen Van A',
-        reporter_id: 1,
-        user_email: 'lecturer.a@vnuis.edu.vn'
-      },
-      {
-        report_id: 'REP-0015',
-        equipment_name: 'Gigabit Switch R601',
-        room_name: 'Room 601',
-        priority: 'High',
-        reported_at: '2026-07-29 08:38:35',
-        status: 'Closed',
-        description: 'Gigabit switch power LED off, room R601 network completely down.',
-        order_id: 'WO-2024-0008',
-        technician_name: 'Pham Thi D',
-        assigned_at: '2026-07-29 08:45:00',
-        resolved_at: '2026-07-29 09:15:00',
-        fix_description: 'Inspected and replaced network switch power supply.',
-        parts_used: 'Gigabit Switch 12V Power Supply',
-        reporter_name: 'Doan Van G',
-        reporter_id: 7,
-        user_email: 'lecturer.g@vnuis.edu.vn'
-      }
-    ];
-
-    // ===== LOAD REPORT =====
-    async function loadReport() {
-      let report = null;
-      let workOrder = null;
-      let confirmation = null;
-
-      const numId = parseInt(String(reportId).replace(/\D/g, ''), 10);
-
-      // 1. Try loading from API
-      try {
+        let apiSuccess = false;
         if (window.Api && window.Auth && Auth.isAuthenticated()) {
-          const isNumeric = /^\d+$/.test(String(reportId));
-          const tryIds = isNumeric ? [reportId] : (!isNaN(numId) ? [numId] : []);
-          for (const tryId of tryIds) {
+          // Try the correct endpoint first: /work-orders/:id/reopen
+          try {
+            await Api.post(`/work-orders/${numOrderId}/reopen`, { reason: reason.trim() });
+            apiSuccess = true;
+          } catch (e1) {
+            // Fallback: try /workOrders/:id/reopen
             try {
-              report = await Api.get(`/fault-reports/${tryId}`);
-              break;
-            } catch(e) {}
+              await Api.post(`/workOrders/${numOrderId}/reopen`, { reason: reason.trim() });
+              apiSuccess = true;
+            } catch (e2) {
+              console.warn('API reopen call failed (may be offline or seed data), using local fallback:', e2.message || e2);
+            }
           }
-          console.log('Report data from API:', report);
         }
-      } catch (err) {
-        console.warn('API load failed, checking local storage & fallback dataset:', err);
-      }
 
-      // 2. Check local storage for user created reports
-      if (!report) {
-        try {
-          const localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
-          report = localReports.find(r => 
-            String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase() ||
-            (!isNaN(numId) && parseInt(String(r.report_id || r.id).replace(/\D/g, ''), 10) === numId)
-          );
-        } catch (e) {}
-      }
-
-      // 3. Check default seed reports
-      if (!report) {
-        report = ALL_SEED_REPORTS.find(r => 
-          String(r.report_id).toLowerCase() === String(reportId).toLowerCase() ||
-          (!isNaN(numId) && parseInt(String(r.report_id).replace(/\D/g, ''), 10) === numId)
-        );
-      }
-
-      // 4. Check for locally saved reopen state or confirmation
-      let isLocallyReopened = false;
-      try {
-        const savedReopen = localStorage.getItem('vnu_reopened_' + reportId);
-        if (savedReopen) {
-          isLocallyReopened = true;
-          if (report) report.status = 'Processing';
+        // If API failed, try to update FaultReport status directly
+        if (!apiSuccess && window.Api && window.Auth && Auth.isAuthenticated()) {
+          try {
+            const numReportId = parseInt(String(reportId).replace(/\D/g, ''), 10);
+            if (numReportId) {
+              await Api.patch(`/fault-reports/${numReportId}/status`, { status: 'Processing' });
+            }
+          } catch (e) {
+            // Ignore - will use local storage fallback
+          }
         }
-      } catch (e) {}
 
-      if (!isLocallyReopened && !confirmation) {
+        // Reopen API already updates WorkOrder & FaultReport status and notifies technicians
+
+        // Update local storage fallback for user reports and reopen history persistence
         try {
-          const savedConfirm = localStorage.getItem('vnu_confirmation_' + reportId);
-          if (savedConfirm) {
-            confirmation = JSON.parse(savedConfirm);
-            if (report) report.status = 'Closed';
-          }
-        } catch (e) {}
-      }
+          if (reportId) {
+            const formattedReportId = (window.UiHelpers && window.UiHelpers.formatReportId) ? UiHelpers.formatReportId(reportId) : reportId;
+            let localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+            let target = localReports.find(r =>
+              String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase() ||
+              String(r.report_id || r.id).toLowerCase() === String(formattedReportId).toLowerCase()
+            );
+            if (target) {
+              target.status = 'Processing';
+            } else {
+              localReports.push({
+                report_id: formattedReportId,
+                status: 'Processing'
+              });
+            }
+            localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
 
-      // 5. If report found, try workOrder & confirmation
-      if (report) {
-        if (report.order_id && !workOrder) {
-          if (window.Api && window.Auth && Auth.isAuthenticated()) {
-            try {
-              workOrder = await Api.get(`/work-orders/${report.order_id}`);
-            } catch (e) {}
-          }
-          if (!workOrder) {
-            workOrder = {
-              order_id: report.order_id,
-              technician_name: report.technician_name || 'Le Van C',
-              task_status: isLocallyReopened ? 'In Progress' : (report.status === 'Closed' ? 'Closed' : (report.task_status || 'Completed')),
-              assigned_at: report.assigned_at || report.reported_at,
-              resolved_at: report.resolved_at || report.reported_at,
-              fix_description: report.fix_description || 'Inspected and resolved issue.',
-              parts_used: report.parts_used || null
+            // Save reopen status & reason in local storage for history display
+            const reopenData = {
+              reopened: true,
+              reason: reason.trim(),
+              reopened_at: new Date().toISOString()
             };
+            localStorage.setItem('vnu_reopened_' + reportId, JSON.stringify(reopenData));
+            localStorage.setItem('vnu_reopened_' + formattedReportId, JSON.stringify(reopenData));
+
+            // Clear resolved confirmation state so confirmation form disappears
+            localStorage.removeItem('vnu_confirmation_' + reportId);
+            localStorage.removeItem('vnu_confirmation_' + formattedReportId);
           }
-          if (!confirmation) {
-            try {
-              const res = await Api.get(`/confirmations/${report.order_id}`);
-              if (res && res.confirmed_at !== null && res.is_confirmed !== null && res.is_confirmed !== undefined) {
-                confirmation = res;
-                if (report && (confirmation.is_confirmed === true || confirmation.is_confirmed === 1)) {
-                  report.status = 'Closed';
-                } else if (confirmation.is_confirmed === false || confirmation.is_confirmed === 0) {
-                  report.status = 'Processing';
-                  if (workOrder) workOrder.task_status = 'In Progress';
-                }
-              }
-            } catch (e) {}
-          }
+        } catch (e) { }
+
+        const msg = "✅ Successfully reopened. The report status has been changed to In Progress. The technician will be notified to continue the repair.";
+        if (window.showToast) {
+          showToast(msg, 'success');
+        } else if (window.UiHelpers && window.UiHelpers.showToast) {
+          window.UiHelpers.showToast(msg, 'success');
+        } else {
+          sessionStorage.setItem('vnu_toast_msg', msg);
+          sessionStorage.setItem('vnu_toast_type', 'success');
         }
 
-        content.innerHTML = renderReport(report, workOrder, confirmation);
+        setTimeout(() => {
+          window.location.reload();
+        }, 800);
+      };
 
-        // Setup confirmation form
-        const confirmForm = document.getElementById('confirmForm');
-        if (confirmForm) {
-          setConfirmation(true);
-          confirmForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const errorBox = document.getElementById('confirmError');
-            if (errorBox) errorBox.classList.add('hidden');
-            
-            const isConfirmed = document.getElementById('isConfirmed').value === 'true';
-            
-            if (!isConfirmed) {
-              const reopenReason = (document.getElementById('reopenReasonInput')?.value || '').trim();
-              if (!reopenReason) {
-                if (errorBox) {
-                  errorBox.textContent = 'Please enter a detailed description of the unresolved issue.';
-                  errorBox.classList.remove('hidden');
+      window.setConfirmation = function (value) {
+        const input = document.getElementById('isConfirmed');
+        if (input) input.value = value;
+        const yesBtn = document.getElementById('btnConfirmedYes');
+        const noBtn = document.getElementById('btnConfirmedNo');
+        if (yesBtn) yesBtn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#28A745]');
+        if (noBtn) noBtn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#DC3545]');
+        if (value) {
+          if (yesBtn) yesBtn.classList.add('ring-2', 'ring-offset-2', 'ring-[#28A745]');
+        } else {
+          if (noBtn) noBtn.classList.add('ring-2', 'ring-offset-2', 'ring-[#DC3545]');
+        }
+
+        const ratingSection = document.getElementById('ratingSection');
+        const reopenSection = document.getElementById('reopenSection');
+        const submitBtn = document.getElementById('confirmSubmitBtn');
+
+        if (value) {
+          if (ratingSection) ratingSection.classList.remove('hidden');
+          if (reopenSection) reopenSection.classList.add('hidden');
+          if (submitBtn) {
+            submitBtn.textContent = 'Confirm & Close';
+            submitBtn.className = 'px-8 py-3 bg-[#005BAC] text-white rounded-lg font-bold text-body-md shadow-lg shadow-brand-blue/20 hover:opacity-90 transition-all cursor-pointer';
+          }
+        } else {
+          if (ratingSection) ratingSection.classList.add('hidden');
+          if (reopenSection) reopenSection.classList.remove('hidden');
+          if (submitBtn) {
+            submitBtn.textContent = 'Send Reopen Request';
+            submitBtn.className = 'px-8 py-3 bg-[#DC3545] text-white rounded-lg font-bold text-body-md shadow-lg shadow-red-500/20 hover:opacity-90 transition-all cursor-pointer';
+          }
+        }
+      };
+
+      window.setRating = function (value) {
+        const input = document.getElementById('ratingInput');
+        if (input) input.value = value;
+        document.querySelectorAll('.rating-star').forEach(star => {
+          const val = parseInt(star.dataset.value);
+          if (val <= value) {
+            star.style.fontVariationSettings = "'FILL' 1";
+          } else {
+            star.style.fontVariationSettings = "'FILL' 0";
+          }
+        });
+      };
+
+      const ALL_SEED_REPORTS = [
+        {
+          report_id: 'REP-0001',
+          equipment_name: 'Sony Laser Projector VPL-PHZ60',
+          room_name: 'Room 302',
+          priority: 'High',
+          reported_at: '2026-07-26 23:38:35',
+          status: 'Processing',
+          description: 'Sony Projector has no display signal and blinks red LED indicator.',
+          order_id: 'WO-2024-0001',
+          technician_name: 'Le Van C',
+          assigned_at: '2026-07-27 10:20:00',
+          fix_description: 'Received device and inspecting power supply components.',
+          reporter_name: 'Nguyen Van A',
+          reporter_id: 1,
+          user_email: 'lecturer.a@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0002',
+          equipment_name: 'Daikin Inverter AC 18000 BTU',
+          room_name: 'Room 401',
+          priority: 'Medium',
+          reported_at: '2026-07-27 23:38:35',
+          status: 'Pending Approval',
+          description: 'Air conditioner is running but blowing warm air into the classroom.',
+          reporter_name: 'Tran Thi B',
+          reporter_id: 2,
+          user_email: 'student.b@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0003',
+          equipment_name: 'Samsung 75in Commercial TV',
+          room_name: 'Room 101',
+          priority: 'High',
+          reported_at: '2026-07-23 23:38:35',
+          status: 'Completed',
+          description: 'Samsung Commercial TV screen sensor unresponsive during lecture.',
+          order_id: 'WO-2024-0002',
+          technician_name: 'Pham Thi D',
+          assigned_at: '2026-07-24 09:45:00',
+          resolved_at: '2026-07-25 09:45:00',
+          fix_description: 'Replaced display panel driver and updated firmware.',
+          parts_used: 'Display Controller Board',
+          reporter_name: 'Nguyen Van A',
+          reporter_id: 1,
+          user_email: 'lecturer.a@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0004',
+          equipment_name: 'JBL Classroom Wall Speaker',
+          room_name: 'Room 401',
+          priority: 'Low',
+          reported_at: '2026-07-25 23:38:35',
+          status: 'Rejected',
+          description: 'Speaker system makes static noise when microphone is turned on.',
+          reporter_name: 'Tran Thi B',
+          reporter_id: 2,
+          user_email: 'student.b@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0005',
+          equipment_name: 'Ultra HD 4K HDMI Cable',
+          room_name: 'Room 302',
+          priority: 'Low',
+          reported_at: '2026-07-25 23:38:35',
+          status: 'Cancelled',
+          description: 'HDMI cable loose contact, replaced by lecturer using spare cable.',
+          reporter_name: 'Doan Van G',
+          reporter_id: 7,
+          user_email: 'lecturer.g@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0006',
+          equipment_name: 'Epson HD Document Camera',
+          room_name: 'Room 503',
+          priority: 'Medium',
+          reported_at: '2026-07-28 17:38:35',
+          status: 'Processing',
+          description: 'Document camera fails to zoom and image flickers constantly.',
+          order_id: 'WO-2024-0003',
+          technician_name: 'Vu Van F',
+          assigned_at: '2026-07-28 18:00:00',
+          fix_description: 'Inspecting camera control board.',
+          reporter_name: 'Bui Thi H',
+          reporter_id: 8,
+          user_email: 'student.h@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0007',
+          equipment_name: 'Daikin Inverter AC 18000 BTU',
+          room_name: 'Room 301',
+          priority: 'Medium',
+          reported_at: '2026-07-28 20:38:35',
+          status: 'Pending Approval',
+          description: 'Air conditioner leaking water heavily onto student desks.',
+          reporter_name: 'Nguyen Van A',
+          reporter_id: 1,
+          user_email: 'lecturer.a@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0008',
+          equipment_name: 'Samsung 75in Commercial TV',
+          room_name: 'Room 302',
+          priority: 'High',
+          reported_at: '2026-07-28 11:38:35',
+          status: 'Processing',
+          description: 'TV screen displays distorted color lines across display panel.',
+          order_id: 'WO-2024-0004',
+          technician_name: 'Le Van C',
+          assigned_at: '2026-07-28 12:00:00',
+          fix_description: 'Technician is inspecting TV signal components.',
+          reporter_name: 'Doan Van G',
+          reporter_id: 7,
+          user_email: 'lecturer.g@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0009',
+          equipment_name: 'Shure Wireless Dual Microphone',
+          room_name: 'Room 303',
+          priority: 'Medium',
+          reported_at: '2026-07-28 23:38:35',
+          status: 'Processing',
+          description: 'Wireless microphone loses signal every 2 minutes during lecture.',
+          order_id: 'WO-2024-0005',
+          technician_name: 'Pham Thi D',
+          assigned_at: '2026-07-29 00:00:00',
+          fix_description: 'Testing wireless frequency and checking microphone.',
+          reporter_name: 'Bui Thi H',
+          reporter_id: 8,
+          user_email: 'student.h@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0010',
+          equipment_name: 'Panasonic 4K Laser Projector',
+          room_name: 'Room 102',
+          priority: 'High',
+          reported_at: '2026-07-28 21:38:35',
+          status: 'Pending Approval',
+          description: 'Panasonic Projector power light turns amber and powers down.',
+          reporter_name: 'Nguyen Van A',
+          reporter_id: 1,
+          user_email: 'lecturer.a@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0011',
+          equipment_name: 'Samsung 75in Commercial TV',
+          room_name: 'Room 103',
+          priority: 'Medium',
+          reported_at: '2026-07-22 23:38:35',
+          status: 'Completed',
+          description: 'Classroom TV remote control unresponsive and HDMI port loose.',
+          order_id: 'WO-2024-0006',
+          technician_name: 'Vu Van F',
+          assigned_at: '2026-07-23 09:00:00',
+          resolved_at: '2026-07-24 10:00:00',
+          fix_description: 'Fixed HDMI port connection and replaced TV remote battery.',
+          parts_used: 'HDMI Female Socket',
+          reporter_name: 'Tran Thi B',
+          reporter_id: 2,
+          user_email: 'student.b@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0012',
+          equipment_name: 'Shure Wireless Dual Microphone',
+          room_name: 'Room 503',
+          priority: 'Low',
+          reported_at: '2026-07-22 23:38:35',
+          status: 'Completed',
+          description: 'Microphone battery compartment cover broken and wire frayed.',
+          order_id: 'WO-2024-0007',
+          technician_name: 'Le Van C',
+          assigned_at: '2026-07-23 08:00:00',
+          resolved_at: '2026-07-23 15:00:00',
+          fix_description: 'Replaced microphone shell casing and soldered broken audio lead.',
+          parts_used: 'Mic Housing Clip',
+          reporter_name: 'Doan Van G',
+          reporter_id: 7,
+          user_email: 'lecturer.g@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0013',
+          equipment_name: 'Cisco Catalyst 24-Port Switch',
+          room_name: 'Room 101',
+          priority: 'High',
+          reported_at: '2026-07-24 23:38:35',
+          status: 'Rejected',
+          description: 'Network switch port #12 dead, no internet connection in Room R101.',
+          reporter_name: 'Bui Thi H',
+          reporter_id: 8,
+          user_email: 'student.h@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0014',
+          equipment_name: 'Ceiling Speaker R104',
+          room_name: 'Room 104',
+          priority: 'Low',
+          reported_at: '2026-07-21 23:38:35',
+          status: 'Cancelled',
+          description: 'Ceiling speaker buzzing sound when audio volume exceeds 50%.',
+          reporter_name: 'Nguyen Van A',
+          reporter_id: 1,
+          user_email: 'lecturer.a@vnuis.edu.vn'
+        },
+        {
+          report_id: 'REP-0015',
+          equipment_name: 'Gigabit Switch R601',
+          room_name: 'Room 601',
+          priority: 'High',
+          reported_at: '2026-07-29 08:38:35',
+          status: 'Closed',
+          description: 'Gigabit switch power LED off, room R601 network completely down.',
+          order_id: 'WO-2024-0008',
+          technician_name: 'Pham Thi D',
+          assigned_at: '2026-07-29 08:45:00',
+          resolved_at: '2026-07-29 09:15:00',
+          fix_description: 'Inspected and replaced network switch power supply.',
+          parts_used: 'Gigabit Switch 12V Power Supply',
+          reporter_name: 'Doan Van G',
+          reporter_id: 7,
+          user_email: 'lecturer.g@vnuis.edu.vn'
+        }
+      ];
+
+      // ===== LOAD REPORT =====
+      async function loadReport() {
+        let report = null;
+        let workOrder = null;
+        let confirmation = null;
+
+        const numId = parseInt(String(reportId).replace(/\D/g, ''), 10);
+
+        // 1. Try loading from API
+        try {
+          if (window.Api && window.Auth && Auth.isAuthenticated()) {
+            const isNumeric = /^\d+$/.test(String(reportId));
+            const tryIds = isNumeric ? [reportId] : (!isNaN(numId) ? [numId] : []);
+            for (const tryId of tryIds) {
+              try {
+                report = await Api.get(`/fault-reports/${tryId}`);
+                break;
+              } catch (e) { }
+            }
+            console.log('Report data from API:', report);
+          }
+        } catch (err) {
+          console.warn('API load failed, checking local storage & fallback dataset:', err);
+        }
+
+        // 2. Check local storage for user created reports
+        if (!report) {
+          try {
+            const localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+            report = localReports.find(r =>
+              String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase() ||
+              (!isNaN(numId) && parseInt(String(r.report_id || r.id).replace(/\D/g, ''), 10) === numId)
+            );
+          } catch (e) { }
+        }
+
+        // 3. Check default seed reports
+        if (!report) {
+          report = ALL_SEED_REPORTS.find(r =>
+            String(r.report_id).toLowerCase() === String(reportId).toLowerCase() ||
+            (!isNaN(numId) && parseInt(String(r.report_id).replace(/\D/g, ''), 10) === numId)
+          );
+        }
+
+        // 4. Check for locally saved reopen state or confirmation
+        let isLocallyReopened = false;
+        try {
+          const savedReopen = localStorage.getItem('vnu_reopened_' + reportId);
+          if (savedReopen) {
+            isLocallyReopened = true;
+            if (report) report.status = 'Processing';
+          }
+        } catch (e) { }
+
+        if (!isLocallyReopened && !confirmation) {
+          try {
+            const savedConfirm = localStorage.getItem('vnu_confirmation_' + reportId);
+            if (savedConfirm) {
+              confirmation = JSON.parse(savedConfirm);
+              if (report) report.status = 'Closed';
+            }
+          } catch (e) { }
+        }
+
+        // 5. If report found, try workOrder & confirmation
+        if (report) {
+          if (report.order_id && !workOrder) {
+            if (window.Api && window.Auth && Auth.isAuthenticated()) {
+              try {
+                workOrder = await Api.get(`/work-orders/${report.order_id}`);
+              } catch (e) { }
+            }
+            if (!workOrder) {
+              workOrder = {
+                order_id: report.order_id,
+                technician_name: report.technician_name || 'Le Van C',
+                task_status: isLocallyReopened ? 'In Progress' : (report.status === 'Closed' ? 'Closed' : (report.task_status || 'Completed')),
+                assigned_at: report.assigned_at || report.reported_at,
+                resolved_at: report.resolved_at || report.reported_at,
+                fix_description: report.fix_description || 'Inspected and resolved issue.',
+                parts_used: report.parts_used || null
+              };
+            }
+            if (!confirmation) {
+              try {
+                const res = await Api.get(`/confirmations/${report.order_id}`);
+                if (res && res.confirmed_at !== null && res.is_confirmed !== null && res.is_confirmed !== undefined) {
+                  confirmation = res;
+                  if (report && (confirmation.is_confirmed === true || confirmation.is_confirmed === 1)) {
+                    report.status = 'Closed';
+                  } else if (confirmation.is_confirmed === false || confirmation.is_confirmed === 0) {
+                    report.status = 'Processing';
+                    if (workOrder) workOrder.task_status = 'In Progress';
+                  }
                 }
+              } catch (e) { }
+            }
+          }
+
+          content.innerHTML = renderReport(report, workOrder, confirmation);
+
+          // Setup confirmation form
+          const confirmForm = document.getElementById('confirmForm');
+          if (confirmForm) {
+            setConfirmation(true);
+            confirmForm.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const errorBox = document.getElementById('confirmError');
+              if (errorBox) errorBox.classList.add('hidden');
+
+              const isConfirmed = document.getElementById('isConfirmed').value === 'true';
+
+              if (!isConfirmed) {
+                const reopenReason = (document.getElementById('reopenReasonInput')?.value || '').trim();
+                if (!reopenReason) {
+                  if (errorBox) {
+                    errorBox.textContent = 'Please enter a detailed description of the unresolved issue.';
+                    errorBox.classList.remove('hidden');
+                  }
+                  return;
+                }
+                const targetOrderId = (workOrder && workOrder.order_id) ? workOrder.order_id : (report.order_id || reportId);
+                await window.reportIssuePersists(targetOrderId, reopenReason);
                 return;
               }
-              const targetOrderId = (workOrder && workOrder.order_id) ? workOrder.order_id : (report.order_id || reportId);
-              await window.reportIssuePersists(targetOrderId, reopenReason);
-              return;
-            }
 
-            const rating = document.getElementById('ratingInput').value;
-            const feedback = document.getElementById('feedbackInput').value.trim();
-            
-            try {
-              if (window.Api && window.Auth && Auth.isAuthenticated() && report.order_id) {
-                try {
-                  await Api.post(`/confirmations/${report.order_id}`, {
-                    isConfirmed: isConfirmed,
-                    rating: rating ? Number(rating) : undefined,
-                    feedback: feedback || undefined,
-                  });
-                } catch (apiErr) {}
-              }
-              
-              // Save confirmation in localStorage for persistence
-              const confirmData = {
-                is_confirmed: isConfirmed,
-                rating: rating ? Number(rating) : 5,
-                feedback: feedback || null
-              };
-              localStorage.setItem('vnu_confirmation_' + reportId, JSON.stringify(confirmData));
+              const rating = document.getElementById('ratingInput').value;
+              const feedback = document.getElementById('feedbackInput').value.trim();
 
-              // Update status to 'Closed' in local reports storage
               try {
-                let localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
-                let target = localReports.find(r => String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase());
-                if (target) {
-                  target.status = 'Closed';
-                  localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
+                if (window.Api && window.Auth && Auth.isAuthenticated() && report.order_id) {
+                  try {
+                    await Api.post(`/confirmations/${report.order_id}`, {
+                      isConfirmed: isConfirmed,
+                      rating: rating ? Number(rating) : undefined,
+                      feedback: feedback || undefined,
+                    });
+                  } catch (apiErr) { }
                 }
-              } catch(e) {}
 
-              if (window.showToast) {
-                showToast('Confirmation submitted! Report status changed to Closed.', 'success');
+                // Save confirmation in localStorage for persistence
+                const confirmData = {
+                  is_confirmed: isConfirmed,
+                  rating: rating ? Number(rating) : 5,
+                  feedback: feedback || null
+                };
+                localStorage.setItem('vnu_confirmation_' + reportId, JSON.stringify(confirmData));
+
+                // Update status to 'Closed' in local reports storage
+                try {
+                  let localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+                  let target = localReports.find(r => String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase());
+                  if (target) {
+                    target.status = 'Closed';
+                    localStorage.setItem('vnu_user_reports', JSON.stringify(localReports));
+                  }
+                } catch (e) { }
+
+                if (window.showToast) {
+                  showToast('Confirmation submitted! Report status changed to Closed.', 'success');
+                }
+
+                loadReport();
+              } catch (err) {
+                if (errorBox) {
+                  errorBox.textContent = err.message || 'Failed to submit confirmation';
+                  errorBox.classList.remove('hidden');
+                }
               }
-              
-              loadReport();
-            } catch (err) {
-              if (errorBox) {
-                errorBox.textContent = err.message || 'Failed to submit confirmation';
-                errorBox.classList.remove('hidden');
-              }
-            }
-          });
-        }
-      } else {
-        content.innerHTML = `
+            });
+          }
+        } else {
+          content.innerHTML = `
           <div class="bg-white border border-outline-variant/30 rounded-xl p-8 text-center max-w-lg mx-auto my-8 shadow-sm">
             <span class="material-symbols-outlined text-outline text-4xl mb-2">article</span>
             <h3 class="text-headline-sm font-bold text-on-surface mb-2">Report Details</h3>
@@ -1323,12 +1331,13 @@
             </a>
           </div>
         `;
+        }
       }
-    }
 
-    loadReport();
+      loadReport();
 
-  })();
-</script>
+    })();
+  </script>
 </body>
+
 </html>
