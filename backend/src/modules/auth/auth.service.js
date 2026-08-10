@@ -109,14 +109,9 @@ async function updateProfile(userId, data) {
   const [rows] = await pool.execute('SELECT * FROM Users WHERE user_id = ?', [userId]);
   if (!rows[0]) throw new ApiError(404, 'User not found');
   
-  // Xây dựng câu lệnh UPDATE động
+  // Xây dựng câu lệnh UPDATE động (phone không được đổi - UAT-TECH-14)
   const updates = [];
   const values = [];
-  
-  if (data.phone !== undefined && data.phone !== null) {
-    updates.push('phone = ?');
-    values.push(data.phone);
-  }
   
   if (data.full_name !== undefined && data.full_name !== null) {
     updates.push('full_name = ?');
@@ -126,6 +121,11 @@ async function updateProfile(userId, data) {
   if (data.department !== undefined && data.department !== null) {
     updates.push('department = ?');
     values.push(data.department);
+  }
+  
+  if (data.technician_specialty !== undefined && data.technician_specialty !== null) {
+    updates.push('technician_specialty = ?');
+    values.push(data.technician_specialty);
   }
   
   if (updates.length === 0) {

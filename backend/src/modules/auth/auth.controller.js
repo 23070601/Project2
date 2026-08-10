@@ -30,17 +30,17 @@ async function changePassword(req, res) {
 // THÊM CONTROLLER MỚI: Cập nhật profile
 async function updateProfile(req, res) {
   const userId = req.user.userId;
-  const { phone, full_name, department } = req.body;
+  const { full_name, department, technician_specialty } = req.body;
   
-  // Kiểm tra có field nào để update không
-  if (!phone && !full_name && !department) {
+  // Kiểm tra có field nào để update không (phone không được đổi - UAT-TECH-14)
+  if (!full_name && !department && !technician_specialty) {
     throw new ApiError(400, 'No fields to update');
   }
   
   const updatedUser = await authService.updateProfile(userId, {
-    phone,
     full_name,
-    department
+    department,
+    technician_specialty
   });
   
   ok(res, updatedUser);
