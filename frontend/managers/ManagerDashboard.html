@@ -104,7 +104,7 @@
         <span class="material-symbols-outlined text-amber-600 text-3xl">notification_important</span>
         <div>
           <p class="text-amber-900 font-bold font-label-lg">Decision Support Alert</p>
-          <p id="dssAlertText" class="text-amber-800 text-body-sm font-body-sm">⚠️ 3 assets have exceeded failure threshold. Click to view for predictive maintenance scheduling.</p>
+          <p id="dssAlertText" class="text-amber-800 text-body-sm font-body-sm">3 assets have exceeded failure threshold. Click to view for predictive maintenance scheduling.</p>
         </div>
       </div>
       <span class="text-amber-900 font-bold text-label-lg hover:underline flex items-center gap-1">
@@ -385,7 +385,7 @@
           if (kpis.downtime !== undefined) document.getElementById('kpiDowntime').textContent = `${kpis.downtime}h`;
           if (kpis.performance !== undefined) document.getElementById('kpiPerformance').textContent = `${kpis.performance}%`;
           if (kpis.replacementAlerts !== undefined) {
-            document.getElementById('dssAlertText').innerHTML = `⚠️ <strong>${kpis.replacementAlerts}</strong> assets have exceeded failure threshold. Click to view for predictive maintenance scheduling.`;
+            document.getElementById('dssAlertText').innerHTML = `<strong>${kpis.replacementAlerts}</strong> assets have exceeded failure threshold. Click to view for predictive maintenance scheduling.`;
           }
           if (kpis.statusDistribution) {
             renderStatusDistribution(kpis.statusDistribution);

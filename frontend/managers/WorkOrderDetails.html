@@ -90,7 +90,7 @@
               </div>
               <div>
                 <p class="text-label-md text-on-surface-variant mb-1">Task Status</p>
-                <span id="woStatusBadge" class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">⚠️ Rejected</span>
+                <span id="woStatusBadge" class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">Rejected</span>
               </div>
             </div>
           </div>
@@ -596,7 +596,7 @@
             
             if (isRejected) {
               badgeClass = 'bg-[#ffdf9e] text-[#5b4300]';
-              statusText = '⚠️ Rejected';
+              statusText = 'Rejected';
             } else if (data.task_status === 'Assigned') {
               badgeClass = 'bg-blue-50 text-brand-blue';
             } else if (data.task_status === 'Received') {

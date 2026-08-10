@@ -104,7 +104,7 @@
       <div id="criticalBanner" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-l-red-500 rounded-r-xl flex items-center justify-between shadow-sm">
         <div class="flex items-center gap-3">
           <span class="material-symbols-outlined text-red-600 text-2xl">warning</span>
-          <p id="criticalBannerText" class="text-red-800 font-bold text-label-lg">⚠️ Critical Assets: 0 assets need attention.</p>
+          <p id="criticalBannerText" class="text-red-800 font-bold text-label-lg">Critical Assets: 0 assets need attention.</p>
         </div>
         <div class="flex items-center gap-3">
           <button onclick="filterCriticalOnly()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-label-md font-bold hover:bg-red-700 transition-colors">View Critical Only</button>
@@ -128,7 +128,7 @@
         </select>
         <select id="assetStatusFilter" onchange="renderAllAssetsTable()" class="bg-white border border-outline-variant rounded-lg py-2.5 pl-4 pr-10 text-label-md focus:ring-primary shadow-sm cursor-pointer outline-none">
           <option value="">All Status</option>
-          <option value="Critical">⚠️ Critical</option>
+          <option value="Critical">Critical</option>
           <option value="Normal">✅ Normal</option>
         </select>
         <button onclick="resetAssetFilters()" class="px-4 py-2.5 text-label-md text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors border border-outline-variant/50">Reset</button>
@@ -837,7 +837,7 @@
     const banner = document.getElementById('criticalBanner');
     const bannerText = document.getElementById('criticalBannerText');
     if (criticalCount > 0) {
-      bannerText.textContent = `⚠️ Critical Assets: ${criticalCount} asset${criticalCount > 1 ? 's' : ''} need attention in the last 3 months.`;
+      bannerText.textContent = `Critical Assets: ${criticalCount} asset${criticalCount > 1 ? 's' : ''} need attention in the last 3 months.`;
       banner.classList.remove('hidden');
     } else {
       banner.classList.add('hidden');
