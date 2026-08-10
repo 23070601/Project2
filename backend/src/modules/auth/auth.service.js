@@ -109,9 +109,14 @@ async function updateProfile(userId, data) {
   const [rows] = await pool.execute('SELECT * FROM Users WHERE user_id = ?', [userId]);
   if (!rows[0]) throw new ApiError(404, 'User not found');
   
-  // Xây dựng câu lệnh UPDATE động (phone không được đổi - UAT-TECH-14)
+  // Xây dựng câu lệnh UPDATE động
   const updates = [];
   const values = [];
+  
+  if (data.phone !== undefined && data.phone !== null) {
+    updates.push('phone = ?');
+    values.push(data.phone);
+  }
   
   if (data.full_name !== undefined && data.full_name !== null) {
     updates.push('full_name = ?');
