@@ -48,21 +48,21 @@
           <span class="material-symbols-outlined">computer</span>
         </div>
         <p class="text-outline text-label-md font-label-md uppercase tracking-widest mb-1">Total Assets</p>
-        <p id="kpiTotalAssets" class="text-headline-lg font-headline-lg text-on-surface">3</p>
+        <p id="kpiTotalAssets" class="text-headline-lg font-headline-lg text-on-surface">0</p>
       </div>
       <div class="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant/30 shadow-sm flex flex-col items-center text-center border-l-4 border-l-primary-container">
         <div class="w-12 h-12 bg-tertiary-fixed/30 text-tertiary rounded-lg flex items-center justify-center mb-3">
           <span class="material-symbols-outlined">calendar_today</span>
         </div>
         <p class="text-outline text-label-md font-label-md uppercase tracking-widest mb-1">Last Maintenance</p>
-        <p class="text-headline-lg font-headline-lg text-on-surface">10 Jul 2026</p>
+        <p id="kpiLastMaintenance" class="text-headline-lg font-headline-lg text-on-surface">N/A</p>
       </div>
       <div class="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant/30 shadow-sm flex flex-col items-center text-center border-l-4 border-l-primary-container">
         <div class="w-12 h-12 bg-error-container/50 text-error rounded-lg flex items-center justify-center mb-3">
           <span class="material-symbols-outlined">warning</span>
         </div>
         <p class="text-outline text-label-md font-label-md uppercase tracking-widest mb-1">Total Failure Reports</p>
-        <p class="text-headline-lg font-headline-lg text-on-surface">9</p>
+        <p id="kpiTotalReports" class="text-headline-lg font-headline-lg text-on-surface">0</p>
       </div>
     </div>
 
@@ -629,12 +629,20 @@
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
         const room = await Api.get(`/classrooms/${roomId}`);
         const assets = await Api.get('/assets', { roomId });
+        try {
+          const reports = await Api.get('/faultReports', { roomId });
+          if (reports && Array.isArray(reports)) {
+            document.getElementById('kpiTotalReports').textContent = reports.length;
+          }
+        } catch (e) {}
 
         if (room) {
           if (room.room_name) {
+            const displayTitle = room.room_name.startsWith('Room') ? room.room_name : `Room ${room.room_name}`;
             if (document.getElementById('inputRoomName')) document.getElementById('inputRoomName').value = room.room_name;
-            document.getElementById('breadcrumbRoomName').textContent = room.room_name;
-            document.getElementById('pageRoomTitle').textContent = room.room_name;
+            document.getElementById('breadcrumbRoomName').textContent = displayTitle;
+            document.getElementById('pageRoomTitle').textContent = displayTitle;
+            document.getElementById('assetsCardTitle').textContent = `Assets in ${displayTitle}`;
           }
           if (room.capacity && document.getElementById('inputCapacity')) {
             document.getElementById('inputCapacity').value = `${room.capacity} Students`;
@@ -647,28 +655,40 @@
           }
         }
 
-        if (assets && Array.isArray(assets) && assets.length > 0) {
+        if (assets && Array.isArray(assets)) {
           document.getElementById('kpiTotalAssets').textContent = assets.length;
-          document.getElementById('assetsCountInfo').textContent = `Showing 1–${assets.length} of ${assets.length} assets`;
-          document.getElementById('assetsTableBody').innerHTML = assets.map((a, index) => `
-            <tr class="hover:bg-surface-container-low/50 transition-colors">
-              <td class="px-6 py-4 text-body-sm text-outline">${index + 1}</td>
-              <td class="px-6 py-4 text-body-sm font-medium">AST00${a.asset_id || index+1}</td>
-              <td class="px-6 py-4 text-body-md font-bold text-primary">${UiHelpers.escapeHtml(a.asset_name)}</td>
-              <td class="px-6 py-4 text-body-sm">${UiHelpers.escapeHtml(a.asset_type || 'Equipment')}</td>
-              <td class="px-6 py-4 text-center text-body-sm">${Math.max(Number(a.failure_count || 0), Number(a.recent_failures || 0))}</td>
-              <td class="px-6 py-4 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <button onclick="openEditAssetModal('AST00${a.asset_id || index+1}', '${UiHelpers.escapeHtml(a.asset_name)}', '${a.asset_type || 'Projector'}', '${a.failure_count || 0}')" class="px-3 py-1 text-primary border border-primary/20 hover:bg-primary-fixed/30 rounded text-label-md font-label-md transition-colors">Edit</button>
-                  <button onclick="openAssetHistoryModal('AST00${a.asset_id || index+1}', '${UiHelpers.escapeHtml(a.asset_name)}')" class="px-3 py-1 text-secondary border border-outline-variant hover:bg-surface-container rounded text-label-md font-label-md transition-colors">History</button>
-                </div>
-              </td>
-            </tr>
-          `).join('');
+          if (assets.length > 0) {
+            document.getElementById('assetsCountInfo').textContent = `Showing 1–${assets.length} of ${assets.length} assets`;
+            document.getElementById('assetsTableBody').innerHTML = assets.map((a, index) => `
+              <tr class="hover:bg-surface-container-low/50 transition-colors">
+                <td class="px-6 py-4 text-body-sm text-outline">${index + 1}</td>
+                <td class="px-6 py-4 text-body-sm font-medium">AST00${a.asset_id || index+1}</td>
+                <td class="px-6 py-4 text-body-md font-bold text-primary">${UiHelpers.escapeHtml(a.asset_name)}</td>
+                <td class="px-6 py-4 text-body-sm">${UiHelpers.escapeHtml(a.asset_type || 'Equipment')}</td>
+                <td class="px-6 py-4 text-center text-body-sm">${Math.max(Number(a.failure_count || 0), Number(a.recent_failures || 0))}</td>
+                <td class="px-6 py-4 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button onclick="openEditAssetModal('AST00${a.asset_id || index+1}', '${UiHelpers.escapeHtml(a.asset_name)}', '${a.asset_type || 'Projector'}', '${a.failure_count || 0}')" class="px-3 py-1 text-primary border border-primary/20 hover:bg-primary-fixed/30 rounded text-label-md font-label-md transition-colors">Edit</button>
+                    <button onclick="openAssetHistoryModal('AST00${a.asset_id || index+1}', '${UiHelpers.escapeHtml(a.asset_name)}')" class="px-3 py-1 text-secondary border border-outline-variant hover:bg-surface-container rounded text-label-md font-label-md transition-colors">History</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('');
+          } else {
+            document.getElementById('assetsCountInfo').textContent = 'Showing 0 assets';
+            document.getElementById('assetsTableBody').innerHTML = `
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center text-on-surface-variant font-medium">
+                  <span class="material-symbols-outlined text-4xl text-outline mb-2 block">inventory_2</span>
+                  No assets currently assigned to this classroom. Click "Add Asset" to assign one.
+                </td>
+              </tr>
+            `;
+          }
         }
       }
     } catch (err) {
-      console.log('Using default mock data for ClassroomsDetail view', err);
+      console.log('Using default view for ClassroomsDetail', err);
     }
   }
 

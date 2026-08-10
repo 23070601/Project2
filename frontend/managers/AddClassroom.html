@@ -76,18 +76,31 @@
 
         <!-- Section 2: Room Photos -->
         <section>
-          <div class="flex items-center gap-2 mb-6 pb-2 border-b border-outline-variant">
-            <span class="material-symbols-outlined text-primary">photo_camera</span>
-            <h3 class="text-headline-sm font-headline-sm text-primary">Room Photos</h3>
+          <div class="flex items-center justify-between mb-6 pb-2 border-b border-outline-variant">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">photo_camera</span>
+              <h3 class="text-headline-sm font-headline-sm text-primary">Room Photos</h3>
+            </div>
+            <span id="photoCountBadge" class="text-label-md font-label-md text-on-surface-variant font-medium">0 / 10 photos selected</span>
           </div>
+
           <div class="flex flex-col gap-4">
-            <div onclick="document.getElementById('photoInput').click()" class="w-full h-40 border-2 border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center gap-2 bg-surface-container-lowest hover:bg-surface-container transition-colors cursor-pointer group">
-              <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-3xl">add_a_photo</span>
-              <div class="text-center">
-                <p class="text-label-lg font-label-lg text-on-surface">Click to upload or drag and drop</p>
-                <p class="text-body-sm font-body-sm text-on-surface-variant">PNG, JPG or GIF (max. 5MB)</p>
+            <!-- Dropzone -->
+            <div id="dropZone" onclick="document.getElementById('photoInput').click()" class="w-full min-h-[140px] border-2 border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center p-6 gap-2 bg-surface-container-lowest hover:bg-surface-container transition-colors cursor-pointer group relative">
+              <div id="uploadPlaceholder" class="flex flex-col items-center gap-2">
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-3xl">add_a_photo</span>
+                <div class="text-center">
+                  <p class="text-label-lg font-label-lg text-on-surface">Click to upload or drag and drop multiple images</p>
+                  <p class="text-body-sm font-body-sm text-on-surface-variant">PNG, JPG or GIF (max 5MB each, up to 10 photos)</p>
+                </div>
               </div>
-              <input type="file" id="photoInput" class="hidden" accept="image/*">
+
+              <input type="file" id="photoInput" class="hidden" accept="image/*" multiple>
+            </div>
+
+            <!-- Image Preview Grid Gallery -->
+            <div id="imagePreviewGrid" class="hidden grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-2">
+              <!-- Cards rendered dynamically -->
             </div>
           </div>
         </section>
@@ -101,9 +114,9 @@
           <div class="flex flex-col gap-2 max-w-sm">
             <label class="text-label-lg font-label-lg text-on-surface">Status</label>
             <select id="roomStatus" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-white text-body-md focus:ring-2 focus:ring-primary-container outline-none cursor-pointer">
-              <option value="available">Available</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="inactive">Inactive</option>
+              <option value="Available">Available</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Inactive">Inactive</option>
             </select>
             <p class="text-label-md font-label-md text-on-surface-variant mt-1">Status determines if the room can be booked or assigned for exams.</p>
           </div>
@@ -151,6 +164,115 @@
 
   Layout.init({ role: 'Manager', activePage: 'ClassroomsManagement' });
 
+  let selectedPhotoFiles = [];
+  const photoInput = document.getElementById('photoInput');
+  const dropZone = document.getElementById('dropZone');
+  const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+  const photoCountBadge = document.getElementById('photoCountBadge');
+
+  function handleFilesSelect(files) {
+    if (!files || files.length === 0) return;
+    const fileList = Array.from(files);
+
+    for (const file of fileList) {
+      if (!file.type.startsWith('image/')) {
+        alert(`File "${file.name}" is not an image.`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File "${file.name}" exceeds maximum size of 5MB.`);
+        continue;
+      }
+      if (selectedPhotoFiles.length >= 10) {
+        alert('You can upload a maximum of 10 photos.');
+        break;
+      }
+      if (!selectedPhotoFiles.some(f => f.name === file.name && f.size === file.size)) {
+        selectedPhotoFiles.push(file);
+      }
+    }
+    renderImagePreviews();
+  }
+
+  function renderImagePreviews() {
+    photoCountBadge.textContent = `${selectedPhotoFiles.length} / 10 photos selected`;
+    imagePreviewGrid.innerHTML = '';
+
+    if (selectedPhotoFiles.length === 0) {
+      imagePreviewGrid.classList.add('hidden');
+      imagePreviewGrid.classList.remove('grid');
+      return;
+    }
+
+    imagePreviewGrid.classList.remove('hidden');
+    imagePreviewGrid.classList.add('grid');
+
+    selectedPhotoFiles.forEach((file, index) => {
+      const card = document.createElement('div');
+      card.className = 'relative group rounded-lg border border-outline-variant overflow-hidden bg-white shadow-sm flex flex-col h-36';
+
+      const img = document.createElement('img');
+      img.className = 'w-full h-24 object-cover';
+      img.alt = file.name;
+
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.readAsDataURL(file);
+
+      const footer = document.createElement('div');
+      footer.className = 'p-1.5 bg-surface-container-lowest flex items-center justify-between text-xs text-on-surface truncate font-medium';
+      footer.innerHTML = `<span class="truncate max-w-[80px]" title="${file.name}">${file.name}</span>`;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'absolute top-1 right-1 bg-black/60 hover:bg-error text-white rounded-full p-1 transition-colors flex items-center justify-center';
+      removeBtn.innerHTML = '<span class="material-symbols-outlined text-sm">close</span>';
+      removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removePhoto(index);
+      };
+
+      card.appendChild(img);
+      card.appendChild(footer);
+      card.appendChild(removeBtn);
+      imagePreviewGrid.appendChild(card);
+    });
+  }
+
+  function removePhoto(index) {
+    selectedPhotoFiles.splice(index, 1);
+    photoInput.value = '';
+    renderImagePreviews();
+  }
+
+  photoInput.addEventListener('change', (e) => {
+    handleFilesSelect(e.target.files);
+  });
+
+  // Drag & drop support
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add('border-primary', 'bg-surface-container');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('border-primary', 'bg-surface-container');
+    });
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    if (dt && dt.files) {
+      handleFilesSelect(dt.files);
+    }
+  });
+
   document.getElementById('addClassroomForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
@@ -159,13 +281,30 @@
 
     const roomName = document.getElementById('roomName').value.trim();
     const capacity = document.getElementById('roomCapacity').value;
+    const status = document.getElementById('roomStatus').value;
 
     try {
-      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+      if (window.Api) {
         try {
-          await Api.post('/classrooms', { room_name: roomName, capacity });
+          if (selectedPhotoFiles.length > 0) {
+            const formData = new FormData();
+            formData.append('room_name', roomName);
+            if (capacity) formData.append('capacity', capacity);
+            if (status) formData.append('status', status);
+            selectedPhotoFiles.forEach(file => {
+              formData.append('photos', file);
+            });
+            await Api.upload('/classrooms', formData);
+          } else {
+            await Api.post('/classrooms', { room_name: roomName, capacity, status });
+          }
         } catch (err) {
-          console.log('Room created in demo mode');
+          console.warn('API create classroom notice:', err);
+          // If server returned a business validation error (e.g. 409 duplicate name, 400 bad input), throw it to show alert
+          if (err.status && err.status >= 400 && err.status < 500) {
+            throw err;
+          }
+          console.log('Room created in demo/offline mode');
         }
       }
 
@@ -178,8 +317,7 @@
         window.location.href = 'ClassroomsManagement.html';
       }, 1500);
     } catch (err) {
-      alert(err.message || 'Created classroom successfully');
-      window.location.href = 'ClassroomsManagement.html';
+      alert(err.message || 'Error creating classroom');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Create Classroom';

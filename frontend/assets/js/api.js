@@ -157,7 +157,8 @@ const Api = (() => {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutMs = isFormData ? 30000 : 15000;
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
