@@ -298,7 +298,7 @@
       // 2. Kiểm tra nếu trùng tên phòng (không phân biệt hoa thường)
       const isDuplicate = existingRooms.some(r => r.room_name && r.room_name.trim().toLowerCase() === roomName.toLowerCase());
       if (isDuplicate) {
-        throw new Error(`Phòng "${roomName}" đã tồn tại trong hệ thống! Vui lòng đặt tên phòng khác.`);
+        throw new Error(`Room "${roomName}" already exists in the system! Please choose a different room name.`);
       }
 
       // 3. Thực hiện tạo mới
