@@ -853,22 +853,29 @@
 
   function filterPending() {
     currentPendingPage = 1;
-    const searchVal = document.getElementById('pendingSearch').value.toLowerCase();
-    const prioVal = document.getElementById('pendingPriorityFilter').value;
-    const sortVal = document.getElementById('pendingSortFilter') ? document.getElementById('pendingSortFilter').value : 'newest';
+    const searchInput = document.getElementById('pendingSearch');
+    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const prioSelect = document.getElementById('pendingPriorityFilter');
+    const prioVal = prioSelect ? prioSelect.value : 'All';
+    const sortSelect = document.getElementById('pendingSortFilter');
+    const sortVal = sortSelect ? sortSelect.value : 'newest';
     
     let filtered = allPendingReports.filter(r => !r.order_id && ['Pending Approval', 'Pending'].includes(r.status || 'Pending Approval'));
     if (searchVal) {
       filtered = filtered.filter(r => {
         const reporterName = getReporterDisplayName(r).toLowerCase();
+        const formattedId = UiHelpers ? UiHelpers.formatReportId(r.report_id).toLowerCase() : `#fr-${r.report_id}`;
+        const rawId = String(r.report_id || '').toLowerCase();
         return reporterName.includes(searchVal) ||
           (r.asset_name || '').toLowerCase().includes(searchVal) ||
           (r.room_name || '').toLowerCase().includes(searchVal) ||
-          (r.description || '').toLowerCase().includes(searchVal);
+          (r.description || '').toLowerCase().includes(searchVal) ||
+          formattedId.includes(searchVal) ||
+          rawId.includes(searchVal);
       });
     }
     if (prioVal !== 'All') {
-      filtered = filtered.filter(r => r.priority === prioVal);
+      filtered = filtered.filter(r => (r.priority || '').toLowerCase() === prioVal.toLowerCase());
     }
 
     filtered.sort((a, b) => {
@@ -915,7 +922,7 @@
       );
     }
     if (priorityVal !== 'All') {
-      filtered = filtered.filter(o => o.priority === priorityVal);
+      filtered = filtered.filter(o => (o.priority || '').toLowerCase() === priorityVal.toLowerCase());
     }
     if (statusVal !== 'All') {
       filtered = filtered.filter(o => {
@@ -955,6 +962,9 @@
   // Bind filter events
   document.getElementById('pendingSearch').addEventListener('input', filterPending);
   document.getElementById('pendingPriorityFilter').addEventListener('change', filterPending);
+  if (document.getElementById('pendingSortFilter')) {
+    document.getElementById('pendingSortFilter').addEventListener('change', filterPending);
+  }
   document.getElementById('rejectedSearch').addEventListener('input', filterRejected);
   document.getElementById('assignedSearch').addEventListener('input', filterAssigned);
   if (document.getElementById('assignedPriorityFilter')) {
