@@ -214,11 +214,11 @@ Pre-configured demo accounts with the default password: **`123456`**
 
 | Role | Email Address | Default Password | Redirect Target Page |
 |---|---|---|---|
-| **Manager** | `manager.e@vnuis.edu.vn` | `123456` | `frontend/managers/ManagerDashboard.html` |
-| **Technician (Electrical)** | `tech.c@vnuis.edu.vn` | `123456` | `frontend/technicians/TechnicianDashboard.html` |
-| **Technician (IT/Network)** | `tech.d@vnuis.edu.vn` | `123456` | `frontend/technicians/TechnicianDashboard.html` |
-| **User (Lecturer)** | `lecturer.a@vnuis.edu.vn` | `123456` | `frontend/users/Dashboard.html` |
-| **User (Student)** | `student.b@vnuis.edu.vn` | `123456` | `frontend/users/Dashboard.html` |
+| **Manager** | `manager.e@vnu.edu.vn` | `123456` | `frontend/managers/ManagerDashboard.html` |
+| **Technician (Electrical)** | `tech.c@vnu.edu.vn` | `123456` | `frontend/technicians/TechnicianDashboard.html` |
+| **Technician (IT/Network)** | `tech.d@vnu.edu.vn` | `123456` | `frontend/technicians/TechnicianDashboard.html` |
+| **User (Lecturer)** | `lecturer.a@vnu.edu.vn` | `123456` | `frontend/users/Dashboard.html` |
+| **User (Student)** | `student.b@vnu.edu.vn` | `123456` | `frontend/users/Dashboard.html` |
 
 ---
 
