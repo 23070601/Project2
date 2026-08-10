@@ -11,12 +11,12 @@ const router = express.Router();
 
 router.use(authenticate);
 
+// DSS2 - Managers/PendingRequestDetail.html gọi trước khi Approve & Assign
+router.get('/suggestions/:reportId', requireRole(ROLES.MANAGER), asyncHandler(controller.suggestions));
+
 // Technicians/AssignedTasks.html | Managers/AssignedTasks.html
 router.get('/', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN), asyncHandler(controller.list));
 router.get('/:id', requireRole(ROLES.MANAGER, ROLES.TECHNICIAN, ROLES.USER), asyncHandler(controller.getById));
-
-// DSS2 - Managers/PendingRequestDetail.html gọi trước khi Approve & Assign
-router.get('/suggestions/:reportId', requireRole(ROLES.MANAGER), asyncHandler(controller.suggestions));
 
 // Managers/PendingRequestDetail.html "Approve & Assign"
 router.post('/', requireRole(ROLES.MANAGER), asyncHandler(controller.create));
@@ -25,8 +25,9 @@ router.post('/', requireRole(ROLES.MANAGER), asyncHandler(controller.create));
 router.patch('/:id/response', requireRole(ROLES.TECHNICIAN), asyncHandler(controller.respond));
 router.patch('/:id/reject', requireRole(ROLES.TECHNICIAN), asyncHandler(controller.reject));
 
-// Managers/WorkOrderDetails.html cập nhật deadline
+// Managers/WorkOrderDetails.html cập nhật deadline & reassign
 router.patch('/:id/deadline', requireRole(ROLES.MANAGER), asyncHandler(controller.updateDeadline));
+router.patch('/:id/reassign', requireRole(ROLES.MANAGER), asyncHandler(controller.reassign));
 
 // Technicians/WorkOrderDetails.html upload minh chứng sửa chữa (multi-file)
 router.post(

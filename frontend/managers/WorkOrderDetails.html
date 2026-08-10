@@ -227,9 +227,7 @@
       <div>
         <label class="block text-label-md font-bold text-on-surface-variant mb-1">Select Technician *</label>
         <select id="reassignTechSelect" class="w-full border border-outline-variant/30 rounded-lg p-3 text-body-md focus:ring-primary focus:border-primary outline-none">
-          <option value="Le Van C">Le Van C (Technician)</option>
-          <option value="Pham Thi D">Pham Thi D (Technician)</option>
-          <option value="Vu Van F">Vu Van F (Technician)</option>
+          <option value="">-- Selecting technician... --</option>
         </select>
       </div>
     </div>
@@ -529,13 +527,23 @@
             }).join('');
           }
 
-          // Load technician suggestions for reassigning
+          // Load technician suggestions for reassigning (loại bỏ KTV vừa từ chối khỏi danh sách)
           const suggestions = await Api.get(`/work-orders/suggestions/${data.report_id}`);
           const reassignSelect = document.getElementById('reassignTechSelect');
-          if (reassignSelect && suggestions) {
-            reassignSelect.innerHTML = suggestions.map(t => `
-              <option value="${t.technicianId}">${UiHelpers.escapeHtml(t.fullName)} (${t.specialty || 'General'})</option>
-            `).join('');
+          if (reassignSelect && Array.isArray(suggestions)) {
+            const currentTechId = Number(data.technician_id);
+            const availableTechs = suggestions.filter(t => Number(t.technicianId) !== currentTechId);
+
+            if (availableTechs.length === 0) {
+              reassignSelect.innerHTML = '<option value="">(Không có kỹ thuật viên khác)</option>';
+            } else {
+              reassignSelect.innerHTML = availableTechs.map(t => `
+                <option value="${t.technicianId}">
+                  ${UiHelpers.escapeHtml(t.fullName)} (${t.specialty || 'General'})
+                </option>
+              `).join('');
+              reassignSelect.value = String(availableTechs[0].technicianId);
+            }
           }
 
           // Load comments timeline
