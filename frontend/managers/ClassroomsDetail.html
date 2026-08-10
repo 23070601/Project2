@@ -225,38 +225,24 @@
 
         <!-- Room Gallery Card -->
         <div class="bg-surface-container-lowest rounded-lg border border-outline-variant/30 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-outline-variant/20">
+          <div class="px-6 py-4 border-b border-outline-variant/20 flex items-center justify-between">
             <h3 class="text-headline-sm font-headline-sm text-on-surface">Room Gallery</h3>
+            <span id="galleryCountBadge" class="text-label-md text-on-surface-variant">0 photos</span>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="galleryGrid">
-              <div class="relative aspect-video rounded-lg overflow-hidden border border-outline-variant/20 group gallery-item">
-                <img alt="Classroom view 1" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgKgNEL4zI7aLWYg3M9T_cOpukzA_9eLBht3CYcCA2v0Pq3M65cxPZ6Sdov4HhnRWj3vj9jJ81PCpMjQ0UUZker_AVay4ePQ1QxkZvLA_8VXKBVlxC9bTZQr5VFwhRYVbVuLw_3Qo5qvbSXXEW39C8FNWsd5BbMPsbctn9pGPTIwWI-3IErDGSQl6aRHEic1iL3ewJtuRZndsb3XK6OuQKGk8Tdjnkbp7rGyOsNCUdf-RBHWDKI-ODD5DG9icHDhoVnPJEP1Y2eR5e">
-                <button onclick="deleteGalleryPhoto(this)" title="Delete photo" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-error text-white flex items-center justify-center transition-colors shadow-md z-10">
-                  <span class="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              </div>
-              <div class="relative aspect-video rounded-lg overflow-hidden border border-outline-variant/20 group gallery-item">
-                <img alt="Classroom view 2" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBue3V3IRlrNTqhuCsRaDh3bcamFm1gXRsgjpUqbxkfOoIOG_X0qHgHngQlsogSj_pO6-bh8tHSYxD_7o65Hx1ilzN4ZsDgxnPAvksMP-TWywmMlgE8pTBX4DkqyziDjkV4jVEqATkKg2wF4OLgjAHyVH0pdrLst34TrO-LRXDuo405ogTZO1DPdLExc89ZOQAPG4Atco1pcJVwcYjjR9L3w_eD5QZQO1x-sSrI5PXU7Okag0S798CmyNngzwJZb07cAqogAYWxcl9c">
-                <button onclick="deleteGalleryPhoto(this)" title="Delete photo" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-error text-white flex items-center justify-center transition-colors shadow-md z-10">
-                  <span class="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              </div>
-              <div class="relative aspect-video rounded-lg overflow-hidden border border-outline-variant/20 group gallery-item">
-                <img alt="Classroom view 3" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUi7MgzEMZmT_CIdpST_UVKYHTianXXNbGLkev9mblsvJE5M2ckcH4UEysC4o0a22ZfOzVr1w4FaVL4AXcfS0u4Bf2wlIcp9TFdNe9STSO5AfwsRzI2cHTDTlZ-rTzU0P1iNoUwSXe8HoePzRYMjT2LoydFToTWh5TLrw6uJzHCqH01HI1REffGGTAZJBZXSrfPqu0BC9Z93ST_QF_6e0oCPLHb5S009CP1ar3oyhUUy2ksTw5BnWRR-EIFr6YpDpxyJQ7CSNRjAdB">
-                <button onclick="deleteGalleryPhoto(this)" title="Delete photo" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-error text-white flex items-center justify-center transition-colors shadow-md z-10">
-                  <span class="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              </div>
-              <div class="relative aspect-video rounded-lg overflow-hidden border border-outline-variant/20 group gallery-item">
-                <img alt="Classroom view 4" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbE4tVsWdJ1cSsWPjzNISBrhq7vx9JcQyJMEUDRdy0SK1TUn-qAZYm8YMIYiceLAcj5AYCx7T3PQ17vJ7IlAj0YU4qHFee8qRr_7HAm1rpcXuP55a6qQa16uztwZRnGBTcYjsvhWB4DlQh2ybgD7sDvr-TsNC2oCKHqjhmDSkuAwBfmoqODU4zqY4AZoguDiNhduLBs1tcyvVWOIG3nEYX6box1wtp-CodWsaCfaR0C6cNI5MFGx6yY2e24d30RrRMh8l5qWAKRtbd">
-                <button onclick="deleteGalleryPhoto(this)" title="Delete photo" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-error text-white flex items-center justify-center transition-colors shadow-md z-10">
-                  <span class="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              </div>
-              <div onclick="alert('Upload photo feature coming soon!')" class="aspect-video rounded-lg border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-surface-container-low hover:border-primary/30 transition-all group">
+              <!-- Photos rendered dynamically from API -->
+              <!-- Upload button always last -->
+              <div id="galleryUploadBtn" onclick="document.getElementById('galleryPhotoInput').click()" class="aspect-video rounded-lg border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-surface-container-low hover:border-primary/30 transition-all group">
                 <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add_a_photo</span>
                 <span class="text-label-md font-label-md text-on-surface-variant group-hover:text-primary transition-colors">Add Photos</span>
+              </div>
+              <input type="file" id="galleryPhotoInput" class="hidden" accept="image/*" multiple>
+            </div>
+            <div id="galleryUploadProgress" class="hidden mt-3">
+              <div class="flex items-center gap-3 text-body-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-primary animate-spin text-xl">progress_activity</span>
+                <span id="galleryUploadMsg">Uploading photos...</span>
               </div>
             </div>
           </div>
@@ -655,14 +641,121 @@
     document.getElementById('assetHistoryModal').classList.add('hidden');
   }
 
-  function deleteGalleryPhoto(btn) {
-    if (confirm('Are you sure you want to delete this photo from the gallery?')) {
-      const item = btn.closest('.gallery-item');
-      if (item) {
-        item.remove();
+  // ===================== GALLERY MANAGEMENT =====================
+  let galleryImages = []; // tracks image paths for this room
+
+  function renderGallery(images) {
+    galleryImages = images || [];
+    const grid = document.getElementById('galleryGrid');
+    const uploadBtn = document.getElementById('galleryUploadBtn');
+    const input = document.getElementById('galleryPhotoInput');
+    const badge = document.getElementById('galleryCountBadge');
+
+    if (!grid) return;
+
+    // Remove all gallery-item cards, keep uploadBtn + input
+    grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
+
+    badge.textContent = `${galleryImages.length} photo${galleryImages.length !== 1 ? 's' : ''}`;
+
+    // Get backend base URL
+    const backendBase = window.APP_CONFIG?.API_BASE_URL
+      ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '')
+      : 'http://localhost:5000';
+
+    // Insert image cards before the upload button
+    galleryImages.forEach((imgPath, index) => {
+      const fullUrl = (imgPath.startsWith('http') || imgPath.startsWith('data:'))
+        ? imgPath
+        : backendBase + imgPath;
+
+      const card = document.createElement('div');
+      card.className = 'relative aspect-video rounded-lg overflow-hidden border border-outline-variant/20 group gallery-item';
+      card.innerHTML = `
+        <img src="${fullUrl}" alt="Room photo ${index + 1}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null;this.parentElement.style.display='none'">
+        <button onclick="deleteGalleryPhoto(this, '${imgPath.replace(/'/g, "\\'")}')"
+          title="Delete photo"
+          class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-error text-white flex items-center justify-center transition-colors shadow-md z-10">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      `;
+      grid.insertBefore(card, uploadBtn);
+    });
+  }
+
+  async function deleteGalleryPhoto(btn, imgPath) {
+    if (!confirm('Are you sure you want to delete this photo?')) return;
+
+    const item = btn.closest('.gallery-item');
+    if (!item) return;
+
+    // Remove from UI immediately
+    item.remove();
+    galleryImages = galleryImages.filter(p => p !== imgPath);
+    document.getElementById('galleryCountBadge').textContent =
+      `${galleryImages.length} photo${galleryImages.length !== 1 ? 's' : ''}`;
+
+    // Persist to backend: update room with remaining images
+    try {
+      if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        // Store the remaining image list as comma-separated in a hidden field via PATCH
+        // We call PATCH with imageUrls to reset (first image becomes primary)
+        const updateBody = { image_url: galleryImages[0] || null };
+        await Api.patch(`/classrooms/${roomId}`, updateBody);
       }
+    } catch (e) {
+      console.warn('Could not sync gallery deletion to backend:', e);
     }
   }
+
+  // Gallery upload handler
+  document.getElementById('galleryPhotoInput')?.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const MAX = 10;
+    const progress = document.getElementById('galleryUploadProgress');
+    const msg = document.getElementById('galleryUploadMsg');
+    progress.classList.remove('hidden');
+
+    let successCount = 0;
+    for (const file of files) {
+      if (galleryImages.length >= MAX) {
+        alert('Maximum 10 photos allowed in the gallery.');
+        break;
+      }
+      if (!file.type.startsWith('image/')) { alert(`"${file.name}" is not an image.`); continue; }
+      if (file.size > 5 * 1024 * 1024) { alert(`"${file.name}" exceeds 5MB.`); continue; }
+
+      msg.textContent = `Uploading ${file.name}...`;
+      try {
+        if (window.Api && window.Auth && Auth.isAuthenticated()) {
+          const formData = new FormData();
+          formData.append('photos', file);
+          const result = await Api.uploadPut(`/classrooms/${roomId}`, formData);
+          const newImages = result?.images || galleryImages;
+          renderGallery(newImages);
+          successCount++;
+        } else {
+          // Demo mode: just show preview
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            galleryImages.push(ev.target.result);
+            renderGallery(galleryImages);
+          };
+          reader.readAsDataURL(file);
+          successCount++;
+        }
+      } catch (err) {
+        console.warn('Upload failed for', file.name, err);
+        alert(`Failed to upload ${file.name}: ${err.message || 'Network error'}`);
+      }
+    }
+
+    progress.classList.add('hidden');
+    e.target.value = '';
+    if (successCount > 0 && window.showToast) showToast(`${successCount} photo(s) uploaded successfully!`, 'success');
+  });
 
   async function saveRoomChanges() {
     const btn = document.getElementById('saveRoomBtn');
@@ -744,6 +837,10 @@
           if (!saved) {
             updateUIForRoom(name, fl, cap, desc);
           }
+
+          // Render gallery from actual room images (empty array for new rooms)
+          const images = Array.isArray(room.images) ? room.images : (room.image_url ? [room.image_url] : []);
+          renderGallery(images);
         }
 
         if (assets && Array.isArray(assets)) {
@@ -783,6 +880,8 @@
     }
   }
 
+  // Initialize gallery as empty on page load; loadRoomDetails will populate from API
+  renderGallery([]);
   loadRoomDetails();
 </script>
 </body>
