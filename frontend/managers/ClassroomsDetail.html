@@ -477,19 +477,64 @@
   Layout.init({ role: 'Manager', activePage: 'ClassroomsManagement' });
 
   const params = new URLSearchParams(window.location.search);
-  const roomId = params.get('id') || 'R401';
-  const cleanRoomCode = roomId.replace(/^Room\s*/i, '').replace(/^R/i, '');
-  const displayRoom = `Room R${cleanRoomCode || '401'}`;
+  const rawRoomId = params.get('id') || '2';
+  const roomId = rawRoomId;
 
-  document.getElementById('breadcrumbRoomName').textContent = displayRoom;
-  document.getElementById('pageRoomTitle').textContent = displayRoom;
-  document.getElementById('addAssetRoomTitle').textContent = displayRoom;
-  document.getElementById('editAssetRoom').value = displayRoom;
-  document.getElementById('assetsCardTitle').textContent = `Assets in ${displayRoom}`;
+  // Key để lưu thông tin phòng đã chỉnh sửa vào localStorage
+  const LOCAL_STORAGE_KEY = `room_detail_custom_${roomId}`;
+  let currentRoomData = {
+    room_name: 'R102',
+    capacity: '60 Students',
+    description: 'Standard classroom equipped with projector and desktop computers.'
+  };
 
-  const floorChar = roomId.replace(/\D/g, '').charAt(0) || '4';
-  if (document.getElementById('inputFloor')) document.getElementById('inputFloor').value = floorChar;
-  if (document.getElementById('inputRoomName')) document.getElementById('inputRoomName').value = roomId;
+  // Check data local storage nếu đã lưu trước đó
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      currentRoomData = JSON.parse(saved);
+    } else if (/^\d+$/.test(roomId)) {
+      // Mapping tạm cho ID số từ database seed
+      const roomMap = {
+        '1': 'R101', '2': 'R102', '3': 'R103', '4': 'R106', '5': 'R107',
+        '11': 'R401', '12': 'R402', '13': 'R403', '14': 'R404', '15': 'R405',
+        '16': 'R501', '17': 'R502', '18': 'R503', '19': 'R504', '20': 'R512',
+        '21': 'R601', '22': 'R602', '23': 'R603', '24': 'R604', '25': 'R605', '26': 'R606'
+      };
+      if (roomMap[roomId]) {
+        currentRoomData.room_name = roomMap[roomId];
+      }
+    } else if (roomId) {
+      currentRoomData.room_name = roomId;
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+
+  function updateUIForRoom(name, floor, capacity, description) {
+    const formattedTitle = name.startsWith('Room') ? name : `Room ${name}`;
+    document.getElementById('breadcrumbRoomName').textContent = name;
+    document.getElementById('pageRoomTitle').textContent = formattedTitle;
+    if (document.getElementById('addAssetRoomTitle')) document.getElementById('addAssetRoomTitle').textContent = formattedTitle;
+    if (document.getElementById('editAssetRoom')) document.getElementById('editAssetRoom').value = formattedTitle;
+    document.getElementById('assetsCardTitle').textContent = `Assets in ${formattedTitle}`;
+
+    if (document.getElementById('inputRoomName')) document.getElementById('inputRoomName').value = name;
+    if (document.getElementById('inputFloor')) document.getElementById('inputFloor').value = floor;
+    if (document.getElementById('inputCapacity')) document.getElementById('inputCapacity').value = capacity;
+    if (document.getElementById('inputDescription')) document.getElementById('inputDescription').value = description;
+  }
+
+  // Tự động tính floor từ room_name
+  let calculatedFloor = UiHelpers.getFloorFromName(currentRoomData.room_name);
+  updateUIForRoom(currentRoomData.room_name, calculatedFloor, currentRoomData.capacity, currentRoomData.description);
+
+  // Tự động cập nhật Floor khi người dùng nhập Room Name
+  document.getElementById('inputRoomName').addEventListener('input', (e) => {
+    const val = e.target.value.trim();
+    const fl = UiHelpers.getFloorFromName(val);
+    document.getElementById('inputFloor').value = fl;
+  });
 
   // Add Asset Modal
   function openAddAssetModal() {
@@ -507,6 +552,9 @@
 
     btn.disabled = true;
     btn.textContent = 'Adding...';
+
+    const currentName = document.getElementById('inputRoomName').value.trim();
+    const displayRoom = currentName.startsWith('Room') ? currentName : `Room ${currentName}`;
 
     try {
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
@@ -595,9 +643,24 @@
     btn.textContent = 'Saving...';
 
     const newName = document.getElementById('inputRoomName').value.trim();
-    const newFloor = document.getElementById('inputFloor').value.trim();
+    const calculatedFloor = UiHelpers.getFloorFromName(newName);
+    document.getElementById('inputFloor').value = calculatedFloor;
+    const newFloor = calculatedFloor;
     const newCapacity = document.getElementById('inputCapacity').value.trim();
     const newDesc = document.getElementById('inputDescription').value.trim();
+
+    // Lưu vào LocalStorage
+    try {
+      const roomDataToSave = {
+        room_name: newName,
+        floor: newFloor,
+        capacity: newCapacity,
+        description: newDesc
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(roomDataToSave));
+    } catch (e) {
+      console.warn('LocalStorage save failed:', e);
+    }
 
     try {
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
@@ -612,12 +675,19 @@
           console.log('Room updated in demo mode');
         }
       }
-      alert(`Classroom ${newName} information saved successfully!`);
-      document.getElementById('pageRoomTitle').textContent = newName.startsWith('Room') ? newName : `Room ${newName}`;
-      document.getElementById('breadcrumbRoomName').textContent = newName.startsWith('Room') ? newName : `Room ${newName}`;
-      document.getElementById('assetsCardTitle').textContent = `Assets in ${newName.startsWith('Room') ? newName : `Room ${newName}`}`;
+      if (window.showToast) {
+        showToast(`Classroom ${newName} information saved successfully!`, 'success');
+      } else {
+        alert(`Classroom ${newName} information saved successfully!`);
+      }
+      updateUIForRoom(newName, newFloor, newCapacity, newDesc);
     } catch (err) {
-      alert(err.message || 'Room information saved successfully!');
+      if (window.showToast) {
+        showToast(err.message || 'Room information saved successfully!', 'success');
+      } else {
+        alert(err.message || 'Room information saved successfully!');
+      }
+      updateUIForRoom(newName, newFloor, newCapacity, newDesc);
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">save</span> Save Changes';
@@ -637,21 +707,15 @@
         } catch (e) {}
 
         if (room) {
-          if (room.room_name) {
-            const displayTitle = room.room_name.startsWith('Room') ? room.room_name : `Room ${room.room_name}`;
-            if (document.getElementById('inputRoomName')) document.getElementById('inputRoomName').value = room.room_name;
-            document.getElementById('breadcrumbRoomName').textContent = displayTitle;
-            document.getElementById('pageRoomTitle').textContent = displayTitle;
-            document.getElementById('assetsCardTitle').textContent = `Assets in ${displayTitle}`;
-          }
-          if (room.capacity && document.getElementById('inputCapacity')) {
-            document.getElementById('inputCapacity').value = `${room.capacity} Students`;
-          }
-          if (room.floor && document.getElementById('inputFloor')) {
-            document.getElementById('inputFloor').value = room.floor;
-          }
-          if (room.description && document.getElementById('inputDescription')) {
-            document.getElementById('inputDescription').value = room.description;
+          const name = room.room_name || currentRoomData.room_name;
+          const fl = UiHelpers.getFloorFromName(name);
+          const cap = room.capacity ? `${room.capacity}` : currentRoomData.capacity;
+          const desc = room.description || currentRoomData.description;
+          
+          // Ưu tiên dữ liệu đã lưu chỉnh sửa locally nếu chưa có server sync đầy đủ
+          const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (!saved) {
+            updateUIForRoom(name, fl, cap, desc);
           }
         }
 

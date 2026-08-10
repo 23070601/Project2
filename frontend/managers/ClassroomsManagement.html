@@ -400,8 +400,14 @@
   let allAssets = [];
 
   function getFloorFromName(name) {
-    const match = name.match(/\d/);
-    return match ? parseInt(match[0], 10) : 1;
+    if (window.UiHelpers && typeof window.UiHelpers.getFloorFromName === 'function') {
+      return window.UiHelpers.getFloorFromName(name);
+    }
+    if (!name) return 1;
+    const match = String(name).match(/(\d+)/);
+    if (!match) return 1;
+    const numStr = match[1];
+    return numStr.length >= 3 ? (parseInt(numStr.substring(0, numStr.length - 2), 10) || 1) : (parseInt(numStr.charAt(0), 10) || 1);
   }
 
   function getRoomStatus(roomAssets) {
