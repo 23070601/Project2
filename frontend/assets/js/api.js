@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const token = window.Api.getToken();
   if (token && !window.Api.isTokenValid()) {
-    console.warn('⚠️ Token expired, redirecting to login...');
+    console.warn('Token expired, redirecting to login...');
     window.Api.removeToken();
     window.Api.redirectToLogin();
   }

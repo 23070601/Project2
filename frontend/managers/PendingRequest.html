@@ -274,7 +274,7 @@
                 <td class="px-6 py-4">Epson Visualizer Document Camera</td>
                 <td class="px-6 py-4">Vu Van F</td>
                 <td class="px-6 py-4"><span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full capitalize">High</span></td>
-                <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">⚠️ Rejected</span></td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-[#ffdf9e] text-[#5b4300] text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1">Rejected</span></td>
                 <td class="px-6 py-4"><span class="px-3 py-1 text-white text-[11px] font-bold rounded-full whitespace-nowrap inline-flex items-center gap-1 shadow-xs" style="background-color: #DC3545;">🔴 Overdue</span></td>
                 <td class="px-6 py-4 text-body-sm">Jul 21, 2026</td>
                 <td class="px-6 py-4 text-center">
@@ -807,7 +807,7 @@
       
       if (isRejected) {
         badgeClass = 'bg-[#ffdf9e] text-[#5b4300]';
-        statusText = '⚠️ Rejected';
+        statusText = 'Rejected';
       } else if (o.task_status === 'Assigned') {
         badgeClass = 'bg-blue-50 text-brand-blue';
       } else if (o.task_status === 'Received') {
