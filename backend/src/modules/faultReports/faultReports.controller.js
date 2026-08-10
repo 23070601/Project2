@@ -105,13 +105,12 @@ async function create(req, res) {
   let asset = null;
   let validAssetId = null;
   if (assetId) {
-    try {
-      asset = await assetsRepository.findById(assetId);
-      if (asset) {
-        validAssetId = asset.asset_id;
+    asset = await assetsRepository.findById(assetId);
+    if (asset) {
+      if (asset.status === 'Inactive') {
+        throw new ApiError(400, 'Cannot create fault report for an inactive asset');
       }
-    } catch (e) {
-      console.warn('Asset lookup warning:', e.message);
+      validAssetId = asset.asset_id;
     }
   }
 

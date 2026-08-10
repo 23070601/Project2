@@ -6,7 +6,12 @@ async function findAll({ roomId, assetType, status, search } = {}) {
 
   if (roomId) { clauses.push('a.room_id = ?'); params.push(roomId); }
   if (assetType) { clauses.push('a.asset_type = ?'); params.push(assetType); }
-  if (status) { clauses.push('a.status = ?'); params.push(status); }
+  if (status && status !== 'All') {
+    clauses.push('a.status = ?');
+    params.push(status);
+  } else if (!status) {
+    clauses.push("a.status != 'Inactive'");
+  }
   if (search) { clauses.push('a.asset_name LIKE ?'); params.push(`%${search}%`); }
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
@@ -70,8 +75,21 @@ async function update(assetId, { assetName, assetType, roomId, status }) {
   return findById(assetId);
 }
 
+async function hasActiveWorkOrder(assetId) {
+  const [rows] = await pool.query(
+    `SELECT wo.order_id
+     FROM WorkOrders wo
+     JOIN FaultReports fr ON fr.report_id = wo.report_id
+     WHERE fr.asset_id = ?
+       AND wo.task_status IN ('Assigned', 'Received', 'In Progress')`,
+    [assetId]
+  );
+  return rows.length > 0;
+}
+
 async function remove(assetId) {
-  await pool.execute('DELETE FROM Assets WHERE asset_id = ?', [assetId]);
+  // Requirement 1 & 6: Soft deactivation (never DELETE FROM Assets)
+  await pool.execute("UPDATE Assets SET status = 'Inactive' WHERE asset_id = ?", [assetId]);
 }
 
 // DSS3: danh sách thiết bị vượt ngưỡng hỏng hóc (dùng view có sẵn trong schema)
@@ -87,8 +105,14 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
 
   if (assetType) { clauses.push('a.asset_type = ?'); params.push(assetType); }
   if (roomId) { clauses.push('a.room_id = ?'); params.push(roomId); }
-  if (status === 'Critical') { clauses.push('COALESCE(f3.recent_failures, 0) >= 3'); }
-  if (status === 'Normal') { clauses.push('COALESCE(f3.recent_failures, 0) < 3'); }
+  if (status === 'Critical') {
+    clauses.push('COALESCE(f3.recent_failures, 0) >= 3');
+  } else if (status === 'Normal') {
+    clauses.push('COALESCE(f3.recent_failures, 0) < 3');
+  } else if (status && status !== 'All') {
+    clauses.push('a.status = ?');
+    params.push(status);
+  }
   if (search) { clauses.push('(a.asset_name LIKE ? OR a.asset_type LIKE ?)'); params.push(`%${search}%`, `%${search}%`); }
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
@@ -126,4 +150,4 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
   return rows;
 }
 
-module.exports = { findAll, findById, create, update, remove, findReplacementAlerts, findAllWithFailures };
+module.exports = { findAll, findById, create, update, remove, hasActiveWorkOrder, findReplacementAlerts, findAllWithFailures };

@@ -21,6 +21,19 @@ async function checkConnection() {
   try {
     await conn.ping();
     console.log(`[DB] Connected to MySQL database "${env.db.database}" at ${env.db.host}:${env.db.port}`);
+    try {
+      await conn.query('ALTER TABLE Assets DROP CHECK chk_assets_status');
+    } catch (e) {}
+    try {
+      await conn.query('ALTER TABLE Assets DROP CONSTRAINT chk_assets_status');
+    } catch (e) {}
+    try {
+      await conn.query(`
+        ALTER TABLE Assets ADD CONSTRAINT chk_assets_status CHECK (
+          status IN ('Operational', 'Under Repair', 'Recommended for Replacement', 'Retired', 'Inactive')
+        )
+      `);
+    } catch (e) {}
   } finally {
     conn.release();
   }

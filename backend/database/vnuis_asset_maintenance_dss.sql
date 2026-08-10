@@ -53,7 +53,7 @@ CREATE TABLE Assets (
     CONSTRAINT fk_assets_room FOREIGN KEY (room_id)
         REFERENCES Classrooms(room_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT chk_assets_status CHECK (
-        status IN ('Operational', 'Under Repair', 'Recommended for Replacement', 'Retired')
+        status IN ('Operational', 'Under Repair', 'Recommended for Replacement', 'Retired', 'Inactive')
     )
 ) ENGINE=InnoDB;
 
@@ -625,6 +625,7 @@ BEGIN
         SET failure_count = failure_count + 1,
             last_fault_at = NEW.reported_at,
             status = CASE
+                WHEN status = 'Inactive' THEN 'Inactive'
                 WHEN failure_count + 1 >= 3 THEN 'Recommended for Replacement'
                 WHEN failure_count + 1 > 0 THEN 'Under Repair'
                 ELSE 'Operational'
@@ -644,6 +645,7 @@ BEGIN
             UPDATE Assets
             SET failure_count = GREATEST(failure_count - 1, 0),
                 status = CASE
+                    WHEN status = 'Inactive' THEN 'Inactive'
                     WHEN GREATEST(failure_count - 1, 0) >= 3 THEN 'Recommended for Replacement'
                     WHEN GREATEST(failure_count - 1, 0) > 0 THEN 'Under Repair'
                     ELSE 'Operational'
@@ -660,6 +662,7 @@ BEGIN
             SET failure_count = failure_count + 1,
                 last_fault_at = NEW.reported_at,
                 status = CASE
+                    WHEN status = 'Inactive' THEN 'Inactive'
                     WHEN failure_count + 1 >= 3 THEN 'Recommended for Replacement'
                     WHEN failure_count + 1 > 0 THEN 'Under Repair'
                     ELSE 'Operational'
@@ -679,6 +682,7 @@ BEGIN
         UPDATE Assets
         SET failure_count = GREATEST(failure_count - 1, 0),
             status = CASE
+                WHEN status = 'Inactive' THEN 'Inactive'
                 WHEN GREATEST(failure_count - 1, 0) >= 3 THEN 'Recommended for Replacement'
                 WHEN GREATEST(failure_count - 1, 0) > 0 THEN 'Under Repair'
                 ELSE 'Operational'

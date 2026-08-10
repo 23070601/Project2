@@ -21,6 +21,16 @@
     <h1 class="text-headline-lg font-headline-lg text-primary mb-6">Edit Asset</h1>
 
     <form id="editAssetForm" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-label-md font-label-md text-on-surface-variant">Asset ID</label>
+          <input id="assetIdDisplay" type="text" readonly class="mt-1 w-full rounded-lg border border-outline-variant/30 bg-surface-container-low px-4 py-2.5 text-body-sm cursor-not-allowed">
+        </div>
+        <div>
+          <label class="text-label-md font-label-md text-on-surface-variant">Classroom</label>
+          <input id="roomDisplay" type="text" readonly class="mt-1 w-full rounded-lg border border-outline-variant/30 bg-surface-container-low px-4 py-2.5 text-body-sm cursor-not-allowed">
+        </div>
+      </div>
       <div>
         <label class="text-label-md font-label-md text-on-surface-variant">Asset Name *</label>
         <input id="assetName" type="text" required class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
@@ -36,19 +46,6 @@
           <option value="Microphone">Microphone</option>
         </select>
       </div>
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant">Classroom *</label>
-        <select id="roomSelect" required class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm"></select>
-      </div>
-      <div>
-        <label class="text-label-md font-label-md text-on-surface-variant">Status</label>
-        <select id="status" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
-          <option value="Operational">Operational</option>
-          <option value="Under Repair">Under Repair</option>
-          <option value="Recommended for Replacement">Recommended for Replacement</option>
-          <option value="Retired">Retired</option>
-        </select>
-      </div>
       <div class="grid grid-cols-2 gap-4 text-body-sm text-on-surface-variant pt-2 border-t border-outline-variant/10">
         <div>Failure count: <strong id="failureCount" class="text-on-surface">-</strong></div>
         <div>Last fault: <strong id="lastFaultAt" class="text-on-surface">-</strong></div>
@@ -57,7 +54,7 @@
       <p id="formSuccess" class="hidden text-green-700 text-body-sm bg-green-50 rounded-lg px-3 py-2"></p>
       <div class="flex gap-3">
         <button type="submit" class="bg-brand-blue text-white text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:opacity-90">Save Changes</button>
-        <button type="button" id="deleteBtn" class="border border-error text-error text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:bg-error/5">Delete Asset</button>
+        <button type="button" id="deleteBtn" class="border border-error text-error text-label-lg font-label-lg px-5 py-2.5 rounded-lg hover:bg-error/5">Deactivate Asset</button>
       </div>
     </form>
   </main>
@@ -74,22 +71,16 @@
   Layout.init({ role: 'Manager', activePage: 'ClassroomsManagement' });
 
   const assetId = new URLSearchParams(location.search).get('id');
-  const roomSelect = document.getElementById('roomSelect');
   let currentAsset = null;
 
   async function load() {
-    const [asset, rooms] = await Promise.all([
-      Api.get(`/assets/${assetId}`),
-      Api.get('/classrooms'),
-    ]);
+    const asset = await Api.get(`/assets/${assetId}`);
     currentAsset = asset;
 
-    roomSelect.innerHTML = rooms.map(r => `<option value="${r.room_id}">${r.room_name}</option>`).join('');
-    roomSelect.value = asset.room_id;
-
+    document.getElementById('assetIdDisplay').value = `AST00${asset.asset_id}`;
+    document.getElementById('roomDisplay').value = asset.room_name || `Room #${asset.room_id}`;
     document.getElementById('assetName').value = asset.asset_name;
     document.getElementById('assetType').value = asset.asset_type;
-    document.getElementById('status').value = asset.status;
     document.getElementById('failureCount').textContent = asset.failure_count;
     document.getElementById('lastFaultAt').textContent = UiHelpers.formatDate(asset.last_fault_at);
   }
@@ -104,8 +95,6 @@
       await Api.patch(`/assets/${assetId}`, {
         assetName: document.getElementById('assetName').value.trim(),
         assetType: document.getElementById('assetType').value,
-        roomId: Number(roomSelect.value),
-        status: document.getElementById('status').value,
       });
       successBox.textContent = 'Asset updated successfully.';
       successBox.classList.remove('hidden');
@@ -116,7 +105,7 @@
   });
 
   document.getElementById('deleteBtn').addEventListener('click', async () => {
-    if (!confirm('Delete this asset? This cannot be undone.')) return;
+    if (!confirm('Deactivate this asset? It will be marked as Inactive in the system.')) return;
     try {
       await Api.delete(`/assets/${assetId}`);
       location.href = `ClassroomsDetail.html?id=${currentAsset.room_id}`;

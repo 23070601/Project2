@@ -5,7 +5,7 @@ async function ensureRoomCanBeDeleted({ pool, roomId }) {
 
   const [rows] = await pool.query(
     `SELECT
-       (SELECT COUNT(*) FROM Assets a WHERE a.room_id = ? AND a.status NOT IN ('Retired')) AS activeAssetCount,
+       (SELECT COUNT(*) FROM Assets a WHERE a.room_id = ? AND a.status NOT IN ('Retired', 'Inactive')) AS activeAssetCount,
        (SELECT COUNT(*) FROM FaultReports fr WHERE fr.room_id = ?) AS maintenanceHistoryCount`,
     [roomId, roomId]
   );

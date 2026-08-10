@@ -4,6 +4,7 @@ const auditLogRepository = require('../auditLog/auditLog.repository');
 const { ok, created, noContent, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, requireOneOf, toPositiveInt } = require('../../shared/utils/validators');
 const { ASSET_STATUS } = require('../../shared/constants/statusEnums');
+const { ROLES } = require('../../shared/constants/roles');
 
 async function list(req, res) {
   const { roomId, assetType, status, search } = req.query;
@@ -52,7 +53,19 @@ async function update(req, res) {
   const existing = await assetsRepository.findById(assetId);
   if (!existing) throw new ApiError(404, 'Asset not found');
 
-  if (req.body.status) requireOneOf(req.body.status, Object.values(ASSET_STATUS), 'status');
+  if (req.body.status) {
+    requireOneOf(req.body.status, Object.values(ASSET_STATUS), 'status');
+    if (req.body.status === ASSET_STATUS.INACTIVE) {
+      if (req.user?.role !== ROLES.MANAGER) {
+        throw new ApiError(403, 'Only Managers are authorized to deactivate an asset.');
+      }
+      const activeWo = await assetsRepository.hasActiveWorkOrder(assetId);
+      if (activeWo) {
+        throw new ApiError(400, 'Cannot deactivate asset while it has an active work order. Active work order must be resolved or closed first.');
+      }
+    }
+  }
+
   if (req.body.roomId) {
     const room = await classroomsRepository.findById(req.body.roomId);
     if (!room) throw new ApiError(404, `Classroom #${req.body.roomId} not found`);
@@ -60,14 +73,18 @@ async function update(req, res) {
 
   const updated = await assetsRepository.update(assetId, req.body);
 
-  await auditLogRepository.log({
-    userId: req.user.userId,
-    actionType: 'UPDATE',
-    entityTable: 'Assets',
-    entityId: assetId,
-    assetId,
-    description: `Manager ${req.user.email} updated asset #${assetId}`,
-  });
+  try {
+    await auditLogRepository.log({
+      userId: req.user?.userId || null,
+      actionType: 'UPDATE',
+      entityTable: 'Assets',
+      entityId: assetId,
+      assetId,
+      description: `${req.user?.role || 'User'} ${req.user?.email || ''} updated asset #${assetId}`,
+    });
+  } catch (e) {
+    console.warn('AuditLog error:', e.message);
+  }
 
   ok(res, updated);
 }
@@ -77,15 +94,24 @@ async function remove(req, res) {
   const existing = await assetsRepository.findById(assetId);
   if (!existing) throw new ApiError(404, 'Asset not found');
 
+  const activeWo = await assetsRepository.hasActiveWorkOrder(assetId);
+  if (activeWo) {
+    throw new ApiError(400, 'Cannot deactivate asset while it has an active work order. Active work order must be resolved or closed first.');
+  }
+
   await assetsRepository.remove(assetId);
 
-  await auditLogRepository.log({
-    userId: req.user.userId,
-    actionType: 'DELETE',
-    entityTable: 'Assets',
-    entityId: assetId,
-    description: `Manager ${req.user.email} deleted asset #${assetId}`,
-  });
+  try {
+    await auditLogRepository.log({
+      userId: req.user?.userId || null,
+      actionType: 'UPDATE',
+      entityTable: 'Assets',
+      entityId: assetId,
+      description: `Manager ${req.user?.email || ''} deactivated asset #${assetId}`,
+    });
+  } catch (e) {
+    console.warn('AuditLog error:', e.message);
+  }
 
   noContent(res);
 }

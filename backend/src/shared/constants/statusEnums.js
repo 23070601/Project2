@@ -12,6 +12,7 @@ const ASSET_STATUS = Object.freeze({
   UNDER_REPAIR: 'Under Repair',
   RECOMMENDED_FOR_REPLACEMENT: 'Recommended for Replacement',
   RETIRED: 'Retired',
+  INACTIVE: 'Inactive',
 });
 
 const PRIORITY = Object.freeze({

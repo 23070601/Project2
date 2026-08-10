@@ -4,6 +4,7 @@ const usersRepository = require('../users/users.repository');
 const auditLogRepository = require('../auditLog/auditLog.repository');
 const notificationsRepository = require('../notifications/notifications.repository');
 const links = require('../notifications/notificationLinks');
+const assetsRepository = require('../assets/assets.repository');
 const { suggestTechnicians } = require('./assignment.service');
 const { ok, created, ApiError } = require('../../shared/utils/responseWrapper');
 const { requireFields, requireOneOf, toPositiveInt } = require('../../shared/utils/validators');
@@ -85,6 +86,13 @@ async function create(req, res) {
   const pendingStatuses = [FAULT_REPORT_STATUS.PENDING_APPROVAL, 'Pending'];
   if (!pendingStatuses.includes(report.status)) {
     throw new ApiError(400, `Fault report #${reportId} is not pending approval (current: ${report.status})`);
+  }
+
+  if (report.asset_id) {
+    const asset = await assetsRepository.findById(report.asset_id);
+    if (asset && asset.status === 'Inactive') {
+      throw new ApiError(400, 'Cannot create a work order for an inactive asset.');
+    }
   }
 
   // Validate technician exists and has correct role
