@@ -116,6 +116,69 @@
           </div>
         </div>
 
+        <!-- Submitted Repair Report Card (Visible when status is Completed or report info exists) -->
+        <div id="detailRepairReportCard" class="bg-white rounded-xl shadow-sm border border-emerald-500/30 overflow-hidden hidden">
+          <div class="bg-emerald-700 px-6 py-3.5 flex justify-between items-center text-white">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-emerald-200">assignment_turned_in</span>
+              <h4 class="font-bold text-label-lg">Submitted Repair Report</h4>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-800 text-emerald-100 text-xs font-bold uppercase tracking-wider">Completed</span>
+              <button onclick="openRepairReportModalForEdit()" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">edit</span> Edit Report
+              </button>
+            </div>
+          </div>
+          <div class="p-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Root Cause -->
+              <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100 space-y-1">
+                <div class="flex items-center gap-1.5 text-blue-700 font-bold text-xs uppercase tracking-wider">
+                  <span class="material-symbols-outlined text-sm">psychology</span>
+                  <span>Root Cause</span>
+                </div>
+                <p id="detailReportRootCause" class="text-body-md font-medium text-slate-800">--</p>
+              </div>
+              <!-- Solution Actions -->
+              <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 space-y-1">
+                <div class="flex items-center gap-1.5 text-emerald-700 font-bold text-xs uppercase tracking-wider">
+                  <span class="material-symbols-outlined text-sm">build</span>
+                  <span>Solution Actions</span>
+                </div>
+                <p id="detailReportSolution" class="text-body-md font-medium text-slate-800">--</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Parts Used -->
+              <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-100 space-y-1">
+                <div class="flex items-center gap-1.5 text-amber-700 font-bold text-xs uppercase tracking-wider">
+                  <span class="material-symbols-outlined text-sm">inventory_2</span>
+                  <span>Parts Used</span>
+                </div>
+                <p id="detailReportParts" class="text-body-md font-medium text-slate-800">--</p>
+              </div>
+              <!-- Technician & Resolution Info -->
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5 text-slate-500 font-bold text-xs uppercase tracking-wider mb-1">
+                    <span class="material-symbols-outlined text-sm">badge</span>
+                    <span>Service Technician</span>
+                  </div>
+                  <p id="detailReportTech" class="text-body-md font-bold text-slate-800">--</p>
+                </div>
+                <div class="text-right">
+                  <div class="flex items-center justify-end gap-1.5 text-slate-500 font-bold text-xs uppercase tracking-wider mb-1">
+                    <span class="material-symbols-outlined text-sm">event_available</span>
+                    <span>Submitted Date</span>
+                  </div>
+                  <p id="detailReportResolvedAt" class="text-body-sm font-medium text-slate-700">--</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Asset Repair History Card -->
         <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
           <div class="bg-primary px-6 py-3">
@@ -758,6 +821,37 @@
     // Render Evidence Photos Gallery
     renderEvidencePhotos(order);
 
+    // Render Submitted Repair Report Card
+    const reportCard = document.getElementById('detailRepairReportCard');
+    if (reportCard) {
+      let rootCause = order.root_cause || '';
+      let solution = order.solution_actions || '';
+      let parts = order.parts_used || '';
+
+      if (!rootCause && order.fix_description) {
+        if (order.fix_description.includes(' - ')) {
+          const partsArr = order.fix_description.split(' - ');
+          rootCause = partsArr[0];
+          solution = partsArr.slice(1).join(' - ');
+        } else {
+          solution = order.fix_description;
+        }
+      }
+
+      const isCompletedOrHasReport = (displayStatus === 'Completed' || displayStatus === 'Closed' || !!rootCause || !!solution || !!order.fix_description);
+
+      if (isCompletedOrHasReport) {
+        reportCard.classList.remove('hidden');
+        document.getElementById('detailReportRootCause').textContent = rootCause || 'Standard technical inspection';
+        document.getElementById('detailReportSolution').textContent = solution || order.fix_description || 'Maintenance completed successfully';
+        document.getElementById('detailReportParts').textContent = parts || 'None / Standard maintenance tools';
+        document.getElementById('detailReportTech').textContent = order.technician_name || (currentUser && currentUser.full_name) || 'Technician';
+        document.getElementById('detailReportResolvedAt').textContent = formatAssignedDate(order.resolved_at || order.updated_at || new Date().toISOString());
+      } else {
+        reportCard.classList.add('hidden');
+      }
+    }
+
     // Render Timeline & Repair History
     renderStatusTimeline(order);
     renderRepairHistory(order);
@@ -956,12 +1050,36 @@
     }).reverse().join('');
   }
 
+  function openRepairReportModalForEdit() {
+    document.getElementById('reportModalWorkOrderId').value = displayId;
+    document.getElementById('reportModalNewStatus').value = 'Completed';
+
+    if (currentOrderData) {
+      let rootCause = currentOrderData.root_cause || '';
+      let solution = currentOrderData.solution_actions || '';
+      let parts = currentOrderData.parts_used || '';
+      if (!rootCause && currentOrderData.fix_description) {
+        if (currentOrderData.fix_description.includes(' - ')) {
+          const partsArr = currentOrderData.fix_description.split(' - ');
+          rootCause = partsArr[0];
+          solution = partsArr.slice(1).join(' - ');
+        } else {
+          solution = currentOrderData.fix_description;
+        }
+      }
+      document.getElementById('reportRootCause').value = rootCause;
+      document.getElementById('reportSolutionActions').value = solution;
+      document.getElementById('reportPartsUsed').value = parts;
+    }
+
+    toggleModal('repairReportModal', true);
+  }
+  window.openRepairReportModalForEdit = openRepairReportModalForEdit;
+
   function handleStatusSaveClick() {
     const selectVal = document.getElementById('updateStatusSelect').value;
     if (selectVal === 'Completed') {
-      document.getElementById('reportModalWorkOrderId').value = displayId;
-      document.getElementById('reportModalNewStatus').value = 'Completed';
-      toggleModal('repairReportModal', true);
+      openRepairReportModalForEdit();
     } else {
       updateTaskStatusApi(selectVal);
     }
@@ -981,24 +1099,22 @@
       else alert(e.message || 'Error updating status in Database');
     }
 
-    if (apiSuccess) {
-      const stored = getStoredWorkOrders();
-      const idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
-      if (idx !== -1) {
-        stored[idx].task_status = newStatus;
-        if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
-        stored[idx].statusHistory.push({
-          task_status: newStatus,
-          changed_at: new Date().toISOString(),
-          notes: `Technician updated status to ${newStatus}`
-        });
-        saveStoredWorkOrders(stored);
-      }
-
-      if (window.showToast) showToast(`WorkOrder ${displayId} status updated to "${newStatus}" in MySQL Database!`, 'success');
-      else alert(`WorkOrder ${displayId} status updated to "${newStatus}" in MySQL Database!`);
+    const stored = getStoredWorkOrders();
+    const idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
+    if (idx !== -1) {
+      stored[idx].task_status = newStatus;
+      if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
+      stored[idx].statusHistory.push({
+        task_status: newStatus,
+        changed_at: new Date().toISOString(),
+        notes: `Technician updated status to ${newStatus}`
+      });
+      saveStoredWorkOrders(stored);
     }
-    
+
+    if (window.showToast) showToast(`WorkOrder ${displayId} status updated to "${newStatus}"!`, 'success');
+    else alert(`WorkOrder ${displayId} status updated to "${newStatus}"!`);
+
     await loadWorkOrderDetails();
   }
 
@@ -1029,42 +1145,45 @@
       else alert(e.message || 'Error submitting report to Database');
     }
 
-    if (apiSuccess) {
-      const stored = getStoredWorkOrders();
-      const idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
-      if (idx !== -1) {
-        stored[idx].task_status = 'Completed';
-        stored[idx].fix_description = `${rootCause} - ${solution}`;
-        stored[idx].parts_used = parts;
-        if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
-        stored[idx].statusHistory.push({
-          task_status: 'Completed',
-          changed_at: new Date().toISOString(),
-          notes: `Repair completed: ${rootCause} - ${solution}`
-        });
-
-        if (!stored[idx].repairHistory) stored[idx].repairHistory = [];
-        stored[idx].repairHistory.unshift({
-          order_id: cleanId,
-          assigned_at: new Date().toISOString(),
-          task_status: 'Completed',
-          technician_name: currentUser.full_name || 'Technician',
-          fix_description: `${rootCause} - ${solution}`,
-          parts_used: parts || 'Standard maintenance tools'
-        });
-
-        saveStoredWorkOrders(stored);
-      }
-    }
-
-    toggleModal('repairReportModal', false);
-    if (apiSuccess) {
-      await loadWorkOrderDetails();
-      if (window.showToast) showToast(`Repair report submitted for ${displayId}! Status updated in MySQL Database.`, 'success');
-      else alert(`Repair report submitted for ${displayId}! Status updated in MySQL Database.`);
+    const stored = getStoredWorkOrders();
+    let idx = stored.findIndex(o => String(o.order_id) === String(cleanId));
+    if (idx === -1) {
+      stored.push({ order_id: cleanId });
+      idx = stored.length - 1;
     }
     
+    stored[idx].task_status = 'Completed';
+    stored[idx].root_cause = rootCause;
+    stored[idx].solution_actions = solution;
+    stored[idx].fix_description = `${rootCause} - ${solution}`;
+    stored[idx].parts_used = parts;
+    stored[idx].resolved_at = new Date().toISOString();
+
+    if (!stored[idx].statusHistory) stored[idx].statusHistory = [];
+    stored[idx].statusHistory.push({
+      task_status: 'Completed',
+      changed_at: new Date().toISOString(),
+      notes: `Repair completed: ${rootCause} - ${solution}`
+    });
+
+    if (!stored[idx].repairHistory) stored[idx].repairHistory = [];
+    stored[idx].repairHistory.unshift({
+      order_id: cleanId,
+      assigned_at: new Date().toISOString(),
+      task_status: 'Completed',
+      technician_name: (currentUser && currentUser.full_name) ? currentUser.full_name : 'Technician',
+      root_cause: rootCause,
+      fix_description: `${rootCause} - ${solution}`,
+      parts_used: parts || 'Standard maintenance tools'
+    });
+
+    saveStoredWorkOrders(stored);
+
+    toggleModal('repairReportModal', false);
     await loadWorkOrderDetails();
+
+    if (window.showToast) showToast(`Repair report submitted for ${displayId}! Status updated to Completed.`, 'success');
+    else alert(`Repair report submitted for ${displayId}! Status updated to Completed.`);
   }
 
   let pendingEvidenceFiles = [];
