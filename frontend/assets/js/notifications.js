@@ -125,7 +125,8 @@ const Notifications = (() => {
         try {
           const res = await Api.get('/notifications/unread-count');
           const apiVal = res?.unreadCount ?? res?.data?.unreadCount ?? res?.count;
-          if (apiVal != null && Number(apiVal) > 0) {
+          // Accept 0 as a valid response — fixes badge not clearing when all notifications are read
+          if (apiVal != null) {
             unreadCount = Number(apiVal);
             fetched = true;
           }
@@ -135,6 +136,7 @@ const Notifications = (() => {
       }
 
       if (!fetched) {
+        // API unavailable — fall back to localStorage cache only (never show hardcoded demo unread items)
         const user = window.Auth?.getCurrentUser?.();
         const role = (user?.role || '').toLowerCase();
         let items = null;
@@ -143,22 +145,10 @@ const Notifications = (() => {
           if (stored) items = JSON.parse(stored);
         } catch (e) {}
 
-        if (!items || !Array.isArray(items) || items.length === 0) {
-          if (role === 'technician') {
-            items = [
-              { is_read: false }, { is_read: false }, { is_read: false }, { is_read: true }
-            ];
-          } else if (role === 'manager') {
-            items = [
-              { is_read: false }, { is_read: false }, { is_read: false }, { is_read: true }
-            ];
-          } else {
-            items = [
-              { is_read: false }, { is_read: false }, { is_read: true }
-            ];
-          }
+        if (items && Array.isArray(items) && items.length > 0) {
+          unreadCount = items.filter(n => !(n.is_read || n.isRead)).length;
         }
-        unreadCount = items.filter(n => !(n.is_read || n.isRead)).length;
+        // If no localStorage data and API unavailable, leave unreadCount = 0 (hide badge)
       }
     }
 
@@ -189,6 +179,7 @@ const Notifications = (() => {
       console.warn('Failed to mark all notifications read via API', e);
     }
 
+    // Explicitly hide the badge — don't re-fetch (avoids race with the API)
     refreshBadge(0);
     if (container) {
       await loadDropdown();
@@ -204,6 +195,7 @@ const Notifications = (() => {
     } catch (err) {
       console.warn(`Failed to mark notification #${id} as read`, err);
     }
+    // Re-fetch the real unread count from API after marking one as read
     refreshBadge();
   }
 
