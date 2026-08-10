@@ -124,6 +124,64 @@
             </div>
           </div>
 
+          <!-- Submitted Repair Report Card (Visible when status is Completed/Closed or repair info exists) -->
+          <div id="repairReportCard" class="bg-white rounded-xl border border-emerald-500/30 shadow-sm overflow-hidden hidden">
+            <div class="bg-emerald-700 px-6 py-3.5 flex justify-between items-center text-white">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-200">assignment_turned_in</span>
+                <h3 class="font-bold text-label-lg">Technician Repair Report (Báo cáo sửa chữa)</h3>
+              </div>
+              <span id="repairReportStatusBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-800 text-emerald-100 text-xs font-bold uppercase tracking-wider">Completed</span>
+            </div>
+            <div class="p-6 space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Root Cause -->
+                <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100 space-y-1">
+                  <div class="flex items-center gap-1.5 text-blue-700 font-bold text-xs uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-sm">psychology</span>
+                    <span>Root Cause (Nguyên nhân)</span>
+                  </div>
+                  <p id="managerReportRootCause" class="text-body-md font-medium text-slate-800">--</p>
+                </div>
+                <!-- Solution Actions -->
+                <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 space-y-1">
+                  <div class="flex items-center gap-1.5 text-emerald-700 font-bold text-xs uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-sm">build</span>
+                    <span>Solution Actions (Biện pháp xử lý)</span>
+                  </div>
+                  <p id="managerReportSolution" class="text-body-md font-medium text-slate-800">--</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Parts Used -->
+                <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-100 space-y-1">
+                  <div class="flex items-center gap-1.5 text-amber-700 font-bold text-xs uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-sm">inventory_2</span>
+                    <span>Parts Used (Vật tư / Linh kiện)</span>
+                  </div>
+                  <p id="managerReportParts" class="text-body-md font-medium text-slate-800">--</p>
+                </div>
+                <!-- Technician & Resolution Info -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <div class="flex items-center gap-1.5 text-slate-500 font-bold text-xs uppercase tracking-wider mb-1">
+                      <span class="material-symbols-outlined text-sm">badge</span>
+                      <span>Service Technician</span>
+                    </div>
+                    <p id="managerReportTech" class="text-body-md font-bold text-slate-800">--</p>
+                  </div>
+                  <div class="text-right">
+                    <div class="flex items-center justify-end gap-1.5 text-slate-500 font-bold text-xs uppercase tracking-wider mb-1">
+                      <span class="material-symbols-outlined text-sm">event_available</span>
+                      <span>Resolved Date</span>
+                    </div>
+                    <p id="managerReportResolvedAt" class="text-body-sm font-medium text-slate-700">--</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Rejection Information Card (Shown for Rejected WorkOrders) -->
           <div id="rejectionInfoCard" class="bg-tertiary-fixed/20 rounded-xl border border-tertiary-container/30 shadow-sm p-6">
             <div class="flex items-center gap-2 mb-6">
@@ -481,6 +539,52 @@
               if (data.rejection_reason) document.getElementById('rejectionReasonText').textContent = `"${data.rejection_reason}"`;
             } else {
               rejectionCard.classList.add('hidden');
+            }
+          }
+
+          // Merge local stored data if available for fix description & root cause
+          try {
+            const rawStored = localStorage.getItem('vnuis_work_orders');
+            if (rawStored) {
+              const storedList = JSON.parse(rawStored);
+              const localMatch = storedList.find(o => String(o.order_id) === String(cleanId));
+              if (localMatch) {
+                data = { ...localMatch, ...data };
+              }
+            }
+          } catch(e) {}
+
+          // Render Submitted Repair Report Card
+          const reportCard = document.getElementById('repairReportCard');
+          if (reportCard) {
+            let rootCause = data.root_cause || '';
+            let solution = data.solution_actions || '';
+            let parts = data.parts_used || '';
+
+            if (!rootCause && data.fix_description) {
+              if (data.fix_description.includes(' - ')) {
+                const partsArr = data.fix_description.split(' - ');
+                rootCause = partsArr[0];
+                solution = partsArr.slice(1).join(' - ');
+              } else {
+                solution = data.fix_description;
+              }
+            }
+
+            const isCompletedOrHasReport = (data.task_status === 'Completed' || data.task_status === 'Closed' || !!rootCause || !!solution || !!data.fix_description);
+
+            if (isCompletedOrHasReport) {
+              reportCard.classList.remove('hidden');
+              document.getElementById('managerReportRootCause').textContent = rootCause || 'Technical inspection and diagnostics completed';
+              document.getElementById('managerReportSolution').textContent = solution || data.fix_description || 'Maintenance completed successfully';
+              document.getElementById('managerReportParts').textContent = parts || 'None / Standard maintenance tools';
+              document.getElementById('managerReportTech').textContent = data.technician_name || 'Technician';
+              const resolvedTime = data.resolved_at || data.updated_at || data.assigned_at;
+              document.getElementById('managerReportResolvedAt').textContent = resolvedTime ? UiHelpers.formatDate(resolvedTime) : 'N/A';
+              const statusBadge = document.getElementById('repairReportStatusBadge');
+              if (statusBadge) statusBadge.textContent = data.task_status || 'Completed';
+            } else {
+              reportCard.classList.add('hidden');
             }
           }
 
