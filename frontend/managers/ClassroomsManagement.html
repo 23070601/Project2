@@ -156,20 +156,10 @@
       </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="mt-8 flex items-center justify-between">
-      <p class="text-body-sm text-on-surface-variant">Showing 1–12 of 12 classrooms</p>
-      <div class="flex items-center gap-2">
-        <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors disabled:opacity-50" disabled>
-          <span class="material-symbols-outlined">chevron_left</span>
-        </button>
-        <button class="px-4 py-2 bg-primary text-white rounded-lg font-bold shadow-sm">1</button>
-        <button class="px-4 py-2 hover:bg-surface-container rounded-lg transition-colors">2</button>
-        <button class="px-4 py-2 hover:bg-surface-container rounded-lg transition-colors">3</button>
-        <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
-      </div>
+    <!-- Pagination (All Assets tab) -->
+    <div id="assetsPaginationBar" class="hidden mt-8 flex items-center justify-between">
+      <p id="assetsPaginationInfo" class="text-body-sm text-on-surface-variant"></p>
+      <div id="assetsPaginationButtons" class="flex items-center gap-2"></div>
     </div>
   </main>
 
@@ -636,12 +626,14 @@
     const btnAllAssets = document.getElementById('tabAllAssets');
     const panelClassrooms = document.getElementById('panelClassrooms');
     const panelAllAssets = document.getElementById('panelAllAssets');
+    const paginationBar = document.getElementById('assetsPaginationBar');
 
     if (tab === 'classrooms') {
       btnClassrooms.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all bg-primary text-white shadow-sm';
       btnAllAssets.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all text-on-surface-variant hover:bg-surface-container';
       panelClassrooms.classList.remove('hidden');
       panelAllAssets.classList.add('hidden');
+      if (paginationBar) paginationBar.classList.add('hidden');
     } else {
       btnAllAssets.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all bg-primary text-white shadow-sm';
       btnClassrooms.className = 'px-5 py-2.5 rounded-lg text-label-lg font-label-lg transition-all text-on-surface-variant hover:bg-surface-container';
@@ -653,6 +645,11 @@
 
   // ========== ALL ASSETS TAB ==========
   let allAssetsData = [];
+  let currentAssetsPage = 1;
+  const ASSETS_PER_PAGE = 10;
+
+  // Holds the currently-filtered dataset (set by renderAllAssetsTable, read by renderAssetsPagination)
+  let _filteredAssetsData = [];
 
   async function loadAllAssets() {
     const tbody = document.getElementById('allAssetsTableBody');
@@ -662,6 +659,7 @@
       if (window.Api) {
         allAssetsData = await Api.get('/assets/all') || [];
         populateAssetFilters(allAssetsData);
+        currentAssetsPage = 1;
         renderAllAssetsTable();
         updateCriticalBanner(allAssetsData);
       }
@@ -672,8 +670,7 @@
 
   function populateAssetFilters(assets) {
     const types = [...new Set(assets.map(a => a.asset_type).filter(Boolean))].sort();
-    const rooms = [...new Map(assets.map(a => [a.room_id, a.room_name])).values()].sort();
-    
+
     const typeEl = document.getElementById('assetTypeFilter');
     typeEl.innerHTML = `<option value="">All Types</option>` + types.map(t => `<option value="${UiHelpers.escapeHtml(t)}">${UiHelpers.escapeHtml(t)}</option>`).join('');
 
@@ -699,12 +696,26 @@
     if (statusFilter === 'Critical') data = data.filter(a => Number(a.recent_failures) >= 3);
     if (statusFilter === 'Normal') data = data.filter(a => Number(a.recent_failures) < 3);
 
+    _filteredAssetsData = data;
+
+    // Clamp currentPage within valid range whenever filters change
+    const totalPages = Math.max(1, Math.ceil(data.length / ASSETS_PER_PAGE));
+    if (currentAssetsPage > totalPages) currentAssetsPage = totalPages;
+
     if (data.length === 0) {
       tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-outline">No assets match the selected filters.</td></tr>`;
+      const paginationBar = document.getElementById('assetsPaginationBar');
+      if (paginationBar) paginationBar.classList.add('hidden');
       return;
     }
 
-    tbody.innerHTML = data.map((a, idx) => {
+    // Slice for current page
+    const start = (currentAssetsPage - 1) * ASSETS_PER_PAGE;
+    const end = start + ASSETS_PER_PAGE;
+    const pageData = data.slice(start, end);
+
+    tbody.innerHTML = pageData.map((a, idx) => {
+      const globalIdx = start + idx + 1;  // 1-based row number across all pages
       const isCritical = Number(a.recent_failures) >= 3;
       const statusBadge = isCritical
         ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800"><span class="material-symbols-outlined text-xs">warning</span> Critical</span>`
@@ -715,7 +726,7 @@
 
       return `
         <tr class="hover:bg-surface-container-low transition-colors${isCritical ? ' bg-red-50/30' : ''}">
-          <td class="p-4 text-body-sm text-outline">${idx + 1}</td>
+          <td class="p-4 text-body-sm text-outline">${globalIdx}</td>
           <td class="p-4 text-left">
             <p class="text-body-sm font-bold text-on-surface">${UiHelpers.escapeHtml(a.asset_name)}</p>
             <p class="text-xs text-outline">AST-${String(a.asset_id).padStart(3, '0')}</p>
@@ -733,6 +744,79 @@
         </tr>
       `;
     }).join('');
+
+    renderAssetsPagination(data.length);
+  }
+
+  function renderAssetsPagination(totalItems) {
+    const bar = document.getElementById('assetsPaginationBar');
+    const infoEl = document.getElementById('assetsPaginationInfo');
+    const btnsEl = document.getElementById('assetsPaginationButtons');
+    if (!bar || !infoEl || !btnsEl) return;
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / ASSETS_PER_PAGE));
+    const start = (currentAssetsPage - 1) * ASSETS_PER_PAGE + 1;
+    const end = Math.min(currentAssetsPage * ASSETS_PER_PAGE, totalItems);
+
+    infoEl.textContent = `Showing ${start}–${end} of ${totalItems} assets (${ASSETS_PER_PAGE} per page)`;
+
+    // Build buttons
+    let html = '';
+
+    // Previous button
+    html += `<button
+      id="assetsPrevBtn"
+      onclick="goToAssetsPage(${currentAssetsPage - 1})"
+      ${currentAssetsPage <= 1 ? 'disabled' : ''}
+      class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>`;
+
+    // Page number buttons (show up to 7 buttons with ellipsis)
+    const WINDOW = 2; // pages on each side of current
+    for (let i = 1; i <= totalPages; i++) {
+      const isFirst = i === 1;
+      const isLast = i === totalPages;
+      const isNearCurrent = Math.abs(i - currentAssetsPage) <= WINDOW;
+
+      if (isFirst || isLast || isNearCurrent) {
+        const isActive = i === currentAssetsPage;
+        html += `<button
+          onclick="goToAssetsPage(${i})"
+          class="px-4 py-2 rounded-lg font-bold transition-colors ${
+            isActive
+              ? 'bg-primary text-white shadow-sm'
+              : 'hover:bg-surface-container text-on-surface border border-outline-variant/50'
+          }">${i}</button>`;
+      } else if (i === currentAssetsPage - WINDOW - 1 || i === currentAssetsPage + WINDOW + 1) {
+        html += `<span class="px-1 text-on-surface-variant select-none">…</span>`;
+      }
+    }
+
+    // Next button
+    html += `<button
+      id="assetsNextBtn"
+      onclick="goToAssetsPage(${currentAssetsPage + 1})"
+      ${currentAssetsPage >= totalPages ? 'disabled' : ''}
+      class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>`;
+
+    btnsEl.innerHTML = html;
+    bar.classList.remove('hidden');
+
+    // Only show pagination bar if there is more than one page
+    if (totalPages <= 1) bar.classList.add('hidden');
+  }
+
+  function goToAssetsPage(page) {
+    const totalPages = Math.max(1, Math.ceil(_filteredAssetsData.length / ASSETS_PER_PAGE));
+    if (page < 1 || page > totalPages) return;
+    currentAssetsPage = page;
+    renderAllAssetsTable();
+    // Scroll table into view smoothly
+    const tableEl = document.getElementById('allAssetsTableBody');
+    if (tableEl) tableEl.closest('div')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function updateCriticalBanner(assets) {
@@ -758,6 +842,7 @@
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    currentAssetsPage = 1;
     renderAllAssetsTable();
   }
 
