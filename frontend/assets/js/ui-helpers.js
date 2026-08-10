@@ -38,11 +38,15 @@ const UiHelpers = (() => {
 
   function formatDate(isoString) {
     if (!isoString) return '-';
-    const date = new Date(isoString.replace(' ', 'T'));
+    const dateStr = String(isoString).replace(' ', 'T');
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return String(isoString);
     return date.toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
     });
   }
+
+  const formatDateTime = formatDate;
 
   function escapeHtml(str) {
     const div = document.createElement('div');
@@ -121,6 +125,8 @@ const UiHelpers = (() => {
   window.formatWorkOrderId = formatWorkOrderId;
   window.formatReportId = formatReportId;
   window.formatAssetId = formatAssetId;
+  window.formatDate = formatDate;
+  window.formatDateTime = formatDateTime;
 
-  return { priorityBadge, statusBadge, formatDate, escapeHtml, escapeJsString, showToast, formatWorkOrderId, formatReportId, formatAssetId };
+  return { priorityBadge, statusBadge, formatDate, formatDateTime, escapeHtml, escapeJsString, showToast, formatWorkOrderId, formatReportId, formatAssetId };
 })();
