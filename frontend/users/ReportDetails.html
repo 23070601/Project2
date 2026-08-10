@@ -707,22 +707,22 @@
       return `
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 shadow-sm mt-6">
           <p class="text-body-md font-medium text-emerald-900 flex items-center gap-2 mb-4">
-            <span class="text-[14px]">🟢</span> This issue has been marked as resolved. Please confirm if the problem is fixed.
+            <span class="text-[14px]">🟢</span> The issue has been marked as resolved. Please confirm the repair results.
           </p>
           <form id="confirmForm" class="space-y-4">
             <div class="flex gap-3 flex-wrap">
-              <button type="button" onclick="setConfirmation(true)" class="px-6 py-2 bg-[#28A745] text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all cursor-pointer ring-2 ring-offset-2 ring-[#28A745]">
+              <button type="button" id="btnConfirmedYes" onclick="setConfirmation(true)" class="px-6 py-2 bg-[#28A745] text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all cursor-pointer ring-2 ring-offset-2 ring-[#28A745]">
                 ✅ Yes, it's fixed
               </button>
-              <button type="button" onclick="setConfirmation(false)" class="px-6 py-2 bg-[#DC3545] text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all cursor-pointer">
-                ❌ No, it's not fixed
+              <button type="button" id="btnConfirmedNo" onclick="setConfirmation(false)" class="px-6 py-2 bg-[#DC3545] text-white rounded-lg font-bold text-label-lg hover:opacity-90 transition-all cursor-pointer">
+                ❌ Unresolved issue (Reopen)
               </button>
             </div>
             <input type="hidden" id="isConfirmed" value="true">
             
             <div id="ratingSection" class="pt-4 border-t border-emerald-200/50 space-y-4">
               <div>
-                <p class="text-label-md font-bold text-emerald-900 mb-2">Your Rating:</p>
+                <p class="text-label-md font-bold text-emerald-900 mb-2">Quality assessment:</p>
                 <div class="flex gap-1" id="ratingStars">
                   ${[1,2,3,4,5].map(i => `
                     <span class="material-symbols-outlined cursor-pointer text-2xl hover:scale-110 transition-transform rating-star text-amber-500" 
@@ -741,9 +741,10 @@
             </div>
 
             <div id="reopenSection" class="pt-4 border-t border-red-200/50 space-y-4 hidden">
-              <div>
-                <p class="text-label-md font-bold text-red-900 mb-2">Reason (Issue persists): <span class="text-red-600">*</span></p>
-                <textarea id="reopenReasonInput" class="w-full bg-white border border-red-300 rounded-lg p-3 text-body-sm focus:ring-1 focus:ring-red-500 outline-none resize-none" rows="3" placeholder="Describe remaining issue..."></textarea>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p class="text-label-md font-bold text-red-900 mb-1">⚠️ Detailed description of the unresolved issue: <span class="text-red-600">*</span></p>
+                <p class="text-xs text-red-700 mb-2">After submission, the report status will change to <strong>In Progress</strong> and the technician will be notified.</p>
+                <textarea id="reopenReasonInput" class="w-full bg-white border border-red-300 rounded-lg p-3 text-body-sm focus:ring-1 focus:ring-red-500 outline-none resize-none" rows="3" placeholder="Enter a detailed description of the remaining issue..."></textarea>
               </div>
             </div>
             
@@ -762,9 +763,11 @@
       return `
         <div class="bg-green-50 border border-green-200 rounded-xl p-6 shadow-sm mt-6">
           <p class="text-green-800 text-body-md font-bold flex items-center gap-2">
-            ${confirmation.is_confirmed ? '✅ You confirmed this repair was successful.' : '⚠️ You reported this issue is still not resolved.'}
+            ${confirmation.is_confirmed
+              ? '\u2705 B\u1ea1n \u0111\u00e3 x\u00e1c nh\u1eadn vi\u1ec7c s\u1eeda ch\u1eefa th\u00e0nh c\u00f4ng.'
+              : '\u26a0\ufe0f B\u1ea1n \u0111\u00e3 b\u00e1o c\u00e1o l\u1ed7i ch\u01b0a \u0111\u01b0\u1ee3c kh\u1eafc ph\u1ee5c. B\u00e1o c\u00e1o \u0111\u00e3 \u0111\u01b0\u1ee3c Reopen.'}
           </p>
-          ${confirmation.rating ? `<p class="text-body-sm text-green-700 font-semibold mt-2">Rating: ${'⭐'.repeat(confirmation.rating)}</p>` : ''}
+          ${confirmation.rating ? `<p class="text-body-sm text-green-700 font-semibold mt-2">\u0110\u00e1nh gi\u00e1: ${'\u2b50'.repeat(confirmation.rating)}</p>` : ''}
           ${hasFeedback ? `<p class="text-body-sm text-green-700 italic mt-2">"${escapeHtml(confirmation.feedback)}"</p>` : ''}
         </div>
       `;
@@ -773,25 +776,46 @@
     // ===== GLOBAL FUNCTIONS =====
     window.reportIssuePersists = async function(orderId, reason) {
       if (!reason || !reason.trim()) {
-        alert('Please enter the reason why the issue persists.');
+        alert('Please enter a detailed description of the unresolved issue.');
         return;
       }
 
       const numOrderId = parseInt(String(orderId).replace(/\D/g, ''), 10) || orderId;
       const reportId = new URLSearchParams(location.search).get('id');
 
+      // Disable submit button to prevent double-submission
+      const submitBtn = document.getElementById('confirmSubmitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang gửi...';
+      }
+
       let apiSuccess = false;
       if (window.Api && window.Auth && Auth.isAuthenticated()) {
+        // Try the correct endpoint first: /work-orders/:id/reopen
         try {
-          await Api.post(`/workOrders/${numOrderId}/reopen`, { reason: reason.trim() });
+          await Api.post(`/work-orders/${numOrderId}/reopen`, { reason: reason.trim() });
           apiSuccess = true;
         } catch (e1) {
+          // Fallback: try /workOrders/:id/reopen
           try {
-            await Api.post(`/work-orders/${numOrderId}/reopen`, { reason: reason.trim() });
+            await Api.post(`/workOrders/${numOrderId}/reopen`, { reason: reason.trim() });
             apiSuccess = true;
           } catch (e2) {
-            console.error('API reopen call failed:', e2);
+            console.warn('API reopen call failed (may be offline or seed data), using local fallback:', e2.message || e2);
           }
+        }
+      }
+
+      // If API failed, try to update FaultReport status directly
+      if (!apiSuccess && window.Api && window.Auth && Auth.isAuthenticated()) {
+        try {
+          const numReportId = parseInt(String(reportId).replace(/\D/g, ''), 10);
+          if (numReportId) {
+            await Api.patch(`/fault-reports/${numReportId}/status`, { status: 'Processing' });
+          }
+        } catch (e) {
+          // Ignore - will use local storage fallback
         }
       }
 
@@ -831,7 +855,7 @@
         }
       } catch (e) {}
 
-      const msg = "✅ Issue reported as Not Fixed. Work Order & Report updated to In Progress and sent back to Technician.";
+      const msg = "✅ Successfully reopened. The report status has been changed to In Progress. The technician will be notified to continue the repair.";
       if (window.showToast) {
         showToast(msg, 'success');
       } else if (window.UiHelpers && window.UiHelpers.showToast) {
@@ -843,19 +867,20 @@
 
       setTimeout(() => {
         window.location.reload();
-      }, 600);
+      }, 800);
     };
 
     window.setConfirmation = function(value) {
       const input = document.getElementById('isConfirmed');
       if (input) input.value = value;
-      const buttons = document.querySelectorAll('#confirmForm .flex.gap-3 button');
-      buttons.forEach(btn => {
-        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#28A745]', 'ring-[#DC3545]');
-      });
-      const selectedBtn = value ? buttons[0] : buttons[1];
-      if (selectedBtn) {
-        selectedBtn.classList.add('ring-2', 'ring-offset-2', value ? 'ring-[#28A745]' : 'ring-[#DC3545]');
+      const yesBtn = document.getElementById('btnConfirmedYes');
+      const noBtn = document.getElementById('btnConfirmedNo');
+      if (yesBtn) yesBtn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#28A745]');
+      if (noBtn) noBtn.classList.remove('ring-2', 'ring-offset-2', 'ring-[#DC3545]');
+      if (value) {
+        if (yesBtn) yesBtn.classList.add('ring-2', 'ring-offset-2', 'ring-[#28A745]');
+      } else {
+        if (noBtn) noBtn.classList.add('ring-2', 'ring-offset-2', 'ring-[#DC3545]');
       }
 
       const ratingSection = document.getElementById('ratingSection');
@@ -873,7 +898,7 @@
         if (ratingSection) ratingSection.classList.add('hidden');
         if (reopenSection) reopenSection.classList.remove('hidden');
         if (submitBtn) {
-          submitBtn.textContent = 'Reopen Work Order';
+          submitBtn.textContent = 'Send Reopen Request';
           submitBtn.className = 'px-8 py-3 bg-[#DC3545] text-white rounded-lg font-bold text-body-md shadow-lg shadow-red-500/20 hover:opacity-90 transition-all cursor-pointer';
         }
       }
@@ -1231,7 +1256,7 @@
               const reopenReason = (document.getElementById('reopenReasonInput')?.value || '').trim();
               if (!reopenReason) {
                 if (errorBox) {
-                  errorBox.textContent = 'Please describe why the issue is not fixed.';
+                  errorBox.textContent = 'Please enter a detailed description of the unresolved issue.';
                   errorBox.classList.remove('hidden');
                 }
                 return;

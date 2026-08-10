@@ -63,6 +63,9 @@
       <button type="button" data-status="Completed" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
         Completed <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-bold" id="countCompleted">0</span>
       </button>
+      <button type="button" data-status="Closed" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
+        Closed <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 font-bold" id="countClosed">0</span>
+      </button>
       <button type="button" data-status="Rejected" class="status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer">
         Rejected / Cancelled <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-bold" id="countRejected">0</span>
       </button>
@@ -79,6 +82,19 @@
       </div>
 
       <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+        <!-- Status Dropdown Filter -->
+        <div class="flex items-center gap-2">
+          <span class="text-label-md text-on-surface-variant shrink-0 font-medium">Status:</span>
+          <select id="statusFilter" class="pl-3 pr-8 py-2 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1em_1em] bg-[right_0.5rem_center] bg-no-repeat">
+            <option value="">All Statuses</option>
+            <option value="Pending Approval">Pending Approval</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Closed">Closed</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+
         <!-- Priority Filter -->
         <div class="flex items-center gap-2">
           <span class="text-label-md text-on-surface-variant shrink-0 font-medium">Priority:</span>
@@ -350,6 +366,7 @@
         Pending: 0,
         InProgress: 0,
         Completed: 0,
+        Closed: 0,
         Rejected: 0
       };
 
@@ -357,10 +374,12 @@
         const s = report.display_status || report.status || '';
         if (['Pending', 'Pending Approval'].includes(s)) {
           counts.Pending++;
-        } else if (['In Progress', 'Processing'].includes(s)) {
+        } else if (['In Progress', 'Processing', 'Assigned', 'Received'].includes(s)) {
           counts.InProgress++;
-        } else if (['Completed', 'Resolved', 'Closed'].includes(s)) {
+        } else if (['Completed', 'Resolved'].includes(s)) {
           counts.Completed++;
+        } else if (s === 'Closed') {
+          counts.Closed++;
         } else if (['Rejected', 'Cancelled'].includes(s)) {
           counts.Rejected++;
         }
@@ -370,12 +389,14 @@
       const countPending = document.getElementById('countPending');
       const countInProgress = document.getElementById('countInProgress');
       const countCompleted = document.getElementById('countCompleted');
+      const countClosed = document.getElementById('countClosed');
       const countRejected = document.getElementById('countRejected');
 
       if (countAll) countAll.textContent = counts.All;
       if (countPending) countPending.textContent = counts.Pending;
       if (countInProgress) countInProgress.textContent = counts.InProgress;
       if (countCompleted) countCompleted.textContent = counts.Completed;
+      if (countClosed) countClosed.textContent = counts.Closed;
       if (countRejected) countRejected.textContent = counts.Rejected;
     }
 
@@ -383,22 +404,27 @@
     function applyFilters() {
       const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
       const priorityValue = priorityFilter ? priorityFilter.value : '';
+      const statusSelectValue = statusFilter ? statusFilter.value : '';
       const sortValue = sortBySelect ? sortBySelect.value : 'newest';
 
       filteredReports = allReports.filter(report => {
         const s = report.display_status || report.status || '';
 
-        // Status tab filter
-        if (currentStatus) {
-          if (['Pending', 'Pending Approval'].includes(currentStatus)) {
+        // Status tab or Status dropdown filter
+        const targetStatus = statusSelectValue || currentStatus;
+
+        if (targetStatus) {
+          if (['Pending', 'Pending Approval'].includes(targetStatus)) {
             if (!['Pending', 'Pending Approval'].includes(s)) return false;
-          } else if (['In Progress', 'Processing'].includes(currentStatus)) {
+          } else if (['In Progress', 'Processing'].includes(targetStatus)) {
             if (!['In Progress', 'Processing', 'Assigned', 'Received'].includes(s)) return false;
-          } else if (['Completed', 'Resolved', 'Closed'].includes(currentStatus)) {
-            if (!['Completed', 'Resolved', 'Closed'].includes(s)) return false;
-          } else if (['Rejected', 'Cancelled'].includes(currentStatus)) {
+          } else if (targetStatus === 'Completed') {
+            if (!['Completed', 'Resolved'].includes(s)) return false;
+          } else if (targetStatus === 'Closed') {
+            if (s !== 'Closed') return false;
+          } else if (['Rejected', 'Cancelled'].includes(targetStatus)) {
             if (!['Rejected', 'Cancelled'].includes(s)) return false;
-          } else if (s !== currentStatus) {
+          } else if (s !== targetStatus) {
             return false;
           }
         }
@@ -562,6 +588,9 @@
     statusTabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         currentStatus = btn.dataset.status || '';
+        if (statusFilter) {
+          statusFilter.value = currentStatus;
+        }
 
         // Update tab styles
         statusTabBtns.forEach(b => {
@@ -578,7 +607,8 @@
               let badgeColor = 'bg-gray-100 text-gray-800';
               if (['Pending', 'Pending Approval'].includes(statusVal)) badgeColor = 'bg-amber-100 text-amber-800';
               else if (['In Progress', 'Processing'].includes(statusVal)) badgeColor = 'bg-blue-100 text-blue-800';
-              else if (['Completed', 'Resolved', 'Closed'].includes(statusVal)) badgeColor = 'bg-green-100 text-green-800';
+              else if (statusVal === 'Completed') badgeColor = 'bg-green-100 text-green-800';
+              else if (statusVal === 'Closed') badgeColor = 'bg-gray-100 text-gray-800';
               else if (['Rejected', 'Cancelled'].includes(statusVal)) badgeColor = 'bg-red-100 text-red-800';
               badge.className = `ml-1 text-xs px-2 py-0.5 rounded-full ${badgeColor} font-bold`;
             }
@@ -588,6 +618,38 @@
         applyFilters();
       });
     });
+
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+      statusFilter.addEventListener('change', () => {
+        const val = statusFilter.value;
+        currentStatus = val;
+
+        // Sync tab buttons visual state
+        statusTabBtns.forEach(b => {
+          const isSelected = (b.dataset.status || '') === val;
+          const badge = b.querySelector('span');
+          if (isSelected) {
+            b.className = 'status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm bg-brand-blue text-white cursor-pointer';
+            if (badge) badge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-white/20 font-bold';
+          } else {
+            b.className = 'status-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/30 cursor-pointer';
+            if (badge) {
+              const statusVal = b.dataset.status || '';
+              let badgeColor = 'bg-gray-100 text-gray-800';
+              if (['Pending', 'Pending Approval'].includes(statusVal)) badgeColor = 'bg-amber-100 text-amber-800';
+              else if (['In Progress', 'Processing'].includes(statusVal)) badgeColor = 'bg-blue-100 text-blue-800';
+              else if (statusVal === 'Completed') badgeColor = 'bg-green-100 text-green-800';
+              else if (statusVal === 'Closed') badgeColor = 'bg-gray-100 text-gray-800';
+              else if (['Rejected', 'Cancelled'].includes(statusVal)) badgeColor = 'bg-red-100 text-red-800';
+              badge.className = `ml-1 text-xs px-2 py-0.5 rounded-full ${badgeColor} font-bold`;
+            }
+          }
+        });
+
+        applyFilters();
+      });
+    }
 
     if (searchInput) {
       searchInput.addEventListener('input', () => {
