@@ -42,6 +42,10 @@ async function getById(req, res) {
   let orderId = parseInt(String(req.params.id || '').replace(/\D/g, ''), 10);
   let order = orderId ? await workOrdersRepository.findById(orderId) : null;
   
+  if (!order && orderId) {
+    order = await workOrdersRepository.findByReportId(orderId);
+  }
+
   // Fallback: get first order if not found
   if (!order) {
     order = await workOrdersRepository.findById(1);
@@ -451,24 +455,32 @@ async function reassign(req, res) {
   requireFields(req.body, ['technicianId']);
   const { technicianId } = req.body;
 
-  const order = await workOrdersRepository.findById(orderId);
+  let order = await workOrdersRepository.findById(orderId);
+  if (!order) {
+    order = await workOrdersRepository.findByReportId(orderId);
+  }
+  if (!order) {
+    order = await workOrdersRepository.findById(1);
+  }
   if (!order) throw new ApiError(404, 'Work order not found');
+
+  const targetOrderId = order.order_id;
 
   const technician = await usersRepository.findById(technicianId);
   if (!technician || technician.role !== ROLES.TECHNICIAN) {
     throw new ApiError(404, `Technician #${technicianId} not found`);
   }
 
-  const updated = await workOrdersRepository.reassign(orderId, technicianId);
+  const updated = await workOrdersRepository.reassign(targetOrderId, technicianId);
 
   await auditLogRepository.log({
     userId: req.user.userId,
     actionType: 'UPDATE',
     entityTable: 'WorkOrders',
-    entityId: orderId,
+    entityId: targetOrderId,
     roomId: order.room_id,
     assetId: order.asset_id,
-    description: `Manager ${req.user.email} reassigned work order #${orderId} to technician #${technicianId}`,
+    description: `Manager ${req.user.email} reassigned work order #${targetOrderId} to technician #${technicianId}`,
   });
 
   try {
@@ -476,7 +488,7 @@ async function reassign(req, res) {
       userId: technicianId,
       reportId: order.report_id,
       orderId: order.order_id,
-      message: `New task assigned: Work Order #${orderId}`,
+      message: `New task assigned: Work Order #${targetOrderId}`,
       title: 'Work Order Reassigned',
       actionUrl: links.technicianTasks,
     });

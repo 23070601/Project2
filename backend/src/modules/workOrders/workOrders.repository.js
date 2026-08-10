@@ -8,12 +8,12 @@ const BASE_SELECT = `
          tech.full_name AS technician_name, tech.technician_specialty,
          mgr.full_name AS manager_name
   FROM WorkOrders wo
-  JOIN FaultReports fr ON fr.report_id = wo.report_id
-  JOIN Classrooms c ON c.room_id = fr.room_id
+  LEFT JOIN FaultReports fr ON fr.report_id = wo.report_id
+  LEFT JOIN Classrooms c ON c.room_id = fr.room_id
   LEFT JOIN Assets a ON a.asset_id = fr.asset_id
-  JOIN Users reporter ON reporter.user_id = fr.reporter_id
-  JOIN Users tech ON tech.user_id = wo.technician_id
-  JOIN Users mgr ON mgr.user_id = wo.manager_id
+  LEFT JOIN Users reporter ON reporter.user_id = fr.reporter_id
+  LEFT JOIN Users tech ON tech.user_id = wo.technician_id
+  LEFT JOIN Users mgr ON mgr.user_id = wo.manager_id
 `;
 
 async function getImages(orderId) {
