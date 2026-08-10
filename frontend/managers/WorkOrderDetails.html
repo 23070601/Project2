@@ -639,7 +639,7 @@
             const availableTechs = suggestions.filter(t => Number(t.technicianId) !== currentTechId);
 
             if (availableTechs.length === 0) {
-              reassignSelect.innerHTML = '<option value="">(Không có kỹ thuật viên khác)</option>';
+              reassignSelect.innerHTML = '<option value="">(No other technicians available)</option>';
             } else {
               reassignSelect.innerHTML = availableTechs.map(t => `
                 <option value="${t.technicianId}">
@@ -683,7 +683,7 @@
         : 'bg-emerald-50 text-emerald-700 border-emerald-200';
       const avatarBg = isManager ? 'bg-primary text-white' : 'bg-emerald-600 text-white';
       const roleTitle = isManager ? 'Manager' : 'Technician';
-      const dateStr = c.created_at ? new Date(c.created_at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }) : 'Vừa xong';
+      const dateStr = c.created_at ? new Date(c.created_at).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : 'Just now';
       const initials = (c.user_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
       return `
@@ -694,7 +694,7 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-1">
               <div class="flex items-center gap-2">
-                <span class="font-bold text-body-sm text-on-surface truncate">${c.user_name || 'Người dùng'}</span>
+                <span class="font-bold text-body-sm text-on-surface truncate">${c.user_name || 'User'}</span>
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleBadgeClass}">${roleTitle}</span>
               </div>
               <span class="text-[11px] text-outline font-medium shrink-0">${dateStr}</span>
@@ -755,7 +755,7 @@
 
     const text = input.value.trim();
     if (!text) {
-      alert('Vui lòng nhập nội dung comment!');
+      alert('Please enter a comment!');
       return;
     }
 
@@ -798,7 +798,7 @@
     input.value = '';
     if (submitBtn) submitBtn.disabled = false;
     
-    if (window.showToast) showToast('Đã gửi comment thành công!', 'success');
+    if (window.showToast) showToast('Comment submitted successfully!', 'success');
     
     await loadComments();
   }

@@ -232,7 +232,7 @@
       <!-- DSS3 Alert Section -->
       <div id="modalDss3AlertBanner" class="bg-error-container/20 border border-error/30 p-4 rounded-lg flex items-center gap-3 text-error">
         <span class="material-symbols-outlined">report_problem</span>
-        <p class="text-body-sm font-medium"> <strong>DSS3 Warning:</strong> Device frequently fails (failed <span id="modalDss3Count">4</span> times). Replacement recommended.</p>
+        <p class="text-body-sm font-medium">⚠️ <strong>DSS3 Warning:</strong> High failure frequency (<span id="modalDss3Count">4</span> failures). Replacement recommended.</p>
       </div>
 
       <!-- Repair History Table -->
@@ -604,7 +604,7 @@
   function getAssetStatusBadgeHtml(status, failureCount = 0) {
     const s = status || 'Operational';
     if (s === 'Recommended for Replacement' || (failureCount && failureCount >= 3)) {
-      return `<span class="px-2.5 py-1 rounded-full bg-error-container/40 text-error border border-error/30 text-[10px] font-bold uppercase flex items-center gap-1 w-fitDSS3 Warning: Replacement recommended. mx-auto" title="Thiết bị hay hỏng, đề xuất thay mới (DSS3)"><span class="material-symbols-outlined text-[12px]">warning</span> </span>`;
+      return `<span class="px-2.5 py-1 rounded-full bg-error-container/40 text-error border border-error/30 text-[10px] font-bold uppercase flex items-center gap-1 w-fit mx-auto" title="High failure frequency, replacement recommended (DSS3)"><span class="material-symbols-outlined text-[12px]">warning</span> Replacement Rec. (DSS3)</span>`;
     }
     if (s === 'Under Repair') {
       return `<span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold uppercase flex items-center gap-1 w-fit mx-auto"><span class="material-symbols-outlined text-[12px]">build</span> Under Repair</span>`;
@@ -705,7 +705,7 @@
 
     const statusBadgeContainer = document.getElementById('modalInfoStatusBadge');
     if (isHighRisk) {
-      statusBadgeContainer.innerHTML = `<span class="px-2.5 py-1 rounded-full bg-error-container/40 text-error border border-error/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> DSS3 Warning: Replacement recommended.</span>`;
+      statusBadgeContainer.innerHTML = `<span class="px-2.5 py-1 rounded-full bg-error-container/40 text-error border border-error/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> Replacement Rec. (DSS3)</span>`;
       document.getElementById('modalDss3AlertBanner').classList.remove('hidden');
       document.getElementById('modalDss3Count').textContent = asset.failure_count || 3;
     } else {

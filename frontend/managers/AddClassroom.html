@@ -336,9 +336,9 @@
       }, 1500);
     } catch (err) {
       if (window.showToast) {
-        showToast(err.message || 'Lỗi khi tạo phòng học mới', 'error');
+        showToast(err.message || 'Error creating new classroom', 'error');
       } else {
-        alert(err.message || 'Lỗi khi tạo phòng học mới');
+        alert(err.message || 'Error creating new classroom');
       }
     } finally {
       btn.disabled = false;

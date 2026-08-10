@@ -213,18 +213,18 @@
       var newFiles = Array.from(filesList);
 
       if (selectedFiles.length + newFiles.length > 5) {
-        alert('Tối đa 5 ảnh / tệp tin cho mỗi báo cáo! (Hiện tại bạn đã chọn ' + selectedFiles.length + ' tệp)');
+        alert('Maximum 5 images / files per report! (Currently selected: ' + selectedFiles.length + ' files)');
         return;
       }
 
       for (var i = 0; i < newFiles.length; i++) {
         var file = newFiles[i];
         if (!validTypes.includes(file.type)) {
-          alert('Tệp "' + file.name + '" không hợp lệ. Chỉ chấp nhận các định dạng PNG, JPG, WEBP hoặc PDF.');
+          alert('File "' + file.name + '" is invalid. Only PNG, JPG, WEBP, or PDF formats are accepted.');
           return;
         }
         if (file.size > 5 * 1024 * 1024) {
-          alert('Dung lượng tệp "' + file.name + '" vượt quá 5MB.');
+          alert('File size of "' + file.name + '" exceeds 5MB.');
           return;
         }
       }
