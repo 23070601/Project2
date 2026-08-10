@@ -656,7 +656,7 @@
               <td class="px-6 py-4 text-body-sm font-medium">AST00${a.asset_id || index+1}</td>
               <td class="px-6 py-4 text-body-md font-bold text-primary">${UiHelpers.escapeHtml(a.asset_name)}</td>
               <td class="px-6 py-4 text-body-sm">${UiHelpers.escapeHtml(a.asset_type || 'Equipment')}</td>
-              <td class="px-6 py-4 text-center text-body-sm">${a.failure_count || 0}</td>
+              <td class="px-6 py-4 text-center text-body-sm">${Math.max(Number(a.failure_count || 0), Number(a.recent_failures || 0))}</td>
               <td class="px-6 py-4 text-center">
                 <div class="flex items-center justify-center gap-2">
                   <button onclick="openEditAssetModal('AST00${a.asset_id || index+1}', '${UiHelpers.escapeHtml(a.asset_name)}', '${a.asset_type || 'Projector'}', '${a.failure_count || 0}')" class="px-3 py-1 text-primary border border-primary/20 hover:bg-primary-fixed/30 rounded text-label-md font-label-md transition-colors">Edit</button>

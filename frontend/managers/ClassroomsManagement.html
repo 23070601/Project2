@@ -740,7 +740,7 @@
           </td>
           <td class="p-4 text-body-sm text-left">${UiHelpers.escapeHtml(a.asset_type || '—')}</td>
           <td class="p-4 text-body-sm">${UiHelpers.escapeHtml(a.room_name)}</td>
-          <td class="p-4 text-body-sm">${a.failure_count || 0}</td>
+          <td class="p-4 text-body-sm">${Math.max(Number(a.failure_count || 0), Number(a.recent_failures || 0))}</td>
           ${failuresCell}
           <td class="p-4">${statusBadge}</td>
           <td class="p-4">

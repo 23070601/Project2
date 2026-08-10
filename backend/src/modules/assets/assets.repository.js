@@ -80,7 +80,7 @@ async function findReplacementAlerts() {
   return rows;
 }
 
-// All Assets tab: trả về tất cả assets kèm số lần hỏng trong 3 tháng gần nhất
+// All Assets tab: trả về tất cả assets kèm số lần hỏng trong 3 tháng gần nhất và tổng số lần hỏng
 async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
   const clauses = [];
   const params = [];
@@ -98,7 +98,7 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
         a.asset_name,
         a.asset_type,
         a.status,
-        a.failure_count,
+        GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) AS failure_count,
         c.room_name,
         a.room_id,
         COALESCE(f3.recent_failures, 0) AS recent_failures
@@ -112,8 +112,15 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
          AND status NOT IN ('Rejected', 'Cancelled')
        GROUP BY asset_id
      ) f3 ON f3.asset_id = a.asset_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS total_failures
+       FROM FaultReports
+       WHERE asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
+       GROUP BY asset_id
+     ) tf ON tf.asset_id = a.asset_id
      ${where}
-     ORDER BY recent_failures DESC, a.failure_count DESC, a.asset_name`,
+     ORDER BY recent_failures DESC, failure_count DESC, a.asset_name`,
     params
   );
   return rows;
