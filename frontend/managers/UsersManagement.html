@@ -351,7 +351,7 @@
       <h3 class="text-headline-sm font-headline-sm text-on-surface">Add New User</h3>
       <p class="text-body-sm text-on-surface-variant mt-1">Create a new account for the system.</p>
     </div>
-    <form id="addUserForm" onsubmit="event.preventDefault(); confirmAddUser();" class="p-6 space-y-4">
+    <form id="addUserForm" novalidate onsubmit="event.preventDefault(); confirmAddUser();" class="p-6 space-y-4">
       <div>
         <label class="block text-label-md font-bold text-on-surface mb-1">Full Name *</label>
         <input id="newFullName" type="text" placeholder="Enter full name" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
@@ -363,6 +363,7 @@
       <div>
         <label class="block text-label-md font-bold text-on-surface mb-1">Temporary Password *</label>
         <input id="newPassword" type="password" placeholder="Enter password (min 6 chars)" value="123456" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
+        <p class="text-[12px] text-on-surface-variant/80 mt-1">Password must be at least 6 characters long</p>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
@@ -586,9 +587,15 @@
     const status = document.getElementById('newStatus').value;
     const btn = document.getElementById('saveAddUserBtn');
 
-    if (!name || !email) {
-      if (window.showToast) showToast('Please enter full name and email', 'error');
-      else alert('Please enter full name and email');
+    if (!name || !email || !password) {
+      if (window.showToast) showToast('Please enter full name, email, and password', 'error');
+      else alert('Please enter full name, email, and password');
+      return;
+    }
+
+    if (password.length < 6) {
+      if (window.showToast) showToast('Password must be at least 6 characters long', 'error');
+      else alert('Password must be at least 6 characters long');
       return;
     }
 

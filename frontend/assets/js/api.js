@@ -93,9 +93,12 @@ const Api = (() => {
     return loginPath;
   }
 
-  function redirectToLogin() {
-    const loginPath = resolveLoginPath();
-    if (typeof window !== 'undefined' && window.location.pathname !== loginPath) {
+  function redirectToLogin(reason) {
+    let loginPath = resolveLoginPath();
+    if (reason) {
+      loginPath += `?error=${reason}`;
+    }
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('Login.html')) {
       window.location.href = loginPath;
     }
   }
@@ -202,7 +205,7 @@ const Api = (() => {
           if (currentToken && !currentToken.startsWith(DEMO_TOKEN_PREFIX)) {
             removeToken();
             if (typeof window !== 'undefined' && !window.location.pathname.includes('Login.html')) {
-              redirectToLogin();
+              redirectToLogin('expired');
             }
           } else if (!currentToken) {
             redirectToLogin();
@@ -290,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (token && !window.Api.isTokenValid()) {
     console.warn('Token expired, redirecting to login...');
     window.Api.removeToken();
-    window.Api.redirectToLogin();
+    window.Api.redirectToLogin('expired');
   }
 });
 
@@ -326,3 +329,46 @@ Api.removeToken();
 const user = Api.getCurrentUser();
 console.log('Logged in as:', user?.full_name);
 */
+
+// Global HTML5 form validation localization to English
+document.addEventListener('invalid', function(e) {
+  const target = e.target;
+  if (!target) return;
+
+  if (target.validity.valueMissing) {
+    target.setCustomValidity('Please fill out this field.');
+  } else if (target.validity.typeMismatch) {
+    if (target.type === 'email') {
+      target.setCustomValidity('Please enter a valid email address.');
+    } else {
+      target.setCustomValidity('Please enter a valid value.');
+    }
+  } else if (target.validity.tooShort) {
+    const minLength = target.getAttribute('minlength') || target.minLength;
+    target.setCustomValidity(`Please lengthen this text to ${minLength} characters or more.`);
+  } else if (target.validity.tooLong) {
+    const maxLength = target.getAttribute('maxlength') || target.maxLength;
+    target.setCustomValidity(`Please shorten this text to ${maxLength} characters or less.`);
+  } else if (target.validity.rangeUnderflow) {
+    const min = target.getAttribute('min') || target.min;
+    target.setCustomValidity(`Value must be greater than or equal to ${min}.`);
+  } else if (target.validity.rangeOverflow) {
+    const max = target.getAttribute('max') || target.max;
+    target.setCustomValidity(`Value must be less than or equal to ${max}.`);
+  } else if (target.validity.stepMismatch) {
+    target.setCustomValidity('Please enter a valid step value.');
+  } else if (target.validity.patternMismatch) {
+    const title = target.getAttribute('title');
+    target.setCustomValidity(title ? `Please match the requested format: ${title}` : 'Please match the requested format.');
+  } else {
+    target.setCustomValidity('');
+  }
+}, true);
+
+document.addEventListener('input', function(e) {
+  e.target.setCustomValidity('');
+}, true);
+
+document.addEventListener('change', function(e) {
+  e.target.setCustomValidity('');
+}, true);

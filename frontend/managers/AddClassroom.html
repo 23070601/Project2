@@ -95,7 +95,7 @@
                 </div>
               </div>
 
-              <input type="file" id="photoInput" class="hidden" accept="image/*" multiple>
+              <input type="file" id="photoInput" class="hidden" accept=".jpg,.jpeg,.png" multiple>
             </div>
 
             <!-- Image Preview Grid Gallery -->
@@ -175,8 +175,11 @@
     const fileList = Array.from(files);
 
     for (const file of fileList) {
-      if (!file.type.startsWith('image/')) {
-        alert(`File "${file.name}" is not an image.`);
+      const ext = file.name.split('.').pop().toLowerCase();
+      const validExtensions = ['jpg', 'jpeg', 'png'];
+      const validMimetypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validMimetypes.includes(file.type) || !validExtensions.includes(ext)) {
+        alert(`File "${file.name}" is invalid. Only JPG, JPEG, and PNG images are allowed.`);
         continue;
       }
       if (file.size > 5 * 1024 * 1024) {

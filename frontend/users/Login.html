@@ -205,6 +205,16 @@
         this.querySelector('span').textContent = type === 'password' ? 'visibility' : 'visibility_off';
       });
     }
+
+    // Check for session expired redirect query param
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'expired') {
+      const errorBox = document.getElementById('loginError');
+      if (errorBox) {
+        errorBox.textContent = 'Phiên làm việc hết hạn';
+        errorBox.classList.remove('hidden');
+      }
+    }
   });
 
   // ===== LOGIC LOGIN =====

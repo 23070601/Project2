@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { ApiError } = require('../shared/utils/responseWrapper');
 
 const uploadDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -18,18 +19,17 @@ const storage = multer.diskStorage({
   }
 });
 
-// SỬA: Cho phép tất cả file (CHỈ DÙNG DEVELOPMENT)
 const fileFilter = (req, file, cb) => {
-  // Cho phép tất cả file
-  cb(null, true);
-  
-  // Hoặc vẫn giữ filter nhưng thêm text/plain
-  // const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 'text/plain'];
-  // if (allowedTypes.includes(file.mimetype)) {
-  //   cb(null, true);
-  // } else {
-  //   cb(new Error('Only JPEG, PNG, PDF, and TXT files are allowed'), false);
-  // }
+  const ext = path.extname(file.originalname).toLowerCase();
+  const mimetype = file.mimetype;
+  const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+  const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+
+  if (allowedExtensions.includes(ext) && allowedMimeTypes.includes(mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new ApiError(400, 'Only JPG, JPEG, and PNG images are allowed'), false);
+  }
 };
 
 const upload = multer({
@@ -37,5 +37,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: fileFilter
 });
+
+upload.fileFilter = fileFilter;
 
 module.exports = upload;

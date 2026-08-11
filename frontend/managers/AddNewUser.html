@@ -20,7 +20,7 @@
   <main class="flex-1 p-8 max-w-[480px]">
     <h1 class="text-headline-lg font-headline-lg text-primary mb-6">Add New User</h1>
 
-    <form id="addUserForm" class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
+    <form id="addUserForm" novalidate class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 space-y-4">
       <div>
         <label class="text-label-md font-label-md text-on-surface-variant">Full Name *</label>
         <input id="fullName" type="text" required class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
@@ -32,6 +32,7 @@
       <div>
         <label class="text-label-md font-label-md text-on-surface-variant">Temporary Password *</label>
         <input id="password" type="text" required minlength="6" class="mt-1 w-full rounded-lg border border-outline-variant/50 px-4 py-2.5 text-body-sm">
+        <p class="text-[12px] text-on-surface-variant/80 mt-1">Password must be at least 6 characters long</p>
       </div>
       <div>
         <label class="text-label-md font-label-md text-on-surface-variant">Role *</label>
@@ -74,6 +75,22 @@
     e.preventDefault();
     const errorBox = document.getElementById('formError');
     errorBox.classList.add('hidden');
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const emailInput = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!fullName || !emailInput || !password) {
+      errorBox.textContent = 'All fields marked with * are required.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+
+    if (password.length < 6) {
+      errorBox.textContent = 'Temporary password must be at least 6 characters long.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
 
     const email = document.getElementById('email').value.trim();
     const isVnuEmail = /^[^\s@]+@([a-zA-Z0-9-]+\.)*vnu\.edu\.vn$/i.test(email);

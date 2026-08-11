@@ -238,7 +238,7 @@
                 <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add_a_photo</span>
                 <span class="text-label-md font-label-md text-on-surface-variant group-hover:text-primary transition-colors">Add Photos</span>
               </div>
-              <input type="file" id="galleryPhotoInput" class="hidden" accept="image/*" multiple>
+              <input type="file" id="galleryPhotoInput" class="hidden" accept=".jpg,.jpeg,.png" multiple>
             </div>
             <div id="galleryUploadProgress" class="hidden mt-3">
               <div class="flex items-center gap-3 text-body-sm text-on-surface-variant">
@@ -764,7 +764,13 @@
         alert('Maximum 10 photos allowed in the gallery.');
         break;
       }
-      if (!file.type.startsWith('image/')) { alert(`"${file.name}" is not an image.`); continue; }
+      const ext = file.name.split('.').pop().toLowerCase();
+      const validExtensions = ['jpg', 'jpeg', 'png'];
+      const validMimetypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validMimetypes.includes(file.type) || !validExtensions.includes(ext)) {
+        alert(`File "${file.name}" is invalid. Only JPG, JPEG, and PNG images are allowed.`);
+        continue;
+      }
       if (file.size > 5 * 1024 * 1024) { alert(`"${file.name}" exceeds 5MB.`); continue; }
 
       msg.textContent = `Uploading ${file.name}...`;
