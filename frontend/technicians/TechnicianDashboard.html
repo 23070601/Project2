@@ -205,18 +205,18 @@
   }
 
   const TASKS_BY_EMAIL = {
-    'tech.c@vnuis.edu.vn': [
+    'tech.c@vnu.edu.vn': [
       { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R102', priority: 'High', task_status: 'Received', technician_response: 'Accepted' },
       { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R101', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted' },
       { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
     ],
-    'tech.d@vnuis.edu.vn': [
+    'tech.d@vnu.edu.vn': [
       { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted' },
       { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted' },
       { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending' },
       { order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
     ],
-    'tech.f@vnuis.edu.vn': [
+    'tech.f@vnu.edu.vn': [
       { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected' },
       { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted' }
     ]
@@ -253,7 +253,7 @@
       }
       if (!orders || orders.length === 0) {
         const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
-        orders = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+        orders = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnu.edu.vn'];
       }
     }
 

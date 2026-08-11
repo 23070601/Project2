@@ -35,6 +35,6 @@ module.exports = {
     port: Number(process.env.SMTP_PORT || 587),
     user: String(process.env.SMTP_USER || '').trim(),
     pass: String(process.env.SMTP_PASS || '').trim().replace(/\s+/g, ''),
-    from: String(process.env.SMTP_FROM || 'noreply@vnuis.edu.vn').trim(),
+    from: String(process.env.SMTP_FROM || 'noreply@vnu.edu.vn').trim(),
   },
 };

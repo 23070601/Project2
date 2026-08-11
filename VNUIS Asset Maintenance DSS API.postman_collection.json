@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "63330df0-9139-44d6-9031-1f2bcbf8a361",
     "name": "VNUIS Asset Maintenance DSS API",
-    "description": "Complete API collection for VNUIS Asset Maintenance Decision Support System.\n\n## Roles\n- **Manager** (manager.e@vnuis.edu.vn) - Full admin access\n- **Technician** (tech.c@vnuis.edu.vn) - Work order management\n- **User** (lecturer.a@vnuis.edu.vn) - Fault reporting\n\n## Getting Started\n1. Login with one of the accounts above (password: 123456)\n2. Copy the token from login response\n3. Set the `token` variable in collection variables\n4. Or use role-specific tokens: `manager_token`, `technician_token`, `user_token`",
+    "description": "Complete API collection for VNUIS Asset Maintenance Decision Support System.\n\n## Roles\n- **Manager** (manager.e@vnu.edu.vn) - Full admin access\n- **Technician** (tech.c@vnu.edu.vn) - Work order management\n- **User** (lecturer.a@vnu.edu.vn) - Fault reporting\n\n## Getting Started\n1. Login with one of the accounts above (password: 123456)\n2. Copy the token from login response\n3. Set the `token` variable in collection variables\n4. Or use role-specific tokens: `manager_token`, `technician_token`, `user_token`",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "54921934",
     "_collection_link": "https://go.postman.co/collection/54921934-63330df0-9139-44d6-9031-1f2bcbf8a361?source=collection_link"
@@ -45,7 +45,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"manager.e@vnuis.edu.vn\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"manager.e@vnu.edu.vn\",\n  \"password\": \"123456\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
@@ -93,7 +93,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"tech.c@vnuis.edu.vn\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"tech.c@vnu.edu.vn\",\n  \"password\": \"123456\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
@@ -141,7 +141,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"lecturer.a@vnuis.edu.vn\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"lecturer.a@vnu.edu.vn\",\n  \"password\": \"123456\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
@@ -395,7 +395,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Tran Van Test\",\n  \"email\": \"test.user@vnuis.edu.vn\",\n  \"password\": \"123456\",\n  \"role\": \"User\",\n  \"phone\": \"0987654321\"\n}"
+              "raw": "{\n  \"fullName\": \"Tran Van Test\",\n  \"email\": \"test.user@vnu.edu.vn\",\n  \"password\": \"123456\",\n  \"role\": \"User\",\n  \"phone\": \"0987654321\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/users",
@@ -425,7 +425,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Nguyen Tech Test\",\n  \"email\": \"test.tech@vnuis.edu.vn\",\n  \"password\": \"123456\",\n  \"role\": \"Technician\",\n  \"phone\": \"0912345678\",\n  \"technicianSpecialty\": \"Projector\"\n}"
+              "raw": "{\n  \"fullName\": \"Nguyen Tech Test\",\n  \"email\": \"test.tech@vnu.edu.vn\",\n  \"password\": \"123456\",\n  \"role\": \"Technician\",\n  \"phone\": \"0912345678\",\n  \"technicianSpecialty\": \"Projector\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/users",

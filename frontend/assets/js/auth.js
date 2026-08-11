@@ -39,14 +39,14 @@ const Auth = (() => {
       if (password === expectedPassword) {
         // Catalog các tài khoản seed khớp dữ liệu vnuis_asset_maintenance_dss.sql
         const DEMO_USERS = {
-          'lecturer.a@vnuis.edu.vn': { user_id: 1, full_name: 'Nguyen Van A', role: 'User' },
-          'student.b@vnuis.edu.vn':  { user_id: 2, full_name: 'Tran Thi B',   role: 'User' },
-          'tech.c@vnuis.edu.vn':     { user_id: 3, full_name: 'Le Van C',     role: 'Technician' },
-          'tech.d@vnuis.edu.vn':     { user_id: 4, full_name: 'Pham Thi D',   role: 'Technician' },
-          'manager.e@vnuis.edu.vn':  { user_id: 5, full_name: 'Hoang Van E',  role: 'Manager' },
-          'tech.f@vnuis.edu.vn':     { user_id: 6, full_name: 'Vu Van F',     role: 'Technician' },
-          'lecturer.g@vnuis.edu.vn': { user_id: 7, full_name: 'Doan Van G',   role: 'User' },
-          'student.h@vnuis.edu.vn':  { user_id: 8, full_name: 'Bui Thi H',    role: 'User' },
+          'lecturer.a@vnu.edu.vn': { user_id: 1, full_name: 'Nguyen Van A', role: 'User' },
+          'student.b@vnu.edu.vn':  { user_id: 2, full_name: 'Tran Thi B',   role: 'User' },
+          'tech.c@vnu.edu.vn':     { user_id: 3, full_name: 'Le Van C',     role: 'Technician' },
+          'tech.d@vnu.edu.vn':     { user_id: 4, full_name: 'Pham Thi D',   role: 'Technician' },
+          'manager.e@vnu.edu.vn':  { user_id: 5, full_name: 'Hoang Van E',  role: 'Manager' },
+          'tech.f@vnu.edu.vn':     { user_id: 6, full_name: 'Vu Van F',     role: 'Technician' },
+          'lecturer.g@vnu.edu.vn': { user_id: 7, full_name: 'Doan Van G',   role: 'User' },
+          'student.h@vnu.edu.vn':  { user_id: 8, full_name: 'Bui Thi H',    role: 'User' },
         };
 
         let seedUser = DEMO_USERS[cleanEmail];

@@ -106,7 +106,7 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let currentUser = { full_name: 'Le Van C', role: 'Technician', email: 'tech.c@vnuis.edu.vn', phone: '0934567890' };
+  let currentUser = { full_name: 'Le Van C', role: 'Technician', email: 'tech.c@vnu.edu.vn', phone: '0934567890' };
   try {
     const user = Auth.guard('Technician');
     if (user) currentUser = user;
@@ -132,7 +132,7 @@
     document.getElementById('profileHeaderRole').textContent = (currentUser.role || 'Technician').toUpperCase();
 
     document.getElementById('profileFullName').textContent = currentUser.full_name || 'Le Van C';
-    document.getElementById('profileEmail').textContent = currentUser.email || 'tech.c@vnuis.edu.vn';
+    document.getElementById('profileEmail').textContent = currentUser.email || 'tech.c@vnu.edu.vn';
     document.getElementById('profilePhone').value = currentUser.phone || '0934567890';
 
     if (currentUser.technician_specialty) {

@@ -37,14 +37,14 @@ async function authenticate(req, res, next) {
 
       // Default fallback based on role in email or seed catalog
       const SEED_USERS = {
-        'lecturer.a@vnuis.edu.vn': { userId: 1, role: 'User', fullName: 'Nguyen Van A', email: 'lecturer.a@vnuis.edu.vn' },
-        'student.b@vnuis.edu.vn':  { userId: 2, role: 'User', fullName: 'Tran Thi B', email: 'student.b@vnuis.edu.vn' },
-        'tech.c@vnuis.edu.vn':     { userId: 3, role: 'Technician', fullName: 'Le Van C', email: 'tech.c@vnuis.edu.vn' },
-        'tech.d@vnuis.edu.vn':     { userId: 4, role: 'Technician', fullName: 'Pham Thi D', email: 'tech.d@vnuis.edu.vn' },
-        'manager.e@vnuis.edu.vn':  { userId: 5, role: 'Manager', fullName: 'Hoang Van E', email: 'manager.e@vnuis.edu.vn' },
-        'tech.f@vnuis.edu.vn':     { userId: 6, role: 'Technician', fullName: 'Vu Van F', email: 'tech.f@vnuis.edu.vn' },
-        'lecturer.g@vnuis.edu.vn': { userId: 7, role: 'User', fullName: 'Doan Van G', email: 'lecturer.g@vnuis.edu.vn' },
-        'student.h@vnuis.edu.vn':  { userId: 8, role: 'User', fullName: 'Bui Thi H', email: 'student.h@vnuis.edu.vn' }
+        'lecturer.a@vnu.edu.vn': { userId: 1, role: 'User', fullName: 'Nguyen Van A', email: 'lecturer.a@vnu.edu.vn' },
+        'student.b@vnu.edu.vn':  { userId: 2, role: 'User', fullName: 'Tran Thi B', email: 'student.b@vnu.edu.vn' },
+        'tech.c@vnu.edu.vn':     { userId: 3, role: 'Technician', fullName: 'Le Van C', email: 'tech.c@vnu.edu.vn' },
+        'tech.d@vnu.edu.vn':     { userId: 4, role: 'Technician', fullName: 'Pham Thi D', email: 'tech.d@vnu.edu.vn' },
+        'manager.e@vnu.edu.vn':  { userId: 5, role: 'Manager', fullName: 'Hoang Van E', email: 'manager.e@vnu.edu.vn' },
+        'tech.f@vnu.edu.vn':     { userId: 6, role: 'Technician', fullName: 'Vu Van F', email: 'tech.f@vnu.edu.vn' },
+        'lecturer.g@vnu.edu.vn': { userId: 7, role: 'User', fullName: 'Doan Van G', email: 'lecturer.g@vnu.edu.vn' },
+        'student.h@vnu.edu.vn':  { userId: 8, role: 'User', fullName: 'Bui Thi H', email: 'student.h@vnu.edu.vn' }
       };
 
       if (SEED_USERS[userEmail]) {
@@ -55,20 +55,20 @@ async function authenticate(req, res, next) {
       let userId = 3;
       let role = 'Technician';
       let fullName = 'Le Van C';
-      let email = 'tech.c@vnuis.edu.vn';
+      let email = 'tech.c@vnu.edu.vn';
 
-      if (userEmail.includes('manager') || userEmail.includes('elina') || userEmail.includes('e@vnuis')) {
-        userId = 5; role = 'Manager'; fullName = 'Hoang Van E'; email = 'manager.e@vnuis.edu.vn';
-      } else if (userEmail.includes('student.b') || userEmail.includes('b@vnuis')) {
-        userId = 2; role = 'User'; fullName = 'Tran Thi B'; email = 'student.b@vnuis.edu.vn';
-      } else if (userEmail.includes('lecturer.a') || userEmail.includes('a@vnuis')) {
-        userId = 1; role = 'User'; fullName = 'Nguyen Van A'; email = 'lecturer.a@vnuis.edu.vn';
-      } else if (userEmail.includes('tech.d') || userEmail.includes('d@vnuis')) {
-        userId = 4; role = 'Technician'; fullName = 'Pham Thi D'; email = 'tech.d@vnuis.edu.vn';
-      } else if (userEmail.includes('tech.f') || userEmail.includes('f@vnuis')) {
-        userId = 6; role = 'Technician'; fullName = 'Vu Van F'; email = 'tech.f@vnuis.edu.vn';
+      if (userEmail.includes('manager') || userEmail.includes('elina') || userEmail.includes('e@vnu')) {
+        userId = 5; role = 'Manager'; fullName = 'Hoang Van E'; email = 'manager.e@vnu.edu.vn';
+      } else if (userEmail.includes('student.b') || userEmail.includes('b@vnu')) {
+        userId = 2; role = 'User'; fullName = 'Tran Thi B'; email = 'student.b@vnu.edu.vn';
+      } else if (userEmail.includes('lecturer.a') || userEmail.includes('a@vnu')) {
+        userId = 1; role = 'User'; fullName = 'Nguyen Van A'; email = 'lecturer.a@vnu.edu.vn';
+      } else if (userEmail.includes('tech.d') || userEmail.includes('d@vnu')) {
+        userId = 4; role = 'Technician'; fullName = 'Pham Thi D'; email = 'tech.d@vnu.edu.vn';
+      } else if (userEmail.includes('tech.f') || userEmail.includes('f@vnu')) {
+        userId = 6; role = 'Technician'; fullName = 'Vu Van F'; email = 'tech.f@vnu.edu.vn';
       } else if (userEmail.includes('student') || userEmail.includes('user')) {
-        userId = 2; role = 'User'; fullName = 'Tran Thi B'; email = userEmail || 'student.b@vnuis.edu.vn';
+        userId = 2; role = 'User'; fullName = 'Tran Thi B'; email = userEmail || 'student.b@vnu.edu.vn';
       }
 
       req.user = { userId, role, fullName, email };

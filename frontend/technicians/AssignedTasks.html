@@ -548,18 +548,18 @@
   }
 
   const TASKS_BY_EMAIL = {
-    'tech.c@vnuis.edu.vn': [
+    'tech.c@vnu.edu.vn': [
       { order_id: '4', asset_name: 'LG Commercial Display 55in', room_name: 'R102', priority: 'High', task_status: 'Received', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'TV screen displays distorted color lines across display panel.' },
       { order_id: '1', asset_name: 'Sony Laser Projector VPL-PHZ60', room_name: 'R101', priority: 'High', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-21 07:52:24', description: 'Sony Projector has no display signal and blinks red LED indicator.' },
       { order_id: '7', asset_name: 'Shure Wireless Dual Microphone', room_name: 'R512', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-15 07:52:24', description: 'Microphone battery compartment cover broken and wire frayed.' }
     ],
-    'tech.d@vnuis.edu.vn': [
+    'tech.d@vnu.edu.vn': [
       { order_id: '2', asset_name: 'Samsung 75in Commercial TV', room_name: 'R101', priority: 'High', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-20 07:52:24', description: 'Display screen flickering unexpectedly during lectures.' },
       { order_id: '5', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R402', priority: 'Medium', task_status: 'In Progress', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'Audio cuts out intermittently due to loose antenna connection.' },
       { order_id: '8', asset_name: 'Cisco Gigabit Switch R601', room_name: 'R601', priority: 'High', task_status: 'Assigned', technician_response: 'Pending', assigned_at: '2026-07-23 07:52:24', description: 'Network port 12 packet drop issue.' },
       { order_id: '10', asset_name: 'AKG Lavalier Wireless Mic', room_name: 'R504', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-06-15 09:00:00', description: 'Wireless mic battery springs replaced and tested in Room R504.' }
     ],
-    'tech.f@vnuis.edu.vn': [
+    'tech.f@vnu.edu.vn': [
       { order_id: '3', asset_name: 'Epson Visualizer Document Camera', room_name: 'R512', priority: 'Medium', task_status: 'Assigned', technician_response: 'Rejected', assigned_at: '2026-07-21 07:52:24', description: 'Visualizer camera autofocus motor jammed.' },
       { order_id: '6', asset_name: 'Panasonic Commercial TV 65in', room_name: 'R403', priority: 'Low', task_status: 'Closed', technician_response: 'Accepted', assigned_at: '2026-07-22 07:52:24', description: 'HDMI 1 port loose and losing signal.' }
     ]
@@ -594,7 +594,7 @@
         tasks = stored;
       } else {
         const email = currentUser ? (currentUser.email || '').toLowerCase() : '';
-        tasks = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnuis.edu.vn'];
+        tasks = TASKS_BY_EMAIL[email] || TASKS_BY_EMAIL['tech.c@vnu.edu.vn'];
       }
     }
 
