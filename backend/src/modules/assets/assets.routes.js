@@ -12,6 +12,7 @@ router.use(authenticate);
 // Đọc: mọi vai trò (User tạo report chọn asset, Technician tra cứu AssetLookup/AssetList/AssetDetails)
 router.get('/replacement-alerts', requireRole(ROLES.MANAGER), asyncHandler(controller.replacementAlerts));
 router.get('/all', requireRole(ROLES.MANAGER), asyncHandler(controller.listAll));
+router.get('/my', requireRole(ROLES.TECHNICIAN), asyncHandler(controller.myAssets));
 router.get('/', asyncHandler(controller.list));
 router.get('/:id', asyncHandler(controller.getById));
 

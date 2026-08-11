@@ -1,6 +1,6 @@
 const { pool } = require('../../config/db');
 
-async function findAll({ roomId, assetType, status, search } = {}) {
+async function findAll({ roomId, assetType, status, search, technicianId } = {}) {
   const clauses = [];
   const params = [];
 
@@ -13,6 +13,10 @@ async function findAll({ roomId, assetType, status, search } = {}) {
     clauses.push("a.status != 'Inactive'");
   }
   if (search) { clauses.push('a.asset_name LIKE ?'); params.push(`%${search}%`); }
+  if (technicianId) {
+    clauses.push('a.asset_id IN (SELECT DISTINCT wo.asset_id FROM WorkOrders wo WHERE wo.technician_id = ?)');
+    params.push(technicianId);
+  }
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const [rows] = await pool.query(
@@ -150,4 +154,14 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
   return rows;
 }
 
-module.exports = { findAll, findById, create, update, remove, hasActiveWorkOrder, findReplacementAlerts, findAllWithFailures };
+async function findByTechnician(techId) {
+  const [rows] = await pool.query(
+    `SELECT DISTINCT a.* FROM Assets a
+     JOIN WorkOrders wo ON wo.asset_id = a.asset_id
+     WHERE wo.technician_id = ?`,
+    [techId]
+  );
+  return rows;
+}
+
+module.exports = { findAll, findById, findByTechnician, create, update, remove, hasActiveWorkOrder, findReplacementAlerts, findAllWithFailures };

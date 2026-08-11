@@ -7,12 +7,32 @@ const { ASSET_STATUS } = require('../../shared/constants/statusEnums');
 const { ROLES } = require('../../shared/constants/roles');
 
 async function list(req, res) {
-  const { roomId, assetType, status, search } = req.query;
+  const { roomId, assetType, status, search, view } = req.query;
+  const user = req.user;
+
+  // Default to 'mine' for Technician, and 'all' for Manager or other roles
+  const currentView = view || (user?.role === ROLES.TECHNICIAN ? 'mine' : 'all');
+
+  let technicianId = undefined;
+
+  if (currentView === 'all') {
+    // Only Manager or Technician is allowed to view assets
+    if (user?.role !== ROLES.MANAGER && user?.role !== ROLES.TECHNICIAN) {
+      throw new ApiError(403, 'Permission denied: Only Manager or Technician can view assets');
+    }
+  } else {
+    // currentView === 'mine'
+    if (user?.role === ROLES.TECHNICIAN) {
+      technicianId = user.userId || user.id;
+    }
+  }
+
   const assets = await assetsRepository.findAll({
     roomId: roomId ? Number(roomId) : undefined,
     assetType,
     status,
     search,
+    technicianId,
   });
   ok(res, assets);
 }
@@ -134,4 +154,10 @@ async function listAll(req, res) {
   ok(res, assets);
 }
 
-module.exports = { list, listAll, getById, create, update, remove, replacementAlerts };
+async function myAssets(req, res) {
+  const techId = req.user.userId || req.user.id;
+  const assets = await assetsRepository.findByTechnician(techId);
+  ok(res, assets);
+}
+
+module.exports = { list, listAll, myAssets, getById, create, update, remove, replacementAlerts };
