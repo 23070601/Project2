@@ -118,8 +118,8 @@
                 <span class="material-symbols-outlined">cloud_upload</span>
               </div>
               <p class="text-label-lg font-semibold text-on-surface">Click to upload or drag and drop</p>
-              <p class="text-body-sm text-on-surface-variant">PNG, JPG, WEBP or PDF (up to 5 files, max. 5MB per file)</p>
-              <input class="hidden" type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp,.pdf" multiple>
+              <p class="text-body-sm text-on-surface-variant">JPG, JPEG or PNG (up to 5 files, max. 5MB per file)</p>
+              <input class="hidden" type="file" id="fileInput" accept=".jpg,.jpeg,.png" multiple>
             </div>
             <div id="fileInfo" class="hidden text-body-sm text-on-surface-variant mt-2"></div>
             <!-- Image Thumbnail Preview Container -->
@@ -209,7 +209,7 @@
     }
 
     function handleFiles(filesList) {
-      var validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'application/pdf'];
+      var validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
       var newFiles = Array.from(filesList);
 
       if (selectedFiles.length + newFiles.length > 5) {
@@ -220,7 +220,7 @@
       for (var i = 0; i < newFiles.length; i++) {
         var file = newFiles[i];
         if (!validTypes.includes(file.type)) {
-          alert('File "' + file.name + '" is invalid. Only PNG, JPG, WEBP, or PDF formats are accepted.');
+          alert('File "' + file.name + '" is invalid. Only PNG, JPG, or JPEG formats are accepted.');
           return;
         }
         if (file.size > 5 * 1024 * 1024) {

@@ -373,14 +373,14 @@
       </button>
     </div>
     <div class="p-6 space-y-5 max-h-[85vh] overflow-y-auto">
-      <input type="file" id="evidenceFileInput" class="hidden" accept="image/*" multiple onchange="handleEvidenceFileSelected(this)">
+      <input type="file" id="evidenceFileInput" class="hidden" accept=".jpg,.jpeg,.png" multiple onchange="handleEvidenceFileSelected(this)">
       
       <!-- Drag & Drop Zone -->
       <div id="evidenceDropZone" onclick="document.getElementById('evidenceFileInput').click()" class="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center justify-center gap-3 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer text-center group">
         <span class="material-symbols-outlined text-[42px] text-primary group-hover:scale-110 transition-transform">cloud_upload</span>
         <div>
           <p class="text-body-md font-bold text-on-surface">Click to select photos or drag & drop</p>
-          <p class="text-label-md text-outline">Select multiple photos (PNG, JPG, WEBP, max 5MB each)</p>
+          <p class="text-label-md text-outline">Select multiple photos (JPG, JPEG, PNG, max 5MB each)</p>
         </div>
       </div>
 
@@ -556,7 +556,7 @@
             PT
           </div>
           <div>
-            <p class="text-xs text-slate-500 font-semibold">Service Technician (Kỹ thuật viên thực hiện)</p>
+            <p class="text-xs text-slate-500 font-semibold">Service Technician</p>
             <p id="historyModalTech" class="text-body-md font-bold text-slate-800">Pham Thi D</p>
           </div>
         </div>
@@ -1303,8 +1303,11 @@
         alert(`File "${f.name}" exceeds the maximum 5MB size limit.`);
         return;
       }
-      if (!f.type.startsWith('image/')) {
-        alert(`File "${f.name}" is not a valid image file.`);
+      const ext = f.name.split('.').pop().toLowerCase();
+      const validExtensions = ['jpg', 'jpeg', 'png'];
+      const validMimetypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validMimetypes.includes(f.type) || !validExtensions.includes(ext)) {
+        alert(`File "${f.name}" is invalid. Only JPG, JPEG, and PNG images are allowed.`);
         return;
       }
       pendingEvidenceFiles.push(f);

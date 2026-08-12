@@ -73,6 +73,44 @@
           <button onclick="executeLevel1Search()" class="bg-primary text-on-primary px-8 py-2 rounded-xl font-bold hover:opacity-90 transition-opacity shrink-0">Search</button>
         </div>
 
+        <!-- View Toggle & Status Label -->
+        <div id="viewToggleContainer" class="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-xl border border-outline-variant/30 text-body-sm font-medium">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px] text-primary">info</span>
+            <span class="text-slate-700">Current view: <strong id="currentViewLabel" class="text-primary font-bold">My Repaired Assets</strong></span>
+          </div>
+          <button id="toggleViewBtn" onclick="toggleAssetView()" class="hidden px-4 py-1.5 bg-primary text-white rounded-lg text-xs font-bold shadow-sm hover:opacity-90 transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+            <span>Switch to All Assets</span>
+          </button>
+        </div>
+
+        <!-- Extended Filters (shown when view is All Assets) -->
+        <div id="extendedFiltersContainer" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50/50 rounded-xl border border-outline-variant/20 pt-3">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Room</label>
+            <select id="extendedFilterRoom" onchange="applyExtendedFilters()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary">
+              <option value="">All Rooms</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Asset Type</label>
+            <select id="extendedFilterType" onchange="applyExtendedFilters()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary">
+              <option value="">All Types</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
+            <select id="extendedFilterStatus" onchange="applyExtendedFilters()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary">
+              <option value="">All Statuses</option>
+              <option value="Operational">Operational</option>
+              <option value="Under Repair">Under Repair</option>
+              <option value="Recommended for Replacement">Recommended for Replacement</option>
+              <option value="Retired">Retired</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Quick Filter Pills -->
         <div class="flex flex-wrap items-center gap-3 pt-1 border-t border-slate-100">
           <span class="text-label-md font-bold text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">filter_alt</span> Quick Filter:</span>
@@ -277,15 +315,15 @@
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/ui-helpers.js"></script>
 <script>
-  let currentUser = { full_name: 'Le Van C' };
+  let currentUser = { full_name: 'Le Van C', role: 'Technician' };
   try {
-    const user = Auth.getCurrentUser();
-    if (user) {
-      currentUser = user;
-    }
-  } catch (e) {}
+    const user = Auth.guard(['Technician', 'Manager']);
+    if (user) currentUser = user;
+  } catch (e) {
+    console.log('Running in demo mode without auth session');
+  }
 
-  Layout.init({ role: 'Technician', activePage: 'AssetLookup' });
+  Layout.init({ role: currentUser.role, activePage: 'AssetLookup' });
 
   // Fallback MySQL Assets matching Database Seeds
   let allAssets = [
@@ -755,17 +793,168 @@
     document.getElementById('assetDetailsModal').classList.add('hidden');
   }
 
+  let currentViewMode = 'mine';
+
+  function updateViewModeUI() {
+    const toggleBtn = document.getElementById('toggleViewBtn');
+    const label = document.getElementById('currentViewLabel');
+    const extFilters = document.getElementById('extendedFiltersContainer');
+    
+    const isAuthorized = currentUser.role === 'Technician' || currentUser.role === 'Manager' || currentUser.role === 'Admin' || currentUser.role === 'Supervisor';
+    
+    if (isAuthorized) {
+      if (toggleBtn) toggleBtn.classList.remove('hidden');
+    } else {
+      if (toggleBtn) toggleBtn.classList.add('hidden');
+    }
+    
+    if (currentViewMode === 'all') {
+      if (label) label.textContent = 'All Assets in System';
+      if (toggleBtn) toggleBtn.innerHTML = `
+        <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+        <span>Switch to My Assets</span>
+      `;
+      if (extFilters) {
+        extFilters.classList.remove('hidden');
+        populateExtendedFiltersDropdowns();
+      }
+    } else {
+      if (label) label.textContent = 'My Repaired Assets Only';
+      if (toggleBtn) toggleBtn.innerHTML = `
+        <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+        <span>Switch to All Assets</span>
+      `;
+      if (extFilters) extFilters.classList.add('hidden');
+    }
+  }
+
+  async function toggleAssetView() {
+    currentViewMode = currentViewMode === 'all' ? 'mine' : 'all';
+    await loadAssetsFromApi();
+  }
+  window.toggleAssetView = toggleAssetView;
+
+  function populateExtendedFiltersDropdowns() {
+    const roomSelect = document.getElementById('extendedFilterRoom');
+    const typeSelect = document.getElementById('extendedFilterType');
+    if (!roomSelect || !typeSelect) return;
+
+    const rooms = [...new Set(allAssets.map(a => a.room_name).filter(Boolean))].sort();
+    const types = [...new Set(allAssets.map(a => a.asset_type).filter(Boolean))].sort();
+
+    const currentRoomVal = roomSelect.value;
+    const currentTypeVal = typeSelect.value;
+
+    roomSelect.innerHTML = '<option value="">All Rooms</option>' + rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+    typeSelect.innerHTML = '<option value="">All Types</option>' + types.map(t => `<option value="${t}">${CATEGORY_META[t]?.label || t}</option>`).join('');
+
+    roomSelect.value = currentRoomVal;
+    typeSelect.value = currentTypeVal;
+  }
+
+  function applyExtendedFilters() {
+    const selectedRoom = document.getElementById('extendedFilterRoom').value;
+    const selectedType = document.getElementById('extendedFilterType').value;
+    const selectedStatus = document.getElementById('extendedFilterStatus').value;
+
+    let filtered = allAssets;
+    if (selectedRoom) {
+      filtered = filtered.filter(a => a.room_name === selectedRoom);
+    }
+    if (selectedType) {
+      filtered = filtered.filter(a => a.asset_type === selectedType);
+    }
+    if (selectedStatus) {
+      filtered = filtered.filter(a => a.status === selectedStatus);
+    }
+    renderFilteredLevel1Categories(filtered);
+  }
+  window.applyExtendedFilters = applyExtendedFilters;
+
+  function renderFilteredLevel1Categories(filteredList) {
+    const categoriesMap = {};
+    filteredList.forEach(a => {
+      const type = a.asset_type || 'Other';
+      if (!categoriesMap[type]) {
+        categoriesMap[type] = {
+          typeKey: type,
+          label: CATEGORY_META[type]?.label || type,
+          icon: CATEGORY_META[type]?.icon || 'category',
+          total: 0,
+          highFailure: 0
+        };
+      }
+      categoriesMap[type].total++;
+      if ((a.failure_count || 0) >= 3) {
+        categoriesMap[type].highFailure++;
+      }
+    });
+
+    const grid = document.getElementById('categoryGrid');
+    if (filteredList.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400 font-medium">
+          No asset categories found matching current filters.
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = Object.values(categoriesMap).map(cat => `
+      <div class="asset-category-card bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col gap-4" style="border-left: 4px solid #005BAC;" data-name="${UiHelpers.escapeHtml(cat.label)}">
+        <div class="flex items-center justify-between">
+          <span class="material-symbols-outlined text-primary p-3 bg-primary-fixed rounded-xl">${cat.icon}</span>
+          ${cat.highFailure > 0 ? `
+            <span class="px-3 py-1 rounded-full bg-error-container/40 text-error text-[10px] font-bold">${cat.highFailure} High Failure</span>
+          ` : `
+            <span class="px-3 py-1 rounded-full bg-green-600/10 text-green-600 text-[10px] font-bold">0 High Failure</span>
+          `}
+        </div>
+        <div>
+          <h4 class="text-headline-sm font-headline-sm text-on-surface">${UiHelpers.escapeHtml(cat.label)}</h4>
+          <p class="text-label-md text-on-surface-variant">Total Assets: ${cat.total}</p>
+        </div>
+        <button onclick="openLevel2DetailView('${UiHelpers.escapeHtml(cat.typeKey)}')" class="w-full py-2 border border-primary text-primary rounded-lg font-bold hover:bg-primary-fixed/20 transition-colors">View Assets</button>
+      </div>
+    `).join('');
+  }
+
   async function loadAssetsFromApi() {
     try {
       if (window.Api) {
-        const data = await Api.get('/assets');
-        if (data && Array.isArray(data) && data.length > 0) {
+        const data = await Api.get('/assets', { view: currentViewMode });
+        if (data && Array.isArray(data)) {
           allAssets = data;
         }
       }
     } catch (e) {
       console.log('Using fallback assets list', e);
+      if (currentViewMode === 'mine') {
+        allAssets = [
+          { asset_id: 1, asset_name: 'Sony Laser Projector VPL-PHZ60', asset_type: 'Projector', room_name: 'R101', status: 'Recommended for Replacement', failure_count: 3, install_date: '2025-01-15' },
+          { asset_id: 2, asset_name: 'Samsung 75in Commercial TV', asset_type: 'TV', room_name: 'R101', status: 'Under Repair', failure_count: 2, install_date: '2025-03-10' },
+          { asset_id: 3, asset_name: 'Epson Visualizer Document Camera', asset_type: 'DocumentCamera', room_name: 'R512', status: 'Operational', failure_count: 1, install_date: '2025-04-20' },
+          { asset_id: 6, asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Aircon', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2025-05-01' }
+        ];
+      } else {
+        allAssets = [
+          { asset_id: 1, asset_name: 'Sony Laser Projector VPL-PHZ60', asset_type: 'Projector', room_name: 'R101', status: 'Recommended for Replacement', failure_count: 3, install_date: '2025-01-15' },
+          { asset_id: 2, asset_name: 'Samsung 75in Commercial TV', asset_type: 'TV', room_name: 'R101', status: 'Under Repair', failure_count: 2, install_date: '2025-03-10' },
+          { asset_id: 3, asset_name: 'Epson Visualizer Document Camera', asset_type: 'DocumentCamera', room_name: 'R512', status: 'Operational', failure_count: 1, install_date: '2025-04-20' },
+          { asset_id: 4, asset_name: 'LG Commercial Display 55in', asset_type: 'TV', room_name: 'R102', status: 'Recommended for Replacement', failure_count: 4, install_date: '2024-11-05' },
+          { asset_id: 5, asset_name: 'Panasonic Commercial TV 65in', asset_type: 'TV', room_name: 'R403', status: 'Operational', failure_count: 1, install_date: '2025-02-14' },
+          { asset_id: 6, asset_name: 'Daikin Inverter AC 18000 BTU', asset_type: 'Aircon', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2025-05-01' },
+          { asset_id: 7, asset_name: 'Shure Wireless Dual Microphone', asset_type: 'Microphone', room_name: 'R512', status: 'Recommended for Replacement', failure_count: 5, install_date: '2024-09-12' },
+          { asset_id: 8, asset_name: 'Cisco Gigabit Switch R601', asset_type: 'NetworkSwitch', room_name: 'R601', status: 'Operational', failure_count: 2, install_date: '2024-10-10' },
+          { asset_id: 9, asset_name: 'JBL Classroom Wall Speaker', asset_type: 'Speaker', room_name: 'R101', status: 'Operational', failure_count: 0, install_date: '2025-06-01' },
+          { asset_id: 10, asset_name: 'Ultra HD HDMI Cable 10m', asset_type: 'Cable', room_name: 'R103', status: 'Operational', failure_count: 0, install_date: '2025-06-15' },
+          { asset_id: 27, asset_name: 'Epson Document Camera R201', asset_type: 'DocumentCamera', room_name: 'R201', status: 'Operational', failure_count: 0, install_date: '2025-07-01' },
+          { asset_id: 32, asset_name: 'AKG Lavalier Wireless Mic', asset_type: 'Microphone', room_name: 'R402', status: 'Recommended for Replacement', failure_count: 4, install_date: '2024-08-20' },
+          { asset_id: 33, asset_name: 'AKG Lavalier Wireless Mic', asset_type: 'Microphone', room_name: 'R504', status: 'Operational', failure_count: 1, install_date: '2025-02-10' }
+        ];
+      }
     }
+    updateViewModeUI();
     renderLevel1Categories();
   }
 
