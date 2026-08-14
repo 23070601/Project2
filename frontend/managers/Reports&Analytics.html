@@ -1029,10 +1029,171 @@
         if (window.showToast) showToast('Failed to generate report file.', 'error');
         else alert('Failed to generate report file.');
       }
-      btn.disabled = false;
-      btn.innerHTML = `<span class="material-symbols-outlined text-lg">download</span> Download File`;
-      closeExportModal();
-    }, 800);
+    }, 600);
+  }
+
+  function executeActualExport(format, timeRangeText, includedSections) {
+    const totalAssets = document.getElementById('statTotalAssets')?.textContent || '28';
+    const totalRequests = document.getElementById('statMaintenanceRequests')?.textContent || '15';
+    const completedRepairs = document.getElementById('statCompletedRepairs')?.textContent || '4';
+    const failureRate = document.getElementById('statFailureRate')?.textContent || '26.7%';
+
+    const classroomRows = [];
+    const classTrs = document.querySelectorAll('#classroomStatusBody tr');
+    classTrs.forEach((tr) => {
+      const tds = tr.querySelectorAll('td');
+      if (tds.length >= 6) {
+        classroomRows.push({
+          no: tds[0].textContent.trim(),
+          room: tds[1].textContent.trim(),
+          totalAssets: tds[2].textContent.trim(),
+          requests: tds[3].textContent.trim(),
+          condition: tds[4].textContent.trim(),
+          status: tds[5].textContent.trim()
+        });
+      }
+    });
+
+    const techRows = [];
+    const techTrs = document.querySelectorAll('#technicianPerformanceBody tr');
+    techTrs.forEach((tr) => {
+      const tds = tr.querySelectorAll('td');
+      if (tds.length >= 4) {
+        techRows.push({
+          name: tds[0].textContent.trim(),
+          assigned: tds[1].textContent.trim(),
+          avgResolution: tds[2].textContent.trim(),
+          performance: tds[3].textContent.trim()
+        });
+      }
+    });
+
+    const nowStr = new Date().toLocaleString();
+    const cleanFmt = (format || 'CSV').toUpperCase();
+    const ext = cleanFmt === 'PDF' ? 'pdf' : cleanFmt === 'EXCEL' ? 'xlsx' : 'csv';
+    const fileName = 'VNU_Maintenance_Report_' + new Date().toISOString().slice(0, 10) + '.' + ext;
+
+    if (cleanFmt === 'PDF') {
+      const printWin = window.open('', '_blank');
+      if (printWin) {
+        let htmlStr = '<!DOCTYPE html><html><head><title>VNU Maintenance Report</title><style>' +
+          'body { font-family: Arial, sans-serif; margin: 30px; color: #1e293b; }' +
+          'h1 { color: #004482; font-size: 22px; border-bottom: 2px solid #004482; padding-bottom: 8px; }' +
+          '.meta { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin: 16px 0; font-size: 13px; }' +
+          '.section { font-size: 15px; font-weight: bold; margin-top: 20px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }' +
+          '.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0; }' +
+          '.kpi-card { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; text-align: center; }' +
+          '.kpi-val { font-size: 20px; font-weight: bold; color: #004482; }' +
+          '.kpi-lbl { font-size: 11px; color: #64748b; margin-top: 4px; }' +
+          'table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }' +
+          'th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }' +
+          'th { background: #f1f5f9; font-weight: bold; }' +
+          '</style></head><body>' +
+          '<h1>VNU Asset Maintenance DSS - Analytics Report</h1>' +
+          '<div class="meta">' +
+          '<p><strong>Time Period:</strong> ' + timeRangeText + '</p>' +
+          '<p><strong>Generated Date:</strong> ' + nowStr + '</p>' +
+          '<p><strong>Sections Included:</strong> ' + includedSections.join(', ') + '</p>' +
+          '</div>';
+
+        if (includedSections.includes('KPI Summary')) {
+          htmlStr += '<div class="section">KPI Summary</div><div class="kpi-grid">' +
+            '<div class="kpi-card"><div class="kpi-val">' + totalAssets + '</div><div class="kpi-lbl">Total Assets</div></div>' +
+            '<div class="kpi-card"><div class="kpi-val">' + totalRequests + '</div><div class="kpi-lbl">Maintenance Requests</div></div>' +
+            '<div class="kpi-card"><div class="kpi-val">' + completedRepairs + '</div><div class="kpi-lbl">Completed Repairs</div></div>' +
+            '<div class="kpi-card"><div class="kpi-val">' + failureRate + '</div><div class="kpi-lbl">Failure Rate</div></div>' +
+            '</div>';
+        }
+
+        if (includedSections.includes('Classroom Status') && classroomRows.length > 0) {
+          htmlStr += '<div class="section">Classroom Maintenance Status</div><table><thead><tr><th>#</th><th>Classroom</th><th>Total Assets</th><th>Requests</th><th>Condition</th><th>Status</th></tr></thead><tbody>';
+          classroomRows.forEach(r => {
+            htmlStr += '<tr><td>' + r.no + '</td><td><strong>' + r.room + '</strong></td><td>' + r.totalAssets + '</td><td>' + r.requests + '</td><td>' + r.condition + '</td><td>' + r.status + '</td></tr>';
+          });
+          htmlStr += '</tbody></table>';
+        }
+
+        if (includedSections.includes('Technician Performance') && techRows.length > 0) {
+          htmlStr += '<div class="section">Technician Performance</div><table><thead><tr><th>Technician Name</th><th>Assigned Tasks</th><th>Avg Resolution Time</th><th>Performance</th></tr></thead><tbody>';
+          techRows.forEach(r => {
+            htmlStr += '<tr><td><strong>' + r.name + '</strong></td><td>' + r.assigned + '</td><td>' + r.avgResolution + '</td><td>' + r.performance + '</td></tr>';
+          });
+          htmlStr += '</tbody></table>';
+        }
+
+        htmlStr += '</body' + '>' + '</html' + '>';
+        printWin.document.write(htmlStr);
+        printWin.document.close();
+        setTimeout(() => {
+          try { printWin.print(); } catch (e) {}
+        }, 300);
+      }
+
+      let reportText = 'VNU Asset Maintenance Analytics Report\nPeriod: ' + timeRangeText + '\nGenerated: ' + nowStr + '\n\n';
+      if (includedSections.includes('KPI Summary')) {
+        reportText += 'KPI SUMMARY:\n- Total Assets: ' + totalAssets + '\n- Maintenance Requests: ' + totalRequests + '\n- Completed Repairs: ' + completedRepairs + '\n- Failure Rate: ' + failureRate + '\n\n';
+      }
+      if (includedSections.includes('Classroom Status') && classroomRows.length > 0) {
+        reportText += 'CLASSROOM STATUS:\n' + classroomRows.map(r => r.no + '. ' + r.room + ' | Assets: ' + r.totalAssets + ' | Requests: ' + r.requests + ' | Condition: ' + r.condition + ' | Status: ' + r.status).join('\n') + '\n\n';
+      }
+      if (includedSections.includes('Technician Performance') && techRows.length > 0) {
+        reportText += 'TECHNICIAN PERFORMANCE:\n' + techRows.map(r => '- ' + r.name + ' | Assigned: ' + r.assigned + ' | Avg Time: ' + r.avgResolution + ' | Rating: ' + r.performance).join('\n');
+      }
+
+      const blob = new Blob([reportText], { type: 'application/pdf' });
+      triggerBrowserDownload(blob, fileName);
+    } else {
+      const csvLines = [];
+      csvLines.push('"VNU Asset Maintenance Analytics Report"');
+      csvLines.push('"Time Period","' + timeRangeText.replace(/"/g, '""') + '"');
+      csvLines.push('"Generated Date","' + nowStr.replace(/"/g, '""') + '"');
+      csvLines.push('');
+
+      if (includedSections.includes('KPI Summary')) {
+        csvLines.push('"--- KPI SUMMARY ---"');
+        csvLines.push('"Metric","Value"');
+        csvLines.push('"Total Assets","' + totalAssets + '"');
+        csvLines.push('"Maintenance Requests","' + totalRequests + '"');
+        csvLines.push('"Completed Repairs","' + completedRepairs + '"');
+        csvLines.push('"Failure Rate","' + failureRate + '"');
+        csvLines.push('');
+      }
+
+      if (includedSections.includes('Classroom Status') && classroomRows.length > 0) {
+        csvLines.push('"--- CLASSROOM MAINTENANCE STATUS ---"');
+        csvLines.push('"No","Classroom","Total Assets","Requests","Condition","Status"');
+        classroomRows.forEach(r => {
+          csvLines.push('"' + r.no + '","' + r.room + '","' + r.totalAssets + '","' + r.requests + '","' + r.condition + '","' + r.status + '"');
+        });
+        csvLines.push('');
+      }
+
+      if (includedSections.includes('Technician Performance') && techRows.length > 0) {
+        csvLines.push('"--- TECHNICIAN PERFORMANCE ---"');
+        csvLines.push('"Technician Name","Assigned Tasks","Avg Resolution Time","Performance Rating"');
+        techRows.forEach(r => {
+          csvLines.push('"' + r.name + '","' + r.assigned + '","' + r.avgResolution + '","' + r.performance + '"');
+        });
+        csvLines.push('');
+      }
+
+      const csvContent = '\uFEFF' + csvLines.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      triggerBrowserDownload(blob, fileName);
+    }
+  }
+
+  function triggerBrowserDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 150);
   }
 
   let maintenanceChartInstance = null;
