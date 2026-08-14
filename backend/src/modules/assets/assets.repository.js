@@ -14,7 +14,12 @@ async function findAll({ roomId, assetType, status, search, technicianId } = {})
   }
   if (search) { clauses.push('a.asset_name LIKE ?'); params.push(`%${search}%`); }
   if (technicianId) {
-    clauses.push('a.asset_id IN (SELECT DISTINCT wo.asset_id FROM WorkOrders wo WHERE wo.technician_id = ?)');
+    clauses.push(`a.asset_id IN (
+      SELECT DISTINCT fr.asset_id 
+      FROM WorkOrders wo 
+      JOIN FaultReports fr ON fr.report_id = wo.report_id 
+      WHERE wo.technician_id = ? AND fr.asset_id IS NOT NULL
+    )`);
     params.push(technicianId);
   }
 
@@ -156,9 +161,14 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
 
 async function findByTechnician(techId) {
   const [rows] = await pool.query(
-    `SELECT DISTINCT a.* FROM Assets a
-     JOIN WorkOrders wo ON wo.asset_id = a.asset_id
-     WHERE wo.technician_id = ?`,
+    `SELECT DISTINCT a.*, c.room_name FROM Assets a
+     JOIN Classrooms c ON c.room_id = a.room_id
+     WHERE a.asset_id IN (
+       SELECT DISTINCT fr.asset_id 
+       FROM WorkOrders wo 
+       JOIN FaultReports fr ON fr.report_id = wo.report_id 
+       WHERE wo.technician_id = ? AND fr.asset_id IS NOT NULL
+     )`,
     [techId]
   );
   return rows;
