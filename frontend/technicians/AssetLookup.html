@@ -86,7 +86,7 @@
         </div>
 
         <!-- Extended Filters (shown when view is All Assets) -->
-        <div id="extendedFiltersContainer" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50/50 rounded-xl border border-outline-variant/20 pt-3">
+        <div id="extendedFiltersContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50/50 rounded-xl border border-outline-variant/20 pt-3">
           <div class="flex flex-col gap-1">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Room</label>
             <select id="extendedFilterRoom" onchange="applyExtendedFilters()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary">
@@ -97,16 +97,6 @@
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Asset Type</label>
             <select id="extendedFilterType" onchange="applyExtendedFilters()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary">
               <option value="">All Types</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
-            <select id="extendedFilterStatus" onchange="applyExtendedFilters()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary">
-              <option value="">All Statuses</option>
-              <option value="Operational">Operational</option>
-              <option value="Under Repair">Under Repair</option>
-              <option value="Recommended for Replacement">Recommended for Replacement</option>
-              <option value="Retired">Retired</option>
             </select>
           </div>
         </div>
@@ -173,13 +163,6 @@
         <div class="flex items-center gap-4">
           <select id="l2FilterRoom" onchange="filterLevel2Table()" class="bg-white border border-outline-variant/30 rounded-lg px-4 py-2 text-body-sm font-body-sm focus:ring-primary">
             <option value="">All Rooms</option>
-          </select>
-          <select id="l2FilterStatus" onchange="filterLevel2Table()" class="bg-white border border-outline-variant/30 rounded-lg px-4 py-2 text-body-sm font-body-sm focus:ring-primary">
-            <option value="">All Status</option>
-            <option value="Operational">Operational</option>
-            <option value="Under Repair">Under Repair</option>
-            <option value="Recommended for Replacement">Recommended for Replacement</option>
-            <option value="Retired">Retired</option>
           </select>
         </div>
       </div>
@@ -370,7 +353,8 @@
         };
       }
       categoriesMap[type].total++;
-      if ((a.failure_count || 0) >= 3) {
+      const recentFailures = a.recent_failures !== undefined ? a.recent_failures : a.failure_count;
+      if ((recentFailures || 0) >= 3) {
         categoriesMap[type].highFailure++;
       }
     });
@@ -553,7 +537,10 @@
 
     let filtered = allAssets;
     if (filterType === 'dss3') {
-      filtered = allAssets.filter(a => (a.failure_count || 0) >= 3 || a.status === 'Recommended for Replacement');
+      filtered = allAssets.filter(a => {
+        const recentFailures = a.recent_failures !== undefined ? a.recent_failures : a.failure_count;
+        return (recentFailures || 0) >= 3 || a.status === 'Recommended for Replacement';
+      });
     } else if (filterType === 'repair') {
       filtered = allAssets.filter(a => a.status === 'Under Repair');
     } else if (filterType === 'operational') {
@@ -571,7 +558,7 @@
 
     grid.innerHTML = filtered.map(a => {
       const formattedId = `AST-${String(a.asset_id).padStart(3, '0')}`;
-      const badgeHtml = getAssetStatusBadgeHtml(a.status, a.failure_count);
+      const badgeHtml = getAssetStatusBadgeHtml(a.status, a.recent_failures !== undefined ? a.recent_failures : a.failure_count);
 
       return `
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between gap-4 hover:shadow-md transition-shadow">
@@ -621,7 +608,10 @@
     const displayList = categoryAssets.length > 0 ? categoryAssets : allAssets;
 
     const total = displayList.length;
-    const highRisk = displayList.filter(a => (a.failure_count || 0) >= 3).length;
+    const highRisk = displayList.filter(a => {
+      const recent = a.recent_failures !== undefined ? a.recent_failures : a.failure_count;
+      return (recent || 0) >= 3;
+    }).length;
     const normal = total - highRisk;
 
     document.getElementById('l2MetricTotal').textContent = total;
@@ -695,7 +685,7 @@
           <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(a.room_name || 'Room')}</td>
           <td class="px-6 py-4 text-body-sm text-center">${a.failure_count || 0}</td>
           <td class="px-6 py-4 text-center">
-            ${getAssetStatusBadgeHtml(a.status, a.failure_count)}
+            ${getAssetStatusBadgeHtml(a.status, a.recent_failures !== undefined ? a.recent_failures : a.failure_count)}
           </td>
           <td class="px-6 py-4 flex justify-center text-center">
             <button data-asset-id="${a.asset_id}" class="asset-details-btn text-primary font-bold text-label-lg hover:underline" title="View Asset Details">
@@ -712,7 +702,6 @@
   function filterLevel2Table() {
     const q = document.getElementById('l2FilterSearch').value.toLowerCase().trim();
     const room = document.getElementById('l2FilterRoom').value;
-    const status = document.getElementById('l2FilterStatus').value;
 
     let categoryAssets = allAssets;
     if (currentCategoryTypeKey) {
@@ -722,8 +711,7 @@
     const filtered = categoryAssets.filter(a => {
       const matchQuery = !q || (a.asset_name || '').toLowerCase().includes(q) || String(a.asset_id).includes(q);
       const matchRoom = !room || a.room_name === room;
-      const matchStatus = !status || a.status === status;
-      return matchQuery && matchRoom && matchStatus;
+      return matchQuery && matchRoom;
     });
 
     renderLevel2TableRows(filtered);
@@ -754,7 +742,8 @@
     }
 
     const formattedId = `AST-${String(asset.asset_id).padStart(3, '0')}`;
-    const isHighRisk = (asset.failure_count || 0) >= 3;
+    const recentFailures = asset.recent_failures !== undefined ? asset.recent_failures : asset.failure_count;
+    const isHighRisk = (recentFailures || 0) >= 3 || asset.status === 'Recommended for Replacement';
 
     document.getElementById('modalAssetIdText').textContent = formattedId;
     document.getElementById('modalInfoAssetId').textContent = formattedId;
@@ -768,7 +757,7 @@
     if (isHighRisk) {
       statusBadgeContainer.innerHTML = `<span class="px-2.5 py-1 rounded-full bg-error-container/40 text-error border border-error/30 text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> Replacement Rec. (DSS3)</span>`;
       document.getElementById('modalDss3AlertBanner').classList.remove('hidden');
-      document.getElementById('modalDss3Count').textContent = asset.failure_count || 3;
+      document.getElementById('modalDss3Count').textContent = recentFailures || 3;
     } else {
       statusBadgeContainer.innerHTML = `<span class="text-green-600 font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Normal</span>`;
       document.getElementById('modalDss3AlertBanner').classList.add('hidden');
@@ -878,7 +867,6 @@
   function applyExtendedFilters() {
     const selectedRoom = document.getElementById('extendedFilterRoom').value;
     const selectedType = document.getElementById('extendedFilterType').value;
-    const selectedStatus = document.getElementById('extendedFilterStatus').value;
 
     let filtered = allAssets;
     if (selectedRoom) {
@@ -886,9 +874,6 @@
     }
     if (selectedType) {
       filtered = filtered.filter(a => a.asset_type === selectedType);
-    }
-    if (selectedStatus) {
-      filtered = filtered.filter(a => a.status === selectedStatus);
     }
     renderFilteredLevel1Categories(filtered);
   }
@@ -908,7 +893,8 @@
         };
       }
       categoriesMap[type].total++;
-      if ((a.failure_count || 0) >= 3) {
+      const recent = a.recent_failures !== undefined ? a.recent_failures : a.failure_count;
+      if ((recent || 0) >= 3) {
         categoriesMap[type].highFailure++;
       }
     });

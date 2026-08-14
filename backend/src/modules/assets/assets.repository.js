@@ -7,7 +7,14 @@ async function findAll({ roomId, assetType, status, search, technicianId } = {})
   if (roomId) { clauses.push('a.room_id = ?'); params.push(roomId); }
   if (assetType) { clauses.push('a.asset_type = ?'); params.push(assetType); }
   if (status && status !== 'All') {
-    clauses.push('a.status = ?');
+    clauses.push(`
+      CASE 
+        WHEN a.status = 'Inactive' THEN 'Inactive'
+        WHEN COALESCE(f3.recent_failures, 0) >= 3 THEN 'Recommended for Replacement'
+        WHEN GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) > 0 THEN 'Under Repair'
+        ELSE 'Operational'
+      END = ?
+    `);
     params.push(status);
   } else if (!status) {
     clauses.push("a.status != 'Inactive'");
@@ -25,11 +32,49 @@ async function findAll({ roomId, assetType, status, search, technicianId } = {})
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const [rows] = await pool.query(
-    `SELECT a.*, c.room_name
+    `SELECT 
+        a.asset_id,
+        a.asset_name,
+        a.asset_type,
+        a.room_id,
+        a.last_fault_at,
+        a.created_at AS install_date,
+        c.room_name,
+        CASE 
+            WHEN a.status = 'Inactive' THEN 'Inactive'
+            WHEN COALESCE(f3.recent_failures, 0) >= 3 THEN 'Recommended for Replacement'
+            WHEN GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) > 0 THEN 'Under Repair'
+            ELSE 'Operational'
+        END AS status,
+        GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) AS failure_count,
+        COALESCE(f3.recent_failures, 0) AS recent_failures
      FROM Assets a
      JOIN Classrooms c ON c.room_id = a.room_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS recent_failures
+       FROM FaultReports
+       WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+         AND asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
+       GROUP BY asset_id
+     ) f3 ON f3.asset_id = a.asset_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS total_failures
+       FROM FaultReports
+       WHERE asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
+       GROUP BY asset_id
+     ) tf ON tf.asset_id = a.asset_id
      ${where}
-     ORDER BY a.status = 'Recommended for Replacement' DESC, a.failure_count DESC, a.asset_name`,
+     ORDER BY 
+         (CASE 
+             WHEN a.status = 'Inactive' THEN 'Inactive'
+             WHEN COALESCE(f3.recent_failures, 0) >= 3 THEN 'Recommended for Replacement'
+             WHEN GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) > 0 THEN 'Under Repair'
+             ELSE 'Operational'
+          END = 'Recommended for Replacement') DESC, 
+        GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) DESC, 
+        a.asset_name`,
     params
   );
   return rows;
@@ -37,8 +82,39 @@ async function findAll({ roomId, assetType, status, search, technicianId } = {})
 
 async function findById(assetId) {
   const [rows] = await pool.execute(
-    `SELECT a.*, c.room_name
-     FROM Assets a JOIN Classrooms c ON c.room_id = a.room_id
+    `SELECT 
+        a.asset_id,
+        a.asset_name,
+        a.asset_type,
+        a.room_id,
+        a.last_fault_at,
+        a.created_at AS install_date,
+        c.room_name,
+        CASE 
+            WHEN a.status = 'Inactive' THEN 'Inactive'
+            WHEN COALESCE(f3.recent_failures, 0) >= 3 THEN 'Recommended for Replacement'
+            WHEN GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) > 0 THEN 'Under Repair'
+            ELSE 'Operational'
+        END AS status,
+        GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) AS failure_count,
+        COALESCE(f3.recent_failures, 0) AS recent_failures
+     FROM Assets a 
+     JOIN Classrooms c ON c.room_id = a.room_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS recent_failures
+       FROM FaultReports
+       WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+         AND asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
+       GROUP BY asset_id
+     ) f3 ON f3.asset_id = a.asset_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS total_failures
+       FROM FaultReports
+       WHERE asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
+       GROUP BY asset_id
+     ) tf ON tf.asset_id = a.asset_id
      WHERE a.asset_id = ?`,
     [assetId]
   );
@@ -161,8 +237,39 @@ async function findAllWithFailures({ assetType, roomId, status, search } = {}) {
 
 async function findByTechnician(techId) {
   const [rows] = await pool.query(
-    `SELECT DISTINCT a.*, c.room_name FROM Assets a
+    `SELECT DISTINCT 
+        a.asset_id,
+        a.asset_name,
+        a.asset_type,
+        a.room_id,
+        a.last_fault_at,
+        a.created_at AS install_date,
+        c.room_name,
+        CASE 
+            WHEN a.status = 'Inactive' THEN 'Inactive'
+            WHEN COALESCE(f3.recent_failures, 0) >= 3 THEN 'Recommended for Replacement'
+            WHEN GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) > 0 THEN 'Under Repair'
+            ELSE 'Operational'
+        END AS status,
+        GREATEST(COALESCE(tf.total_failures, 0), COALESCE(f3.recent_failures, 0), COALESCE(a.failure_count, 0)) AS failure_count,
+        COALESCE(f3.recent_failures, 0) AS recent_failures
+     FROM Assets a
      JOIN Classrooms c ON c.room_id = a.room_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS recent_failures
+       FROM FaultReports
+       WHERE reported_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+         AND asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
+       GROUP BY asset_id
+     ) f3 ON f3.asset_id = a.asset_id
+     LEFT JOIN (
+       SELECT asset_id, COUNT(*) AS total_failures
+       FROM FaultReports
+       WHERE asset_id IS NOT NULL
+         AND status NOT IN ('Rejected', 'Cancelled')
+       GROUP BY asset_id
+     ) tf ON tf.asset_id = a.asset_id
      WHERE a.asset_id IN (
        SELECT DISTINCT fr.asset_id 
        FROM WorkOrders wo 
