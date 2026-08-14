@@ -114,10 +114,10 @@
         <!-- Quick Filter Pills -->
         <div class="flex flex-wrap items-center gap-3 pt-1 border-t border-slate-100">
           <span class="text-label-md font-bold text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">filter_alt</span> Quick Filter:</span>
-          <button onclick="applyQuickAssetFilter('all', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all">All Assets</button>
-          <button onclick="applyQuickAssetFilter('dss3', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-error-container/40 text-error hover:bg-error-container/60 transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> High Risk DSS3</button>
-          <button onclick="applyQuickAssetFilter('repair', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">build</span> Under Repair</button>
-          <button onclick="applyQuickAssetFilter('operational', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check_circle</span> Operational</button>
+          <button data-filter="all" onclick="applyQuickAssetFilter('all', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all">All Assets</button>
+          <button data-filter="dss3" onclick="applyQuickAssetFilter('dss3', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-error-container/40 text-error hover:bg-error-container/60 transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> High Risk DSS3</button>
+          <button data-filter="repair" onclick="applyQuickAssetFilter('repair', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">build</span> Under Repair</button>
+          <button data-filter="operational" onclick="applyQuickAssetFilter('operational', this)" class="quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check_circle</span> Operational</button>
         </div>
       </div>
 
@@ -512,13 +512,36 @@
     }
   }
 
-  function applyQuickAssetFilter(filterType, btnEl) {
-    document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-      btn.className = 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all flex items-center gap-1';
-    });
-    if (btnEl) {
-      btnEl.className = 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all flex items-center gap-1';
+  const FILTER_CLASSES = {
+    all: {
+      active: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-white shadow-xs transition-all',
+      inactive: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all'
+    },
+    dss3: {
+      active: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-error text-white shadow-xs transition-all flex items-center gap-1',
+      inactive: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-error-container/40 text-error hover:bg-error-container/60 transition-all flex items-center gap-1'
+    },
+    repair: {
+      active: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-amber-600 text-white shadow-xs transition-all flex items-center gap-1',
+      inactive: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all flex items-center gap-1'
+    },
+    operational: {
+      active: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-green-600 text-white shadow-xs transition-all flex items-center gap-1',
+      inactive: 'quick-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 transition-all flex items-center gap-1'
     }
+  };
+
+  let currentQuickFilter = 'all';
+
+  function applyQuickAssetFilter(filterType, btnEl) {
+    currentQuickFilter = filterType;
+    document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+      const type = btn.getAttribute('data-filter');
+      const classes = FILTER_CLASSES[type];
+      if (classes) {
+        btn.className = (type === filterType) ? classes.active : classes.inactive;
+      }
+    });
 
     const grid = document.getElementById('categoryGrid');
     if (!grid) return;
@@ -955,7 +978,8 @@
       }
     }
     updateViewModeUI();
-    renderLevel1Categories();
+    const activeBtn = document.querySelector(`.quick-filter-btn[data-filter="${currentQuickFilter}"]`);
+    applyQuickAssetFilter(currentQuickFilter, activeBtn);
   }
 
   loadAssetsFromApi();
