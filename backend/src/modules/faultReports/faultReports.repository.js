@@ -24,10 +24,11 @@ const BASE_SELECT = `
 `;
 
 async function getImages(reportId) {
+  const cleanId = parseInt(String(reportId).replace(/\D/g, ''), 10) || reportId;
   try {
     const [rows] = await pool.execute(
       `SELECT image_path FROM ReportImages WHERE report_id = ? ORDER BY image_id ASC`,
-      [reportId]
+      [cleanId]
     );
     return rows.map(r => r.image_path);
   } catch (e) {
@@ -37,12 +38,13 @@ async function getImages(reportId) {
 
 async function addImages(reportId, imagePaths) {
   if (!imagePaths || !imagePaths.length) return;
+  const cleanId = parseInt(String(reportId).replace(/\D/g, ''), 10) || reportId;
   try {
     for (const path of imagePaths) {
       if (path) {
         await pool.execute(
           `INSERT INTO ReportImages (report_id, image_path) VALUES (?, ?)`,
-          [reportId, path]
+          [cleanId, path]
         );
       }
     }
@@ -110,10 +112,11 @@ async function findAll({ status, priority, reporterId, roomId, sort } = {}) {
 }
 
 async function findById(reportId) {
-  const [rows] = await pool.execute(`${BASE_SELECT} WHERE fr.report_id = ?`, [reportId]);
+  const cleanId = parseInt(String(reportId).replace(/\D/g, ''), 10) || reportId;
+  const [rows] = await pool.execute(`${BASE_SELECT} WHERE fr.report_id = ?`, [cleanId]);
   if (!rows[0]) return null;
   const report = rows[0];
-  const images = await getImages(reportId);
+  const images = await getImages(cleanId);
   if (images.length > 0) {
     report.images = images;
   } else if (report.image_path) {
