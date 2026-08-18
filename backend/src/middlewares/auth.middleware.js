@@ -52,6 +52,16 @@ async function authenticate(req, res, next) {
         return next();
       }
 
+      if (userIdHeader && parseInt(userIdHeader, 10)) {
+        req.user = {
+          userId: parseInt(userIdHeader, 10),
+          role: req.headers['x-user-role'] || 'User',
+          fullName: userEmail ? userEmail.split('@')[0] : 'User',
+          email: userEmail || `user_${userIdHeader}@vnu.edu.vn`
+        };
+        return next();
+      }
+
       let userId = 3;
       let role = 'Technician';
       let fullName = 'Le Van C';
