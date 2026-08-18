@@ -296,7 +296,7 @@
       };
 
       // Nạp dữ liệu seed chuẩn cho đúng user_id đang đăng nhập
-      const userSeedReports = DEMO_REPORTS_BY_USER[user.user_id] || DEMO_REPORTS_BY_USER[1];
+      const userSeedReports = DEMO_REPORTS_BY_USER[user.user_id] || [];
       userSeedReports.forEach(r => {
         if (r && r.report_id && !isDeleted(r.report_id)) {
           r.report_id = UiHelpers.formatReportId(r.report_id);
@@ -319,13 +319,13 @@
 
       localReports.forEach(r => {
         if (r && r.report_id && !isDeleted(r.report_id)) {
-          const isBelongsToUser = (!r.user_email && !r.reporter_id) || r.user_email === user.email || String(r.reporter_id) === String(user.user_id);
-          if (isBelongsToUser) {
-            const formattedId = UiHelpers.formatReportId(r.report_id);
-            const existing = reportMap.get(formattedId);
-            if (existing) {
-              if (r.status) existing.status = r.status;
-            } else {
+          const formattedId = UiHelpers.formatReportId(r.report_id);
+          const existing = reportMap.get(formattedId);
+          if (existing) {
+            if (r.status) existing.status = r.status;
+          } else {
+            const isBelongsToUser = (r.user_email && r.user_email === user.email) || (r.reporter_id && String(r.reporter_id) === String(user.user_id));
+            if (isBelongsToUser) {
               r.report_id = formattedId;
               reportMap.set(formattedId, r);
             }

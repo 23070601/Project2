@@ -24,10 +24,11 @@ const BASE_SELECT = `
 `;
 
 async function getImages(reportId) {
+  const cleanId = parseInt(String(reportId).replace(/\D/g, ''), 10) || reportId;
   try {
     const [rows] = await pool.execute(
       `SELECT image_path FROM ReportImages WHERE report_id = ? ORDER BY image_id ASC`,
-      [reportId]
+      [cleanId]
     );
     return rows.map(r => r.image_path);
   } catch (e) {
@@ -37,12 +38,16 @@ async function getImages(reportId) {
 
 async function addImages(reportId, imagePaths) {
   if (!imagePaths || !imagePaths.length) return;
+  const cleanId = parseInt(String(reportId).replace(/\D/g, ''), 10) || reportId;
   try {
-    const values = imagePaths.map(path => [reportId, path]);
-    await pool.query(
-      `INSERT INTO ReportImages (report_id, image_path) VALUES ?`,
-      [values]
-    );
+    for (const path of imagePaths) {
+      if (path) {
+        await pool.execute(
+          `INSERT INTO ReportImages (report_id, image_path) VALUES (?, ?)`,
+          [cleanId, path]
+        );
+      }
+    }
   } catch (e) {
     console.warn('Failed to insert into ReportImages:', e.message);
   }
@@ -107,10 +112,11 @@ async function findAll({ status, priority, reporterId, roomId, sort } = {}) {
 }
 
 async function findById(reportId) {
-  const [rows] = await pool.execute(`${BASE_SELECT} WHERE fr.report_id = ?`, [reportId]);
+  const cleanId = parseInt(String(reportId).replace(/\D/g, ''), 10) || reportId;
+  const [rows] = await pool.execute(`${BASE_SELECT} WHERE fr.report_id = ?`, [cleanId]);
   if (!rows[0]) return null;
   const report = rows[0];
-  const images = await getImages(reportId);
+  const images = await getImages(cleanId);
   if (images.length > 0) {
     report.images = images;
   } else if (report.image_path) {
@@ -191,8 +197,17 @@ async function ensureFaultReportsColumns() {
     if (!cols2 || cols2.length === 0) {
       await pool.query("ALTER TABLE FaultReports ADD COLUMN rejected_at TIMESTAMP NULL");
     }
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS ReportImages (
+        image_id INT AUTO_INCREMENT PRIMARY KEY,
+        report_id INT NOT NULL,
+        image_path VARCHAR(255) NOT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_reportimages_report FOREIGN KEY (report_id) REFERENCES FaultReports(report_id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
   } catch (e) {
-    console.warn('[DB] Could not ensure FaultReports columns:', e.message);
+    console.warn('[DB] Could not ensure FaultReports columns/tables:', e.message);
   }
 }
 

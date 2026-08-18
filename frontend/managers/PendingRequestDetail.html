@@ -105,7 +105,29 @@
     const equipment = report.asset_name || 'N/A';
     const assetType = report.asset_type || 'Facility / Classroom Equipment';
     const room = report.room_name || report.room_id || 'N/A';
-    const reportImages = Array.isArray(report.images) ? report.images : (report.image_url ? [report.image_url] : []);
+    const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
+    let rawImages = report.images;
+    if (typeof rawImages === 'string') {
+      try {
+        rawImages = JSON.parse(rawImages);
+      } catch (e) {
+        rawImages = rawImages.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    }
+    let reportImages = [];
+    if (rawImages && Array.isArray(rawImages) && rawImages.length > 0) {
+      reportImages = rawImages.map(img => {
+        if (!img) return '';
+        const strImg = typeof img === 'object' && img.image_path ? img.image_path : String(img);
+        return (strImg.startsWith('http') || strImg.startsWith('data:') ? strImg : (backendBase + strImg));
+      }).filter(Boolean);
+    } else if (report.image_path) {
+      const url = (report.image_path.startsWith('http') || report.image_path.startsWith('data:') ? report.image_path : (backendBase + report.image_path));
+      reportImages = [url];
+    } else if (report.image_url) {
+      const url = (report.image_url.startsWith('http') || report.image_url.startsWith('data:') ? report.image_url : (backendBase + report.image_url));
+      reportImages = [url];
+    }
     
     let rejectionInfo = {
       rejectedAt: report.rejected_at || report.updated_at || report.reported_at,
@@ -340,6 +362,22 @@
     } catch (e) {
       console.log('API error, using demo fallback for report details:', e);
     }
+
+    try {
+      const localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+      const localMatch = localReports.find(r => 
+        String(r.report_id || r.id).toLowerCase() === String(cleanId).toLowerCase() ||
+        String(r.report_id || r.id).toLowerCase() === String(numericId).toLowerCase() ||
+        (window.UiHelpers && UiHelpers.formatReportId(r.report_id || r.id).toLowerCase() === UiHelpers.formatReportId(cleanId).toLowerCase())
+      );
+      if (localMatch) {
+        if (!report) {
+          report = localMatch;
+        } else if (localMatch.images && Array.isArray(localMatch.images) && localMatch.images.length > (report.images?.length || 0)) {
+          report.images = localMatch.images;
+        }
+      }
+    } catch (e) {}
 
     if (!report) {
       report = DEMO_REPORTS[cleanId] || DEMO_REPORTS[numericId] || DEMO_REPORTS['10'];

@@ -1165,16 +1165,27 @@
         console.warn('API load failed, checking local storage & fallback dataset:', err);
       }
 
-      // 2. Check local storage for user created reports
-      if (!report) {
-        try {
-          const localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
-          report = localReports.find(r => 
-            String(r.report_id || r.id).toLowerCase() === String(reportId).toLowerCase() ||
-            (!isNaN(numId) && parseInt(String(r.report_id || r.id).replace(/\D/g, ''), 10) === numId)
-          );
-        } catch (e) {}
-      }
+      // 2. Check local storage for user created reports or multi-image evidence
+      try {
+        const localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+        const targetFormatted = window.UiHelpers ? UiHelpers.formatReportId(reportId) : String(reportId);
+        const localMatch = localReports.find(r => {
+          if (!r) return false;
+          const rId = String(r.report_id || r.id || '');
+          const rFormatted = window.UiHelpers ? UiHelpers.formatReportId(rId) : rId;
+          const rNum = parseInt(rId.replace(/\D/g, ''), 10);
+          return rId.toLowerCase() === String(reportId).toLowerCase() ||
+                 rFormatted.toLowerCase() === targetFormatted.toLowerCase() ||
+                 (!isNaN(rNum) && !isNaN(numId) && rNum === numId);
+        });
+        if (localMatch) {
+          if (!report) {
+            report = localMatch;
+          } else if (localMatch.images && Array.isArray(localMatch.images) && localMatch.images.length > (report.images?.length || 0)) {
+            report.images = localMatch.images;
+          }
+        }
+      } catch (e) {}
 
       // 3. Check default seed reports
       if (!report) {

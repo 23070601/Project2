@@ -59,14 +59,12 @@ async function create(req, res) {
   if (req.files) {
     if (Array.isArray(req.files)) {
       uploadedFiles = req.files;
-    } else if (req.files.images && req.files.images.length > 0) {
-      uploadedFiles = req.files.images;
-    } else if (req.files.evidence && req.files.evidence.length > 0) {
-      uploadedFiles = req.files.evidence;
     } else {
-      Object.values(req.files).forEach(fileArray => {
-        if (Array.isArray(fileArray)) {
-          uploadedFiles = uploadedFiles.concat(fileArray);
+      Object.values(req.files).forEach(fileItem => {
+        if (Array.isArray(fileItem)) {
+          uploadedFiles = uploadedFiles.concat(fileItem);
+        } else if (fileItem && typeof fileItem === 'object') {
+          uploadedFiles.push(fileItem);
         }
       });
     }

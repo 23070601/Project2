@@ -209,7 +209,6 @@
     }
 
     function handleFiles(filesList) {
-      var validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
       var newFiles = Array.from(filesList);
 
       if (selectedFiles.length + newFiles.length > 5) {
@@ -219,12 +218,15 @@
 
       for (var i = 0; i < newFiles.length; i++) {
         var file = newFiles[i];
-        if (!validTypes.includes(file.type)) {
-          alert('File "' + file.name + '" is invalid. Only PNG, JPG, or JPEG formats are accepted.');
+        var ext = (file.name || '').split('.').pop().toLowerCase();
+        var isValidExt = ['png', 'jpg', 'jpeg', 'webp', 'heic', 'gif'].includes(ext);
+        var isValidType = !file.type || file.type.startsWith('image/');
+        if (!isValidExt && !isValidType) {
+          alert('File "' + file.name + '" is invalid. Only PNG, JPG, JPEG, or WEBP image formats are accepted.');
           return;
         }
         if (file.size > 5 * 1024 * 1024) {
-          alert('File size of "' + file.name + '" exceeds 5MB.');
+          alert('File size of "' + file.name + '" exceeds 5MB limit.');
           return;
         }
       }
@@ -244,15 +246,21 @@
     function renderPreviews() {
       var container = document.getElementById('imagePreviewContainer');
       var previewList = document.getElementById('previewList');
+      var fileInfo = document.getElementById('fileInfo');
       if (!container || !previewList) return;
 
       if (selectedFiles.length === 0) {
         container.classList.add('hidden');
+        if (fileInfo) fileInfo.classList.add('hidden');
         previewList.innerHTML = '';
         return;
       }
 
       container.classList.remove('hidden');
+      if (fileInfo) {
+        fileInfo.classList.remove('hidden');
+        fileInfo.textContent = 'Selected ' + selectedFiles.length + ' file(s) to upload (Max 5):';
+      }
       previewList.innerHTML = '';
 
       selectedFiles.forEach(function(file, idx) {
@@ -838,6 +846,10 @@
           }
 
           var report = result.data || result;
+          var finalImages = (report.images && report.images.length >= selectedFiles.length)
+            ? report.images
+            : (imagesBase64.length > 0 ? imagesBase64 : ((report.images && report.images.length > 0) ? report.images : (report.image_path ? [report.image_path] : [])));
+          
           var newReport = {
             report_id: report.report_id || report.id || ('REP-' + String(Date.now()).slice(-4)),
             room_id: roomSelect.value,
@@ -848,7 +860,7 @@
             priority: report.priority || document.getElementById('urgencySelect').value || 'Medium',
             status: 'Pending',
             image_path: (report.images && report.images[0]) || report.image_path || (imagesBase64[0] || null),
-            images: (report.images && report.images.length > 0) ? report.images : (imagesBase64.length > 0 ? imagesBase64 : (report.image_path ? [report.image_path] : [])),
+            images: finalImages,
             reported_at: new Date().toISOString(),
             reporter_id: currentUser.user_id || currentUser.id || 1,
             reporter_name: currentUser.full_name || currentUser.fullName || '',
@@ -875,7 +887,7 @@
           reportForm.reset();
           if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
           if (fileInfo) fileInfo.classList.add('hidden');
-          selectedFile = null;
+          selectedFiles = [];
           selectAsset('', 'General / not asset-specific');
 
           setTimeout(function() {
@@ -888,7 +900,11 @@
           // Fallback local save if API is unreachable/erroring
           try {
             var fallbackId = 'REP-' + String(Date.now()).slice(-4);
-            var fallbackBase64 = selectedFile ? await getFileBase64(selectedFile) : null;
+            var fallbackImagesBase64 = [];
+            for (var m = 0; m < selectedFiles.length; m++) {
+              var b64f = await getFileBase64(selectedFiles[m]);
+              if (b64f) fallbackImagesBase64.push(b64f);
+            }
             var fallbackReport = {
               report_id: fallbackId,
               room_id: roomSelect.value,
@@ -898,7 +914,8 @@
               description: document.getElementById('description').value.trim(),
               priority: document.getElementById('urgencySelect').value || 'Medium',
               status: 'Pending',
-              image_path: fallbackBase64,
+              image_path: fallbackImagesBase64[0] || null,
+              images: fallbackImagesBase64,
               reported_at: new Date().toISOString(),
               reporter_id: currentUser.user_id || currentUser.id || 1,
               reporter_name: currentUser.full_name || currentUser.fullName || '',
