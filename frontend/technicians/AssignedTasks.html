@@ -605,10 +605,12 @@
     tbody.innerHTML = activeDisplayTasks.map(o => {
       const displayStatus = getDisplayTaskStatus(o);
       const isAssigned = o.technician_response === 'Pending' && displayStatus === 'Assigned';
+      const rawEqAssigned = o.asset_name || o.equipment_name;
+      const assignedEq = (rawEqAssigned && !rawEqAssigned.includes('not asset-specific')) ? rawEqAssigned : 'General / Classroom Equipment';
       return `
-      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${displayStatus}" data-assigned-at="${o.assigned_at || ''}" data-rejection-reason="${UiHelpers.escapeHtml(o.rejection_reason || '')}">
+      <tr class="task-row hover:bg-surface-container-low transition-colors" data-id="WO-${o.order_id}" data-equipment="${UiHelpers.escapeHtml(assignedEq)}" data-room="${UiHelpers.escapeHtml(o.room_name || '')}" data-priority="${o.priority}" data-status="${displayStatus}" data-assigned-at="${o.assigned_at || ''}" data-rejection-reason="${UiHelpers.escapeHtml(o.rejection_reason || '')}">
         <td class="px-6 py-4 text-body-sm font-bold text-center">WO-${o.order_id}</td>
-        <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.asset_name || o.description || 'Equipment')}</td>
+        <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(assignedEq)}</td>
         <td class="px-6 py-4 text-body-sm text-center">${UiHelpers.escapeHtml(o.room_name || 'Room')}</td>
         <td class="px-6 py-4 text-center">${getPriorityBadgeHtml(o.priority)}</td>
         <td class="px-6 py-4 text-center">

@@ -249,11 +249,13 @@
 
     // 5. Render Report
     function renderReport(report, workOrder, confirmation) {
-      const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name']);
+      const rawEquipment = getFieldValue(report, ['asset_name', 'equipment_name'], null);
       const rawRoom = getFieldValue(report, ['room_name']);
-      const equipment = cleanLabel(rawEquipment);
+      const isGeneralEquipment = !rawEquipment || rawEquipment === 'N/A' || rawEquipment.includes('not asset-specific') || rawEquipment === 'General / Classroom Equipment';
+      const equipment = isGeneralEquipment ? 'General / Classroom Equipment' : cleanLabel(rawEquipment);
       const room = cleanLabel(rawRoom);
-      const assetType = getFieldValue(report, ['asset_type'], 'N/A');
+      const rawAssetType = getFieldValue(report, ['asset_type'], null);
+      const assetType = rawAssetType && rawAssetType !== 'N/A' ? rawAssetType : (isGeneralEquipment ? 'Facility / Classroom Equipment' : 'N/A');
       const roomId = getFieldValue(report, ['room_id'], 'N/A');
       const reporter = resolveReporterName(report);
       const history = report.statusHistory || [];
@@ -1181,8 +1183,15 @@
         if (localMatch) {
           if (!report) {
             report = localMatch;
-          } else if (localMatch.images && Array.isArray(localMatch.images) && localMatch.images.length > (report.images?.length || 0)) {
-            report.images = localMatch.images;
+          } else {
+            // Merge images từ localStorage nếu có nhiều hơn
+            if (localMatch.images && Array.isArray(localMatch.images) && localMatch.images.length > (report.images?.length || 0)) {
+              report.images = localMatch.images;
+            }
+            // Merge asset info từ localStorage nếu API trả về null (asset bị xóa hoặc JOIN không khớp)
+            if (!report.asset_name && localMatch.asset_name) report.asset_name = localMatch.asset_name;
+            if (!report.asset_type && localMatch.asset_type) report.asset_type = localMatch.asset_type;
+            if (!report.equipment_name && localMatch.equipment_name) report.equipment_name = localMatch.equipment_name;
           }
         }
       } catch (e) {}

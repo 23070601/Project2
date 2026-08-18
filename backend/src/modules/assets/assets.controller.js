@@ -16,9 +16,13 @@ async function list(req, res) {
   let technicianId = undefined;
 
   if (currentView === 'all') {
-    // Only Manager or Technician is allowed to view assets
-    if (user?.role !== ROLES.MANAGER && user?.role !== ROLES.TECHNICIAN) {
-      throw new ApiError(403, 'Permission denied: Only Manager or Technician can view assets');
+    // Allow User role to read assets for a specific room (needed for CreateReport)
+    if (user?.role !== ROLES.MANAGER && user?.role !== ROLES.TECHNICIAN && user?.role !== ROLES.USER) {
+      throw new ApiError(403, 'Permission denied: Cannot view assets');
+    }
+    // Non-managers and non-technicians can only query by specific roomId
+    if (user?.role === ROLES.USER && !roomId) {
+      throw new ApiError(403, 'Permission denied: Please provide a roomId to filter assets');
     }
   } else {
     // currentView === 'mine'

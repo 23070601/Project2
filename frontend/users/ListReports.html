@@ -290,14 +290,18 @@
         return deletedReports.includes(formatted) || (raw && deletedReports.includes(raw)) || deletedReports.includes(String(id));
       };
 
-      // 1. Put seed reports matching the logged-in user ID
-      const userSeedReports = DEMO_REPORTS_BY_USER[user.user_id] || [];
-      userSeedReports.forEach(r => {
-        if (r && r.report_id && !isDeleted(r.report_id)) {
-          r.report_id = UiHelpers.formatReportId(r.report_id);
-          reportMap.set(r.report_id, r);
-        }
-      });
+      const apiLoaded = apiReports.length > 0;
+
+      // 1. Put seed reports ONLY when API has no data
+      if (!apiLoaded) {
+        const userSeedReports = DEMO_REPORTS_BY_USER[user.user_id] || [];
+        userSeedReports.forEach(r => {
+          if (r && r.report_id && !isDeleted(r.report_id)) {
+            r.report_id = UiHelpers.formatReportId(r.report_id);
+            reportMap.set(r.report_id, r);
+          }
+        });
+      }
 
       // 2. Put API reports
       apiReports.forEach(r => {
@@ -313,14 +317,20 @@
         }
       });
 
-      // 3. Put locally created reports & status overrides on top (filtered by current user)
+      // 3. Local reports: chỉ merge vào API reports hiện có (không thêm mới nếu API đã load được)
       localReports.forEach(r => {
         if (r && r.report_id && !isDeleted(r.report_id)) {
           const formattedId = UiHelpers.formatReportId(r.report_id);
           const existing = reportMap.get(formattedId);
           if (existing) {
+            // Merge status override
             if (r.status) existing.status = r.status;
-          } else {
+            // Bổ sung asset info nếu API không trả về (asset bị xóa hoặc JOIN null)
+            if (!existing.asset_name && r.asset_name) existing.asset_name = r.asset_name;
+            if (!existing.asset_type && r.asset_type) existing.asset_type = r.asset_type;
+            if (!existing.equipment_name && r.equipment_name) existing.equipment_name = r.equipment_name;
+          } else if (!apiLoaded) {
+            // Chỉ thêm local-only report khi API không có data
             const isBelongsToUser = (r.user_email && r.user_email === user.email) || (r.reporter_id && String(r.reporter_id) === String(user.user_id));
             if (isBelongsToUser) {
               r.report_id = formattedId;
@@ -490,9 +500,10 @@
 
       // Render rows
       tbody.innerHTML = pageItems.map((r, index) => {
-        const rawEquipment = getFieldValue(r, ['equipment_name', 'equipment', 'asset_name', 'asset']);
+        const rawEquipment = getFieldValue(r, ['asset_name', 'equipment_name', 'equipment', 'asset'], null);
         const rawRoom = getFieldValue(r, ['room_name', 'room', 'classroom']);
-        const equipment = cleanLabel(rawEquipment);
+        const isGeneralEquipment = !rawEquipment || rawEquipment === 'N/A' || rawEquipment.includes('not asset-specific') || rawEquipment === 'General / Classroom Equipment';
+        const equipment = isGeneralEquipment ? 'General / Classroom Equipment' : cleanLabel(rawEquipment);
         const room = cleanLabel(rawRoom);
         const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-[#EAF5FF]';
         

@@ -458,7 +458,8 @@
           if (deadlineTitleSpan) deadlineTitleSpan.textContent = `WO-${data.order_id}`;
 
           // Asset and room
-          if (data.asset_name) document.getElementById('woEquipment').textContent = data.asset_name;
+          const rawEq = data.asset_name || data.equipment_name;
+          document.getElementById('woEquipment').textContent = (rawEq && !rawEq.includes('not asset-specific')) ? rawEq : 'General / Classroom Equipment';
           if (data.room_name) document.getElementById('woRoom').textContent = data.room_name;
           
           // Priority

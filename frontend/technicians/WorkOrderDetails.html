@@ -804,8 +804,9 @@
     // Render Basic Data from DB
     const displayWoId = UiHelpers.formatWorkOrderId(order.order_id);
     document.getElementById('detailHeaderOrderId').textContent = displayWoId;
-    document.getElementById('detailOrderId').textContent = displayWoId;
-    document.getElementById('detailEquipment').textContent = order.asset_name || 'Equipment';
+    const rawEqTech = order.asset_name || order.equipment_name;
+    const techEq = (rawEqTech && !rawEqTech.includes('not asset-specific')) ? rawEqTech : 'General / Classroom Equipment';
+    document.getElementById('detailEquipment').textContent = techEq;
     document.getElementById('detailRoom').textContent = order.room_name || 'Room';
 
     const priorityContainer = document.getElementById('detailPriorityBadgeContainer');
@@ -824,10 +825,10 @@
 
     const faultDesc = order.description || (WORK_ORDERS_MAP[cleanId] ? WORK_ORDERS_MAP[cleanId].description : '') || (WORK_ORDERS_MAP['1'] ? WORK_ORDERS_MAP['1'].description : 'Sony Projector has no display signal and blinks red LED indicator.');
     document.getElementById('detailFaultQuote').textContent = `"${faultDesc}"`;
-    document.getElementById('detailFaultSubtext').textContent = `Reported issue for ${order.asset_name || 'equipment'} in Room ${order.room_name || ''}.`;
+    document.getElementById('detailFaultSubtext').textContent = `Reported issue for ${techEq} in Room ${order.room_name || ''}.`;
 
     // Asset Info Box
-    document.getElementById('detailAssetBoxName').textContent = order.asset_name || 'Equipment';
+    document.getElementById('detailAssetBoxName').textContent = techEq;
     document.getElementById('detailAssetBoxSn').textContent = `SN: SN-${order.order_id}928374-X`;
     document.getElementById('detailAssetType').textContent = order.asset_type || 'Equipment';
     document.getElementById('detailAssetRoom').textContent = order.room_name || 'Room';

@@ -102,7 +102,8 @@
     const reporterName = resolveReporterName(report);
     const isRejected = report.status === 'Rejected';
     const isPending = report.status === 'Pending Approval' || report.status === 'Pending';
-    const equipment = report.asset_name || report.equipment_name || 'General / Classroom Equipment';
+    const rawEquipment = report.asset_name || report.equipment_name;
+    const equipment = (rawEquipment && !rawEquipment.includes('not asset-specific')) ? rawEquipment : 'General / Classroom Equipment';
     const assetType = report.asset_type || 'Facility / Classroom Equipment';
     const room = report.room_name || report.room_id || 'N/A';
     const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');

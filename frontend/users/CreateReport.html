@@ -393,6 +393,7 @@
 
     // --- Custom Equipment Combobox Selector Logic ---
     var currentAssetsList = [];
+    var selectedAssetData = null; // Tracks the full selected asset object
 
     function renderCustomAssetsList(assets) {
       currentAssetsList = assets || [];
@@ -430,7 +431,7 @@
           </div>
         `;
         genItem.onclick = function() {
-          selectAsset('', 'General / not asset-specific');
+          selectAsset('', 'General / not asset-specific', '', null);
         };
         listContainer.appendChild(genItem);
       }
@@ -461,15 +462,17 @@
           </div>
           ${statusBadge}
         `;
-        item.onclick = function() {
-          selectAsset(a.asset_id, typeName + ' (' + a.asset_name + ')', a.asset_type);
-        };
+        item.onclick = (function(asset) {
+          return function() { selectAsset(asset.asset_id, formatAssetTypeName(asset.asset_type) + ' (' + asset.asset_name + ')', asset.asset_type, asset); };
+        })(a);
         listContainer.appendChild(item);
       });
     }
 
-    function selectAsset(id, label, type) {
-      assetSelect.value = id;
+    function selectAsset(id, label, type, assetObj) {
+      assetSelect.value = id || '';
+      // Store the actual asset data for use in submit handler
+      selectedAssetData = assetObj || (id ? { asset_id: id, asset_name: label, asset_type: type } : null);
       var triggerText = document.getElementById('assetTriggerText');
       triggerText.innerHTML = `
         <span class="material-symbols-outlined text-primary shrink-0">${id ? getAssetIcon(type || label) : 'devices'}</span>
@@ -851,7 +854,9 @@
             room_id: roomSelect.value,
             room_name: cleanLabel(document.getElementById('roomTriggerText') ? document.getElementById('roomTriggerText').textContent : '') || ('Room ' + roomSelect.value),
             asset_id: assetSelect.value || null,
-            equipment_name: assetSelect.value ? (cleanLabel(document.getElementById('assetTriggerText') ? document.getElementById('assetTriggerText').textContent : '') || ('Asset #' + assetSelect.value)) : 'General / not asset-specific',
+            asset_name: report.asset_name || (selectedAssetData ? selectedAssetData.asset_name : null),
+            asset_type: report.asset_type || (selectedAssetData ? selectedAssetData.asset_type : null),
+            equipment_name: report.asset_name || (selectedAssetData ? selectedAssetData.asset_name : null) || 'General / Classroom Equipment',
             description: document.getElementById('description').value.trim(),
             priority: report.priority || document.getElementById('urgencySelect').value || 'Medium',
             status: 'Pending',

@@ -670,6 +670,8 @@
       const initials = reporterName ? reporterName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
       const cleanDesc = (r.description || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
       const priorityClass = r.priority === 'High' ? 'bg-error-container text-on-error-container' : (r.priority === 'Medium' ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-primary-fixed text-on-primary-fixed-variant');
+      const rawEq = r.asset_name || r.equipment_name;
+      const pendingEq = (rawEq && !rawEq.includes('not asset-specific')) ? rawEq : 'General / Classroom Equipment';
       return `
         <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="location.href='PendingRequestDetail.html?id=${r.report_id}&tab=pending'">
           <td class="px-6 py-4 font-bold text-primary">${UiHelpers.formatReportId(r.report_id)}</td>
@@ -679,14 +681,14 @@
               <span class="font-medium">${UiHelpers.escapeHtml(reporterName)}</span>
             </div>
           </td>
-          <td class="px-6 py-4">${UiHelpers.escapeHtml(r.asset_name || 'General Room Asset')}</td>
+          <td class="px-6 py-4">${UiHelpers.escapeHtml(pendingEq)}</td>
           <td class="px-6 py-4 font-mono text-sm">${UiHelpers.escapeHtml(r.room_name || 'N/A')}</td>
           <td class="px-6 py-4"><span class="px-3 py-1 ${priorityClass} text-[11px] font-bold rounded-full capitalize">${r.priority}</span></td>
           <td class="px-6 py-4 text-body-sm">${UiHelpers.formatDate(r.reported_at)}</td>
           <td class="px-6 py-4" onclick="event.stopPropagation()">
             <div class="flex items-center justify-center gap-2">
-              <button onclick="openApproveModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}', '${r.priority}', '${cleanDesc}')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
-              <button onclick="openRejectModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${(r.asset_name || 'General Room Asset').replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
+              <button onclick="openApproveModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${pendingEq.replace(/'/g, "\\'")}', '${r.room_name}', '${r.priority}', '${cleanDesc}')" class="px-4 py-1.5 bg-[#28A745] text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">check_circle</span> Approve</button>
+              <button onclick="openRejectModal(${r.report_id}, '${reporterName.replace(/'/g, "\\'")}', '${pendingEq.replace(/'/g, "\\'")}', '${r.room_name}')" class="px-4 py-1.5 bg-error text-white rounded font-bold text-sm flex items-center gap-1 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-[18px]">cancel</span> Reject</button>
             </div>
           </td>
         </tr>
