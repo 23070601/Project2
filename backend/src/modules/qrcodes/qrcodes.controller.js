@@ -12,7 +12,7 @@ async function generate(req, res) {
   if (!room) throw new ApiError(404, 'Classroom not found');
 
   const targetUrl = `${FRONTEND_BASE_URL}/CreateReport.html?room_id=${roomId}&room_name=${encodeURIComponent(room.room_name)}`;
-  const qrCode = `QR-${room.room_name}-${Date.now()}`;
+  const qrCode = `QR-${room.room_name}`;
   const qrImageDataUrl = await QRCode.toDataURL(targetUrl, { width: 400, margin: 1 });
 
   await classroomsRepository.updateQrCode(roomId, qrCode);
@@ -35,7 +35,7 @@ async function view(req, res) {
   if (!room) throw new ApiError(404, 'Classroom not found');
 
   if (!room.qr_code) {
-    const qrCode = `QR-${room.room_name}-${Date.now()}`;
+    const qrCode = `QR-${room.room_name}`;
     await classroomsRepository.updateQrCode(roomId, qrCode);
     room.qr_code = qrCode;
 

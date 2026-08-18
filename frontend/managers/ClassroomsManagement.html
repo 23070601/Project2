@@ -612,7 +612,7 @@
     try {
       if (window.Api) {
         const rooms = await Api.get('/classrooms');
-        const assets = await Api.get('/assets');
+        const assets = await Api.get('/assets/all');
         allClassrooms = rooms || [];
         allAssets = assets || [];
 

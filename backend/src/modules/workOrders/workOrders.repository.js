@@ -2,7 +2,7 @@ const { pool } = require('../../config/db');
 
 const BASE_SELECT = `
   SELECT wo.*,
-         fr.description, fr.priority, fr.status AS report_status, fr.room_id, fr.asset_id,
+         fr.description, fr.priority, fr.status AS report_status, fr.room_id, fr.asset_id, fr.image_path AS report_image_path,
          c.room_name, a.asset_name, a.asset_type,
          reporter.user_id AS reporter_id, reporter.full_name AS reporter_name, reporter.email AS reporter_email,
          tech.full_name AS technician_name, tech.technician_specialty,
@@ -98,10 +98,12 @@ async function findAll({ technicianId, managerId, taskStatus, technicianResponse
         imgMap[r.order_id].push(r.image_path);
       });
       rows.forEach(r => {
-        r.images = imgMap[r.order_id] || [];
+        r.images = (imgMap[r.order_id] && imgMap[r.order_id].length > 0)
+          ? imgMap[r.order_id]
+          : (r.report_image_path ? [r.report_image_path] : []);
       });
     } catch (e) {
-      rows.forEach(r => { r.images = []; });
+      rows.forEach(r => { r.images = r.report_image_path ? [r.report_image_path] : []; });
     }
   }
 
@@ -109,18 +111,41 @@ async function findAll({ technicianId, managerId, taskStatus, technicianResponse
 }
 
 async function findById(orderId) {
-  const [rows] = await pool.execute(`${BASE_SELECT} WHERE wo.order_id = ?`, [orderId]);
+  const cleanId = parseInt(String(orderId).replace(/\D/g, ''), 10) || orderId;
+  const [rows] = await pool.execute(`${BASE_SELECT} WHERE wo.order_id = ? OR wo.order_id = ?`, [orderId, cleanId]);
   const order = rows[0] || null;
   if (order) {
-    order.images = await getImages(orderId);
-    order.comments = await getComments(orderId);
+    order.images = await getImages(order.order_id);
+    if (order.report_id) {
+      try {
+        const [repImgRows] = await pool.execute(
+          `SELECT image_path FROM ReportImages WHERE report_id = ? ORDER BY image_id ASC`,
+          [order.report_id]
+        );
+        order.report_images = repImgRows.map(r => r.image_path);
+        if (order.report_images.length === 0 && order.report_image_path) {
+          order.report_images = [order.report_image_path];
+        }
+        if ((!order.images || order.images.length === 0) && order.report_images.length > 0) {
+          order.images = order.report_images;
+        }
+      } catch (e) {
+        order.report_images = order.report_image_path ? [order.report_image_path] : [];
+        if (!order.images || order.images.length === 0) {
+          order.images = order.report_images;
+        }
+      }
+    } else if (order.report_image_path && (!order.images || order.images.length === 0)) {
+      order.images = [order.report_image_path];
+    }
+    order.comments = await getComments(order.order_id);
     try {
       const [shRows] = await pool.execute(
         `SELECT history_id, order_id, old_status, new_status, changed_by, note AS notes, changed_at
          FROM WorkOrderStatusHistory
          WHERE order_id = ?
          ORDER BY changed_at ASC`,
-        [orderId]
+        [order.order_id]
       );
       order.statusHistory = shRows;
     } catch (e) {

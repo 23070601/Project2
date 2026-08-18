@@ -410,7 +410,7 @@
       return `
         <tr class="hover:bg-surface-container-low transition-colors">
           <td class="p-4 text-body-sm">${idx + 1}</td>
-          <td class="p-4 text-body-sm font-medium text-primary">${q.qrCode || 'N/A'}</td>
+          <td class="p-4 text-body-sm font-medium text-primary">${q.qrCode ? q.qrCode.replace(/-\d{10,}$/, '') : `QR-${UiHelpers.escapeHtml(q.roomName)}`}</td>
           <td class="p-4 text-body-sm">Room ${UiHelpers.escapeHtml(q.roomName)}</td>
           <td class="p-4 text-body-sm">Floor ${fl}</td>
           <td class="p-4 text-body-sm">${lastUpdated}</td>

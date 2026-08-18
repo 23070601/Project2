@@ -488,11 +488,24 @@
           const imagesGrid = document.getElementById('woReportImagesGrid');
           if (imagesGrid) {
             const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
+            let rawImages = (data.images && data.images.length > 0) ? data.images : data.report_images;
+            if (typeof rawImages === 'string') {
+              try {
+                rawImages = JSON.parse(rawImages);
+              } catch (e) {
+                rawImages = rawImages.split(',').map(s => s.trim()).filter(Boolean);
+              }
+            }
             let images = [];
-            if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-              images = data.images.map(img => (img.startsWith('http') || img.startsWith('data:') ? img : (backendBase + img)));
-            } else if (data.image_path) {
-              images = [(data.image_path.startsWith('http') || data.image_path.startsWith('data:') ? data.image_path : (backendBase + data.image_path))];
+            if (rawImages && Array.isArray(rawImages) && rawImages.length > 0) {
+              images = rawImages.map(img => {
+                if (!img) return '';
+                const strImg = typeof img === 'object' && img.image_path ? img.image_path : String(img);
+                return (strImg.startsWith('http') || strImg.startsWith('data:') ? strImg : (backendBase + strImg));
+              }).filter(Boolean);
+            } else if (data.image_path || data.report_image_path) {
+              const p = data.image_path || data.report_image_path;
+              images = [(p.startsWith('http') || p.startsWith('data:') ? p : (backendBase + p))];
             }
 
             if (images.length > 0) {

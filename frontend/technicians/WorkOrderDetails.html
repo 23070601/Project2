@@ -1395,13 +1395,33 @@
 
     const backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
 
+    let rawImgs = (order && order.images && order.images.length > 0) ? order.images : (order && order.report_images ? order.report_images : []);
+    if (typeof rawImgs === 'string') {
+      try {
+        rawImgs = JSON.parse(rawImgs);
+      } catch (e) {
+        rawImgs = rawImgs.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    }
+
     let apiImages = [];
-    if (order && Array.isArray(order.images)) {
-      apiImages = order.images.map(img => ({
-        url: (img.startsWith('http') || img.startsWith('data:') ? img : (backendBase + img)),
+    if (rawImgs && Array.isArray(rawImgs) && rawImgs.length > 0) {
+      apiImages = rawImgs.map(img => {
+        if (!img) return null;
+        const strImg = typeof img === 'object' && img.image_path ? img.image_path : String(img);
+        return {
+          url: (strImg.startsWith('http') || strImg.startsWith('data:') ? strImg : (backendBase + strImg)),
+          category: 'Repair Evidence',
+          isApi: true
+        };
+      }).filter(Boolean);
+    } else if (order && (order.image_path || order.report_image_path)) {
+      const p = order.image_path || order.report_image_path;
+      apiImages = [{
+        url: (p.startsWith('http') || p.startsWith('data:') ? p : (backendBase + p)),
         category: 'Repair Evidence',
         isApi: true
-      }));
+      }];
     }
 
     const localItems = getStoredEvidenceList(cleanId);
