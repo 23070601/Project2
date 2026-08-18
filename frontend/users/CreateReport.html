@@ -829,27 +829,23 @@
             throw new Error(errMsg);
           }
 
-          function getFileBase64(file) {
-            return new Promise(function(resolve) {
-              if (!file) return resolve(null);
-              var reader = new FileReader();
-              reader.onload = function(e) { resolve(e.target.result); };
-              reader.onerror = function() { resolve(null); };
-              reader.readAsDataURL(file);
-            });
-          }
-
-          var imagesBase64 = [];
-          for (var i = 0; i < selectedFiles.length; i++) {
-            var b64 = await getFileBase64(selectedFiles[i]);
-            if (b64) imagesBase64.push(b64);
-          }
 
           var report = result.data || result;
-          var finalImages = (report.images && report.images.length >= selectedFiles.length)
-            ? report.images
-            : (imagesBase64.length > 0 ? imagesBase64 : ((report.images && report.images.length > 0) ? report.images : (report.image_path ? [report.image_path] : [])));
-          
+
+          // Use API image paths directly (not base64 - avoid localStorage quota overflow)
+          var backendBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL ? window.APP_CONFIG.API_BASE_URL.replace('/api/v1', '') : 'http://localhost:4000');
+          var apiImages = [];
+          if (report.images && Array.isArray(report.images) && report.images.length > 0) {
+            apiImages = report.images.map(function(img) {
+              if (!img) return '';
+              var strImg = typeof img === 'object' && img.image_path ? img.image_path : String(img);
+              return (strImg.startsWith('http') || strImg.startsWith('data:') ? strImg : (backendBase + strImg));
+            }).filter(Boolean);
+          } else if (report.image_path) {
+            var p = report.image_path;
+            apiImages = [(p.startsWith('http') || p.startsWith('data:') ? p : (backendBase + p))];
+          }
+
           var newReport = {
             report_id: report.report_id || report.id || ('REP-' + String(Date.now()).slice(-4)),
             room_id: roomSelect.value,
@@ -859,20 +855,31 @@
             description: document.getElementById('description').value.trim(),
             priority: report.priority || document.getElementById('urgencySelect').value || 'Medium',
             status: 'Pending',
-            image_path: (report.images && report.images[0]) || report.image_path || (imagesBase64[0] || null),
-            images: finalImages,
+            image_path: apiImages[0] || null,
+            images: apiImages,
             reported_at: new Date().toISOString(),
             reporter_id: currentUser.user_id || currentUser.id || 1,
             reporter_name: currentUser.full_name || currentUser.fullName || '',
             user_email: currentUser.email || ''
           };
 
+          console.log('[CreateReport] Saving report with', newReport.images.length, 'images:', newReport.images);
+
           try {
             var userReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
             userReports = userReports.filter(function(r) { return String(r.report_id) !== String(newReport.report_id); });
             userReports.unshift(newReport);
+            // Keep only last 30 reports to prevent localStorage overflow
+            userReports = userReports.slice(0, 30);
             localStorage.setItem('vnu_user_reports', JSON.stringify(userReports));
-          } catch (e) {}
+          } catch (e) {
+            console.warn('localStorage save failed:', e.message);
+            // Try again with fewer reports
+            try {
+              var minimal = [newReport];
+              localStorage.setItem('vnu_user_reports', JSON.stringify(minimal));
+            } catch (e2) {}
+          }
 
           sessionStorage.setItem('vnu_toast_msg', 'Fault report ' + newReport.report_id + ' submitted successfully!');
           sessionStorage.setItem('vnu_toast_type', 'success');

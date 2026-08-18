@@ -189,25 +189,39 @@ async function remove(reportId) {
 
 async function ensureFaultReportsColumns() {
   try {
+    // Ensure rejection_reason column exists
     const [cols] = await pool.query("SHOW COLUMNS FROM FaultReports LIKE 'rejection_reason'");
     if (!cols || cols.length === 0) {
       await pool.query("ALTER TABLE FaultReports ADD COLUMN rejection_reason VARCHAR(255) NULL");
+      console.log('[DB] Added rejection_reason column to FaultReports');
     }
+    // Ensure rejected_at column exists
     const [cols2] = await pool.query("SHOW COLUMNS FROM FaultReports LIKE 'rejected_at'");
     if (!cols2 || cols2.length === 0) {
       await pool.query("ALTER TABLE FaultReports ADD COLUMN rejected_at TIMESTAMP NULL");
+      console.log('[DB] Added rejected_at column to FaultReports');
     }
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS ReportImages (
-        image_id INT AUTO_INCREMENT PRIMARY KEY,
-        report_id INT NOT NULL,
-        image_path VARCHAR(255) NOT NULL,
-        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT fk_reportimages_report FOREIGN KEY (report_id) REFERENCES FaultReports(report_id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
+    // Check if ReportImages table exists using INFORMATION_SCHEMA (case-insensitive)
+    const [tableCheck] = await pool.query(
+      `SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES 
+       WHERE TABLE_SCHEMA = DATABASE() AND UPPER(TABLE_NAME) = 'REPORTIMAGES' LIMIT 1`
+    );
+    if (!tableCheck || tableCheck.length === 0) {
+      await pool.query(`
+        CREATE TABLE ReportImages (
+          image_id INT AUTO_INCREMENT PRIMARY KEY,
+          report_id INT NOT NULL,
+          image_path VARCHAR(500) NOT NULL,
+          uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT fk_reportimages_report FOREIGN KEY (report_id) REFERENCES FaultReports(report_id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      `);
+      console.log('[DB] Created ReportImages table successfully');
+    } else {
+      console.log('[DB] ReportImages table already exists');
+    }
   } catch (e) {
-    console.warn('[DB] Could not ensure FaultReports columns/tables:', e.message);
+    console.error('[DB] Could not ensure FaultReports columns/tables:', e.message);
   }
 }
 

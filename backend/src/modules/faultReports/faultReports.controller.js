@@ -63,7 +63,7 @@ async function create(req, res) {
       Object.values(req.files).forEach(fileItem => {
         if (Array.isArray(fileItem)) {
           uploadedFiles = uploadedFiles.concat(fileItem);
-        } else if (fileItem && typeof fileItem === 'object') {
+        } else if (fileItem && typeof fileItem === 'object' && fileItem.filename) {
           uploadedFiles.push(fileItem);
         }
       });
@@ -72,6 +72,9 @@ async function create(req, res) {
     uploadedFiles.push(req.file);
   }
 
+  console.log('[Upload] req.files type:', Array.isArray(req.files) ? 'array' : typeof req.files);
+  console.log('[Upload] Files received:', uploadedFiles.length, uploadedFiles.map(f => f && f.filename));
+
   const seen = new Set();
   uploadedFiles = uploadedFiles.filter(f => {
     if (!f || !f.filename) return false;
@@ -79,6 +82,8 @@ async function create(req, res) {
     seen.add(f.filename);
     return true;
   });
+
+  console.log('[Upload] Files after dedup:', uploadedFiles.length);
 
   if (uploadedFiles.length > 5) {
     throw new ApiError(400, 'Maximum 5 images allowed per report');
@@ -91,6 +96,7 @@ async function create(req, res) {
 
   const imagePaths = uploadedFiles.map(f => '/uploads/' + f.filename);
   const imagePath = imagePaths.length > 0 ? imagePaths[0] : null;
+  console.log('[Upload] imagePaths to save:', imagePaths);
 
   // Validate classroom exists
   let room = await classroomsRepository.findById(roomId);
