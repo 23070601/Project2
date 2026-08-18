@@ -18,7 +18,7 @@ router.get('/:id', asyncHandler(controller.getById));
 // ✅ POST route - QUAN TRỌNG: PHẢI CÓ DÒNG NÀY
 router.post('/', 
   requireRole(ROLES.USER, ROLES.TECHNICIAN, ROLES.MANAGER), 
-  upload.fields([{ name: 'images', maxCount: 5 }, { name: 'evidence', maxCount: 5 }]),
+  upload.any(),
   asyncHandler(controller.create)
 );
 

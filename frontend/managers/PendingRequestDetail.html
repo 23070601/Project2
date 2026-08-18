@@ -341,6 +341,22 @@
       console.log('API error, using demo fallback for report details:', e);
     }
 
+    try {
+      const localReports = JSON.parse(localStorage.getItem('vnu_user_reports') || '[]');
+      const localMatch = localReports.find(r => 
+        String(r.report_id || r.id).toLowerCase() === String(cleanId).toLowerCase() ||
+        String(r.report_id || r.id).toLowerCase() === String(numericId).toLowerCase() ||
+        (window.UiHelpers && UiHelpers.formatReportId(r.report_id || r.id).toLowerCase() === UiHelpers.formatReportId(cleanId).toLowerCase())
+      );
+      if (localMatch) {
+        if (!report) {
+          report = localMatch;
+        } else if (localMatch.images && Array.isArray(localMatch.images) && localMatch.images.length > (report.images?.length || 0)) {
+          report.images = localMatch.images;
+        }
+      }
+    } catch (e) {}
+
     if (!report) {
       report = DEMO_REPORTS[cleanId] || DEMO_REPORTS[numericId] || DEMO_REPORTS['10'];
     }

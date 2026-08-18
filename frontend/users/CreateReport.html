@@ -838,6 +838,10 @@
           }
 
           var report = result.data || result;
+          var finalImages = (report.images && report.images.length >= selectedFiles.length)
+            ? report.images
+            : (imagesBase64.length > 0 ? imagesBase64 : ((report.images && report.images.length > 0) ? report.images : (report.image_path ? [report.image_path] : [])));
+          
           var newReport = {
             report_id: report.report_id || report.id || ('REP-' + String(Date.now()).slice(-4)),
             room_id: roomSelect.value,
@@ -848,7 +852,7 @@
             priority: report.priority || document.getElementById('urgencySelect').value || 'Medium',
             status: 'Pending',
             image_path: (report.images && report.images[0]) || report.image_path || (imagesBase64[0] || null),
-            images: (report.images && report.images.length > 0) ? report.images : (imagesBase64.length > 0 ? imagesBase64 : (report.image_path ? [report.image_path] : [])),
+            images: finalImages,
             reported_at: new Date().toISOString(),
             reporter_id: currentUser.user_id || currentUser.id || 1,
             reporter_name: currentUser.full_name || currentUser.fullName || '',
@@ -875,7 +879,7 @@
           reportForm.reset();
           if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
           if (fileInfo) fileInfo.classList.add('hidden');
-          selectedFile = null;
+          selectedFiles = [];
           selectAsset('', 'General / not asset-specific');
 
           setTimeout(function() {
@@ -888,7 +892,11 @@
           // Fallback local save if API is unreachable/erroring
           try {
             var fallbackId = 'REP-' + String(Date.now()).slice(-4);
-            var fallbackBase64 = selectedFile ? await getFileBase64(selectedFile) : null;
+            var fallbackImagesBase64 = [];
+            for (var m = 0; m < selectedFiles.length; m++) {
+              var b64f = await getFileBase64(selectedFiles[m]);
+              if (b64f) fallbackImagesBase64.push(b64f);
+            }
             var fallbackReport = {
               report_id: fallbackId,
               room_id: roomSelect.value,
@@ -898,7 +906,8 @@
               description: document.getElementById('description').value.trim(),
               priority: document.getElementById('urgencySelect').value || 'Medium',
               status: 'Pending',
-              image_path: fallbackBase64,
+              image_path: fallbackImagesBase64[0] || null,
+              images: fallbackImagesBase64,
               reported_at: new Date().toISOString(),
               reporter_id: currentUser.user_id || currentUser.id || 1,
               reporter_name: currentUser.full_name || currentUser.fullName || '',
