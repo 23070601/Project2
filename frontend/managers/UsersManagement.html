@@ -444,7 +444,13 @@
       </div>
       <div id="editSpecialtyWrap" class="hidden">
         <label class="block text-label-md font-bold text-on-surface mb-1">Technician Specialty</label>
-        <input id="editSpecialty" type="text" placeholder="e.g. Electrical, Network, HVAC" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
+        <select id="editSpecialty" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all cursor-pointer">
+          <option value="Electrical">Electrical</option>
+          <option value="HVAC">HVAC</option>
+          <option value="Software">Software</option>
+          <option value="Networking">Networking</option>
+          <option value="General">General</option>
+        </select>
       </div>
       <div class="pt-6 flex justify-end items-center gap-3 border-t border-outline-variant/10">
         <button type="button" onclick="closeEditUserModal()" class="px-6 py-2.5 rounded-lg text-on-surface-variant font-bold text-label-lg hover:bg-surface-container transition-colors">
@@ -676,8 +682,13 @@
     const phoneVal = existing ? (existing.phone || existing.phone_number || '') : '';
     const specVal = existing ? (existing.technician_specialty || existing.technicianSpecialty || '') : '';
 
+    let selectedSpec = specVal;
+    if (specVal === 'Projector') selectedSpec = 'Electrical';
+    else if (specVal === 'Network') selectedSpec = 'Networking';
+    else if (specVal === 'Electronics') selectedSpec = 'Electrical';
+
     document.getElementById('editPhone').value = phoneVal;
-    document.getElementById('editSpecialty').value = specVal;
+    document.getElementById('editSpecialty').value = selectedSpec || 'General';
     toggleSpecialtyVisibility(role || 'User');
 
     document.getElementById('editUserModal').classList.remove('hidden');

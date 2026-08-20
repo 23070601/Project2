@@ -58,10 +58,10 @@
             <div>
               <label class="text-label-md font-medium text-on-surface-variant block mb-1">Specialty</label>
               <select id="profileSpecialty" class="w-full p-3 bg-white rounded-lg border border-outline-variant/30 text-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
-                <option value="Projector" selected>Projector</option>
-                <option value="Computer">Computer</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Network">Network</option>
+                <option value="Electrical">Electrical</option>
+                <option value="HVAC">HVAC</option>
+                <option value="Software">Software</option>
+                <option value="Networking">Networking</option>
                 <option value="General">General</option>
               </select>
             </div>
@@ -137,7 +137,14 @@
 
     if (currentUser.technician_specialty) {
       const select = document.getElementById('profileSpecialty');
-      if (select) select.value = currentUser.technician_specialty;
+      if (select) {
+        let specVal = currentUser.technician_specialty;
+        if (specVal === 'Projector') specVal = 'Electrical';
+        else if (specVal === 'Network') specVal = 'Networking';
+        else if (specVal === 'Electronics') specVal = 'Electrical';
+        else if (specVal === 'Computer') specVal = 'Software';
+        select.value = specVal || 'General';
+      }
     }
   }
 

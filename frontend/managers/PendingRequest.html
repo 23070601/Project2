@@ -1011,14 +1011,20 @@
           radioGroup.innerHTML = suggestions.map((tech, idx) => {
             const initials = tech.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             const checked = idx === 0 ? 'checked' : '';
-            const borderClass = idx === 0 ? 'border-primary bg-primary/5' : 'border-outline-variant/30 hover:bg-surface-container-low';
+            const isOverloaded = tech.activeWorkload >= 3;
+            const isRecommended = idx === 0 && !isOverloaded;
+            const borderClass = isRecommended ? 'border-primary bg-primary/5' : 'border-outline-variant/30 hover:bg-surface-container-low';
             return `
               <label class="flex items-center justify-between p-3 border ${borderClass} rounded-lg cursor-pointer transition-colors tech-card-option">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">${initials}</div>
                   <div>
-                    <p class="text-body-sm font-bold">${UiHelpers.escapeHtml(tech.fullName)}</p>
-                    <p class="text-xs text-on-surface-variant">Specialty: ${tech.specialty || 'General'} • <span class="text-primary font-medium">${tech.activeWorkload} active tasks</span></p>
+                    <p class="text-body-sm font-bold">
+                      ${UiHelpers.escapeHtml(tech.fullName)}
+                      ${isRecommended ? '<span class="text-[10px] bg-primary text-white px-2 py-0.5 rounded-full font-bold ml-1">RECOMMENDED</span>' : ''}
+                      ${isOverloaded ? '<span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold border border-red-200 ml-1">OVERLOADED</span>' : ''}
+                    </p>
+                    <p class="text-xs text-on-surface-variant">Specialty: ${tech.specialty || 'General'} • <span class="${isOverloaded ? 'text-red-600 font-bold' : 'text-primary font-medium'}">${tech.activeWorkload} active tasks</span></p>
                   </div>
                 </div>
                 <input ${checked} name="techRadio" value="${tech.technicianId}" type="radio" class="text-primary focus:ring-primary">
